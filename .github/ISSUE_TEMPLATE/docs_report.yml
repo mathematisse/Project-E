@@ -1,5 +1,10 @@
----
 name: 📚 Docs Report
-about: Create a report to improve the docs
 labels: '📖 documentation'
---- 
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe in more details
+      description: More details about the documentation issue
+      placeholder: Docs description
