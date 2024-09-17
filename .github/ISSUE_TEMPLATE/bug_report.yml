@@ -4,9 +4,9 @@ labels: ["🪲 bug"]
 
 body:
   - type: dropdown
-    id: context
+    id: scope
     attributes:
-      label: Context
+      label: Scope
       description: What part of the project?
       options:
         - Client
