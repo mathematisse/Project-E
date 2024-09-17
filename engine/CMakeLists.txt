@@ -64,10 +64,10 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 ## End of raylib
 
-
-include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
+include_directories(modules)
 
 if(RENDER_ENABLED AND NOT TARGET render)
     add_subdirectory(modules/render)
