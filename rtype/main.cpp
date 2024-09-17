@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include <iostream>
 
 int main(void)
 {
@@ -13,6 +14,16 @@ int main(void)
   {
 
     BeginDrawing();
+
+    if (IsKeyPressed(KEY_ENTER))
+    {
+      // make asan do an error
+      std::cout << "Hello, world!" << std::endl;
+      int *a = new int[10];
+      a[10] = 0;
+      delete[] a;
+      delete[] a;
+    }
 
     ClearBackground(RAYWHITE);
 
