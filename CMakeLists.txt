@@ -4,6 +4,8 @@ project(MultiProjectSetup)
 option(BUILD_RTYPE "Build R-Type" ON)
 option(BUILD_MAP_EDITOR "Build MapEditor" OFF) # cmake -S . -B build/ -DBUILD_MAP_EDITOR=ON
 
+enable_testing()
+
 if(UNIX)
     option(ENABLE_ASAN "Enable AddressSanitizer" ON)
     option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
