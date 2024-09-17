@@ -1,5 +1,6 @@
 name: 📚 Docs Report
 labels: '📖 documentation'
+description: Report an issue with the documentation
 
 body:
   - type: textarea
