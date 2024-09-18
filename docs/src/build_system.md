@@ -58,6 +58,8 @@ cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
 ### Using CMake:
 
 #### Release build:
+
+Configure the project:
 ```bash
 cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release
 ```
@@ -68,6 +70,8 @@ cmake --build cmake-build-release --parallel --config Release
 ```
 
 #### Debug build:
+
+Configure the project:
 ```bash
 cmake -B cmake-build-debug -S . -DCMAKE_BUILD_TYPE=Debug
 ```
@@ -76,6 +80,14 @@ Build the project:
 ```bash
 cmake --build cmake-build-debug --parallel --config Debug
 ```
+
+-----
+*If you are using WSL2, you might have the following error:*
+```bash
+c++ fatal error killed signal terminated program cc1plus
+```
+You can fix this by removing the `--parallel` flag from the build command. (you can enable it again after the first build)
+
 
 #### Using Visual Studio:
 
