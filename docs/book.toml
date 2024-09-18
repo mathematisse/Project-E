@@ -1,0 +1,6 @@
+[book]
+authors = ["R-Type Team"]
+language = "en"
+multilingual = false
+src = "src"
+title = "R-Type"
