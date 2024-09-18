@@ -7,11 +7,17 @@ option(BUILD_MAP_EDITOR "Build MapEditor" OFF) # cmake -S . -B build/ -DBUILD_MA
 enable_testing()
 
 if(UNIX)
-    option(ENABLE_ASAN "Enable AddressSanitizer" ON)
-    option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+    endif()
+    if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+        option(ENABLE_ASAN "Enable AddressSanitizer" ON)
+        option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
+    endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Build type not set, default to Debug")
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
