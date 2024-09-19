@@ -109,3 +109,19 @@ The binary is standalone and can be run from anywhere.
 #### On Windows:
 
 TODO...
+
+
+## How to test
+
+To run the whole test suite you can use the `ctest` command. This will run all the tests in the `cmake-build-release` or `cmake-build-debug` directory depending on the build type you chose.
+```bash
+cd <path-to-build-directory>
+ctest
+```
+
+You can also run the tests individually. Or run the tests with the `-V` flag to get more information about the tests.
+```bash
+cd <path-to-build-directory>
+ctest -R <test-name>
+ctest -V
+```
