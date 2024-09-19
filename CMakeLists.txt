@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(MultiProjectSetup)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(BUILD_RTYPE "Build R-Type" ON)
 option(BUILD_MAP_EDITOR "Build MapEditor" OFF) # cmake -S . -B build/ -DBUILD_MAP_EDITOR=ON
 
