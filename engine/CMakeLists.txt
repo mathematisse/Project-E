@@ -69,14 +69,4 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 
 include_directories(modules)
 
-if(RENDER_ENABLED AND NOT TARGET render)
-    add_subdirectory(modules/render)
-endif()
-
-if(PHYSICS_ENABLED AND NOT TARGET physics)
-    add_subdirectory(modules/physics)
-endif()
-
-if(ECS_ENABLED AND NOT TARGET ecs)
-    add_subdirectory(modules/ecs)
-endif()
+add_subdirectory(modules)
