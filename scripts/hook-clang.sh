@@ -24,11 +24,9 @@ if ! command -v clang-tidy &> /dev/null; then
     fi
 fi
 
-# Run clang-format on all staged files (only C, C++ files)
 echo "Running clang-format..."
 git ls-files -o -c --exclude-standard | grep -E '\.(cpp|hpp|cc|c|h)$' | xargs clang-format -i
 
-# Run clang-tidy on all staged files
 echo "Running clang-tidy..."
 for file in $(git diff --cached --name-only --diff-filter=d | grep -E '\.(cpp|cc|c|h)$'); do
     clang-tidy $file --fix --fix-errors
