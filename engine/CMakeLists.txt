@@ -67,6 +67,8 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 ## End of raylib
 
-include_directories(modules)
+add_subdirectory(libs)
+
+include_directories(modules libs)
 
 add_subdirectory(modules)
