@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(render STATIC render.cpp)
 
-target_link_libraries(render raylib)
+target_link_libraries(render raylib lib_net)
 
 # Required for testing
 enable_testing()

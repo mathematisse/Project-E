@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "ecs/ecs.hpp"
+#include "lib.hpp"
 
 int main()
 {

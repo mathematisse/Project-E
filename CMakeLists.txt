@@ -1,17 +1,28 @@
 cmake_minimum_required(VERSION 3.15)
 project(MultiProjectSetup)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(BUILD_RTYPE "Build R-Type" ON)
 option(BUILD_MAP_EDITOR "Build MapEditor" OFF) # cmake -S . -B build/ -DBUILD_MAP_EDITOR=ON
 
 enable_testing()
 
 if(UNIX)
-    option(ENABLE_ASAN "Enable AddressSanitizer" ON)
-    option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+    endif()
+    if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+        option(ENABLE_ASAN "Enable AddressSanitizer" ON)
+        option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
+    else()
+        set(ENABLE_ASAN OFF)
+        set(ENABLE_UBSAN OFF)
+    endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Build type not set, default to Debug")
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 

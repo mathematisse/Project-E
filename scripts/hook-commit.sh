@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Allowed verbs
-allowed_verbs="Add|Edit|Remove|Document|Test|Refactor|Fix"
+allowed_verbs="Add|Edit|Remove|Document|Test|Refactor|Fix|Merge"
 
 commit_message=$(head -n 1 "$1")
 
