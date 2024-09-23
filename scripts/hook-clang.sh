@@ -26,6 +26,10 @@ fi
 
 echo "Running clang-format..."
 git ls-files -o -c --exclude-standard | grep -E '\.(cpp|hpp|cc|c|h)$' | xargs clang-format -i
+if ! git diff --quiet; then
+    echo "clang-format made changes. Please review and commit the changes."
+    exit 1
+fi
 
 echo "Running clang-tidy..."
 for file in $(git diff --cached --name-only --diff-filter=d | grep -E '\.(cpp|cc|c|h)$'); do
