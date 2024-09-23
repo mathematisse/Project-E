@@ -1,18 +1,153 @@
 
+#pragma once
+
+#include "Packet.hpp"
+#include "TSQueue.hpp"
+#include <iostream>
 #include <memory>
+#include <boost/asio.hpp>
+
 namespace net {
 
-template<typename T>
-class Connection : public std::enable_shared_from_this<Connection<T>> {
+enum class Ownership {
+    Client,
+    Server,
+};
+
+template<Ownership O, typename T>
+class Connection : public std::enable_shared_from_this<Connection<O, T>> {
 
 public:
-    enum class Ownership {
-        Client,
-        Server,
-    };
+    Connection(boost::asio::io_context &context, boost::asio::ip::tcp::socket socket, TSQueue<T> &queueIn):
+        _context(context),
+        _socket(std::move(socket)),
+        _queueIn(queueIn)
+    {
+    }
+    Connection(const Connection &) = default;
+    Connection(Connection &&) = default;
+    Connection &operator=(const Connection &) = default;
+    Connection &operator=(Connection &&) = default;
 
-public:
-    Connection(Ownership parent) { }
+    virtual ~Connection() = default;
+
+    void AddToIncomingMessageQueue()
+    {
+        if constexpr (O == Ownership::Server) {
+            _queueIn.push_back({this->shared_from_this(), _tmpPacket});
+        } else {
+            _queueIn.push_back({nullptr, _tmpPacket});
+        }
+        ReadHeader();
+    }
+
+    void Disconnect()
+    {
+        if (IsConnected()) {
+            boost::asio::post(_context, [this]() {
+                _socket.close();
+            });
+        }
+    }
+
+    [[nodiscard]] bool IsConnected() const { return _socket.is_open(); }
+
+    void StartListening() { }
+
+    void Send(const Packet<T> &msg)
+    {
+        boost::asio::post(_context, [this, msg]() {
+            bool is_writing = !_queueOut.empty();
+            _queueOut.push_back(msg);
+            if (!is_writing) {
+                WriteHeader();
+            }
+        });
+    }
+
+    void WriteHeader()
+    {
+        boost::asio::async_write(
+            _socket, boost::asio::buffer(&_queueOut.front().header, sizeof(Packet<T>::Header)),
+            [this](std::error_code error_code, std::size_t length) {
+                if (!error_code) {
+                    if (_queueOut.front().body.size() > 0) {
+                        WriteBody();
+                    } else {
+                        _queueOut.pop_front();
+
+                        if (!_queueOut.empty()) {
+                            WriteHeader();
+                        }
+                    }
+                } else {
+                    std::cout << "[] Write Header Fail.\n";
+                    _socket.close();
+                }
+            }
+        );
+    }
+
+    void WriteBody()
+    {
+        boost::asio::async_write(
+            _socket, boost::asio::buffer(_queueOut.front().body.data(), _queueOut.front().body.size()),
+            [this](std::error_code error_code, std::size_t length) {
+                if (!error_code) {
+                    _queueOut.pop_front();
+
+                    if (!_queueOut.empty()) {
+                        WriteHeader();
+                    }
+                } else {
+                    std::cout << "[] Write Body Fail.\n";
+                    _socket.close();
+                }
+            }
+        );
+    }
+
+    void ReadHeader()
+    {
+        boost::asio::async_read(
+            _socket, boost::asio::buffer(&_queueIn.header, sizeof(Packet<T>::Header)),
+            [this](std::error_code error_code, std::size_t length) {
+                if (!error_code) {
+                    if (_queueIn.header.size > 0) {
+                        _queueIn.body.resize(_queueIn.header.size);
+                        ReadBody();
+                    } else {
+                        AddToIncomingMessageQueue();
+                    }
+                } else {
+                    std::cout << "[] Read Header Fail.\n";
+                    _socket.close();
+                }
+            }
+        );
+    }
+
+    void ReadBody()
+    {
+        boost::asio::async_read(
+            _socket, boost::asio::buffer(_queueIn.body.data(), _queueIn.body.size()),
+            [this](std::error_code error_code, std::size_t length) {
+                if (!error_code) {
+                    AddToIncomingMessageQueue();
+                } else {
+                    std::cout << "[] Read Body Fail.\n";
+                    _socket.close();
+                }
+            }
+        );
+    }
+
+private:
+    boost::asio::io_context &_context;
+    boost::asio::ip::tcp::socket _socket;
+    TSQueue<T> &_queueIn;
+    TSQueue<T> _queueOut;
+    Packet<T> _tmpPacket;
 };
 
 } // namespace net
