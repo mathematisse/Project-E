@@ -10,7 +10,10 @@ option(ECS_ENABLED "Enable ecs module" ON)
 include(FetchContent)
 
 set(BOOST_VERSION 1.86.0)
-# set(BOOST_INCLUDE_LIBRARIES thread filesystem system program_options asio date_time)
+
+# remove warnings temporarily to avoid warnings from raylib & boost
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(CMAKE_CXX_FLAGS "")
 set(BOOST_ENABLE_CMAKE ON)
 find_package(Boost ${BOOST_VERSION} QUIET)
 if (NOT Boost_FOUND)
@@ -66,6 +69,9 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 ## End of raylib
+
+#enable the warnings back
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
 
 add_subdirectory(libs)
 

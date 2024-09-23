@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(lib_net STATIC lib.cpp)
 
-target_link_libraries(lib_net)
+target_link_libraries(lib_net Boost::asio)
 
 # Required for testing
 enable_testing()
