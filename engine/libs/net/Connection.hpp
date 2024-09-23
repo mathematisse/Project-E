@@ -31,6 +31,33 @@ public:
 
     virtual ~Connection() = default;
 
+    void connect(const boost::asio::ip::tcp::resolver::results_type &endpoints)
+    {
+        if constexpr (O == Ownership::Client) {
+            boost::asio::async_connect(
+                _socket, endpoints,
+                [this](std::error_code error_code, boost::asio::ip::tcp::endpoint endpoint) {
+                    if (!error_code) {
+                        ReadHeader();
+                    }
+                }
+            );
+        } else {
+            static_assert(O == Ownership::Client, "Server connections should not connect to other servers.");
+        }
+    }
+
+    void connect()
+    {
+        if constexpr (O == Ownership::Server) {
+            if (_socket.is_open()) {
+                ReadHeader();
+            }
+        } else {
+            static_assert(O == Ownership::Server, "Client connections should connect to servers.");
+        }
+    }
+
     void AddToIncomingMessageQueue()
     {
         if constexpr (O == Ownership::Server) {
@@ -65,6 +92,7 @@ public:
         });
     }
 
+private:
     void WriteHeader()
     {
         boost::asio::async_write(
@@ -142,7 +170,7 @@ public:
         );
     }
 
-private:
+protected:
     boost::asio::io_context &_context;
     boost::asio::ip::tcp::socket _socket;
     TSQueue<T> &_queueIn;
