@@ -1,11 +1,12 @@
 
 #pragma once
 
-#include "Packet.hpp"
-#include "TSQueue.hpp"
 #include <iostream>
 #include <memory>
 #include <boost/asio.hpp>
+
+#include "Packet.hpp"
+#include "TSQueue.hpp"
 
 namespace net {
 
@@ -21,9 +22,10 @@ public:
     Connection(boost::asio::io_context &context, boost::asio::ip::tcp::socket socket, TSQueue<T> &queueIn):
         _context(context),
         _socket(std::move(socket)),
-        _queueIn(queueIn)
+        _queueIn(&queueIn)
     {
     }
+
     Connection(const Connection &) = default;
     Connection(Connection &&) = default;
     Connection &operator=(const Connection &) = default;
@@ -36,9 +38,9 @@ public:
         if constexpr (O == Ownership::Client) {
             boost::asio::async_connect(
                 _socket, endpoints,
-                [this](std::error_code error_code, boost::asio::ip::tcp::endpoint endpoint) {
+                [this](std::error_code error_code, const boost::asio::ip::tcp::endpoint & /*endpoint*/) {
                     if (!error_code) {
-                        ReadHeader();
+                        read_header();
                     }
                 }
             );
@@ -51,61 +53,61 @@ public:
     {
         if constexpr (O == Ownership::Server) {
             if (_socket.is_open()) {
-                ReadHeader();
+                read_header();
             }
         } else {
             static_assert(O == Ownership::Server, "Client connections should connect to servers.");
         }
     }
 
-    void AddToIncomingMessageQueue()
+    void add_to_incoming_message_queue()
     {
         if constexpr (O == Ownership::Server) {
             _queueIn.push_back({this->shared_from_this(), _tmpPacket});
         } else {
             _queueIn.push_back({nullptr, _tmpPacket});
         }
-        ReadHeader();
+        read_header();
     }
 
-    void Disconnect()
+    void disconnect()
     {
-        if (IsConnected()) {
+        if (is_connected()) {
             boost::asio::post(_context, [this]() {
                 _socket.close();
             });
         }
     }
 
-    [[nodiscard]] bool IsConnected() const { return _socket.is_open(); }
+    [[nodiscard]] bool is_connected() const { return _socket.is_open(); }
 
-    void StartListening() { }
+    void start_listening() { }
 
-    void Send(const Packet<T> &msg)
+    void send(const Packet<T> &msg)
     {
         boost::asio::post(_context, [this, msg]() {
             bool is_writing = !_queueOut.empty();
             _queueOut.push_back(msg);
             if (!is_writing) {
-                WriteHeader();
+                write_header();
             }
         });
     }
 
 private:
-    void WriteHeader()
+    void write_header()
     {
         boost::asio::async_write(
             _socket, boost::asio::buffer(&_queueOut.front().header, sizeof(Packet<T>::Header)),
-            [this](std::error_code error_code, std::size_t length) {
+            [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
                     if (_queueOut.front().body.size() > 0) {
-                        WriteBody();
+                        write_body();
                     } else {
                         _queueOut.pop_front();
 
                         if (!_queueOut.empty()) {
-                            WriteHeader();
+                            write_header();
                         }
                     }
                 } else {
@@ -116,16 +118,16 @@ private:
         );
     }
 
-    void WriteBody()
+    void write_body()
     {
         boost::asio::async_write(
             _socket, boost::asio::buffer(_queueOut.front().body.data(), _queueOut.front().body.size()),
-            [this](std::error_code error_code, std::size_t length) {
+            [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
                     _queueOut.pop_front();
 
                     if (!_queueOut.empty()) {
-                        WriteHeader();
+                        write_header();
                     }
                 } else {
                     std::cout << "[] Write Body Fail.\n";
@@ -135,17 +137,17 @@ private:
         );
     }
 
-    void ReadHeader()
+    void read_header()
     {
         boost::asio::async_read(
             _socket, boost::asio::buffer(&_queueIn.header, sizeof(Packet<T>::Header)),
-            [this](std::error_code error_code, std::size_t length) {
+            [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
                     if (_queueIn.header.size > 0) {
                         _queueIn.body.resize(_queueIn.header.size);
-                        ReadBody();
+                        read_body();
                     } else {
-                        AddToIncomingMessageQueue();
+                        add_to_incoming_message_queue();
                     }
                 } else {
                     std::cout << "[] Read Header Fail.\n";
@@ -155,13 +157,13 @@ private:
         );
     }
 
-    void ReadBody()
+    void read_body()
     {
         boost::asio::async_read(
             _socket, boost::asio::buffer(_queueIn.body.data(), _queueIn.body.size()),
-            [this](std::error_code error_code, std::size_t length) {
+            [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
-                    AddToIncomingMessageQueue();
+                    add_to_incoming_message_queue();
                 } else {
                     std::cout << "[] Read Body Fail.\n";
                     _socket.close();
