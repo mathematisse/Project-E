@@ -34,7 +34,7 @@ fi
 echo "Running clang-tidy..."
 for file in $(git diff --cached --name-only --diff-filter=d | grep -E '\.(cpp|cc|c|h)$'); do
     clang-tidy $file --fix --fix-errors
-    git add $file
 done
+    # git add $file
 
 echo "Pre-commit hook done."

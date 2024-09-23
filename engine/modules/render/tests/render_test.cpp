@@ -1,9 +1,8 @@
 // clang-format off
-#include <boost/test/unit_test_suite.hpp>
-#include <boost/test/tools/old/interface.hpp>
 #define BOOST_TEST_MODULE ECSTest
 
 #include "ecs/ecs.hpp"
+#include <boost/test/included/unit_test.hpp>
 // clang-format on
 
 BOOST_AUTO_TEST_CASE(test_max_entities)
