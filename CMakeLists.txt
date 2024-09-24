@@ -50,6 +50,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 #     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}")
 # endif()
 
+include_directories(engine/libs)
 add_subdirectory(engine)
 
 if(BUILD_RTYPE)

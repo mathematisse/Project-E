@@ -6,7 +6,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(RENDER_ENABLED OFF)
 set(PHYSICS_ENABLED ON)
 set(ECS_ENABLED ON)
+set(NETWORK_ENABLED ON)
 
 add_executable(r-type_server main.cpp)
 
-target_link_libraries(r-type_server r-type_common ecs physics)
+target_link_libraries(r-type_server r-type_common ecs physics network)

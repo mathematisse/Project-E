@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(RENDER_ENABLED "Enable render module" ON)
 option(PHYSICS_ENABLED "Enable physics module" ON)
 option(ECS_ENABLED "Enable ecs module" ON)
+option(NETWORK_ENABLED "Enable network module" ON)
 
 include(FetchContent)
 
@@ -75,6 +76,7 @@ set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
 
 add_subdirectory(libs)
 
-include_directories(modules libs)
+include_directories(libs)
+include_directories(modules)
 
 add_subdirectory(modules)

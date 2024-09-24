@@ -7,6 +7,7 @@
 
 #include "Packet.hpp"
 #include "TSQueue.hpp"
+#include "lib_net/OwnedPacket.hpp"
 
 namespace net {
 
@@ -19,10 +20,13 @@ template<Ownership O, typename T>
 class Connection : public std::enable_shared_from_this<Connection<O, T>> {
 
 public:
-    Connection(boost::asio::io_context &context, boost::asio::ip::tcp::socket socket, TSQueue<T> &queueIn):
+    Connection(
+        boost::asio::io_context &context, boost::asio::ip::tcp::socket socket,
+        TSQueue<OwnedPacket<O, T>> &queueIn
+    ):
         _context(context),
         _socket(std::move(socket)),
-        _queueIn(&queueIn)
+        _queueIn(queueIn)
     {
     }
 
@@ -98,10 +102,10 @@ private:
     void write_header()
     {
         boost::asio::async_write(
-            _socket, boost::asio::buffer(&_queueOut.front().header, sizeof(Packet<T>::Header)),
+            _socket, boost::asio::buffer(&_queueOut.front().header, _queueOut.front().get_header_size()),
             [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
-                    if (_queueOut.front().body.size() > 0) {
+                    if (_queueOut.front().data.size() > 0) {
                         write_body();
                     } else {
                         _queueOut.pop_front();
@@ -121,7 +125,7 @@ private:
     void write_body()
     {
         boost::asio::async_write(
-            _socket, boost::asio::buffer(_queueOut.front().body.data(), _queueOut.front().body.size()),
+            _socket, boost::asio::buffer(_queueOut.front().data.data(), _queueOut.front().data.size()),
             [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
                     _queueOut.pop_front();
@@ -140,11 +144,11 @@ private:
     void read_header()
     {
         boost::asio::async_read(
-            _socket, boost::asio::buffer(&_queueIn.header, sizeof(Packet<T>::Header)),
+            _socket, boost::asio::buffer(&_tmpPacket.header, _tmpPacket.get_header_size()),
             [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
-                    if (_queueIn.header.size > 0) {
-                        _queueIn.body.resize(_queueIn.header.size);
+                    if (_tmpPacket.header.size > 0) {
+                        _tmpPacket.data.resize(_tmpPacket.header.size);
                         read_body();
                     } else {
                         add_to_incoming_message_queue();
@@ -160,7 +164,7 @@ private:
     void read_body()
     {
         boost::asio::async_read(
-            _socket, boost::asio::buffer(_queueIn.body.data(), _queueIn.body.size()),
+            _socket, boost::asio::buffer(_tmpPacket.data.data(), _tmpPacket.data.size()),
             [this](std::error_code error_code, std::size_t /*length*/) {
                 if (!error_code) {
                     add_to_incoming_message_queue();
@@ -175,8 +179,8 @@ private:
 protected:
     boost::asio::io_context &_context;
     boost::asio::ip::tcp::socket _socket;
-    TSQueue<T> &_queueIn;
-    TSQueue<T> _queueOut;
+    TSQueue<OwnedPacket<O, T>> &_queueIn;
+    TSQueue<Packet<T>> _queueOut;
     Packet<T> _tmpPacket;
 };
 
