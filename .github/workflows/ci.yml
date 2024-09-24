@@ -1,0 +1,30 @@
+name: Compile and check
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+env:
+  TARGETS: "r-type_client r-type_server"
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake g++ libboost-all-dev
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile & Install dependencies
+        run: cmake -B build -S .
+
+      - name: Build
+        run: cmake --build build --target $TARGETS
+
