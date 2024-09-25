@@ -8,7 +8,7 @@ add_library(lib_net STATIC lib.cpp)
 target_link_libraries(lib_net Boost::asio)
 
 if(MINGW)
-  target_link_libraries(lib_net ws2_32)
+  target_link_libraries(lib_net ws2_32 wsock32)
 endif()
 
 # Required for testing
