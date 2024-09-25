@@ -10,7 +10,7 @@ option(ECS_ENABLED "Enable ecs module" ON)
 include(FetchContent)
 
 set(BOOST_VERSION 1.86.0)
-# set(BOOST_INCLUDE_LIBRARIES thread filesystem system program_options asio date_time)
+
 set(BOOST_ENABLE_CMAKE ON)
 find_package(Boost ${BOOST_VERSION} QUIET)
 if (NOT Boost_FOUND)
@@ -24,11 +24,11 @@ if (NOT Boost_FOUND)
     if (NOT boost_POPULATED)
         set(FETCHCONTENT_QUIET NO) # Display more information during the fetch process
         FetchContent_MakeAvailable(boost)
-        include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
     endif()
+    include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
 else()
     message(STATUS "Using local Boost installation=${Boost_INCLUDE_DIRS}")
-    include(${Boost_INCLUDE_DIRS})
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 # From Raylib's example CMakeLists.txt
