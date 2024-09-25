@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(r-type_client)
 
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(RENDER_ENABLED ON)
@@ -10,4 +11,4 @@ set(NETWORK_ENABLED ON)
 
 add_executable(r-type_client main.cpp)
 
-target_link_libraries(r-type_client r-type_common render physics ncurses)
+target_link_libraries(r-type_client r-type_common render physics ncurses ecs raylib)
