@@ -6,10 +6,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(RENDER_ENABLED "Enable render module" ON)
 option(PHYSICS_ENABLED "Enable physics module" ON)
 option(ECS_ENABLED "Enable ecs module" ON)
+option(NETWORK_ENABLED "Enable network module" ON)
 
 include(FetchContent)
 
 set(BOOST_VERSION 1.86.0)
+
+
+# remove warnings temporarily to avoid warnings from raylib & boost
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(CMAKE_CXX_FLAGS "")
 
 set(BOOST_ENABLE_CMAKE ON)
 find_package(Boost ${BOOST_VERSION} QUIET)
@@ -67,8 +73,12 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 ## End of raylib
 
+#enable the warnings back
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+
 add_subdirectory(libs)
 
-include_directories(modules libs)
+include_directories(libs)
+include_directories(modules)
 
 add_subdirectory(modules)
