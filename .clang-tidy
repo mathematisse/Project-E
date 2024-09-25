@@ -24,3 +24,5 @@ CheckOptions:
   - key: readability-identifier-length.IgnoredParameterNames
     value: 'x|y|z'
 
+ExtraArgs:
+  - -std=c++20
