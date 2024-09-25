@@ -13,7 +13,7 @@ env:
   TARGETS: "r-type_client r-type_server"
 
 jobs:
-  compile:
+  compile-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Install dependencies
@@ -27,3 +27,21 @@ jobs:
 
       - name: Build
         run: cmake --build build --target $TARGETS
+
+  compile-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' 
+          choco install mingw
+          refreshenv
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -G "MinGW Makefiles" -B build -S .
+
+      - name: Build
+        run: cmake --build build --target %TARGETS%
