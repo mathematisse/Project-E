@@ -1,0 +1,29 @@
+name: Compile and check
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+env:
+  TARGETS: "r-type_client r-type_server"
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: sudo apt install -y cmake build-essential libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile & Install dependencies
+        run: cmake -B build -S .
+
+      - name: Build
+        run: cmake --build build --target $TARGETS

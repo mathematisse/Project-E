@@ -12,9 +12,11 @@ include(FetchContent)
 
 set(BOOST_VERSION 1.86.0)
 
+
 # remove warnings temporarily to avoid warnings from raylib & boost
 set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(CMAKE_CXX_FLAGS "")
+
 set(BOOST_ENABLE_CMAKE ON)
 find_package(Boost ${BOOST_VERSION} QUIET)
 if (NOT Boost_FOUND)
@@ -28,11 +30,11 @@ if (NOT Boost_FOUND)
     if (NOT boost_POPULATED)
         set(FETCHCONTENT_QUIET NO) # Display more information during the fetch process
         FetchContent_MakeAvailable(boost)
-        include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
     endif()
+    include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
 else()
     message(STATUS "Using local Boost installation=${Boost_INCLUDE_DIRS}")
-    include(${Boost_INCLUDE_DIRS})
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 # From Raylib's example CMakeLists.txt
