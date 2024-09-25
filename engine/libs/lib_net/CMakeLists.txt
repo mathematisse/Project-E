@@ -7,6 +7,10 @@ add_library(lib_net STATIC lib.cpp)
 
 target_link_libraries(lib_net Boost::asio)
 
+if(MINGW)
+  target_link_libraries(lib_net ws2_32)
+endif()
+
 # Required for testing
 enable_testing()
 add_executable(lnet_test tests/basic.cpp)
