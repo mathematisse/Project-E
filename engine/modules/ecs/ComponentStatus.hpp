@@ -172,13 +172,10 @@ public:
     using storage_type = decltype(select_storage_type<num_of_structures>());
 
 private:
-    storage_type bitfield;
+    storage_type bitfield {0};
 
 public:
-    ComponentStatus():
-        bitfield(0)
-    {
-    }
+    ComponentStatus() = default;
 
     template<typename T>
     inline void activate()

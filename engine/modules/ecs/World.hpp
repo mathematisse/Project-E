@@ -212,15 +212,7 @@ public:
             world(world)
         {
         }
-        [[nodiscard]] inline auto begin() const -> iterator
-        {
-            size_t idx = 0;
-            while (idx < world.number_of_entities && !world.status[idx].template isActive<World::Exist>() ||
-                   (!world.status[idx].template isActive<FilterComponents>() || ...)) {
-                idx++;
-            }
-            return iterator(world, 0);
-        }
+        [[nodiscard]] inline auto begin() const -> iterator { return iterator(world, 0); }
 
         [[nodiscard]] inline auto end() const -> iterator
         {
