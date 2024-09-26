@@ -16,24 +16,11 @@
         class Component : public IComponent {
         public:
             explicit Component(T *x) : _x(x), _dummyX(0) {
-                std::cout << "Component" << std::endl;
-                std::cout << "adress value: -" << _x << "-" << std::endl;
-                if (x == nullptr)
-                    std::cout << "value: " << "null" << std::endl;
-                else
-                    std::cout << "value: " << *x << std::endl;
             }
             explicit Component(T x) : _x(&_dummyX), _dummyX(x) {}
             T *GetX() { return _x; }
             const T *GetX() const { return _x; }
-            void SetX(T x) { 
-                std::cout << "SetX" << std::endl;
-                std::cout << x << std::endl;
-                std::cout << "adress value: " << _x << std::endl;
-                if (_x == nullptr)
-                    std::cout << "value: " << "null" << std::endl;
-                else
-                    std::cout << "value: " << *_x << std::endl;
+            void SetX(T x) {
                 *_x = x; 
                 }
         protected:

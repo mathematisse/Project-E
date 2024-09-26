@@ -8,35 +8,62 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
+
+#include "Chunks/ChunkType.hpp"
 
 namespace ECS::Chunks
 {
-    // bitmask enum
-    enum ChunkType : unsigned int {
-        NONECHUNK = 0,
-        STDCHUNK = 1,
-        SSECHUNKI = 2,
-        SSECHUNK = 4,
-        SSECHUNKD = 8,
-        AVXCHUNKI = 16,
-        AVXCHUNK = 32,
-        AVXCHUNKD = 64,
-        CUDACHUNK = 128,
-        CUDALINKCHUNK = 256,
-        SIMDCHUNK = SSECHUNKI | SSECHUNK | SSECHUNKD | AVXCHUNKI | AVXCHUNK | AVXCHUNKD,
-        ANYCUDACHUNK = CUDACHUNK | CUDALINKCHUNK
-    };
 
+    /**
+     * @brief Interface for a chunk.
+     * 
+     * @tparam T Type of elements stored in the chunk.
+     * @tparam TContainer Type of container used to store elements.
+     */
     template <typename T>
     class IChunk
     {
     public:
-        virtual T* operator[](size_t idx) = 0;
-        virtual const T* operator[](size_t idx) const = 0;
-        [[nodiscard]] virtual size_t ElemCount() const = 0;
-        virtual T* GetData() = 0;
-        [[nodiscard]] virtual ChunkType GetType() const = 0;
+        /**
+         * @brief Destructor.
+         */
+        virtual ~IChunk() = default;
+
+        IChunk(const IChunk &other) = delete;
+        IChunk(IChunk &&other) = delete;
+        IChunk &operator=(const IChunk &other) = delete;
+        IChunk &operator=(IChunk &&other) = delete;
+
+        /**
+         * @brief Get the element at the specified index.
+         * 
+         * @param idx Index of the element.
+         * @return T& Reference to the element.
+         */
+        virtual T& getElem(size_t idx) = 0;
+
+        /**
+         * @brief Get the element at the specified index (const version).
+         * 
+         * @param idx Index of the element.
+         * @return const T& Const reference to the element.
+         */
+        virtual const T& getElem(size_t idx) const = 0;
+
+        /**
+         * @brief Get the count of elements.
+         * 
+         * @return size_t Number of elements.
+         */
+        [[nodiscard]] virtual size_t elemCount() const = 0;
+
+        /**
+         * @brief Get the type of the chunk.
+         * 
+         * @return ChunkType Type of the chunk.
+         */
+        [[nodiscard]] virtual ChunkType getType() const = 0;
+        
     };
 
 }

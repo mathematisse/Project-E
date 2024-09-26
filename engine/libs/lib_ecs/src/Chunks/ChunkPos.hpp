@@ -12,6 +12,9 @@
 
     namespace ECS::Chunks
     {
+        /**
+         * @brief A struct representing a position in a chunk pool.
+         */
         struct ChunkPos {
             uint64_t chunkIndex;
             uint64_t elemIndex;

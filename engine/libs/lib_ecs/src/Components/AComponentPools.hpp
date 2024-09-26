@@ -26,11 +26,11 @@ namespace ECS::Components
         ~AComponentPool() override = default;
         IComponent* operator[](Chunks::ChunkPos cPos) override
         {
-            return Components::Component<T>(this->_x.operator[](cPos));
+            return new Components::Component<T>(this->_x[cPos]);
         }
         const IComponent* operator[](Chunks::ChunkPos cPos) const override
         {
-            return Components::Component<T>(this->_x.operator[](cPos));
+            return new Components::Component<T>(*(this->_x[cPos]));
         }
         [[nodiscard]] uint64_t elemCount() const override { return this->_x.elemCount(); }
         [[nodiscard]] uint64_t chunkCount() const override { return this->_x.chunkCount(); }
@@ -42,11 +42,11 @@ namespace ECS::Components
         }
         std::vector<Chunks::IChunkPool<T> *> getChunkPools()
         {
-            return {this->_x.get()};
+            return {this->_x};
         }
 
     protected:
-        Chunks::IChunkPool<T> _x;
+        Chunks::StandardChunkPool<T> _x;
         std::string _componentName;
     };
 
@@ -59,11 +59,11 @@ namespace ECS::Components
         {
             std::cout << "Getting component of type " << this->_componentName << " at " << cPos.chunkIndex << " and " << cPos.elemIndex << std::endl;
             std::cout << "Sizes: " << this->_x->getChunks().size() << " and " << this->_y->getChunks().size() << std::endl;
-            return Components::Component2<T>(this->_x->operator[](cPos).get(), this->_y->operator[](cPos).get());
+            return new Components::Component2<T>(this->_x->operator[](cPos), this->_y->operator[](cPos));
         }
         const IComponent* operator[](Chunks::ChunkPos cPos) const override
         {
-            return Components::Component2<T>(this->_x->operator[](cPos).get(), this->_y->operator[](cPos).get());
+            return new Components::Component2<T>(this->_x->operator[](cPos), this->_y->operator[](cPos));
         }
         void addChunk(size_t elemCount) override
         {
@@ -73,11 +73,11 @@ namespace ECS::Components
         }
         std::vector<Chunks::IChunkPool<T> *> getChunkPools()
         {
-            return {this->_x.get(), this->_y.get()};
+            return {this->_x, this->_y};
         }
 
     protected:
-        Chunks::IChunkPool<T> _y;
+        Chunks::StandardChunkPool<T> _y;
     };
 
     template <typename T>
@@ -87,13 +87,11 @@ namespace ECS::Components
         explicit AComponentPool3(const std::string &componentName) : AComponentPool2<T>(componentName), _z() {}
         IComponent* operator[](Chunks::ChunkPos cPos) override
         {
-            Components::Component3<T> elem(this->_x->operator[](cPos).get(), this->_y->operator[](cPos).get(), this->_z->operator[](cPos).get());
-            return Components::Component3<T>(elem);
+            return new Components::Component3<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), this->_z->operator[](cPos));
         }
         const IComponent* operator[](Chunks::ChunkPos cPos) const override
         {
-            Components::Component3<T> elem(this->_x->operator[](cPos).get(), this->_y->operator[](cPos).get(), this->_z->operator[](cPos).get());
-            return Components::Component3<T>(elem);
+            return new Components::Component3<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), this->_z->operator[](cPos));
         }
         void addChunk(size_t elemCount) override
         {
@@ -103,11 +101,11 @@ namespace ECS::Components
         }
         std::vector<Chunks::IChunkPool<T> *> getChunkPools()
         {
-            return {this->_x.get(), this->_y.get(), this->_z.get()};
+            return {this->_x, this->_y, this->_z};
         }
 
     protected:
-        Chunks::IChunkPool<T> _z;
+        Chunks::StandardChunkPool<T> _z;
     };
 
     template <typename T>
@@ -117,11 +115,11 @@ namespace ECS::Components
         explicit AComponentPool4(const std::string &componentName) : AComponentPool3<T>(componentName), _w() {}
         IComponent* operator[](Chunks::ChunkPos cPos) override
         {
-            return Components::Component4<T>(this->_x->operator[](cPos).get(), this->_y->operator[](cPos).get(), (this->_z->operator[](cPos).get())), (this->_w->operator[](cPos).get());
+            return new Components::Component4<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), (this->_z->operator[](cPos))), (this->_w->operator[](cPos));
         }
         const IComponent* operator[](Chunks::ChunkPos cPos) const override
         {
-            return Components::Component4<T>(this->_x->operator[](cPos).get(), this->_y->operator[](cPos).get(), (this->_z->operator[](cPos).get())), (this->_w->operator[](cPos).get());
+            return new Components::Component4<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), (this->_z->operator[](cPos))), (this->_w->operator[](cPos));
         }
         void addChunk(size_t elemCount) override
         {
@@ -132,10 +130,77 @@ namespace ECS::Components
         }
         std::vector<Chunks::IChunkPool<T> *> getChunkPools() override
         {
-            return {this->_x.get(), this->_y.get(), this->_z.get(), this->_w.get()};
+            return {this->_x, this->_y, this->_z, this->_w};
         }
 
     protected:
-        Chunks::IChunkPool<T> _w;
+        Chunks::StandardChunkPool<T> _w;
+    };
+
+    template <typename T, typename... Ts>
+    class AComponentPoolVar : public IComponentPool
+    {
+    public:
+        explicit AComponentPoolVar(std::string componentName)
+            : _componentName(std::move(componentName)), _pools(std::make_tuple(Chunks::StandardChunkPool<Ts>()...)) {}
+
+        ~AComponentPoolVar() override = default;
+
+        IComponent* operator[](Chunks::ChunkPos cPos) override
+        {
+            return createComponent(cPos, std::index_sequence_for<Ts...>{});
+        }
+
+        const IComponent* operator[](Chunks::ChunkPos cPos) const override
+        {
+            return createComponent(cPos, std::index_sequence_for<Ts...>{});
+        }
+
+        [[nodiscard]] uint64_t elemCount() const override
+        {
+            return std::get<0>(_pools).elemCount();
+        }
+
+        [[nodiscard]] uint64_t chunkCount() const override
+        {
+            return std::get<0>(_pools).chunkCount();
+        }
+
+        [[nodiscard]] const std::string &getComponentName() const override
+        {
+            return this->_componentName;
+        }
+
+        void addChunk(size_t elemCount) override
+        {
+            addChunkToPools(elemCount, std::index_sequence_for<Ts...>{});
+        }
+
+        std::vector<Chunks::IChunkPool<T> *> getChunkPools() override
+        {
+            return getChunkPools(std::index_sequence_for<Ts...>{});
+        }
+
+    protected:
+        template <std::size_t... Is>
+        IComponent* createComponent(Chunks::ChunkPos cPos, std::index_sequence<Is...>) const
+        {
+            return new Components::Component<T>(std::get<Is>(_pools)[cPos]...);
+        }
+
+        template <std::size_t... Is>
+        void addChunkToPools(size_t elemCount, std::index_sequence<Is...>)
+        {
+            (std::get<Is>(_pools).addChunk(elemCount), ...);
+        }
+
+        template <std::size_t... Is>
+        std::vector<Chunks::IChunkPool<T> *> getChunkPools(std::index_sequence<Is...>)
+        {
+            return {&std::get<Is>(_pools)...};
+        }
+
+        std::tuple<Chunks::StandardChunkPool<Ts>...> _pools;
+        std::string _componentName;
     };
 }
