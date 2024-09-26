@@ -167,18 +167,19 @@ public:
         inline auto operator++() -> iterator &
         {
             idx++;
-            while (idx < world.number_of_entities && (!world.status[idx].template isActive<Cs>() && ...)) {
+            while (idx < world.number_of_entities && ((!world.status[idx].template isActive<Cs>()) && ...) &&
+                   !world.status[idx].template isActive<Exist>()) {
                 idx++;
             }
             return *this;
         }
 
-        inline auto operator++(int) -> iterator
-        {
-            iterator it = *this;
-            ++(*this);
-            return it;
-        }
+        // inline auto operator++(int) -> iterator
+        // {
+        //     iterator it = *this;
+        //     ++(*this);
+        //     return it;
+        // }
 
         inline auto operator*() -> size_t { return idx; }
 
