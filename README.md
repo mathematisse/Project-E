@@ -1,4 +1,4 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<!-- Improved compatibility of back to top link: See: https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle/pull/73 -->
 <a id="readme-top"></a>
 <!--
 *** Thanks for checking out the Best-README-Template. If you have a suggestion
@@ -58,12 +58,12 @@ _For more examples, please refer to the [Documentation](docs/src/SUMMARY.md)_
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+[contributors-shield]: https://img.shields.io/github/contributors/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.svg?style=for-the-badge
+[contributors-url]: https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.svg?style=for-the-badge
+[forks-url]: https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle/network/members
+[stars-shield]: https://img.shields.io/github/stars/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.svg?style=for-the-badge
+[stars-url]: https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle/stargazers
+[issues-shield]: https://img.shields.io/github/issues/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.svg?style=for-the-badge
+[issues-url]: https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle/issues
 
