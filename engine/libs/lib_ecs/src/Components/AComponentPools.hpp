@@ -12,195 +12,287 @@
 #include "Components/Components.hpp"
 #include "Chunks/StandardChunkPool.hpp"
 #include <cstddef>
-#include <memory>
-#include <utility>
 #include <vector>
 
 namespace ECS::Components
 {
+
+    /**
+     * @class AComponentPool
+     * @brief A template class for managing component pools.
+     * 
+     * This class provides an interface for managing pools of components of type T.
+     * It inherits from the IComponentPool interface and provides implementations
+     * for various component pool operations.
+     * 
+     * @tparam T The type of components managed by the pool.
+     */
     template <typename T>
     class AComponentPool : virtual public IComponentPool
     {
     public:
-        explicit AComponentPool(std::string componentName) : _x(), _componentName(std::move(componentName)) {}
-        ~AComponentPool() override = default;
-        IComponent* operator[](Chunks::ChunkPos cPos) override
-        {
-            return new Components::Component<T>(this->_x[cPos]);
+        /**
+         * @brief Constructs an AComponentPool with a given component name.
+         * 
+         * @param componentName The name of the component.
+         */
+        explicit AComponentPool(std::string componentName) : IComponentPool(), _x(), _componentName(std::move(componentName)) {}
+
+        /**
+         * @brief Destructor for AComponentPool.
+         */
+        ~AComponentPool() override;
+
+        AComponentPool(const AComponentPool &other) = default;
+        AComponentPool &operator=(const AComponentPool &other) = default;
+        AComponentPool(AComponentPool &&other) = default;
+        AComponentPool &operator=(AComponentPool &&other) = default;
+
+        /**
+         * @brief Retrieves a reference to a component at a given chunk position.
+         * 
+         * @param cPos The position of the chunk.
+         * @return IComponentRef A reference to the component.
+         */
+        IComponentRef getComponentRef(Chunks::ChunkPos cPos) override {
+            return Components::ComponentRef<T>(this->_x.getElem(cPos));
         }
-        const IComponent* operator[](Chunks::ChunkPos cPos) const override
-        {
-            return new Components::Component<T>(*(this->_x[cPos]));
+
+        /**
+         * @brief Retrieves a dummy reference to a component at a given chunk position.
+         * 
+         * @param cPos The position of the chunk.
+         * @return IComponentRef A dummy reference to the component.
+         */
+        [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override {
+            return Components::ComponentRef<T>(*(this->_x.getElem(cPos)));
         }
-        [[nodiscard]] uint64_t elemCount() const override { return this->_x.elemCount(); }
-        [[nodiscard]] uint64_t chunkCount() const override { return this->_x.chunkCount(); }
-        [[nodiscard]] const std::string &getComponentName() const override { return this->_componentName; }
-        void addChunk(size_t elemCount) override
-        {
-            std::cout << "Adding chunk with " << elemCount << " elements\nFor component " << this->_componentName << std::endl;
-            this->_x.addChunk(elemCount);
-        }
-        std::vector<Chunks::IChunkPool<T> *> getChunkPools()
-        {
-            return {this->_x};
-        }
+
+        /**
+         * @brief Gets the number of elements in the pool.
+         * 
+         * @return uint64_t The number of elements.
+         */
+        [[nodiscard]] uint64_t elemCount() const override;
+
+        /**
+         * @brief Gets the number of chunks in the pool.
+         * 
+         * @return uint64_t The number of chunks.
+         */
+        [[nodiscard]] uint64_t chunkCount() const override;
+
+        /**
+         * @brief Gets the name of the component.
+         * 
+         * @return const std::string& The name of the component.
+         */
+        [[nodiscard]] const std::string &getComponentName() const override;
+
+        /**
+         * @brief Adds a chunk to the pool with a specified number of elements.
+         * 
+         * @param elemCount The number of elements in the chunk.
+         */
+        void addChunk(size_t elemCount) override;
+
+        /**
+         * @brief Retrieves the chunk pools managed by this component pool.
+         * 
+         * @return std::vector<Chunks::IChunkPool<T>*> A vector of chunk pools.
+         */
+        std::vector<Chunks::IChunkPool<T> *> getChunkPools();
 
     protected:
-        Chunks::StandardChunkPool<T> _x;
-        std::string _componentName;
+        Chunks::StandardChunkPool<T> _x; ///< The standard chunk pool for components of type T.
+        std::string _componentName; ///< The name of the component.
     };
 
+    /**
+     * @class AComponentPool2
+     * @brief A specialized component pool class template.
+     * 
+     * This class template extends the AComponentPool class template and provides
+     * additional functionality for managing component pools.
+     * 
+     * @tparam T The type of components managed by this pool.
+     */
     template <typename T>
     class AComponentPool2 : public AComponentPool<T>
     {
     public:
-        explicit AComponentPool2(const std::string &componentName) : AComponentPool<T>(componentName), _y() {}
-        IComponent* operator[](Chunks::ChunkPos cPos) override
-        {
-            std::cout << "Getting component of type " << this->_componentName << " at " << cPos.chunkIndex << " and " << cPos.elemIndex << std::endl;
-            std::cout << "Sizes: " << this->_x->getChunks().size() << " and " << this->_y->getChunks().size() << std::endl;
-            return new Components::Component2<T>(this->_x->operator[](cPos), this->_y->operator[](cPos));
-        }
-        const IComponent* operator[](Chunks::ChunkPos cPos) const override
-        {
-            return new Components::Component2<T>(this->_x->operator[](cPos), this->_y->operator[](cPos));
-        }
-        void addChunk(size_t elemCount) override
-        {
-            std::cout << "Adding chunk with " << elemCount << " elements\nWADDIHADUIHADUDAHDIAHADHAUDHIUDHA\nHAUDHIUDHA\nHAUDHIUDHA\nHAUDHIUDHA\nHHDAIUHDUADAUHDIHAUDHIUDHA\n";
-            this->_x->addChunk(elemCount);
-            this->_y->addChunk(elemCount);
-        }
-        std::vector<Chunks::IChunkPool<T> *> getChunkPools()
-        {
-            return {this->_x, this->_y};
-        }
+            /**
+             * @brief Constructs a new AComponentPool2 object.
+             * 
+             * @param componentName The name of the component.
+             */
+            explicit AComponentPool2(const std::string &componentName);
+
+            /**
+             * @brief Retrieves a reference to a component at the specified chunk position.
+             * 
+             * @param cPos The position of the chunk.
+             * @return IComponentRef A reference to the component.
+             */
+            IComponentRef getComponentRef(Chunks::ChunkPos cPos) override {
+                return Components::ComponentRef2<T>(this->_x.getElem(cPos), this->_y.getElem(cPos));
+            }
+
+            /**
+             * @brief Retrieves a dummy reference to a component at the specified chunk position.
+             * 
+             * @param cPos The position of the chunk.
+             * @return IComponentRef A dummy reference to the component.
+             */
+            [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override {
+                return Components::ComponentRef2<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)));
+            }
+
+            /**
+             * @brief Adds a new chunk to the component pool.
+             * 
+             * @param elemCount The number of elements in the new chunk.
+             */
+            void addChunk(size_t elemCount) override;
+
+            /**
+             * @brief Retrieves the chunk pools managed by this component pool.
+             * 
+             * @return std::vector<Chunks::IChunkPool<T> *> A vector of pointers to the chunk pools.
+             */
+            std::vector<Chunks::IChunkPool<T> *> getChunkPools();
 
     protected:
-        Chunks::StandardChunkPool<T> _y;
+            Chunks::StandardChunkPool<T> _y; ///< A secondary chunk pool for managing components.
     };
 
+
+    /**
+     * @class AComponentPool3
+     * @brief A specialized component pool class that extends AComponentPool2 to manage three-dimensional component data.
+     * 
+     * @tparam T The type of component managed by this pool.
+     * 
+     * This class provides functionality to manage components in a three-dimensional space, 
+     * extending the capabilities of AComponentPool2. It includes methods to get component 
+     * references, add chunks of components, and retrieve chunk pools.
+     */
     template <typename T>
     class AComponentPool3 : public AComponentPool2<T>
     {
     public:
-        explicit AComponentPool3(const std::string &componentName) : AComponentPool2<T>(componentName), _z() {}
-        IComponent* operator[](Chunks::ChunkPos cPos) override
+     
+    /**
+     * @brief Constructs a new AComponentPool3 object.
+     * 
+     * @param componentName The name of the component managed by this pool.
+     */
+    explicit AComponentPool3(const std::string &componentName) : AComponentPool2<T>(componentName), _z() {}
+     
+    /**
+     * @brief Retrieves a reference to the component at the specified chunk position.
+     * 
+     * @param cPos The position of the chunk.
+     * @return IComponentRef A reference to the component at the specified chunk position.
+     */
+        IComponentRef getComponentRef(Chunks::ChunkPos cPos) override
         {
-            return new Components::Component3<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), this->_z->operator[](cPos));
+            return Components::ComponentRef3<T>(this->_x.getElem(cPos), this->_y.getElem(cPos), this->_z.getElem(cPos));
         }
-        const IComponent* operator[](Chunks::ChunkPos cPos) const override
+     
+    /**
+     * @brief Retrieves a constant reference to a dummy component at the specified chunk position.
+     * 
+     * @param cPos The position of the chunk.
+     * @return IComponentRef A constant reference to a dummy component at the specified chunk position.
+     */
+        [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override
         {
-            return new Components::Component3<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), this->_z->operator[](cPos));
+            return Components::ComponentRef3<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)), *(this->_z.getElem(cPos)));
         }
+     
+    /**
+     * @brief Adds a new chunk of components to the pool.
+     * 
+     * @param elemCount The number of elements in the new chunk.
+     */
         void addChunk(size_t elemCount) override
         {
             this->_x->addChunk(elemCount);
             this->_y->addChunk(elemCount);
             this->_z->addChunk(elemCount);
         }
+     
+    /**
+     * @brief Retrieves the chunk pools managed by this component pool.
+     * 
+     * @return std::vector<Chunks::IChunkPool<T> *> A vector containing pointers to the chunk pools.
+     */
         std::vector<Chunks::IChunkPool<T> *> getChunkPools()
         {
             return {this->_x, this->_y, this->_z};
         }
 
     protected:
-        Chunks::StandardChunkPool<T> _z;
+        Chunks::StandardChunkPool<T> _z; ///< A third chunk pool for managing components.
     };
 
+     /**
+      * @class AComponentPool4
+      * @brief A component pool class template that manages four component pools.
+      *
+      * The AComponentPool4 class template extends the AComponentPool3 class template by adding an additional
+      * component pool (_w). It provides methods to get component references, add chunks, and retrieve chunk pools.
+      *
+      * @tparam T The type of the components managed by the pool.
+      */
     template <typename T>
     class AComponentPool4 : public AComponentPool3<T>
     {
     public:
-        explicit AComponentPool4(const std::string &componentName) : AComponentPool3<T>(componentName), _w() {}
-        IComponent* operator[](Chunks::ChunkPos cPos) override
-        {
-            return new Components::Component4<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), (this->_z->operator[](cPos))), (this->_w->operator[](cPos));
-        }
-        const IComponent* operator[](Chunks::ChunkPos cPos) const override
-        {
-            return new Components::Component4<T>(this->_x->operator[](cPos), this->_y->operator[](cPos), (this->_z->operator[](cPos))), (this->_w->operator[](cPos));
-        }
-        void addChunk(size_t elemCount) override
-        {
-            this->_x->addChunk(elemCount);
-            this->_y->addChunk(elemCount);
-            this->_z->addChunk(elemCount);
-            this->_w->addChunk(elemCount);
-        }
-        std::vector<Chunks::IChunkPool<T> *> getChunkPools() override
-        {
-            return {this->_x, this->_y, this->_z, this->_w};
-        }
+            /**
+             * @brief Constructs an AComponentPool4 with the specified component name.
+             *
+             * @param componentName The name of the component.
+             */
+            explicit AComponentPool4(const std::string &componentName);
+
+            /**
+             * @brief Gets a reference to the component at the specified chunk position.
+             *
+             * @param cPos The chunk position.
+             * @return A reference to the component.
+             */
+            IComponentRef getComponentRef(Chunks::ChunkPos cPos) override {
+                return Components::ComponentRef4<T>(this->_x.getElem(cPos), this->_y.getElem(cPos), this->_z.getElem(cPos), this->_w.getElem(cPos));
+            }
+
+            /**
+             * @brief Gets a dummy reference to the component at the specified chunk position.
+             *
+             * @param cPos The chunk position.
+             * @return A dummy reference to the component.
+             */
+            [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override {
+                return Components::ComponentRef4<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)), *(this->_z.getElem(cPos)), *(this->_w.getElem(cPos)));
+            }
+
+            /**
+             * @brief Adds a chunk with the specified number of elements to the component pools.
+             *
+             * @param elemCount The number of elements in the chunk.
+             */
+            void addChunk(size_t elemCount) override;
+
+            /**
+             * @brief Gets the chunk pools managed by this component pool.
+             *
+             * @return A vector of pointers to the chunk pools.
+             */
+            std::vector<Chunks::IChunkPool<T> *> getChunkPools() override;
 
     protected:
-        Chunks::StandardChunkPool<T> _w;
+            Chunks::StandardChunkPool<T> _w; ///< The fourth component pool.
     };
 
-    template <typename T, typename... Ts>
-    class AComponentPoolVar : public IComponentPool
-    {
-    public:
-        explicit AComponentPoolVar(std::string componentName)
-            : _componentName(std::move(componentName)), _pools(std::make_tuple(Chunks::StandardChunkPool<Ts>()...)) {}
-
-        ~AComponentPoolVar() override = default;
-
-        IComponent* operator[](Chunks::ChunkPos cPos) override
-        {
-            return createComponent(cPos, std::index_sequence_for<Ts...>{});
-        }
-
-        const IComponent* operator[](Chunks::ChunkPos cPos) const override
-        {
-            return createComponent(cPos, std::index_sequence_for<Ts...>{});
-        }
-
-        [[nodiscard]] uint64_t elemCount() const override
-        {
-            return std::get<0>(_pools).elemCount();
-        }
-
-        [[nodiscard]] uint64_t chunkCount() const override
-        {
-            return std::get<0>(_pools).chunkCount();
-        }
-
-        [[nodiscard]] const std::string &getComponentName() const override
-        {
-            return this->_componentName;
-        }
-
-        void addChunk(size_t elemCount) override
-        {
-            addChunkToPools(elemCount, std::index_sequence_for<Ts...>{});
-        }
-
-        std::vector<Chunks::IChunkPool<T> *> getChunkPools() override
-        {
-            return getChunkPools(std::index_sequence_for<Ts...>{});
-        }
-
-    protected:
-        template <std::size_t... Is>
-        IComponent* createComponent(Chunks::ChunkPos cPos, std::index_sequence<Is...>) const
-        {
-            return new Components::Component<T>(std::get<Is>(_pools)[cPos]...);
-        }
-
-        template <std::size_t... Is>
-        void addChunkToPools(size_t elemCount, std::index_sequence<Is...>)
-        {
-            (std::get<Is>(_pools).addChunk(elemCount), ...);
-        }
-
-        template <std::size_t... Is>
-        std::vector<Chunks::IChunkPool<T> *> getChunkPools(std::index_sequence<Is...>)
-        {
-            return {&std::get<Is>(_pools)...};
-        }
-
-        std::tuple<Chunks::StandardChunkPool<Ts>...> _pools;
-        std::string _componentName;
-    };
 }

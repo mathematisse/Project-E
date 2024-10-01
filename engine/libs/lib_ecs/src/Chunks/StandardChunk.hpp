@@ -38,43 +38,43 @@
              */
             ~StandardChunk() = default;
 
-            StandardChunk(const StandardChunk &other) = delete;
-            StandardChunk(StandardChunk &&other) = delete;
-            StandardChunk &operator=(const StandardChunk &other) = delete;
-            StandardChunk &operator=(StandardChunk &&other) = delete;
+            StandardChunk(const StandardChunk &other) = default;
+            StandardChunk(StandardChunk &&other) = default;
+            StandardChunk &operator=(const StandardChunk &other) = default;
+            StandardChunk &operator=(StandardChunk &&other) = default;
 
             /**
-             * @brief Retrieves a reference to the element at the specified index.
+             * @brief Retrieves a pointer to the element at the specified index.
              * 
              * @param idx The index of the element to retrieve.
-             * @return T& A reference to the element at the specified index.
+             * @return T* A pointer to the element at the specified index.
              */
-            T& getElem(size_t idx) override { return _elems[idx]; }
+            T* getElem(size_t idx) override { return _elems[idx]; }
             
             /**
-             * @brief Retrieves a constant reference to the element at the specified index.
+             * @brief Retrieves a constant pointer to the element at the specified index.
              * 
              * @param idx The index of the element to retrieve.
-             * @return const T& A constant reference to the element at the specified index.
+             * @return const T* A constant pointer to the element at the specified index.
              */
-            const T& getElem(size_t idx) const override { return _elems[idx]; }
+            const T* getElem(size_t idx) const override { return _elems[idx]; }
 
             /**
-             * @brief Retrieves a reference to the vector of elements.
+             * @brief Retrieves a pointer to the vector of elements.
              * 
-             * @return std::vector<T>& A reference to the vector of elements.
+             * @return std::vector<T>* A pointer to the vector of elements.
              */
-            std::vector<T>& getElems() override { return _elems; }
+            std::vector<T>* getElems() { return _elems; }
 
             /**
-             * @brief Retrieves a constant reference to the vector of elements.
+             * @brief Retrieves a constant pointer to the vector of elements.
              * 
-             * @return const std::vector<T>& A constant reference to the vector of elements.
+             * @return const std::vector<T>* A constant pointer to the vector of elements.
              */
-            const std::vector<T>& getElems() const override { return _elems; }
+            const std::vector<T>* getElems() const { return _elems; }
 
         protected:
-            std::vector<T> _elems; ///< The vector storing the elements.            std::vector<T> _elems;
+            std::vector<T> _elems; ///< The vector storing the elements.
         };
     }
 

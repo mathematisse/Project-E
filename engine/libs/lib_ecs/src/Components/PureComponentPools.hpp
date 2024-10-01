@@ -18,10 +18,10 @@
         public:
             EntityPoolIdPool();
             ~EntityPoolIdPool() override = default;
-            EntityPoolIdPool(const EntityPoolIdPool &other) = delete;
-            EntityPoolIdPool(EntityPoolIdPool &&other) = delete;
-            EntityPoolIdPool &operator=(const EntityPoolIdPool &other) = delete;
-            EntityPoolIdPool &operator=(EntityPoolIdPool &&other) = delete;
+            EntityPoolIdPool(const EntityPoolIdPool &other) = default;
+            EntityPoolIdPool(EntityPoolIdPool &&other) = default;
+            EntityPoolIdPool &operator=(const EntityPoolIdPool &other) = default;
+            EntityPoolIdPool &operator=(EntityPoolIdPool &&other) = default;
         };
         // Serves multiple purposes, in entity ptrs or for known pool entities references
         class ChunkPosPool : public Components::AComponentPool2<uint64_t>
@@ -29,10 +29,10 @@
         public:
             ChunkPosPool();
             ~ChunkPosPool() override = default;
-            ChunkPosPool(const ChunkPosPool &other) = delete;
-            ChunkPosPool(ChunkPosPool &&other) = delete;
-            ChunkPosPool &operator=(const ChunkPosPool &other) = delete;
-            ChunkPosPool &operator=(ChunkPosPool &&other) = delete;
+            ChunkPosPool(const ChunkPosPool &other) = default;
+            ChunkPosPool(ChunkPosPool &&other) = default;
+            ChunkPosPool &operator=(const ChunkPosPool &other) = default;
+            ChunkPosPool &operator=(ChunkPosPool &&other) = default;
         };
         // Attached to all entities (appart from entity ptrs) to tell the manager what to do
         class EntityStatusPool : public AComponentPool<int8_t>
@@ -40,10 +40,10 @@
         public:
             EntityStatusPool();
             ~EntityStatusPool() override = default;
-            EntityStatusPool(const EntityStatusPool &other) = delete;
-            EntityStatusPool(EntityStatusPool &&other) = delete;
-            EntityStatusPool &operator=(const EntityStatusPool &other) = delete;
-            EntityStatusPool &operator=(EntityStatusPool &&other) = delete;
+            EntityStatusPool(const EntityStatusPool &other) = default;
+            EntityStatusPool(EntityStatusPool &&other) = default;
+            EntityStatusPool &operator=(const EntityStatusPool &other) = default;
+            EntityStatusPool &operator=(EntityStatusPool &&other) = default;
         };
         enum EntityStatus {
             ENT_NONE = 0,

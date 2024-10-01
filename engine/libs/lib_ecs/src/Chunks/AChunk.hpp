@@ -11,6 +11,13 @@
 
 namespace ECS::Chunks
 {
+    /**
+     * @class AChunk
+     * @brief Abstract base class for all chunks in the ECS.
+     *
+     * The AChunk class provides a common interface for all chunks in the ECS.
+     * It ensures that all derived chunks can be properly managed and destroyed.
+     */
     template <typename T>
     class AChunk : public IChunk<T>
     {
@@ -29,10 +36,10 @@ namespace ECS::Chunks
          */
         virtual ~AChunk() = default;
 
-        AChunk(const AChunk &other) = delete;
-        AChunk(AChunk &&other) = delete;
-        AChunk &operator=(const AChunk &other) = delete;
-        AChunk &operator=(AChunk &&other) = delete;
+        AChunk(const AChunk &other) = default;
+        AChunk(AChunk &&other) = default;
+        AChunk &operator=(const AChunk &other) = default;
+        AChunk &operator=(AChunk &&other) = default;
         
         /**
          * @brief Get the count of elements.
@@ -52,17 +59,17 @@ namespace ECS::Chunks
          * @brief Get the element at the specified index.
          * 
          * @param idx Index of the element.
-         * @return T& Reference to the element.
+         * @return T* Pointer to the element.
          */
-        virtual T& getElem(size_t idx) = 0;
+        virtual T* getElem(size_t idx) = 0;
 
         /**
          * @brief Get the element at the specified index (const version).
          * 
          * @param idx Index of the element.
-         * @return const T& Const reference to the element.
+         * @return const T* Const pointer to the element.
          */
-        virtual const T& getElem(size_t idx) const = 0;
+        virtual const T* getElem(size_t idx) const = 0;
 
     protected:
         ChunkType _type;

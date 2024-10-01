@@ -29,26 +29,26 @@ namespace ECS::Chunks
          */
         virtual ~IChunk() = default;
 
-        IChunk(const IChunk &other) = delete;
-        IChunk(IChunk &&other) = delete;
-        IChunk &operator=(const IChunk &other) = delete;
-        IChunk &operator=(IChunk &&other) = delete;
+        IChunk(const IChunk &other) = default;
+        IChunk(IChunk &&other) = default;
+        IChunk &operator=(const IChunk &other) = default;
+        IChunk &operator=(IChunk &&other) = default;
 
         /**
          * @brief Get the element at the specified index.
          * 
          * @param idx Index of the element.
-         * @return T& Reference to the element.
+         * @return T* Pointer to the element.
          */
-        virtual T& getElem(size_t idx) = 0;
+        virtual T* getElem(size_t idx) = 0;
 
         /**
          * @brief Get the element at the specified index (const version).
          * 
          * @param idx Index of the element.
-         * @return const T& Const reference to the element.
+         * @return const T* Const pointer to the element.
          */
-        virtual const T& getElem(size_t idx) const = 0;
+        virtual const T* getElem(size_t idx) const = 0;
 
         /**
          * @brief Get the count of elements.

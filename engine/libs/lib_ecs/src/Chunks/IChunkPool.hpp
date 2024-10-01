@@ -24,46 +24,51 @@ namespace ECS::Chunks
     {
     public:
         /**
+         * @brief Default constructor.
+         */
+        IChunkPool() = default;
+        
+        /**
          * @brief Virtual destructor.
          */
         virtual ~IChunkPool() = default;
 
         IChunkPool(const IChunkPool &other) = default;
-        IChunkPool(IChunkPool &&other) = delete;
-        IChunkPool &operator=(const IChunkPool &other) = delete;
-        IChunkPool &operator=(IChunkPool &&other) = delete;
+        IChunkPool(IChunkPool &&other) = default;
+        IChunkPool &operator=(const IChunkPool &other) = default;
+        IChunkPool &operator=(IChunkPool &&other) = default;
 
         /**
          * @brief Get a chunk by index.
          * 
          * @param index The index of the chunk.
-         * @return IChunk<T>& Reference to the chunk.
+         * @return IChunk<T>* Reference to the chunk.
          */
-        virtual IChunk<T> &getChunk(size_t index) = 0;
+        virtual IChunk<T> *getChunk(size_t index) = 0;
 
         /**
          * @brief Get a chunk by index (const version).
          * 
          * @param index The index of the chunk.
-         * @return const IChunk<T>& Const reference to the chunk.
+         * @return const IChunk<T>* Const pointer to the chunk.
          */
-        virtual const IChunk<T> &getChunk(size_t index) const = 0;
+        virtual const IChunk<T> *getChunk(size_t index) const = 0;
 
         /**
          * @brief Get an element by its position.
          * 
          * @param pos The position of the element.
-         * @return T& Reference to the element.
+         * @return T* Pointer to the element.
          */
-        virtual T& getElem(ChunkPos pos) = 0;
+        virtual T* getElem(ChunkPos pos) = 0;
 
         /**
          * @brief Get an element by its position (const version).
          * 
          * @param pos The position of the element.
-         * @return const T& Const reference to the element.
+         * @return const T* Const pointer to the element.
          */
-        virtual const T& getElem(ChunkPos pos) const = 0;
+        virtual const T* getElem(ChunkPos pos) const = 0;
 
         /**
          * @brief Add a new chunk with a specified number of elements.
@@ -75,7 +80,7 @@ namespace ECS::Chunks
         /**
          * @brief Get all chunks.
          * 
-         * @return std::vector<IChunk<T>&> Vector of references to all chunks.
+         * @return std::vector<IChunk<T>*> Vector of pointers to all chunks.
          */
         virtual std::vector<IChunk<T> *> getChunks() = 0;
 

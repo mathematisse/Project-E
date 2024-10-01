@@ -40,10 +40,10 @@ namespace ECS::Chunks
         ~StandardChunkPool() = default;
 
 
-        StandardChunkPool(const StandardChunkPool &other) = delete;
-        StandardChunkPool(StandardChunkPool &&other) = delete;
-        StandardChunkPool &operator=(const StandardChunkPool &other) = delete;
-        StandardChunkPool &operator=(StandardChunkPool &&other) = delete;
+        StandardChunkPool(const StandardChunkPool &other) = default;
+        StandardChunkPool(StandardChunkPool &&other) = default;
+        StandardChunkPool &operator=(const StandardChunkPool &other) = default;
+        StandardChunkPool &operator=(StandardChunkPool &&other) = default;
 
         /**
          * @brief Add a new chunk to the pool.

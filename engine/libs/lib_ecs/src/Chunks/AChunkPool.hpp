@@ -33,40 +33,40 @@ namespace ECS::Chunks
          */
         virtual ~AChunkPool() = default;
         
-        AChunkPool(const AChunkPool &other) = delete;
-        AChunkPool(AChunkPool &&other) = delete;
-        AChunkPool &operator=(const AChunkPool &other) = delete;
-        AChunkPool &operator=(AChunkPool &&other) = delete;
+        AChunkPool(const AChunkPool &other) = default;
+        AChunkPool(AChunkPool &&other) = default;
+        AChunkPool &operator=(const AChunkPool &other) = default;
+        AChunkPool &operator=(AChunkPool &&other) = default;
 
         /**
          * @brief Access an element by its position.
          * 
          * @param pos The position of the element.
-         * @return T& Reference to the element.
+         * @return T* Pointer to the element.
          */
-        T& getElem(ChunkPos pos) override
+        T* getElem(ChunkPos pos) override
         {
-            return _chunks[pos.chunkIndex].getElem(pos.elemIndex);
+            return _chunks[pos.chunkIndex]->getElem(pos.elemIndex);
         }
 
         /**
          * @brief Access an element by its position (const version).
          * 
          * @param pos The position of the element.
-         * @return const T& Reference to the element.
+         * @return const T* Pointer to the element.
          */
-        const T& getElem(ChunkPos pos) const override
+        const T* getElem(ChunkPos pos) const override
         {
-            return _chunks[pos.chunkIndex].getElem(pos.elemIndex);
+            return _chunks[pos.chunkIndex]->getElem(pos.elemIndex);
         }
 
         /**
          * @brief Access a chunk by index.
          * 
          * @param index The index of the chunk.
-         * @return IChunk<T>& Reference to the chunk.
+         * @return IChunk<T>* Pointer to the chunk.
          */
-        IChunk<T> &getChunk(size_t index) override
+        IChunk<T> *getChunk(size_t index) override
         {
             return _chunks[index];
         }
@@ -75,9 +75,9 @@ namespace ECS::Chunks
          * @brief Access a chunk by index (const version).
          * 
          * @param index The index of the chunk.
-         * @return const IChunk<T>& Reference to the chunk.
+         * @return const IChunk<T>* Reference to the chunk.
          */
-        const IChunk<T> &getChunk(size_t index) const override
+        const IChunk<T> *getChunk(size_t index) const override
         {
             return _chunks[index];
         }
@@ -101,7 +101,7 @@ namespace ECS::Chunks
         {
             uint64_t size = 0;
             for (size_t i = 0; i < _chunks.size(); i++) {
-                size += _chunks[i].elemCount();
+                size += _chunks[i]->elemCount();
             }
             return size;
         }
@@ -121,7 +121,7 @@ namespace ECS::Chunks
          * 
          * @param elemCount The number of elements in the new chunk.
          */
-        virtual void addChunk(size_t elemCount) = 0;
+         void addChunk(size_t elemCount) override = 0;
 
     protected:
         std::vector<IChunk<T> *> _chunks{}; ///< Vector of chunks.
