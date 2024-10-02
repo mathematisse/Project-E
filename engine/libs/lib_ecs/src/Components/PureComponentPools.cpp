@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2024
 ** CPP-ECS
 ** File description:
-** Ecs pure base PureComponentPools
+** Ecs pure base CoreComponentPools
 */
 
 #include "Components/PureComponentPools.hpp"
@@ -10,19 +10,17 @@
 
     namespace ECS::Components
     {
-        EntityPoolIdPool::EntityPoolIdPool()
-            : AComponentPool<entity_pool_id_t>("entity_pool_id")
-        {
-        }
 
-        ChunkPosPool::ChunkPosPool()
-            : AComponentPool2<Chunks::chunk_pos_t>("chunk_pos")
-        {
-        }
+        template <>
+        const std::string AComponentPool<entity_status_t>::componentName = "entity_status";
 
-        EntityStatusPool::EntityStatusPool()
-            : AComponentPool<entity_status_t>("entity_status")
-        {
-        }
+        
+        template <>
+        const std::string AComponentPool<Chunks::chunk_pos_t, Chunks::chunk_pos_t>::componentName = "chunk_pos";
+
+
+        template <>
+        const std::string AComponentPool<entity_pool_id_t>::componentName = "entity_pool_id";
+
     }
 

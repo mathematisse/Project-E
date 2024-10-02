@@ -8,214 +8,75 @@
 #pragma once
 
 #include "Components/IComponentRef.hpp"
-
-#include <iostream>
+#include <tuple>
 
 namespace ECS::Components {
 
-/**
- * @brief Base component class template.
- * 
- * @tparam T Type of the component.
- */
-template <typename T>
+template <typename... Ts>
 class ComponentRef : public IComponentRef {
 public:
     /**
-     * @brief Construct a new Component object with a pointer.
+     * @brief Construct a new ComponentRef object with component pointers.
      * 
-     * @param x Pointer to the component value.
+     * @param components Pointers to the component values.
      */
-    explicit ComponentRef(T *x) : _x(x), _dummyX(0) {
+    explicit ComponentRef(Ts*... components) 
+        : _components(std::make_tuple(components...)) {}
+
+    /**
+     * @brief Construct a new ComponentRef object with component values.
+     * 
+     * @param components Component values.
+     */
+    explicit ComponentRef(Ts... components) 
+        : _components(createPointerTuple(components...)) {}
+
+    /**
+     * @brief Get the component value pointer at the specified index.
+     * 
+     * @tparam Index Index of the component.
+     * @return Pointer to the component value.
+     */
+    template <std::size_t Index>
+    decltype(auto) get() {
+        return std::get<Index>(_components);
     }
 
     /**
-     * @brief Construct a new Component object with a value.
+     * @brief Get the component value pointer at the specified index (const version).
      * 
-     * @param x Value of the component.
+     * @tparam Index Index of the component.
+     * @return Pointer to the component value.
      */
-    explicit ComponentRef(T x) : _x(&_dummyX), _dummyX(x) {}
+    template <std::size_t Index>
+    decltype(auto) get() const {
+        return std::get<Index>(_components);
+    }
 
     /**
-     * @brief Get the component value pointer.
+     * @brief Set the component value at the specified index.
      * 
-     * @return T* Pointer to the component value.
+     * @tparam Index Index of the component.
+     * @param value New value for the component.
      */
-    T *getX() { return _x; }
-
-    /**
-     * @brief Get the component value pointer (const version).
-     * 
-     * @return const T* Pointer to the component value.
-     */
-    const T *getX() const { return _x; }
-
-    /**
-     * @brief set the component value.
-     * 
-     * @param x New value of the component.
-     */
-    void setX(T x) { *_x = x; }
+    template <std::size_t Index>
+    void set(const std::tuple_element_t<Index, std::tuple<Ts...>>& value) {
+        *std::get<Index>(_components) = value;
+    }
 
 protected:
-    T *_x;       ///< Pointer to the component value.
-    T _dummyX;   ///< Dummy value for internal use.
+    std::tuple<Ts*...> _components; ///< Tuple of pointers to component values.
+
+private:
+    /**
+     * @brief Creates a tuple of pointers to the provided components.
+     * 
+     * @param components Component values.
+     * @return Tuple of pointers to the values.
+     */
+    static auto createPointerTuple(Ts... components) {
+        return std::make_tuple(&components...);
+    }
 };
 
-/**
- * @brief Component class template with two values.
- * 
- * @tparam T Type of the component.
- */
-template <typename T>
-class ComponentRef2 : public ComponentRef<T> {
-public:
-    /**
-     * @brief Construct a new Component2 object with pointers.
-     * 
-     * @param x Pointer to the first component value.
-     * @param y Pointer to the second component value.
-     */
-    ComponentRef2(T *x, T *y) : ComponentRef<T>(x), _y(y), _dummyY(0) {}
-
-    /**
-     * @brief Construct a new Component2 object with values.
-     * 
-     * @param x First component value.
-     * @param y Second component value.
-     */
-    ComponentRef2(T x, T y) : ComponentRef<T>(x), _y(&_dummyY), _dummyY(y) {}
-
-    /**
-     * @brief Get the second component value pointer.
-     * 
-     * @return T* Pointer to the second component value.
-     */
-    T *getY() { return _y; }
-
-    /**
-     * @brief Get the second component value pointer (const version).
-     * 
-     * @return const T* Pointer to the second component value.
-     */
-    const T *getY() const { return _y; }
-
-    /**
-     * @brief set the second component value.
-     * 
-     * @param y New value of the second component.
-     */
-    void setY(T y) { *_y = y; }
-
-protected:
-    T *_y;       ///< Pointer to the second component value.
-    T _dummyY;   ///< Dummy value for internal use.
-};
-
-/**
- * @brief Component class template with three values.
- * 
- * @tparam T Type of the component.
- */
-template <typename T>
-class ComponentRef3 : public ComponentRef2<T> {
-public:
-    /**
-     * @brief Construct a new Component3 object with pointers.
-     * 
-     * @param x Pointer to the first component value.
-     * @param y Pointer to the second component value.
-     * @param z Pointer to the third component value.
-     */
-    ComponentRef3(T *x, T *y, T *z) : ComponentRef2<T>(x, y), _z(z), _dummyZ(0) {}
-
-    /**
-     * @brief Construct a new Component3 object with values.
-     * 
-     * @param x First component value.
-     * @param y Second component value.
-     * @param z Third component value.
-     */
-    ComponentRef3(T x, T y, T z) : ComponentRef2<T>(x, y), _z(&_dummyZ), _dummyZ(z) {}
-
-    /**
-     * @brief Get the third component value pointer.
-     * 
-     * @return T* Pointer to the third component value.
-     */
-    T *getZ() { return _z; }
-
-    /**
-     * @brief Get the third component value pointer (const version).
-     * 
-     * @return const T* Pointer to the third component value.
-     */
-    const T *getZ() const { return _z; }
-
-    /**
-     * @brief set the third component value.
-     * 
-     * @param z New value of the third component.
-     */
-    void setZ(T z) { *_z = z; }
-
-protected:
-    T *_z;       ///< Pointer to the third component value.
-    T _dummyZ;   ///< Dummy value for internal use.
-};
-
-/**
- * @brief Component class template with four values.
- * 
- * @tparam T Type of the component.
- */
-template <typename T>
-class ComponentRef4 : public ComponentRef3<T> {
-public:
-    /**
-     * @brief Construct a new Component4 object with pointers.
-     * 
-     * @param x Pointer to the first component value.
-     * @param y Pointer to the second component value.
-     * @param z Pointer to the third component value.
-     * @param w Pointer to the fourth component value.
-     */
-    ComponentRef4(T *x, T *y, T *z, T *w) : ComponentRef3<T>(x, y, z), _w(w), _dummyW(0) {}
-
-    /**
-     * @brief Construct a new Component4 object with values.
-     * 
-     * @param x First component value.
-     * @param y Second component value.
-     * @param z Third component value.
-     * @param w Fourth component value.
-     */
-    ComponentRef4(T x, T y, T z, T w) : ComponentRef3<T>(x, y, z), _w(&_dummyW), _dummyW(w) {}
-
-    /**
-     * @brief Get the fourth component value pointer.
-     * 
-     * @return T* Pointer to the fourth component value.
-     */
-    T *getW() { return _w; }
-
-    /**
-     * @brief Get the fourth component value pointer (const version).
-     * 
-     * @return const T* Pointer to the fourth component value.
-     */
-    const T *getW() const { return _w; }
-
-    /**
-     * @brief set the fourth component value.
-     * 
-     * @param w New value of the fourth component.
-     */
-    void setW(T w) { *_w = w; }
-
-protected:
-    T *_w;       ///< Pointer to the fourth component value.
-    T _dummyW;   ///< Dummy value for internal use.
-};
-
-}
+} // namespace ECS::Components

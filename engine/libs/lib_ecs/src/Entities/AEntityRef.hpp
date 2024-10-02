@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include "Components/ComponentRefs.hpp"
 #include "Components/PureComponentPools.hpp"
-#include "Entities/IEntity.hpp"
+#include "Entities/IEntityRef.hpp"
 
 
     namespace ECS::Entities
@@ -21,7 +20,7 @@
          * The AEntity class provides a common interface for all entities, including methods for
          * getting and setting the status and chunk position of the entity.
          */
-        class AEntity : public IEntity
+        class AEntityRef : public IEntityRef
         {
         public:
             /**
@@ -30,17 +29,17 @@
              * @param status Pointer to a ComponentRef object representing the status of the entity.
              * @param cPos Pointer to a ComponentRef2 object representing the chunk position of the entity.
              */
-            AEntity(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos);
+            AEntityRef(Components::EntityStatusRef *status, Components::ChunkPosRef *cPos);
 
             /**
              * @brief Destroys the AEntity object.
              */
-            ~AEntity() override;
+            ~AEntityRef() override;
 
-            AEntity(const AEntity &other) = default;
-            AEntity(AEntity &&other) = default;
-            AEntity &operator=(const AEntity &other) = default;
-            AEntity &operator=(AEntity &&other) = default;
+            AEntityRef(const AEntityRef &other) = default;
+            AEntityRef(AEntityRef &&other) = default;
+            AEntityRef &operator=(const AEntityRef &other) = default;
+            AEntityRef &operator=(AEntityRef &&other) = default;
 
             /**
              * @brief Gets the status of the entity.
@@ -70,8 +69,8 @@
              */
             void setChunkPos(Chunks::ChunkPos cPos) override;
 
-            Components::ComponentRef<Components::entity_status_t> *_status; ///< Pointer to the status component of the entity.
-            Components::ComponentRef2<Chunks::chunk_pos_t> *_cPos; ///< Pointer to the chunk position component of the entity.
+            Components::EntityStatusRef *_status; ///< Pointer to the status component of the entity.
+            Components::ChunkPosRef *_cPos; ///< Pointer to the chunk position component of the entity.
         };
     }
 

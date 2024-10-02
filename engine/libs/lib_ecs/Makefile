@@ -9,11 +9,10 @@
 
 SRC						=	Chunks/ChunkPos.cpp	\
 							Components/PureComponentPools.cpp	\
-							Entities/AEntity.cpp	\
+							Entities/AEntityRef.cpp	\
 							Entities/AEntityPool.cpp	\
 							Entities/PureEntities.cpp	\
 							Entities/PureEntityPools.cpp	\
-							Systems/ASystem.cpp	\
 							Systems/SystemTree.cpp	\
 							EntityManager.cpp	\
 

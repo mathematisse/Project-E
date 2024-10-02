@@ -8,7 +8,6 @@
 #include "EntityManager.hpp"
 #include "Chunks/ChunkPos.hpp"
 #include "Components/PureComponentPools.hpp"
-#include "Entities/IEntity.hpp"
 #include "Entities/PureEntities.hpp"
 #include "Systems/SystemTree.hpp"
 #include <list>
@@ -43,12 +42,12 @@ bool EntityManager::registerEntityPool(Entities::IEntityPool *entityPool)
     return true;
 }
 
-std::unique_ptr<Entities::IEntity>EntityManager::getEntity(const Entities::EntityPtr &entityPtr)
+std::unique_ptr<Entities::IEntityRef>EntityManager::getEntity(const Entities::EntityPtrRef &entityPtr)
 {
     return (*(_entityPools[entityPtr.getPoolId()])).getEntity(entityPtr.getChunkPos());
 }
 
-std::unique_ptr<Entities::IEntity>EntityManager::getEntity(const Chunks::ChunkPos &cPos)
+std::unique_ptr<Entities::IEntityRef>EntityManager::getEntity(const Chunks::ChunkPos &cPos)
 {
     auto entityPtr = _entityPtrPool.getRawEntity(cPos);
     return (*(_entityPools[entityPtr->getPoolId()])).getEntity(entityPtr->getChunkPos());
@@ -111,7 +110,7 @@ std::vector<Chunks::ChunkPos> EntityManager::createEntities(const std::string &e
 
 void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
 {
-    auto entityPtr = std::unique_ptr<Entities::EntityPtr>(_entityPtrPool.getRawEntity(cPos));
+    auto entityPtr = std::unique_ptr<Entities::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
 
     auto poolId = entityPtr->getPoolId();
     auto entCPos = entityPtr->getChunkPos();

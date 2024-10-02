@@ -10,7 +10,7 @@
 #include "Chunks/ChunkPos.hpp"
 #include "Entities/PureEntityPools.hpp"
 #include "Entities/PureEntities.hpp"
-#include "Entities/IEntity.hpp"
+#include "Entities/IEntityRef.hpp"
 #include "Entities/IEntityPool.hpp"
 #include "Systems/SystemTree.hpp"
 #include <memory>
@@ -31,8 +31,8 @@ namespace ECS
         bool registerSystemGroup(int group, int neighbourGroup, bool addBefore = false, bool addInside = false);
         bool registerSystem(Systems::ISystem &system, int group, bool atStart = false);
         bool registerEntityPool(Entities::IEntityPool *entityPool);
-        std::unique_ptr<Entities::IEntity> getEntity(const Entities::EntityPtr &entityPtr);
-        std::unique_ptr<Entities::IEntity> getEntity(const Chunks::ChunkPos &cPos);
+        std::unique_ptr<Entities::IEntityRef> getEntity(const Entities::EntityPtrRef &entityPtr);
+        std::unique_ptr<Entities::IEntityRef> getEntity(const Chunks::ChunkPos &cPos);
         Chunks::ChunkPos createEntity(const std::string &entityName);
         std::vector<Chunks::ChunkPos> createEntities(const std::string &entityName, size_t count = 0);
         void destroyEntity(const Chunks::ChunkPos &cPos);

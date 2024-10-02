@@ -7,26 +7,25 @@
 
 #pragma once
 
-#include "Chunks/ChunkPos.hpp"
 #include "Components/PureComponentPools.hpp"
-#include "Entities/AEntity.hpp"
+#include "Entities/AEntityRef.hpp"
 
 
     namespace ECS::Entities
     {
-        class EntityPtr : public AEntity
+        class EntityPtrRef : public AEntityRef
         {
         public:
-            EntityPtr(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos, Components::ComponentRef<Components::entity_pool_id_t> *poolId);
-            ~EntityPtr() override;
-            EntityPtr(const EntityPtr &other) = default;
-            EntityPtr(EntityPtr &&other) = default;
-            EntityPtr &operator=(const EntityPtr &other) = default;
-            EntityPtr &operator=(EntityPtr &&other) = default;
+            EntityPtrRef(Components::EntityStatusRef *status, Components::ChunkPosRef *cPos, Components::EntityPoolIdRef *poolId);
+            ~EntityPtrRef() override;
+            EntityPtrRef(const EntityPtrRef &other) = default;
+            EntityPtrRef(EntityPtrRef &&other) = default;
+            EntityPtrRef &operator=(const EntityPtrRef &other) = default;
+            EntityPtrRef &operator=(EntityPtrRef &&other) = default;
             [[nodiscard]] Components::entity_pool_id_t getPoolId() const;
             void setPoolId(Components::entity_pool_id_t poolId);
         protected:
-            Components::ComponentRef<Components::entity_pool_id_t> *_poolId;
+            Components::EntityPoolIdRef *_poolId;
         };
     }
 

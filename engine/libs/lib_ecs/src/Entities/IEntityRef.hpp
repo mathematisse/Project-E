@@ -18,23 +18,23 @@ namespace ECS::Entities
      * This class provides the basic interface for an entity, including methods
      * for getting and setting the status and chunk position of the entity.
      */
-    class IEntity
+    class IEntityRef
     {
     public:
         /**
          * @brief Default constructor.
          */
-        IEntity() = default;
+        IEntityRef() = default;
 
         /**
          * @brief Virtual destructor.
          */
-        virtual ~IEntity() = default;
+        virtual ~IEntityRef() = default;
 
-        IEntity(const IEntity &other) = default;
-        IEntity(IEntity &&other) = default;
-        IEntity &operator=(const IEntity &other) = default;
-        IEntity &operator=(IEntity &&other) = default;
+        IEntityRef(const IEntityRef &other) = default;
+        IEntityRef(IEntityRef &&other) = default;
+        IEntityRef &operator=(const IEntityRef &other) = default;
+        IEntityRef &operator=(IEntityRef &&other) = default;
 
         /**
          * @brief Get the status of the entity.

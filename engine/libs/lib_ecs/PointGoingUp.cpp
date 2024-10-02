@@ -7,17 +7,12 @@
 
 #include "PointGoingUp.hpp"
 #include "Components/PureComponentPools.hpp"
-#include <cstdint>
 #include <iostream>
 
 namespace ECS
 {
-
-    // COMPONENT POOL
-
-    AltitudeComponentPool::AltitudeComponentPool() : AComponentPool<Chunks::chunk_pos_t>("altitude")
-    {
-    }
+    template <>
+    const std::string Components::AComponentPool<float, float>::componentName = "position";
 
     // ENTITY POOL
 
@@ -27,57 +22,49 @@ namespace ECS
 
     PointGoingUpEntityPool::~PointGoingUpEntityPool() = default;
 
-    std::unique_ptr<Entities::IEntity> PointGoingUpEntityPool::getEntity(Chunks::ChunkPos cPos)
+    std::unique_ptr<Entities::IEntityRef> PointGoingUpEntityPool::getEntity(Chunks::ChunkPos cPos)
     {
         return std::make_unique<ECS::PointGoingUpEntity>(
-            dynamic_cast<Components::ComponentRef<Components::entity_status_t> *>(_entityStatusPool.getComponentRef(cPos)),
-            dynamic_cast<Components::ComponentRef2<Chunks::chunk_pos_t> *>(_chunkPosPool.getComponentRef(cPos)),
-            dynamic_cast<Components::ComponentRef<Chunks::chunk_pos_t> *>(_altitudePool.getComponentRef(cPos)));
+            static_cast<Components::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
+            static_cast<Components::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
+            static_cast<Components::PositionRef *>(_positionPool.getComponentRef(cPos)));
     }
 
     std::vector<Components::IComponentPool *> PointGoingUpEntityPool::getComponentPools()
     {
-        return {&_entityStatusPool, &_chunkPosPool, &_altitudePool};
+        return {&_entityStatusPool, &_chunkPosPool, &_positionPool};
     }
 
     // ENTITY
 
-    PointGoingUpEntity::PointGoingUpEntity(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos, Components::ComponentRef<Chunks::chunk_pos_t> *altitude)
-        : AEntity(status, cPos), _altitude(altitude)
+    PointGoingUpEntity::PointGoingUpEntity(Components::EntityStatusRef *status, Components::ChunkPosRef *cPos, Components::PositionRef *position)
+        : AEntityRef(status, cPos), _position(position)
     {
     }
 
     PointGoingUpEntity::~PointGoingUpEntity() {
-        delete _altitude;
+        delete _position;
     }
 
-    Chunks::chunk_pos_t PointGoingUpEntity::getAltitude() const
+    std::tuple<float, float> PointGoingUpEntity::getPosition() const
     {
-        return *_altitude->getX();
+        return std::make_tuple(*_position->get<0>(), *_position->get<1>());
     }
 
     // SYSTEM
 
-    MoveUpSystem::MoveUpSystem(unsigned int velocity)
-        : ASystem({"altitude"}, false), _velocity(velocity)
+    MoveUpSystem::MoveUpSystem(float velocity)
+        : ASystem(false), _velocity(velocity)
     {
     }
 
-    void MoveUpSystem::run()
+
+    void MoveUpSystem::innerOperate(Components::PositionPool::Types& components)
     {
-        std::cout << "Running MoveUpSystem\n";
-        // iterate over list of arrays of component pools (this case, arrays of one component pool)
-        for (auto &componentPools : _componentPools) {
-            // iterate over the component pool
-            for (auto &chunkPool : dynamic_cast<AltitudeComponentPool *>(componentPools[0])->getChunkPools()) {
-                // iterate over the chunk pool
-                for (auto &chunk : chunkPool->getChunks()) {
-                    // iterate over the c like array
-                    for (size_t i = 0; i < chunk->elemCount(); i++) {
-                        *(chunk->getElem(i)) += _velocity;
-                    }
-                }
-            }
-        }
+        std::cout << "Moving up\n";
+        auto [x, y] = components;
+        x += _velocity;
+        y += _velocity;
     }
+
 }

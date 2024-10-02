@@ -9,7 +9,7 @@
 #include <iterator>
 #include <utility>
 
-
+#include <iostream>
     namespace ECS::Systems
     {
         SystemTreeNode::SystemTreeNode(int group, std::list<ISystem *> startSystems, std::list<ISystem *> endSystems, std::list<SystemTreeNode> children)

@@ -5,30 +5,22 @@
 ** Demo lib ecs
 */
 
+#include "Chunks/ChunkPos.hpp"
 #include "Components/PureComponentPools.hpp"
 #include "Entities/AEntityPool.hpp"
-#include "Entities/AEntity.hpp"
+#include "Entities/AEntityRef.hpp"
 
 #include "Systems/ASystem.hpp"
 
 
 namespace ECS
 {
-
-    const size_t PointGoingUpEntityPoolChunkSize = 256;
-
-    class AltitudeComponentPool : public Components::AComponentPool<Chunks::chunk_pos_t>
+    namespace Components
     {
-        public:
-            AltitudeComponentPool();
-            ~AltitudeComponentPool() override = default;
+        DECLARE_COMPONENT(Position, float, float);
+    }
 
-            AltitudeComponentPool(const AltitudeComponentPool &other) = default;
-            AltitudeComponentPool(AltitudeComponentPool &&other) = default;
-            AltitudeComponentPool &operator=(const AltitudeComponentPool &other) = default;
-            AltitudeComponentPool &operator=(AltitudeComponentPool &&other) = default;
-    };
-
+    const size_t PointGoingUpEntityPoolChunkSize = 10;
 
     class PointGoingUpEntityPool : public Entities::AEntityPool
     {
@@ -41,16 +33,16 @@ namespace ECS
             PointGoingUpEntityPool &operator=(const PointGoingUpEntityPool &other) = default;
             PointGoingUpEntityPool &operator=(PointGoingUpEntityPool &&other) = default;
 
-            std::unique_ptr<Entities::IEntity> getEntity(Chunks::ChunkPos cPos) override;
+            std::unique_ptr<Entities::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
             std::vector<Components::IComponentPool *> getComponentPools() override;
         protected:
-            AltitudeComponentPool _altitudePool;
+            Components::PositionPool _positionPool;
     };
 
-    class PointGoingUpEntity : public Entities::AEntity
+    class PointGoingUpEntity : public Entities::AEntityRef
     {
         public:
-            PointGoingUpEntity(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos, Components::ComponentRef<Chunks::chunk_pos_t> *altitude);
+            PointGoingUpEntity(Components::EntityStatusRef *status, Components::ChunkPosRef *cPos, Components::PositionRef *position);
             ~PointGoingUpEntity() override;
 
             PointGoingUpEntity(const PointGoingUpEntity &other) = default;
@@ -58,15 +50,15 @@ namespace ECS
             PointGoingUpEntity &operator=(const PointGoingUpEntity &other) = default;
             PointGoingUpEntity &operator=(PointGoingUpEntity &&other) = default;
 
-            [[nodiscard]] Chunks::chunk_pos_t getAltitude() const;
+            [[nodiscard]] std::tuple<float, float> getPosition() const;
         protected:
-            const Components::ComponentRef<Chunks::chunk_pos_t> *_altitude;
+            const Components::PositionRef *_position;
     };
 
-    class MoveUpSystem : public Systems::ASystem
+    class MoveUpSystem : public Systems::ASystem<Components::PositionPool>
     {
         public:
-            explicit MoveUpSystem(unsigned int velocity = 1);
+            explicit MoveUpSystem(float velocity = 0.5);
             ~MoveUpSystem() override = default;
 
             MoveUpSystem(const MoveUpSystem &other) = default;
@@ -74,8 +66,9 @@ namespace ECS
             MoveUpSystem &operator=(const MoveUpSystem &other) = default;
             MoveUpSystem &operator=(MoveUpSystem &&other) = default;
 
-            void run() override;
+            // void operate(typename PositionPool::VTypes& componentPools) override;
+            void innerOperate(typename Components::PositionPool::Types& components) override;
         protected:
-            unsigned int _velocity;
+            float _velocity;
     };
 }

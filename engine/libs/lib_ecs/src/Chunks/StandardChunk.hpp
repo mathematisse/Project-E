@@ -65,14 +65,14 @@
              * 
              * @return std::vector<T>* A pointer to the vector of elements.
              */
-            std::vector<T>* getElems() { return _elems; }
+            std::vector<T>* getElems() { return &_elems; }
 
             /**
              * @brief Retrieves a constant pointer to the vector of elements.
              * 
              * @return const std::vector<T>* A constant pointer to the vector of elements.
              */
-            const std::vector<T>* getElems() const { return _elems; }
+            const std::vector<T>* getElems() const { return &_elems; }
 
         protected:
             std::vector<T> _elems; ///< The vector storing the elements.
