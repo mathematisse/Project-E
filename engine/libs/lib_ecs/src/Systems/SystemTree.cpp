@@ -74,7 +74,7 @@
 
         void SystemTreeNode::runNode()
         {
-            std::cout << "Running node " << _group<< "\n";
+            std::cout << "Running node " << _group << "\n";
             for (auto &startSystem : _startSystems) {
                 startSystem->run();
             }
@@ -96,9 +96,7 @@
         {
         }
 
-        SystemTree::~SystemTree()
-        {
-        }
+        SystemTree::~SystemTree() = default;
 
         bool SystemTree::addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
         {

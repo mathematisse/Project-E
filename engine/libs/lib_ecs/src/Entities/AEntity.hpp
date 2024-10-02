@@ -10,7 +10,6 @@
 #include "Components/ComponentRefs.hpp"
 #include "Components/PureComponentPools.hpp"
 #include "Entities/IEntity.hpp"
-#include <cstdint>
 
 
     namespace ECS::Entities

@@ -27,7 +27,7 @@ int main() {
     // Run the system
     entityManager.runSystems();
 
-    std::cout << "You've successfully compiled runned, and smashed clang-tidy against a sharpy rock !\n";
+    entityManager.destroyEntities(entities);
 
     return 0;
 }

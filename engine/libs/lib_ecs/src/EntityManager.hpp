@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Chunks/ChunkPos.hpp"
 #include "Entities/PureEntityPools.hpp"
 #include "Entities/PureEntities.hpp"
 #include "Entities/IEntity.hpp"
@@ -31,15 +32,16 @@ namespace ECS
         bool registerSystem(Systems::ISystem &system, int group, bool atStart = false);
         bool registerEntityPool(Entities::IEntityPool *entityPool);
         std::unique_ptr<Entities::IEntity> getEntity(const Entities::EntityPtr &entityPtr);
-        std::unique_ptr<Entities::EntityPtr>createEntity(const std::string &entityName);
-        std::vector<std::unique_ptr<Entities::EntityPtr>> createEntities(const std::string &entityName, size_t count = 0);
-        void destroyEntity(std::unique_ptr<Entities::EntityPtr> &entity);
-        void destroyEntities(std::vector<std::unique_ptr<Entities::EntityPtr>> &entities);
+        std::unique_ptr<Entities::IEntity> getEntity(const Chunks::ChunkPos &cPos);
+        Chunks::ChunkPos createEntity(const std::string &entityName);
+        std::vector<Chunks::ChunkPos> createEntities(const std::string &entityName, size_t count = 0);
+        void destroyEntity(const Chunks::ChunkPos &cPos);
+        void destroyEntities(const std::vector<Chunks::ChunkPos> &cPosArr);
 
         void runSystems();
         
     private:
-        std::vector<std::unique_ptr<Entities::EntityPtr>> _createEntities(Entities::IEntityPool *entityPool, size_t count, size_t poolId);
+        std::vector<Chunks::ChunkPos> _createEntities(Entities::IEntityPool *entityPool, size_t count, size_t poolId);
 
         Entities::EntityPtrPool _entityPtrPool;
         std::vector<Entities::IEntityPool *> _entityPools;

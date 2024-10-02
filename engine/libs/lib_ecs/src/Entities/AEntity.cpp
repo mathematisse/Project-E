@@ -33,8 +33,6 @@
 
         void AEntity::setStatus(Components::entity_status_t status)
         {
-            std::cout << "setting status to " << status<< "\n";
-            std::cout << "raw ptr: " << _status->getX()<< "\n";
             *_status->getX() = status;
         }
 

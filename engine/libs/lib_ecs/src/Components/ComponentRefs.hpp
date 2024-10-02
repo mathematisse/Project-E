@@ -27,8 +27,6 @@ public:
      * @param x Pointer to the component value.
      */
     explicit ComponentRef(T *x) : _x(x), _dummyX(0) {
-        std::cout << "ComponentRef constructor\n";
-        std::cout << "x: " << x<< "\n";
     }
 
     /**

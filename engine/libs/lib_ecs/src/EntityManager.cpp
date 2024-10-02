@@ -14,19 +14,21 @@
 #include <list>
 #include <iostream>
 
-ECS::EntityManager::EntityManager()
+namespace ECS {
+
+EntityManager::EntityManager()
 {
     _entityPtrPool.addChunk();
 }
 
-ECS::EntityManager::~EntityManager() = default;
+EntityManager::~EntityManager() = default;
 
-bool ECS::EntityManager::registerSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
+bool EntityManager::registerSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
 {
     return _systemTree.addSystemGroup(group, neighbourGroup, addBefore, addInside);
 }
 
-bool ECS::EntityManager::registerSystem(Systems::ISystem &system, int group, bool atStart)
+bool EntityManager::registerSystem(Systems::ISystem &system, int group, bool atStart)
 {
     for (auto &entityPool : _entityPools) {
         system.tryAddEntityPool(entityPool);
@@ -34,28 +36,33 @@ bool ECS::EntityManager::registerSystem(Systems::ISystem &system, int group, boo
     return _systemTree.addSystem(&system, group, atStart);
 }
 
-bool ECS::EntityManager::registerEntityPool(Entities::IEntityPool *entityPool)
+bool EntityManager::registerEntityPool(Entities::IEntityPool *entityPool)
 {
     _systemTree.registerEntityPool(entityPool);
     _entityPools.push_back(entityPool);
     return true;
 }
 
-std::unique_ptr<ECS::Entities::IEntity>ECS::EntityManager::getEntity(const ECS::Entities::EntityPtr &entityPtr)
+std::unique_ptr<Entities::IEntity>EntityManager::getEntity(const Entities::EntityPtr &entityPtr)
 {
     return (*(_entityPools[entityPtr.getPoolId()])).getEntity(entityPtr.getChunkPos());
 }
 
-std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> ECS::EntityManager::_createEntities(ECS::Entities::IEntityPool *entityPool, size_t count, size_t poolId)
+std::unique_ptr<Entities::IEntity>EntityManager::getEntity(const Chunks::ChunkPos &cPos)
+{
+    auto entityPtr = _entityPtrPool.getRawEntity(cPos);
+    return (*(_entityPools[entityPtr->getPoolId()])).getEntity(entityPtr->getChunkPos());
+}
+
+std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPool *entityPool, size_t count, size_t poolId)
 {
     std::list<Chunks::ChunkPos> &freePos = entityPool->getFreePos();
     std::list<Chunks::ChunkPos> &freePtrPos = _entityPtrPool.getFreePos();
 
-    std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> entities;
-    // ECS::Entities::IEntity* entity;
+    std::vector<Chunks::ChunkPos> cPosArr;
+    // Entities::IEntity* entity;
 
     for (size_t i = 0; i < count; i++) {
-        std::cout << "creating " << i << " of " << count << " entities\n";
         if (freePos.empty()) {
             entityPool->addChunk();
         }
@@ -65,38 +72,36 @@ std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> ECS::EntityManager::_crea
         auto nextFreePos = freePos.front();
         auto nextFreePtrPos = freePtrPos.front();
 
-        std::cout << "nextFreePos: " << nextFreePos.chunkIndex << " " << nextFreePos.elemIndex<< "\n";
-        std::cout << "nextFreePtrPos: " << nextFreePtrPos.chunkIndex << " " << nextFreePtrPos.elemIndex<< "\n";
-
         auto entity = entityPool->getEntity(nextFreePos);
         entity->setStatus(Components::ENT_NEEDS_INIT);
         entity->setChunkPos(nextFreePtrPos);
 
-        auto *entityPtr = _entityPtrPool.getRawEntity(nextFreePtrPos);
+        auto entityPtr = _entityPtrPool.getRawEntity(nextFreePtrPos);
         entityPtr->setStatus(Components::ENT_ALIVE);
         entityPtr->setChunkPos(nextFreePos);
         entityPtr->setPoolId(poolId);
 
-        entities.push_back(std::unique_ptr<ECS::Entities::EntityPtr>(entityPtr));
+        cPosArr.push_back(nextFreePos);
 
         freePtrPos.pop_front();
         freePos.pop_front();
     }
-    return entities;
+    return cPosArr;
 }
 
-std::unique_ptr<ECS::Entities::EntityPtr>ECS::EntityManager::createEntity(const std::string &entityName)
+Chunks::ChunkPos EntityManager::createEntity(const std::string &entityName)
 {
-    std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> entities = createEntities(entityName, 1);
-    return entities.empty() ? nullptr : std::move(entities[0]);
+    auto cPosArr = createEntities(entityName, 1);
+    return cPosArr.empty() ? Chunks::ChunkPos{0, 0} : cPosArr[0];
 }
 
-std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> ECS::EntityManager::createEntities(const std::string &entityName, size_t count)
+std::vector<Chunks::ChunkPos> EntityManager::createEntities(const std::string &entityName, size_t count)
 {
     size_t idx = 0;
 
     for (auto &entityPool : _entityPools) {
         if (entityPool->getEntityName() == entityName) {
+            std::cout << "Creating " << count << " entities of type " << entityName << "\n";
             return _createEntities(entityPool, count, idx);
         }
         idx++;
@@ -104,24 +109,33 @@ std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> ECS::EntityManager::creat
     return {};
 }
 
-void ECS::EntityManager::destroyEntity(std::unique_ptr<ECS::Entities::EntityPtr> &entity)
+void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
 {
+    auto entityPtr = std::unique_ptr<Entities::EntityPtr>(_entityPtrPool.getRawEntity(cPos));
+
+    auto poolId = entityPtr->getPoolId();
+    auto entCPos = entityPtr->getChunkPos();
+    auto entity = _entityPools[poolId]->getEntity(entCPos);
+
+    entityPtr->setStatus(Components::ENT_NONE);
+    entityPtr->setChunkPos({0, 0});
+    _entityPtrPool.getFreePos().push_back(cPos);
+
     entity->setStatus(Components::ENT_NONE);
-    _entityPtrPool.getFreePos().push_back(entity->getChunkPos());
-    (*(_entityPools[entity->getPoolId()])).getEntity(entity->getChunkPos())->setStatus(Components::ENT_NONE);
-    (*(_entityPools[entity->getPoolId()])).getEntity(entity->getChunkPos())->setChunkPos({0, 0});
-    (*(_entityPools[entity->getPoolId()])).getFreePos().push_back(entity->getChunkPos());
     entity->setChunkPos({0, 0});
+    _entityPools[poolId]->getFreePos().push_back(entCPos);
 }
 
-void ECS::EntityManager::destroyEntities(std::vector<std::unique_ptr<ECS::Entities::EntityPtr>> &entities)
+void EntityManager::destroyEntities(const std::vector<Chunks::ChunkPos> &cPosArr)
 {
-    for (auto &entity : entities) {
-        destroyEntity(entity);
+    for (const auto &cPos : cPosArr) {
+        destroyEntity(cPos);
     }
 }
 
-void ECS::EntityManager::runSystems()
+void EntityManager::runSystems()
 {
     _systemTree.runTree();
+}
+
 }

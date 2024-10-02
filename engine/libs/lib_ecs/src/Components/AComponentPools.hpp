@@ -57,10 +57,6 @@ namespace ECS::Components
          * @return IComponentRef A reference to the component.
          */
         IComponentRef *getComponentRef(Chunks::ChunkPos cPos) override {
-            std::cout << "Getting component ref\n";
-            std::cout << "cPos: " << cPos.chunkIndex << ", " << cPos.elemIndex << "\n";
-            std::cout << "x: " << this->_x.getElem(cPos) << "\n";
-            std::cout << "componentName: " << _componentName << "\n";
             return new Components::ComponentRef<T>(this->_x.getElem(cPos));
         }
 
@@ -107,7 +103,6 @@ namespace ECS::Components
          * @param elemCount The number of elements in the chunk.
          */
         void addChunk(size_t elemCount) override {
-            std::cout << "Adding chunk to " << _componentName << " pool\n";
             _x.addChunk(elemCount);
         }
 

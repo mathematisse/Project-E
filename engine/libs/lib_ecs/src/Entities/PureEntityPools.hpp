@@ -28,7 +28,7 @@
             EntityPtrPool &operator=(const EntityPtrPool &other) = default;
             EntityPtrPool &operator=(EntityPtrPool &&other) = default;
             std::unique_ptr<IEntity> getEntity(Chunks::ChunkPos cPos) override;
-            Entities::EntityPtr *getRawEntity(Chunks::ChunkPos cPos);
+            std::unique_ptr<Entities::EntityPtr> getRawEntity(Chunks::ChunkPos cPos);
             std::vector<Components::IComponentPool *> getComponentPools() override;
         protected:
             Components::EntityPoolIdPool _entityPoolIdPool;
