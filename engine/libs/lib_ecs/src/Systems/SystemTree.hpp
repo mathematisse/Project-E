@@ -24,10 +24,10 @@
         public:
             explicit SystemTreeNode(int group, std::list<ISystem *> startSystems = std::list<ISystem *>(), std::list<ISystem *> endSystems = std::list<ISystem *>(), std::list<SystemTreeNode> children = std::list<SystemTreeNode>());
             ~SystemTreeNode() = default;
-            SystemTreeNode(const SystemTreeNode &other) = delete;
+            SystemTreeNode(const SystemTreeNode &other) = default;
             SystemTreeNode(SystemTreeNode &&other) = default;
-            SystemTreeNode &operator=(const SystemTreeNode &other) = delete;
-            SystemTreeNode &operator=(SystemTreeNode &&other) = delete;
+            SystemTreeNode &operator=(const SystemTreeNode &other) = default;
+            SystemTreeNode &operator=(SystemTreeNode &&other) = default;
             bool addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside);
             bool addSystem(ISystem *system, int group, bool atStart);
             void registerEntityPool(Entities::IEntityPool *entityPool);
@@ -47,10 +47,10 @@
         public:
             SystemTree();
             ~SystemTree();
-            SystemTree(const SystemTree &other) = delete;
-            SystemTree(SystemTree &&other) = delete;
-            SystemTree &operator=(const SystemTree &other) = delete;
-            SystemTree &operator=(SystemTree &&other) = delete;
+            SystemTree(const SystemTree &other) = default;
+            SystemTree(SystemTree &&other) = default;
+            SystemTree &operator=(const SystemTree &other) = default;
+            SystemTree &operator=(SystemTree &&other) = default;
             bool addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside);
             bool addSystem(ISystem *system, int group, bool atStart);
             void registerEntityPool(Entities::IEntityPool *entityPool);

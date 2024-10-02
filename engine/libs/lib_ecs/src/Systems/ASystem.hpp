@@ -22,17 +22,17 @@
         public:
             ASystem(const std::vector<std::string> &matches, bool isParallel);
             ~ASystem() override;
-            ASystem(const ASystem &other) = delete;
-            ASystem(ASystem &&other) = delete;
-            ASystem &operator=(const ASystem &other) = delete;
-            ASystem &operator=(ASystem &&other) = delete;
+            ASystem(const ASystem &other) = default;
+            ASystem(ASystem &&other) = default;
+            ASystem &operator=(const ASystem &other) = default;
+            ASystem &operator=(ASystem &&other) = default;
             [[nodiscard]] const std::vector<std::string> &getMatches() const;
             [[nodiscard]] bool getIsParallel() const;
             bool tryAddEntityPool(Entities::IEntityPool *entityPool) override;
             void run() override = 0;
         protected:
-            const std::vector<std::string> &_matches;
-            const bool _isParallel;
+            std::vector<std::string> _matches;
+            bool _isParallel;
 
             std::list<std::vector<Components::IComponentPool *>> _componentPools;
         };

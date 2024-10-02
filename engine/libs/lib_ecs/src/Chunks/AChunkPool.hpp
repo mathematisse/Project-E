@@ -95,11 +95,11 @@ namespace ECS::Chunks
         /**
          * @brief Get the total number of elements in all chunks.
          * 
-         * @return uint64_t The total number of elements.
+         * @return chunk_pos_t The total number of elements.
          */
-        [[nodiscard]] uint64_t elemCount() const override
+        [[nodiscard]] chunk_pos_t elemCount() const override
         {
-            uint64_t size = 0;
+            chunk_pos_t size = 0;
             for (size_t i = 0; i < _chunks.size(); i++) {
                 size += _chunks[i]->elemCount();
             }
@@ -109,9 +109,9 @@ namespace ECS::Chunks
         /**
          * @brief Get the total number of chunks.
          * 
-         * @return uint64_t The total number of chunks.
+         * @return chunk_pos_t The total number of chunks.
          */
-        [[nodiscard]] uint64_t chunkCount() const override
+        [[nodiscard]] chunk_pos_t chunkCount() const override
         {
             return _chunks.size();
         }

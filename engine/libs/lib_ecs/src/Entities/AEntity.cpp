@@ -6,42 +6,42 @@
 */
 
 #include "Entities/AEntity.hpp"
+#include "Components/PureComponentPools.hpp"
 
 
     namespace ECS::Entities
     {
-        AEntity::AEntity(Components::Component<uint8_t> *status, Components::Component2<uint64_t> *cPos)
+        AEntity::AEntity(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos)
             : _status(status), _cPos(cPos)
         {
         }
 
-        AEntity::~AEntity()
-        {
-            
+        AEntity::~AEntity() {
+            delete _status;
+            delete _cPos;
         }
 
-        uint8_t AEntity::getStatus() const
+        Components::entity_status_t AEntity::getStatus() const
         {
-            return *_status->GetX();
+            return *_status->getX();
         }
 
         Chunks::ChunkPos AEntity::getChunkPos() const
         {
-            return {*_cPos->GetX(), *_cPos->GetY()};
+            return {*_cPos->getX(), *_cPos->getY()};
         }
 
-        void AEntity::setStatus(uint8_t status)
+        void AEntity::setStatus(Components::entity_status_t status)
         {
-            *_status->GetX() = status;
+            std::cout << "setting status to " << status<< "\n";
+            std::cout << "raw ptr: " << _status->getX()<< "\n";
+            *_status->getX() = status;
         }
 
         void AEntity::setChunkPos(Chunks::ChunkPos cPos)
         {
-            std::cout << "setChunkPos" << std::endl;
-            std::cout << cPos.chunkIndex << std::endl;
-            std::cout << cPos.elemIndex << std::endl;
-            _cPos->SetX(cPos.chunkIndex);
-            _cPos->SetY(cPos.elemIndex);
+            _cPos->setX(cPos.chunkIndex);
+            _cPos->setY(cPos.elemIndex);
         }
     }
 

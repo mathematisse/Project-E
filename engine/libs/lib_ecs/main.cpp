@@ -18,7 +18,7 @@ int main() {
     pointGoingUpEntityPool.addChunk();
 
     // Register the system with the entity manager
-    entityManager.registerSystem(dynamic_cast<ECS::Systems::ISystem&>(moveUpSystem), 0);
+    entityManager.registerSystem(dynamic_cast<ECS::Systems::ISystem&>(moveUpSystem), ECS::Systems::ROOTSYSGROUP);
     entityManager.registerEntityPool(&pointGoingUpEntityPool);
 
     // Create entities
@@ -26,6 +26,8 @@ int main() {
 
     // Run the system
     entityManager.runSystems();
+
+    std::cout << "You've successfully compiled runned, and smashed clang-tidy against a sharpy rock !\n";
 
     return 0;
 }

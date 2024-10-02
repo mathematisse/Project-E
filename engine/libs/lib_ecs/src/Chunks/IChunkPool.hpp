@@ -9,7 +9,6 @@
 
 #include "Chunks/IChunk.hpp"
 #include "Chunks/ChunkPos.hpp"
-#include <cstdint>
 #include <vector>
 
 namespace ECS::Chunks
@@ -87,15 +86,15 @@ namespace ECS::Chunks
         /**
          * @brief Get the total number of elements.
          * 
-         * @return uint64_t The total number of elements.
+         * @return chunk_pos_t The total number of elements.
          */
-        [[nodiscard]] virtual uint64_t elemCount() const = 0;
+        [[nodiscard]] virtual chunk_pos_t elemCount() const = 0;
 
         /**
          * @brief Get the total number of chunks.
          * 
-         * @return uint64_t The total number of chunks.
+         * @return chunk_pos_t The total number of chunks.
          */
-        [[nodiscard]] virtual uint64_t chunkCount() const = 0;
+        [[nodiscard]] virtual chunk_pos_t chunkCount() const = 0;
     };
 }

@@ -22,24 +22,24 @@ namespace ECS
     public:
         EntityManager();
         ~EntityManager();
-        EntityManager(const EntityManager &other) = delete;
-        EntityManager(EntityManager &&other) = delete;
-        EntityManager &operator=(const EntityManager &other) = delete;
-        EntityManager &operator=(EntityManager &&other) = delete;
+        EntityManager(const EntityManager &other) = default;
+        EntityManager(EntityManager &&other) = default;
+        EntityManager &operator=(const EntityManager &other) = default;
+        EntityManager &operator=(EntityManager &&other) = default;
 
         bool registerSystemGroup(int group, int neighbourGroup, bool addBefore = false, bool addInside = false);
         bool registerSystem(Systems::ISystem &system, int group, bool atStart = false);
         bool registerEntityPool(Entities::IEntityPool *entityPool);
-        Entities::IEntity*operator[](const Entities::EntityPtr &entityPtr);
-        Entities::EntityPtr *createEntity(const std::string &entityName);
-        std::vector<Entities::EntityPtr *> createEntities(const std::string &entityName, size_t count = 0);
-        void destroyEntity(Entities::EntityPtr *entity);
-        void destroyEntities(const std::vector<Entities::EntityPtr *> &entities);
+        std::unique_ptr<Entities::IEntity> getEntity(const Entities::EntityPtr &entityPtr);
+        std::unique_ptr<Entities::EntityPtr>createEntity(const std::string &entityName);
+        std::vector<std::unique_ptr<Entities::EntityPtr>> createEntities(const std::string &entityName, size_t count = 0);
+        void destroyEntity(std::unique_ptr<Entities::EntityPtr> &entity);
+        void destroyEntities(std::vector<std::unique_ptr<Entities::EntityPtr>> &entities);
 
         void runSystems();
         
     private:
-        std::vector<Entities::EntityPtr *> _createEntities(Entities::IEntityPool *entityPool, size_t count);
+        std::vector<std::unique_ptr<Entities::EntityPtr>> _createEntities(Entities::IEntityPool *entityPool, size_t count, size_t poolId);
 
         Entities::EntityPtrPool _entityPtrPool;
         std::vector<Entities::IEntityPool *> _entityPools;

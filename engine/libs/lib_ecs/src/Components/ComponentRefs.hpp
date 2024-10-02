@@ -7,7 +7,9 @@
 
 #pragma once
 
-#include "Components/IComponent.hpp"
+#include "Components/IComponentRef.hpp"
+
+#include <iostream>
 
 namespace ECS::Components {
 
@@ -24,7 +26,10 @@ public:
      * 
      * @param x Pointer to the component value.
      */
-    explicit ComponentRef(T *x) : _x(x), _dummyX(0) {}
+    explicit ComponentRef(T *x) : _x(x), _dummyX(0) {
+        std::cout << "ComponentRef constructor\n";
+        std::cout << "x: " << x<< "\n";
+    }
 
     /**
      * @brief Construct a new Component object with a value.
@@ -38,21 +43,21 @@ public:
      * 
      * @return T* Pointer to the component value.
      */
-    T *GetX() { return _x; }
+    T *getX() { return _x; }
 
     /**
      * @brief Get the component value pointer (const version).
      * 
      * @return const T* Pointer to the component value.
      */
-    const T *GetX() const { return _x; }
+    const T *getX() const { return _x; }
 
     /**
-     * @brief Set the component value.
+     * @brief set the component value.
      * 
      * @param x New value of the component.
      */
-    void SetX(T x) { *_x = x; }
+    void setX(T x) { *_x = x; }
 
 protected:
     T *_x;       ///< Pointer to the component value.
@@ -88,21 +93,21 @@ public:
      * 
      * @return T* Pointer to the second component value.
      */
-    T *GetY() { return _y; }
+    T *getY() { return _y; }
 
     /**
      * @brief Get the second component value pointer (const version).
      * 
      * @return const T* Pointer to the second component value.
      */
-    const T *GetY() const { return _y; }
+    const T *getY() const { return _y; }
 
     /**
-     * @brief Set the second component value.
+     * @brief set the second component value.
      * 
      * @param y New value of the second component.
      */
-    void SetY(T y) { *_y = y; }
+    void setY(T y) { *_y = y; }
 
 protected:
     T *_y;       ///< Pointer to the second component value.
@@ -140,21 +145,21 @@ public:
      * 
      * @return T* Pointer to the third component value.
      */
-    T *GetZ() { return _z; }
+    T *getZ() { return _z; }
 
     /**
      * @brief Get the third component value pointer (const version).
      * 
      * @return const T* Pointer to the third component value.
      */
-    const T *GetZ() const { return _z; }
+    const T *getZ() const { return _z; }
 
     /**
-     * @brief Set the third component value.
+     * @brief set the third component value.
      * 
      * @param z New value of the third component.
      */
-    void SetZ(T z) { *_z = z; }
+    void setZ(T z) { *_z = z; }
 
 protected:
     T *_z;       ///< Pointer to the third component value.
@@ -194,21 +199,21 @@ public:
      * 
      * @return T* Pointer to the fourth component value.
      */
-    T *GetW() { return _w; }
+    T *getW() { return _w; }
 
     /**
      * @brief Get the fourth component value pointer (const version).
      * 
      * @return const T* Pointer to the fourth component value.
      */
-    const T *GetW() const { return _w; }
+    const T *getW() const { return _w; }
 
     /**
-     * @brief Set the fourth component value.
+     * @brief set the fourth component value.
      * 
      * @param w New value of the fourth component.
      */
-    void SetW(T w) { *_w = w; }
+    void setW(T w) { *_w = w; }
 
 protected:
     T *_w;       ///< Pointer to the fourth component value.

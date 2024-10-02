@@ -15,9 +15,7 @@ namespace ECS::Systems
     {
     }
 
-    ASystem::~ASystem()
-    {
-    }
+    ASystem::~ASystem() = default;
 
     const std::vector<std::string> &ASystem::getMatches() const
     {

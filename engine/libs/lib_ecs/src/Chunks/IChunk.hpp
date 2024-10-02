@@ -25,6 +25,11 @@ namespace ECS::Chunks
     {
     public:
         /**
+         * @brief Constructor.
+         */
+        IChunk() = default;
+
+        /**
          * @brief Destructor.
          */
         virtual ~IChunk() = default;

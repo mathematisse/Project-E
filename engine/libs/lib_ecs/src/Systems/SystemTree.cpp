@@ -74,6 +74,7 @@
 
         void SystemTreeNode::runNode()
         {
+            std::cout << "Running node " << _group<< "\n";
             for (auto &startSystem : _startSystems) {
                 startSystem->run();
             }

@@ -5,6 +5,7 @@
 ** Demo lib ecs
 */
 
+#include "Components/PureComponentPools.hpp"
 #include "Entities/AEntityPool.hpp"
 #include "Entities/AEntity.hpp"
 
@@ -16,16 +17,16 @@ namespace ECS
 
     const size_t PointGoingUpEntityPoolChunkSize = 256;
 
-    class AltitudeComponentPool : public Components::AComponentPool<uint64_t>
+    class AltitudeComponentPool : public Components::AComponentPool<Chunks::chunk_pos_t>
     {
         public:
             AltitudeComponentPool();
             ~AltitudeComponentPool() override = default;
 
-            AltitudeComponentPool(const AltitudeComponentPool &other) = delete;
-            AltitudeComponentPool(AltitudeComponentPool &&other) = delete;
-            AltitudeComponentPool &operator=(const AltitudeComponentPool &other) = delete;
-            AltitudeComponentPool &operator=(AltitudeComponentPool &&other) = delete;
+            AltitudeComponentPool(const AltitudeComponentPool &other) = default;
+            AltitudeComponentPool(AltitudeComponentPool &&other) = default;
+            AltitudeComponentPool &operator=(const AltitudeComponentPool &other) = default;
+            AltitudeComponentPool &operator=(AltitudeComponentPool &&other) = default;
     };
 
 
@@ -35,12 +36,12 @@ namespace ECS
             PointGoingUpEntityPool();
             ~PointGoingUpEntityPool() override;
 
-            PointGoingUpEntityPool(const PointGoingUpEntityPool &other) = delete;
-            PointGoingUpEntityPool(PointGoingUpEntityPool &&other) = delete;
-            PointGoingUpEntityPool &operator=(const PointGoingUpEntityPool &other) = delete;
-            PointGoingUpEntityPool &operator=(PointGoingUpEntityPool &&other) = delete;
+            PointGoingUpEntityPool(const PointGoingUpEntityPool &other) = default;
+            PointGoingUpEntityPool(PointGoingUpEntityPool &&other) = default;
+            PointGoingUpEntityPool &operator=(const PointGoingUpEntityPool &other) = default;
+            PointGoingUpEntityPool &operator=(PointGoingUpEntityPool &&other) = default;
 
-            Entities::IEntity* operator[](Chunks::ChunkPos cPos) override;
+            std::unique_ptr<Entities::IEntity> getEntity(Chunks::ChunkPos cPos) override;
             std::vector<Components::IComponentPool *> getComponentPools() override;
         protected:
             AltitudeComponentPool _altitudePool;
@@ -49,17 +50,17 @@ namespace ECS
     class PointGoingUpEntity : public Entities::AEntity
     {
         public:
-            PointGoingUpEntity(Components::Component<uint8_t> *status, Components::Component2<uint64_t> *cPos, Components::Component<uint64_t> *altitude);
+            PointGoingUpEntity(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos, Components::ComponentRef<Chunks::chunk_pos_t> *altitude);
             ~PointGoingUpEntity() override;
 
-            PointGoingUpEntity(const PointGoingUpEntity &other) = delete;
-            PointGoingUpEntity(PointGoingUpEntity &&other) = delete;
-            PointGoingUpEntity &operator=(const PointGoingUpEntity &other) = delete;
-            PointGoingUpEntity &operator=(PointGoingUpEntity &&other) = delete;
+            PointGoingUpEntity(const PointGoingUpEntity &other) = default;
+            PointGoingUpEntity(PointGoingUpEntity &&other) = default;
+            PointGoingUpEntity &operator=(const PointGoingUpEntity &other) = default;
+            PointGoingUpEntity &operator=(PointGoingUpEntity &&other) = default;
 
-            [[nodiscard]] uint64_t getAltitude() const;
+            [[nodiscard]] Chunks::chunk_pos_t getAltitude() const;
         protected:
-            const Components::Component<uint64_t> *_altitude;
+            const Components::ComponentRef<Chunks::chunk_pos_t> *_altitude;
     };
 
     class MoveUpSystem : public Systems::ASystem
@@ -68,10 +69,10 @@ namespace ECS
             explicit MoveUpSystem(unsigned int velocity = 1);
             ~MoveUpSystem() override = default;
 
-            MoveUpSystem(const MoveUpSystem &other) = delete;
-            MoveUpSystem(MoveUpSystem &&other) = delete;
-            MoveUpSystem &operator=(const MoveUpSystem &other) = delete;
-            MoveUpSystem &operator=(MoveUpSystem &&other) = delete;
+            MoveUpSystem(const MoveUpSystem &other) = default;
+            MoveUpSystem(MoveUpSystem &&other) = default;
+            MoveUpSystem &operator=(const MoveUpSystem &other) = default;
+            MoveUpSystem &operator=(MoveUpSystem &&other) = default;
 
             void run() override;
         protected:

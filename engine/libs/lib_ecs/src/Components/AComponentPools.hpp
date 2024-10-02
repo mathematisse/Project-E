@@ -9,10 +9,12 @@
 
 #include "Chunks/IChunkPool.hpp"
 #include "Components/IComponentPool.hpp"
-#include "Components/Components.hpp"
+#include "Components/ComponentRefs.hpp"
 #include "Chunks/StandardChunkPool.hpp"
 #include <cstddef>
 #include <vector>
+#include <string>
+#include <iostream>
 
 namespace ECS::Components
 {
@@ -41,7 +43,7 @@ namespace ECS::Components
         /**
          * @brief Destructor for AComponentPool.
          */
-        ~AComponentPool() override;
+        ~AComponentPool() override = default;
 
         AComponentPool(const AComponentPool &other) = default;
         AComponentPool &operator=(const AComponentPool &other) = default;
@@ -54,8 +56,12 @@ namespace ECS::Components
          * @param cPos The position of the chunk.
          * @return IComponentRef A reference to the component.
          */
-        IComponentRef getComponentRef(Chunks::ChunkPos cPos) override {
-            return Components::ComponentRef<T>(this->_x.getElem(cPos));
+        IComponentRef *getComponentRef(Chunks::ChunkPos cPos) override {
+            std::cout << "Getting component ref\n";
+            std::cout << "cPos: " << cPos.chunkIndex << ", " << cPos.elemIndex << "\n";
+            std::cout << "x: " << this->_x.getElem(cPos) << "\n";
+            std::cout << "componentName: " << _componentName << "\n";
+            return new Components::ComponentRef<T>(this->_x.getElem(cPos));
         }
 
         /**
@@ -64,44 +70,55 @@ namespace ECS::Components
          * @param cPos The position of the chunk.
          * @return IComponentRef A dummy reference to the component.
          */
-        [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override {
-            return Components::ComponentRef<T>(*(this->_x.getElem(cPos)));
+        [[nodiscard]] const IComponentRef *getDummyComponentRef(Chunks::ChunkPos cPos) const override {
+            return new Components::ComponentRef<T>(*(this->_x.getElem(cPos)));
         }
 
         /**
          * @brief Gets the number of elements in the pool.
          * 
-         * @return uint64_t The number of elements.
+         * @return chunk_pos_t The number of elements.
          */
-        [[nodiscard]] uint64_t elemCount() const override;
+        [[nodiscard]] Chunks::chunk_pos_t elemCount() const override {
+            return _x.elemCount();
+        }
 
         /**
          * @brief Gets the number of chunks in the pool.
          * 
-         * @return uint64_t The number of chunks.
+         * @return chunk_pos_t The number of chunks.
          */
-        [[nodiscard]] uint64_t chunkCount() const override;
+        [[nodiscard]] Chunks::chunk_pos_t chunkCount() const override {
+            return _x.chunkCount();
+        }
 
         /**
          * @brief Gets the name of the component.
          * 
          * @return const std::string& The name of the component.
          */
-        [[nodiscard]] const std::string &getComponentName() const override;
+        [[nodiscard]] const std::string &getComponentName() const override {
+            return _componentName;
+        }
 
         /**
          * @brief Adds a chunk to the pool with a specified number of elements.
          * 
          * @param elemCount The number of elements in the chunk.
          */
-        void addChunk(size_t elemCount) override;
+        void addChunk(size_t elemCount) override {
+            std::cout << "Adding chunk to " << _componentName << " pool\n";
+            _x.addChunk(elemCount);
+        }
 
         /**
          * @brief Retrieves the chunk pools managed by this component pool.
          * 
          * @return std::vector<Chunks::IChunkPool<T>*> A vector of chunk pools.
          */
-        std::vector<Chunks::IChunkPool<T> *> getChunkPools();
+        std::vector<Chunks::IChunkPool<T> *> getChunkPools() {
+            return {&_x};
+        }
 
     protected:
         Chunks::StandardChunkPool<T> _x; ///< The standard chunk pool for components of type T.
@@ -126,7 +143,7 @@ namespace ECS::Components
              * 
              * @param componentName The name of the component.
              */
-            explicit AComponentPool2(const std::string &componentName);
+            explicit AComponentPool2(const std::string &componentName) : AComponentPool<T>(componentName), _y() {}
 
             /**
              * @brief Retrieves a reference to a component at the specified chunk position.
@@ -134,8 +151,8 @@ namespace ECS::Components
              * @param cPos The position of the chunk.
              * @return IComponentRef A reference to the component.
              */
-            IComponentRef getComponentRef(Chunks::ChunkPos cPos) override {
-                return Components::ComponentRef2<T>(this->_x.getElem(cPos), this->_y.getElem(cPos));
+            IComponentRef *getComponentRef(Chunks::ChunkPos cPos) override {
+                return new Components::ComponentRef2<T>(this->_x.getElem(cPos), this->_y.getElem(cPos));
             }
 
             /**
@@ -144,8 +161,8 @@ namespace ECS::Components
              * @param cPos The position of the chunk.
              * @return IComponentRef A dummy reference to the component.
              */
-            [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override {
-                return Components::ComponentRef2<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)));
+            [[nodiscard]] const IComponentRef *getDummyComponentRef(Chunks::ChunkPos cPos) const override {
+                return new Components::ComponentRef2<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)));
             }
 
             /**
@@ -153,14 +170,19 @@ namespace ECS::Components
              * 
              * @param elemCount The number of elements in the new chunk.
              */
-            void addChunk(size_t elemCount) override;
+            void addChunk(size_t elemCount) override {
+                this->_x.addChunk(elemCount);
+                this->_y.addChunk(elemCount);
+            }
 
             /**
              * @brief Retrieves the chunk pools managed by this component pool.
              * 
              * @return std::vector<Chunks::IChunkPool<T> *> A vector of pointers to the chunk pools.
              */
-            std::vector<Chunks::IChunkPool<T> *> getChunkPools();
+            std::vector<Chunks::IChunkPool<T> *> getChunkPools() {
+                return {this->_x, this->_y};
+            }
 
     protected:
             Chunks::StandardChunkPool<T> _y; ///< A secondary chunk pool for managing components.
@@ -195,9 +217,9 @@ namespace ECS::Components
      * @param cPos The position of the chunk.
      * @return IComponentRef A reference to the component at the specified chunk position.
      */
-        IComponentRef getComponentRef(Chunks::ChunkPos cPos) override
+        IComponentRef *getComponentRef(Chunks::ChunkPos cPos) override
         {
-            return Components::ComponentRef3<T>(this->_x.getElem(cPos), this->_y.getElem(cPos), this->_z.getElem(cPos));
+            return new Components::ComponentRef3<T>(this->_x.getElem(cPos), this->_y.getElem(cPos), this->_z.getElem(cPos));
         }
      
     /**
@@ -206,9 +228,9 @@ namespace ECS::Components
      * @param cPos The position of the chunk.
      * @return IComponentRef A constant reference to a dummy component at the specified chunk position.
      */
-        [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override
+        [[nodiscard]] const IComponentRef *getDummyComponentRef(Chunks::ChunkPos cPos) const override
         {
-            return Components::ComponentRef3<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)), *(this->_z.getElem(cPos)));
+            return new Components::ComponentRef3<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)), *(this->_z.getElem(cPos)));
         }
      
     /**
@@ -255,7 +277,7 @@ namespace ECS::Components
              *
              * @param componentName The name of the component.
              */
-            explicit AComponentPool4(const std::string &componentName);
+            explicit AComponentPool4(const std::string &componentName) : AComponentPool3<T>(componentName), _w() {}
 
             /**
              * @brief Gets a reference to the component at the specified chunk position.
@@ -263,8 +285,8 @@ namespace ECS::Components
              * @param cPos The chunk position.
              * @return A reference to the component.
              */
-            IComponentRef getComponentRef(Chunks::ChunkPos cPos) override {
-                return Components::ComponentRef4<T>(this->_x.getElem(cPos), this->_y.getElem(cPos), this->_z.getElem(cPos), this->_w.getElem(cPos));
+            IComponentRef *getComponentRef(Chunks::ChunkPos cPos) override {
+                return new Components::ComponentRef4<T>(this->_x.getElem(cPos), this->_y.getElem(cPos), this->_z.getElem(cPos), this->_w.getElem(cPos));
             }
 
             /**
@@ -273,8 +295,8 @@ namespace ECS::Components
              * @param cPos The chunk position.
              * @return A dummy reference to the component.
              */
-            [[nodiscard]] IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const override {
-                return Components::ComponentRef4<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)), *(this->_z.getElem(cPos)), *(this->_w.getElem(cPos)));
+            [[nodiscard]] IComponentRef *getDummyComponentRef(Chunks::ChunkPos cPos) const override {
+                return new Components::ComponentRef4<T>(*(this->_x.getElem(cPos)), *(this->_y.getElem(cPos)), *(this->_z.getElem(cPos)), *(this->_w.getElem(cPos)));
             }
 
             /**
@@ -289,7 +311,9 @@ namespace ECS::Components
              *
              * @return A vector of pointers to the chunk pools.
              */
-            std::vector<Chunks::IChunkPool<T> *> getChunkPools() override;
+            std::vector<Chunks::IChunkPool<T> *> getChunkPools() {
+                return {this->_x, this->_y, this->_z, this->_w};
+            }
 
     protected:
             Chunks::StandardChunkPool<T> _w; ///< The fourth component pool.

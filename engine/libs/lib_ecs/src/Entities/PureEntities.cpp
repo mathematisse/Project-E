@@ -10,18 +10,23 @@
 
     namespace ECS::Entities
     {
-        EntityPtr::EntityPtr(Components::Component<uint8_t> *status, Components::Component2<uint64_t> *cPos, Components::Component<uint8_t> *poolId)
+        EntityPtr::EntityPtr(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos, Components::ComponentRef<Components::entity_pool_id_t> *poolId)
             : AEntity(status, cPos), _poolId(poolId)
         {
         }
 
-        EntityPtr::~EntityPtr()
-        {
+        EntityPtr::~EntityPtr() {
+            delete _poolId;
         }
 
-        uint8_t EntityPtr::getPoolId() const
+        Components::entity_pool_id_t EntityPtr::getPoolId() const
         {
-            return *_poolId->GetX();
+            return *_poolId->getX();
+        }
+
+        void EntityPtr::setPoolId(Components::entity_pool_id_t poolId)
+        {
+            *_poolId->getX() = poolId;
         }
     }
 

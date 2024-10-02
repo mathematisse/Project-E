@@ -37,7 +37,11 @@ namespace ECS::Chunks
          * 
          * Default destructor.
          */
-        ~StandardChunkPool() = default;
+        ~StandardChunkPool() {
+            for (auto &chunk : this->_chunks) {
+                delete chunk;
+            }
+        }
 
 
         StandardChunkPool(const StandardChunkPool &other) = default;

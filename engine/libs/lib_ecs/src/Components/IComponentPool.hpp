@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Components/IComponent.hpp"
+#include "Components/IComponentRef.hpp"
 #include "Chunks/ChunkPos.hpp"
 #include <cstddef>
 #include <string>
@@ -66,14 +66,14 @@
          * @param cPos The position of the chunk.
          * @return A reference to the component at the specified chunk position.
          */
-        virtual IComponentRef getComponentRef(Chunks::ChunkPos cPos) = 0;
+        virtual IComponentRef *getComponentRef(Chunks::ChunkPos cPos) = 0;
 
         /**
          * @brief Get a dummy reference to a component at the specified chunk position.
          * @param cPos The position of the chunk.
          * @return A constant reference to a dummy component at the specified chunk position.
          */
-        [[nodiscard]] virtual IComponentRef getDummyComponentRef(Chunks::ChunkPos cPos) const = 0;
+        [[nodiscard]] virtual const IComponentRef *getDummyComponentRef(Chunks::ChunkPos cPos) const = 0;
 
         /**
          * @brief Get the number of elements in the component pool.
@@ -92,6 +92,7 @@
          * @param elemCount The number of elements in the chunk to be added.
          */
         virtual void addChunk(size_t elemCount) = 0;
+
     };
 
 }

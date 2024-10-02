@@ -12,8 +12,13 @@
 
     namespace ECS::Components
     {
+
+        using entity_pool_id_t = uint8_t;
+        using entity_status_t = int8_t;
+
+
         // Identifies the entity pool in the core manager
-        class EntityPoolIdPool : public Components::AComponentPool<uint8_t>
+        class EntityPoolIdPool : public Components::AComponentPool<entity_pool_id_t>
         {
         public:
             EntityPoolIdPool();
@@ -24,7 +29,7 @@
             EntityPoolIdPool &operator=(EntityPoolIdPool &&other) = default;
         };
         // Serves multiple purposes, in entity ptrs or for known pool entities references
-        class ChunkPosPool : public Components::AComponentPool2<uint64_t>
+        class ChunkPosPool : public Components::AComponentPool2<Chunks::chunk_pos_t>
         {
         public:
             ChunkPosPool();
@@ -35,7 +40,7 @@
             ChunkPosPool &operator=(ChunkPosPool &&other) = default;
         };
         // Attached to all entities (appart from entity ptrs) to tell the manager what to do
-        class EntityStatusPool : public AComponentPool<int8_t>
+        class EntityStatusPool : public AComponentPool<entity_status_t>
         {
         public:
             EntityStatusPool();

@@ -114,7 +114,7 @@ fclean: clean
 	rm -rf $(BUILD_DIR)
 
 demo: grind
-	$(CXX) $(CXXFLAGS) -o demo main.cpp PointGoingUp.cpp -L$(VAL_DIR) -lecs-pure-base
+	$(CXX) $(CXXFLAGS) -o demo main.cpp PointGoingUp.cpp -L$(VAL_DIR) -lecs-pure-base $(VALARGS)
 
 val-demo: demo
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./demo

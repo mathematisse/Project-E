@@ -8,6 +8,8 @@
 #include "Entities/PureEntityPools.hpp"
 #include "Entities/IEntity.hpp"
 #include "Entities/PureEntities.hpp"
+#include "Components/PureComponentPools.hpp"
+#include <cstdint>
 
 
     namespace ECS::Entities
@@ -18,16 +20,24 @@
         {
         }
 
-        EntityPtrPool::~EntityPtrPool()
+        EntityPtrPool::~EntityPtrPool() = default;
+
+        std::unique_ptr<IEntity> EntityPtrPool::getEntity(Chunks::ChunkPos cPos)
         {
+            auto ptr = std::make_unique<Entities::EntityPtr>(
+                dynamic_cast<Components::ComponentRef<Components::entity_status_t> *>(_entityStatusPool.getComponentRef(cPos)),
+                dynamic_cast<Components::ComponentRef2<Chunks::chunk_pos_t> *>(_chunkPosPool.getComponentRef(cPos)),
+                dynamic_cast<Components::ComponentRef<Components::entity_pool_id_t> *>(_entityPoolIdPool.getComponentRef(cPos)));
+            
+            return ptr;
         }
 
-        IEntity* EntityPtrPool::operator[](Chunks::ChunkPos cPos)
+        Entities::EntityPtr *EntityPtrPool::getRawEntity(Chunks::ChunkPos cPos)
         {
-            return new EntityPtr(
-                dynamic_cast<Components::Component<uint8_t> *>(_entityStatusPool[cPos].get()),
-                dynamic_cast<Components::Component2<uint64_t> *>(_chunkPosPool[cPos].get()),
-                dynamic_cast<Components::Component<uint8_t> *>(_entityPoolIdPool[cPos].get()));
+            return new Entities::EntityPtr(
+                dynamic_cast<Components::ComponentRef<Components::entity_status_t> *>(_entityStatusPool.getComponentRef(cPos)),
+                dynamic_cast<Components::ComponentRef2<Chunks::chunk_pos_t> *>(_chunkPosPool.getComponentRef(cPos)),
+                dynamic_cast<Components::ComponentRef<Components::entity_pool_id_t> *>(_entityPoolIdPool.getComponentRef(cPos)));
         }
 
         std::vector<Components::IComponentPool *> EntityPtrPool::getComponentPools()

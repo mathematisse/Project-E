@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Chunks/AChunk.hpp"
+#include "Chunks/ChunkType.hpp"
 #include <vector>
 
 
@@ -31,7 +32,7 @@
              * 
              * @param elemCount The number of elements to be stored in the chunk.
              */
-            explicit StandardChunk(size_t elemCount);
+            explicit StandardChunk(size_t elemCount) : AChunk<T>(STDCHUNK, elemCount), _elems(elemCount) {}
 
             /**
              * @brief Default destructor.
@@ -49,7 +50,7 @@
              * @param idx The index of the element to retrieve.
              * @return T* A pointer to the element at the specified index.
              */
-            T* getElem(size_t idx) override { return _elems[idx]; }
+            T* getElem(size_t idx) override { return &_elems[idx]; }
             
             /**
              * @brief Retrieves a constant pointer to the element at the specified index.
@@ -57,7 +58,7 @@
              * @param idx The index of the element to retrieve.
              * @return const T* A constant pointer to the element at the specified index.
              */
-            const T* getElem(size_t idx) const override { return _elems[idx]; }
+            const T* getElem(size_t idx) const override { return &_elems[idx]; }
 
             /**
              * @brief Retrieves a pointer to the vector of elements.

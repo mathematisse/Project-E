@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Chunks/ChunkPos.hpp"
+#include "Components/PureComponentPools.hpp"
 #include "Entities/AEntity.hpp"
 
 
@@ -15,15 +17,16 @@
         class EntityPtr : public AEntity
         {
         public:
-            EntityPtr(Components::Component<uint8_t> *status, Components::Component2<uint64_t> *cPos, Components::Component<uint8_t> *poolId);
+            EntityPtr(Components::ComponentRef<Components::entity_status_t> *status, Components::ComponentRef2<Chunks::chunk_pos_t> *cPos, Components::ComponentRef<Components::entity_pool_id_t> *poolId);
             ~EntityPtr() override;
-            EntityPtr(const EntityPtr &other) = delete;
-            EntityPtr(EntityPtr &&other) = delete;
-            EntityPtr &operator=(const EntityPtr &other) = delete;
-            EntityPtr &operator=(EntityPtr &&other) = delete;
-            [[nodiscard]] uint8_t getPoolId() const;
+            EntityPtr(const EntityPtr &other) = default;
+            EntityPtr(EntityPtr &&other) = default;
+            EntityPtr &operator=(const EntityPtr &other) = default;
+            EntityPtr &operator=(EntityPtr &&other) = default;
+            [[nodiscard]] Components::entity_pool_id_t getPoolId() const;
+            void setPoolId(Components::entity_pool_id_t poolId);
         protected:
-            const Components::Component<uint8_t> *_poolId;
+            Components::ComponentRef<Components::entity_pool_id_t> *_poolId;
         };
     }
 
