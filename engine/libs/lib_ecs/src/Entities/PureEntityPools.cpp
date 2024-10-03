@@ -6,40 +6,29 @@
 */
 
 #include "Entities/PureEntityPools.hpp"
-#include "Entities/PureEntities.hpp"
 #include "Components/PureComponentPools.hpp"
+#include "Entities/PureEntities.hpp"
 
 
+namespace ECS { namespace Entities {
 
+EntityPtrPool::EntityPtrPool() : AEntityPool("entityPtr", EntityPtrPoolChunkSize) {}
 
+std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::ChunkPos cPos) { return getRawEntity(cPos); }
 
-    namespace ECS::Entities
-    {
+std::unique_ptr<Entities::EntityPtrRef> EntityPtrPool::getRawEntity(Chunks::ChunkPos cPos)
+{
+  auto ptr = std::make_unique<Entities::EntityPtrRef>(
+    dynamic_cast<Components::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
+    dynamic_cast<Components::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
+    dynamic_cast<Components::EntityPoolIdRef *>(_entityPoolIdPool.getComponentRef(cPos)));
 
-        EntityPtrPool::EntityPtrPool()
-            : AEntityPool("entityPtr", EntityPtrPoolChunkSize)
-        {
-        }
+  return ptr;
+}
 
-        std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::ChunkPos cPos)
-        {
-            return getRawEntity(cPos);
-        }
+std::vector<Components::IComponentPool *> EntityPtrPool::getComponentPools()
+{
+  return { &_entityStatusPool, &_chunkPosPool, &_entityPoolIdPool };
+}
 
-        std::unique_ptr<Entities::EntityPtrRef> EntityPtrPool::getRawEntity(Chunks::ChunkPos cPos)
-        {
-            auto ptr = std::make_unique<Entities::EntityPtrRef>(
-                static_cast<Components::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
-                static_cast<Components::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
-                static_cast<Components::EntityPoolIdRef *>(_entityPoolIdPool.getComponentRef(cPos)));
-            
-            return ptr;
-        }
-
-        std::vector<Components::IComponentPool *> EntityPtrPool::getComponentPools()
-        {
-            return {&_entityStatusPool, &_chunkPosPool, &_entityPoolIdPool};
-        }
-
-    }
-
+} }// namespace ECS::Entities
