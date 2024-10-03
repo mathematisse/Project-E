@@ -10,6 +10,10 @@
 #include <utility>
 
 #include <iostream>
+
+#define BLUE "\033[34m"
+#define RESET "\033[0m"
+
     namespace ECS::Systems
     {
         SystemTreeNode::SystemTreeNode(int group, std::list<ISystem *> startSystems, std::list<ISystem *> endSystems, std::list<SystemTreeNode> children)
@@ -74,7 +78,7 @@
 
         void SystemTreeNode::runNode()
         {
-            std::cout << "Running node " << _group << "\n";
+            std::cout << "\n" BLUE "[SYSTEM RUN] Running node " << _group << RESET "\n";
             for (auto &startSystem : _startSystems) {
                 startSystem->run();
             }
@@ -115,6 +119,8 @@
 
         void SystemTree::runTree()
         {
+            std::cout << "\n" BLUE "----[START SYSTEM RUN]----" RESET "\n";
             _root.runNode();
+            std::cout << "\n" BLUE "-----[END SYSTEM RUN]-----" RESET "\n";
         }
     }

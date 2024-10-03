@@ -13,6 +13,10 @@
 #include <list>
 #include <iostream>
 
+#define BLUE "\033[34m"
+#define RED "\033[31m"
+#define RESET "\033[0m"
+
 namespace ECS {
 
 bool EntityManager::registerSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
@@ -93,7 +97,7 @@ std::vector<Chunks::ChunkPos> EntityManager::createEntities(const std::string &e
 
     for (auto &entityPool : _entityPools) {
         if (entityPool->getEntityName() == entityName) {
-            std::cout << "Creating " << count << " entities of type " << entityName << "\n";
+            std::cout << "\n" BLUE "Creating " << count << " entities of type " RESET << entityName << "\n";
             return _createEntities(entityPool, count, idx, status);
         }
         idx++;
@@ -118,7 +122,7 @@ void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
 
 void EntityManager::destroyEntities(const std::vector<Chunks::ChunkPos> &cPosArr)
 {
-    std::cout << "Destroying " << cPosArr.size() << " entities\n";
+    std::cout << "\n" RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
     for (const auto &cPos : cPosArr) {
         destroyEntity(cPos);
     }

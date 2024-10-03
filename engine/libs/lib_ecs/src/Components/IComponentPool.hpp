@@ -59,7 +59,7 @@
          * @brief Get the name of the component.
          * @return A constant reference to a string containing the component name.
          */
-        [[nodiscard]] virtual const std::string &getComponentName() const = 0;
+        [[nodiscard]] virtual const char *getComponentName() const = 0;
 
         /**
          * @brief Get a reference to a component at the specified chunk position.

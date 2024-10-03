@@ -72,10 +72,9 @@
 
             void run() override {
                 // print the name of the class
-                std::cout << "Running system " << typeid(*this).name() << "\n";
+                std::cout << "\nRunning system " << typeid(*this).name() << "\n";
                 for (auto &componentPools : _componentPoolsArrays) {
                     size_t chunkCount = componentPools[0]->chunkCount();
-                    std::cout << "Running step with chunk count: " << chunkCount << "\n";
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply([i](auto&... pools) {
                             return std::make_tuple(dynamic_cast<Ts*>(pools)->getRawStdVectors(i)...);
@@ -110,17 +109,10 @@
 
                 using OuterIndices = std::make_index_sequence<std::tuple_size<decltype(vectorTuple)>::value>;
 
-                std::cout << "v[" << vectorSize << "] = {";
                 for (size_t i = 0; i < vectorSize; ++i) {
                     auto refTuple = getReferencesAtIndex(i, vectorTuple, OuterIndices{});
-
                     callInnerOperate(refTuple, std::make_index_sequence<std::tuple_size<decltype(refTuple)>::value>{});
-                    std::cout << (i == vectorSize - 1 ? "" : ", ");
-
                 }
-                //reset
-                std::cout << "\033[0m";
-                std::cout << "}\n";
             }
 
 

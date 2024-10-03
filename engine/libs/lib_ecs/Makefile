@@ -8,7 +8,6 @@
 # Variables
 
 SRC						=	Chunks/ChunkPos.cpp	\
-							Components/PureComponentPools.cpp	\
 							Entities/AEntityRef.cpp	\
 							Entities/AEntityPool.cpp	\
 							Entities/PureEntities.cpp	\
@@ -20,6 +19,8 @@ SRC						=	Chunks/ChunkPos.cpp	\
 SRC_DIR					=	./src/
 
 NAME					=	libecs-pure-base.a
+
+CXX						=	g++ -std=c++20
 
 CXXFLAGS				=	-Wall -Wextra -I./src
 
@@ -113,7 +114,7 @@ fclean: clean
 	rm -rf $(BUILD_DIR)
 
 demo: grind
-	$(CXX) $(CXXFLAGS) -o demo main.cpp PointGoingUp.cpp -L$(VAL_DIR) -lecs-pure-base $(VALARGS)
+	$(CXX) $(CXXFLAGS) -o demo main.cpp src/Demo/Systems.cpp src/Demo/ExamplePoint.cpp -L$(VAL_DIR) -lecs-pure-base $(VALARGS)
 
 val-demo: demo
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./demo

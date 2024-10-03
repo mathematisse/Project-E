@@ -21,7 +21,7 @@ namespace ECS::Components {
  * 
  * @tparam Ts Types of the components managed by the pool.
  */
-template <typename... Ts>
+template <const char* Name, typename... Ts>
 class AComponentPool : virtual public IComponentPool {
 public:
     /**
@@ -86,10 +86,10 @@ public:
     /**
      * @brief Get the chunk pools managed by this component pool.
      * 
-     * @return std::vector<Chunks::IChunkPool<Ts>*> Vector of chunk pools.
+     * @return std::tuple<Chunks::StandardChunkPool<Ts>...> Tuple of chunk pools.
      */
-    std::vector<Chunks::IChunkPool<Ts> *...> getChunkPools() {
-        return {&std::get<Chunks::StandardChunkPool<Ts>>(_pools)...};
+    std::tuple<Chunks::StandardChunkPool<Ts>...> &getChunkPools() {
+        return _pools;
     }
 
 
@@ -98,11 +98,11 @@ public:
         return getRawStdVectorsImpl(index, std::index_sequence_for<Ts...>{});
     }
 
-    [[nodiscard]] const std::string &getComponentName() const override {
+    [[nodiscard]] const char *getComponentName() const override {
         return componentName;
     }
 
-    static const std::string componentName; ///< The name of the component pool.
+    static constexpr const char * componentName = Name;
 
     using Types = std::tuple<Ts&...>; ///< The types of the components managed by the pool.
     using VTypes = std::tuple<std::vector<Ts>&...>; ///< The vector types of the components managed by the pool.
