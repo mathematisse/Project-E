@@ -17,6 +17,7 @@ int main() {
     ECS::InitSystem initSystem = ECS::InitSystem();
     ECS::MoveUpSystem moveUpSystem = ECS::MoveUpSystem();
     ECS::PrintSystem printSystem = ECS::PrintSystem();
+    ECS::DualExampleSystem dualExampleSystem = ECS::DualExampleSystem();
 
     ECS::Entities::ExamplePointPool pointsPool = ECS::Entities::ExamplePointPool();
     pointsPool.addChunk();
@@ -25,6 +26,7 @@ int main() {
     entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&initSystem), ECS::Systems::ROOTSYSGROUP);
     entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&moveUpSystem), ECS::Systems::ROOTSYSGROUP);
     entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&printSystem), ECS::Systems::ROOTSYSGROUP);
+    entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&dualExampleSystem), ECS::Systems::ROOTSYSGROUP);
     entityManager.registerEntityPool(&pointsPool);
 
     // Create entities
