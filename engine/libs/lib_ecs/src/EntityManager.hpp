@@ -21,12 +21,6 @@ namespace ECS
     class EntityManager
     {
     public:
-        EntityManager();
-        ~EntityManager();
-        EntityManager(const EntityManager &other) = default;
-        EntityManager(EntityManager &&other) = default;
-        EntityManager &operator=(const EntityManager &other) = default;
-        EntityManager &operator=(EntityManager &&other) = default;
 
         bool registerSystemGroup(int group, int neighbourGroup, bool addBefore = false, bool addInside = false);
         bool registerSystem(Systems::ISystem &system, int group, bool atStart = false);

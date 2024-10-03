@@ -20,7 +20,7 @@ namespace ECS
         DECLARE_COMPONENT(Position, float, float);
     }
 
-    const size_t PointGoingUpEntityPoolChunkSize = 10;
+    const size_t PointGoingUpEntityPoolChunkSize = 5;
 
     class PointGoingUpEntityPool : public Entities::AEntityPool
     {

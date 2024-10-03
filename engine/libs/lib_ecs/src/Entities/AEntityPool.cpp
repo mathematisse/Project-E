@@ -9,6 +9,7 @@
 
 #include <utility>
 #include "Chunks/ChunkPos.hpp"
+#include <iostream>
 
 
     namespace ECS::Entities
@@ -57,6 +58,7 @@
 
         void AEntityPool::addChunk()
         {
+            std::cout << "Adding chunk to entity pool " << _entityName << std::endl;
             Chunks::ChunkPos cPos = {getChunkCount(), 0};
             for (auto *componentPool : getComponentPools()) {
                 componentPool->addChunk(_chunkSize);

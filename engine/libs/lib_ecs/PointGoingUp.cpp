@@ -8,6 +8,11 @@
 #include "PointGoingUp.hpp"
 #include "Components/PureComponentPools.hpp"
 #include <iostream>
+#include <iomanip>
+
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define RESET "\033[0m"
 
 namespace ECS
 {
@@ -61,16 +66,16 @@ namespace ECS
 
     void MoveUpSystem::innerOperate(Components::EntityStatusPool::Types& cstatus, Components::PositionPool::Types& cposition)
     {
-        std::cout << "Trying to move up\n";
+        std::cout << RESET;
         auto [status] = cstatus;
         if ( status != Components::EntityStatusEnum::ENT_ALIVE) {
-            std::cout << "Entity is not alive\n";
+            std::cout << RED << "{x.x, x.x}" << RESET;
             return;
         }
-        std::cout << "Entity is alive\n";
         auto [x, y] = cposition;
         x += _velocity;
         y += _velocity;
+        std::cout << GREEN << "{" << std::fixed << std::setprecision(1) << x << ", " << std::fixed << std::setprecision(1) << y << "}" << RESET;
     }
 
 }

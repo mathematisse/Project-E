@@ -38,5 +38,29 @@ int main() {
     // Run the system
     entityManager.runSystems();
 
+    entityManager.destroyEntities(entities2);
+
+    // Run the system
+    entityManager.runSystems();
+
+    auto lastEntities = entityManager.createEntities("pointGoingUp", 11);
+
+    // Run the system
+    entityManager.runSystems();
+
+    entityManager.destroyEntity(lastEntities[0]);
+    entityManager.destroyEntity(lastEntities[1]);
+    entityManager.destroyEntity(lastEntities[2]);
+
+    // Run the system
+    entityManager.runSystems();
+
+    auto trueLastEntities = entityManager.createEntities("pointGoingUp", 10);
+
+
+    // Run the system
+    entityManager.runSystems();
+
+
     return 0;
 }

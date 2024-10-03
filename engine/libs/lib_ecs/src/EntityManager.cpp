@@ -15,13 +15,6 @@
 
 namespace ECS {
 
-EntityManager::EntityManager()
-{
-    _entityPtrPool.addChunk();
-}
-
-EntityManager::~EntityManager() = default;
-
 bool EntityManager::registerSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
 {
     return _systemTree.addSystemGroup(group, neighbourGroup, addBefore, addInside);
@@ -80,7 +73,7 @@ std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPo
         entityPtr->setChunkPos(nextFreePos);
         entityPtr->setPoolId(poolId);
 
-        cPosArr.push_back(nextFreePos);
+        cPosArr.push_back(nextFreePtrPos);
 
         freePtrPos.pop_front();
         freePos.pop_front();
@@ -117,16 +110,15 @@ void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
     auto entity = _entityPools[poolId]->getEntity(entCPos);
 
     entityPtr->setStatus(Components::ENT_NONE);
-    entityPtr->setChunkPos({0, 0});
     _entityPtrPool.getFreePos().push_back(cPos);
 
     entity->setStatus(Components::ENT_NONE);
-    entity->setChunkPos({0, 0});
     _entityPools[poolId]->getFreePos().push_back(entCPos);
 }
 
 void EntityManager::destroyEntities(const std::vector<Chunks::ChunkPos> &cPosArr)
 {
+    std::cout << "Destroying " << cPosArr.size() << " entities\n";
     for (const auto &cPos : cPosArr) {
         destroyEntity(cPos);
     }
