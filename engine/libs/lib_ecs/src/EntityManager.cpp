@@ -53,7 +53,7 @@ std::unique_ptr<Entities::IEntityRef>EntityManager::getEntity(const Chunks::Chun
     return (*(_entityPools[entityPtr->getPoolId()])).getEntity(entityPtr->getChunkPos());
 }
 
-std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPool *entityPool, size_t count, size_t poolId)
+std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPool *entityPool, size_t count, size_t poolId, Components::EntityStatusEnum status)
 {
     std::list<Chunks::ChunkPos> &freePos = entityPool->getFreePos();
     std::list<Chunks::ChunkPos> &freePtrPos = _entityPtrPool.getFreePos();
@@ -72,7 +72,7 @@ std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPo
         auto nextFreePtrPos = freePtrPos.front();
 
         auto entity = entityPool->getEntity(nextFreePos);
-        entity->setStatus(Components::ENT_NEEDS_INIT);
+        entity->setStatus(status);
         entity->setChunkPos(nextFreePtrPos);
 
         auto entityPtr = _entityPtrPool.getRawEntity(nextFreePtrPos);
@@ -88,20 +88,20 @@ std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPo
     return cPosArr;
 }
 
-Chunks::ChunkPos EntityManager::createEntity(const std::string &entityName)
+Chunks::ChunkPos EntityManager::createEntity(const std::string &entityName, Components::EntityStatusEnum status)
 {
-    auto cPosArr = createEntities(entityName, 1);
+    auto cPosArr = createEntities(entityName, 1, status);
     return cPosArr.empty() ? Chunks::ChunkPos{0, 0} : cPosArr[0];
 }
 
-std::vector<Chunks::ChunkPos> EntityManager::createEntities(const std::string &entityName, size_t count)
+std::vector<Chunks::ChunkPos> EntityManager::createEntities(const std::string &entityName, size_t count, Components::EntityStatusEnum status)
 {
     size_t idx = 0;
 
     for (auto &entityPool : _entityPools) {
         if (entityPool->getEntityName() == entityName) {
             std::cout << "Creating " << count << " entities of type " << entityName << "\n";
-            return _createEntities(entityPool, count, idx);
+            return _createEntities(entityPool, count, idx, status);
         }
         idx++;
     }

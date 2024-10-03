@@ -55,7 +55,7 @@ namespace ECS
             const Components::PositionRef *_position;
     };
 
-    class MoveUpSystem : public Systems::ASystem<Components::PositionPool>
+    class MoveUpSystem : public Systems::ASystem<Components::EntityStatusPool, Components::PositionPool>
     {
         public:
             explicit MoveUpSystem(float velocity = 0.5);
@@ -66,8 +66,7 @@ namespace ECS
             MoveUpSystem &operator=(const MoveUpSystem &other) = default;
             MoveUpSystem &operator=(MoveUpSystem &&other) = default;
 
-            // void operate(typename PositionPool::VTypes& componentPools) override;
-            void innerOperate(typename Components::PositionPool::Types& components) override;
+            void innerOperate(typename Components::EntityStatusPool::Types& cstatus, typename Components::PositionPool::Types& cposition) override;
         protected:
             float _velocity;
     };

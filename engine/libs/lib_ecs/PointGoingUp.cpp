@@ -59,10 +59,16 @@ namespace ECS
     }
 
 
-    void MoveUpSystem::innerOperate(Components::PositionPool::Types& components)
+    void MoveUpSystem::innerOperate(Components::EntityStatusPool::Types& cstatus, Components::PositionPool::Types& cposition)
     {
-        std::cout << "Moving up\n";
-        auto [x, y] = components;
+        std::cout << "Trying to move up\n";
+        auto [status] = cstatus;
+        if ( status != Components::EntityStatusEnum::ENT_ALIVE) {
+            std::cout << "Entity is not alive\n";
+            return;
+        }
+        std::cout << "Entity is alive\n";
+        auto [x, y] = cposition;
         x += _velocity;
         y += _velocity;
     }

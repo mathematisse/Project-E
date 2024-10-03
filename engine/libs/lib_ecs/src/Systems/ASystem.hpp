@@ -51,9 +51,13 @@
 
                 size_t i = 0;
 
+                std::cout << "Trying to add entity pool\n";
                 for (auto & componentPool : componentPools) {
+                    std::cout << "Component pool name: " << componentPool->getComponentName() << std::endl;
                     for (auto & componentName : componentNames) {
+                        std::cout << "Component name: " << componentName << std::endl;
                         if (componentPool->getComponentName() == componentName) {
+                            std::cout << "Matched component name\n";
                             if (i == sizeof...(Ts)) {
                                 return false;
                             }
@@ -63,9 +67,11 @@
                     }
                 }
                 if (i == sizeof...(Ts)) {
+                    std::cout << "Added entity pool\n";
                     _componentPoolsArrays.push_back(newComponentPoolsArray);
                     return true;
                 }
+                std::cout << "Failed to add entity pool\n";
                 return false;
             }
 
@@ -74,9 +80,9 @@
                 for (auto &componentPools : _componentPoolsArrays) {
                     size_t chunkCount = componentPools[0]->chunkCount();
                     for (size_t i = 0; i < chunkCount; i++) {
-                        auto componentPoolsTuple = std::make_tuple(
-                            dynamic_cast<Ts*>(componentPools[i])->getRawStdVectors(i)...
-                        );
+                        auto componentPoolsTuple = std::apply([i](auto&... pools) {
+                            return std::make_tuple(dynamic_cast<Ts*>(pools)->getRawStdVectors(i)...);
+                        }, componentPools);
 
                         std::apply([this](auto &... componentPools) {
                             operate(componentPools...);
@@ -86,17 +92,17 @@
             }
 
             template <std::size_t... Is, typename... Vectors>
-            auto getInnerReferencesAtIndex(size_t i, std::tuple<Vectors...>& vectorTuple, std::index_sequence<Is...> /*unused*/) {
+            constexpr inline auto getInnerReferencesAtIndex(size_t i, std::tuple<Vectors...>& vectorTuple, std::index_sequence<Is...> /*unused*/) {
                 return std::make_tuple(std::ref(std::get<Is>(vectorTuple)[i])...);
             }
 
             template <std::size_t... OuterIs, typename... InnerTuples>
-            auto getReferencesAtIndex(size_t i, std::tuple<InnerTuples...>& outerTuple, std::index_sequence<OuterIs...> /*unused*/) {
+            constexpr inline auto getReferencesAtIndex(size_t i, std::tuple<InnerTuples...>& outerTuple, std::index_sequence<OuterIs...> /*unused*/) {
                 return std::make_tuple(getInnerReferencesAtIndex(i, std::get<OuterIs>(outerTuple), std::make_index_sequence<std::tuple_size<std::decay_t<decltype(std::get<OuterIs>(outerTuple))>>::value>{})...);
             }
 
             template <typename Tuple, std::size_t... Is>
-            void callInnerOperate(Tuple& refTuple, std::index_sequence<Is...> /*unused*/) {
+            constexpr inline void callInnerOperate(Tuple& refTuple, std::index_sequence<Is...> /*unused*/) {
                 innerOperate(std::get<Is>(refTuple)...);
             }
 
@@ -115,7 +121,7 @@
             }
 
 
-            virtual void innerOperate(typename Ts::Types&... componentPools) = 0;
+            virtual inline void innerOperate(typename Ts::Types&... componentPools) = 0;
 
         protected:
             bool _isParallel;
