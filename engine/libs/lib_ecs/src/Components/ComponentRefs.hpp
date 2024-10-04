@@ -10,7 +10,7 @@
 #include "Components/IComponentRef.hpp"
 #include <tuple>
 
-namespace ECS::Components {
+namespace ECS::C {
 
 template<typename... Ts> class ComponentRef : public IComponentRef
 {
@@ -69,4 +69,4 @@ private:
   static auto createPointerTuple(Ts... components) { return std::make_tuple(&components...); }
 };
 
-}// namespace ECS::Components
+}// namespace ECS::C

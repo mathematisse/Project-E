@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace ECS::Components {
+namespace ECS::C {
 /**
  * @class IComponent
  * @brief Abstract base class for all components in the ECS.
@@ -35,4 +35,4 @@ public:
   IComponentRef &operator=(const IComponentRef &other) = default;
   IComponentRef &operator=(IComponentRef &&other) = default;
 };
-}// namespace ECS::Components
+}// namespace ECS::C

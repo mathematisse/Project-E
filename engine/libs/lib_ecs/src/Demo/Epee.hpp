@@ -11,24 +11,24 @@
 #include "Entities/AEntityPool.hpp"
 #include "Entities/AEntityRef.hpp"
 
-namespace ECS::Components {
+namespace ECS::C {
 DECLARE_COMPONENT(Damage, float, float, uint8_t);
 DECLARE_COMPONENT(Stat, long, long, long, long, long, long, uint64_t);
 DECLARE_COMPONENT(Upgradable, bool);
-}// namespace ECS::Components
+}// namespace ECS::C
 
-namespace ECS::Entities {
+namespace ECS::E {
 const size_t EpeeChunkSize = 32;
 
 // ENTITY REF
 class EpeeRef : public AEntityRef
 {
 public:
-  EpeeRef(Components::EntityStatusRef *status,
-    Components::ChunkPosRef *cPos,
-    Components::DamageRef *damage,
-    Components::StatRef *stat,
-    Components::UpgradableRef *upgradable);
+  EpeeRef(C::EntityStatusRef *status,
+    C::ChunkPosRef *cPos,
+    C::DamageRef *damage,
+    C::StatRef *stat,
+    C::UpgradableRef *upgradable);
   ~EpeeRef() override;
 
   // Default rule of five
@@ -39,20 +39,20 @@ public:
 
   // Accessors
 
-  [[nodiscard]] Components::DamageRef *getDamage() const;
-  void setDamage(const Components::DamageRef &damage);
+  [[nodiscard]] C::DamageRef *getDamage() const;
+  void setDamage(const C::DamageRef &damage);
 
-  [[nodiscard]] Components::StatRef *getStat() const;
-  void setStat(const Components::StatRef &stat);
+  [[nodiscard]] C::StatRef *getStat() const;
+  void setStat(const C::StatRef &stat);
 
-  [[nodiscard]] Components::UpgradableRef *getUpgradable() const;
-  void setUpgradable(const Components::UpgradableRef &upgradable);
+  [[nodiscard]] C::UpgradableRef *getUpgradable() const;
+  void setUpgradable(const C::UpgradableRef &upgradable);
 
 
 protected:
-  Components::DamageRef *_damage;
-  Components::StatRef *_stat;
-  Components::UpgradableRef *_upgradable;
+  C::DamageRef *_damage;
+  C::StatRef *_stat;
+  C::UpgradableRef *_upgradable;
 };
 
 // ENTITY POOL
@@ -68,13 +68,13 @@ public:
   EpeePool(EpeePool &&other) = default;
   EpeePool &operator=(EpeePool &&other) = default;
 
-  std::unique_ptr<Entities::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
-  std::unique_ptr<Entities::EpeeRef> getRawEntity(Chunks::ChunkPos cPos);
-  std::vector<Components::IComponentPool *> getComponentPools() override;
+  std::unique_ptr<E::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
+  std::unique_ptr<E::EpeeRef> getRawEntity(Chunks::ChunkPos cPos);
+  std::vector<C::IComponentPool *> getComponentPools() override;
 
 protected:
-  Components::DamagePool _damagePool;
-  Components::StatPool _statPool;
-  Components::UpgradablePool _upgradablePool;
+  C::DamagePool _damagePool;
+  C::StatPool _statPool;
+  C::UpgradablePool _upgradablePool;
 };
-}// namespace ECS::Entities
+}// namespace ECS::E

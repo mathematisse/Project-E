@@ -11,22 +11,19 @@
 #include "Entities/AEntityPool.hpp"
 #include "Entities/AEntityRef.hpp"
 
-namespace ECS::Components {
+namespace ECS::C {
 DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Velocity, float, float);
-}// namespace ECS::Components
+}// namespace ECS::C
 
-namespace ECS::Entities {
+namespace ECS::E {
 const size_t ExamplePointChunkSize = 3;
 
 // ENTITY REF
 class ExamplePointRef : public AEntityRef
 {
 public:
-  ExamplePointRef(Components::EntityStatusRef *status,
-    Components::ChunkPosRef *cPos,
-    Components::PositionRef *position,
-    Components::VelocityRef *velocity);
+  ExamplePointRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity);
   ~ExamplePointRef() override;
 
   // Default rule of five
@@ -37,16 +34,16 @@ public:
 
   // Accessors
 
-  [[nodiscard]] Components::PositionRef *getPosition() const;
-  void setPosition(const Components::PositionRef &position);
+  [[nodiscard]] C::PositionRef *getPosition() const;
+  void setPosition(const C::PositionRef &position);
 
-  [[nodiscard]] Components::VelocityRef *getVelocity() const;
-  void setVelocity(const Components::VelocityRef &velocity);
+  [[nodiscard]] C::VelocityRef *getVelocity() const;
+  void setVelocity(const C::VelocityRef &velocity);
 
 
 protected:
-  Components::PositionRef *_position;
-  Components::VelocityRef *_velocity;
+  C::PositionRef *_position;
+  C::VelocityRef *_velocity;
 };
 
 // ENTITY POOL
@@ -62,12 +59,12 @@ public:
   ExamplePointPool(ExamplePointPool &&other) = default;
   ExamplePointPool &operator=(ExamplePointPool &&other) = default;
 
-  std::unique_ptr<Entities::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
-  std::unique_ptr<Entities::ExamplePointRef> getRawEntity(Chunks::ChunkPos cPos);
-  std::vector<Components::IComponentPool *> getComponentPools() override;
+  std::unique_ptr<E::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
+  std::unique_ptr<E::ExamplePointRef> getRawEntity(Chunks::ChunkPos cPos);
+  std::vector<C::IComponentPool *> getComponentPools() override;
 
 protected:
-  Components::PositionPool _positionPool;
-  Components::VelocityPool _velocityPool;
+  C::PositionPool _positionPool;
+  C::VelocityPool _velocityPool;
 };
-}// namespace ECS::Entities
+}// namespace ECS::E

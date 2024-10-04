@@ -10,10 +10,9 @@
 #include "Chunks/ChunkPos.hpp"
 #include "Components/IComponentRef.hpp"
 #include <cstddef>
-#include <string>
 
 
-namespace ECS::Components {
+namespace ECS::C {
 /**
  * @class IComponentPool
  * @brief Abstract base class for component pools in the ECS (Entity Component System).
@@ -94,4 +93,4 @@ public:
   virtual void addChunk(size_t elemCount) = 0;
 };
 
-}// namespace ECS::Components
+}// namespace ECS::C

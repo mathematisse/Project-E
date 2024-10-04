@@ -11,7 +11,7 @@
 #include <list>
 
 
-namespace ECS::Systems {
+namespace ECS::S {
 enum PureSystemGroups {
   NONESYSGROUP = 0,
   ROOTSYSGROUP = 1,
@@ -22,9 +22,9 @@ class SystemTreeNode
 {
 public:
   explicit SystemTreeNode(int group,
-    std::list<ISystem *> startSystems = std::list<ISystem *>(),
-    std::list<ISystem *> endSystems = std::list<ISystem *>(),
-    std::list<SystemTreeNode> children = std::list<SystemTreeNode>());
+    std::vector<ISystem *> startSystems = std::vector<ISystem *>(),
+    std::vector<ISystem *> endSystems = std::vector<ISystem *>(),
+    std::vector<SystemTreeNode> children = std::vector<SystemTreeNode>());
   ~SystemTreeNode() = default;
   SystemTreeNode(const SystemTreeNode &other) = default;
   SystemTreeNode(SystemTreeNode &&other) = default;
@@ -32,16 +32,16 @@ public:
   SystemTreeNode &operator=(SystemTreeNode &&other) = default;
   bool addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside);
   bool addSystem(ISystem *system, int group, bool atStart);
-  void registerEntityPool(Entities::IEntityPool *entityPool);
+  void registerEntityPool(E::IEntityPool *entityPool);
   void runNode();
   [[nodiscard]] int getGroup() const;
 
 private:
   int _group;
 
-  std::list<ISystem *> _startSystems;
-  std::list<SystemTreeNode> _children;
-  std::list<ISystem *> _endSystems;
+  std::vector<ISystem *> _startSystems;
+  std::vector<SystemTreeNode> _children;
+  std::vector<ISystem *> _endSystems;
 };
 
 
@@ -56,10 +56,11 @@ public:
   SystemTree &operator=(SystemTree &&other) = default;
   bool addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside);
   bool addSystem(ISystem *system, int group, bool atStart);
-  void registerEntityPool(Entities::IEntityPool *entityPool);
+  bool addSystemTreeNodes(SystemTreeNode &node, int group, bool atStart);
+  void registerEntityPool(E::IEntityPool *entityPool);
   void runTree();
 
 private:
   SystemTreeNode _root;
 };
-}// namespace ECS::Systems
+}// namespace ECS::S

@@ -11,7 +11,7 @@
 #include "Entities/IEntityRef.hpp"
 
 
-namespace ECS::Entities {
+namespace ECS::E {
 /**
  * @class AEntity
  * @brief Abstract base class for entities in the ECS framework.
@@ -28,7 +28,7 @@ public:
    * @param status Pointer to a ComponentRef object representing the status of the entity.
    * @param cPos Pointer to a ComponentRef2 object representing the chunk position of the entity.
    */
-  AEntityRef(Components::EntityStatusRef *status, Components::ChunkPosRef *cPos);
+  AEntityRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos);
 
   /**
    * @brief Destroys the AEntity object.
@@ -45,7 +45,7 @@ public:
    *
    * @return The status of the entity as a entity_status_t.
    */
-  [[nodiscard]] Components::entity_status_t getStatus() const override;
+  [[nodiscard]] C::entity_status_t getStatus() const override;
 
   /**
    * @brief Gets the chunk position of the entity.
@@ -59,7 +59,7 @@ public:
    *
    * @param status The new status of the entity as a entity_status_t.
    */
-  void setStatus(Components::entity_status_t status) override;
+  void setStatus(C::entity_status_t status) override;
 
   /**
    * @brief Sets the chunk position of the entity.
@@ -68,7 +68,7 @@ public:
    */
   void setChunkPos(Chunks::ChunkPos cPos) override;
 
-  Components::EntityStatusRef *_status;///< Pointer to the status component of the entity.
-  Components::ChunkPosRef *_cPos;///< Pointer to the chunk position component of the entity.
+  C::EntityStatusRef *_status;///< Pointer to the status component of the entity.
+  C::ChunkPosRef *_cPos;///< Pointer to the chunk position component of the entity.
 };
-}// namespace ECS::Entities
+}// namespace ECS::E

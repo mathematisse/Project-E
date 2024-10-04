@@ -14,11 +14,11 @@
 #define BLUE "\033[34m"
 #define RESET "\033[0m"
 
-namespace ECS { namespace Systems {
+namespace ECS { namespace S {
 SystemTreeNode::SystemTreeNode(int group,
-  std::list<ISystem *> startSystems,
-  std::list<ISystem *> endSystems,
-  std::list<SystemTreeNode> children)
+  std::vector<ISystem *> startSystems,
+  std::vector<ISystem *> endSystems,
+  std::vector<SystemTreeNode> children)
   : _group(group), _startSystems(std::move(startSystems)), _children(std::move(children)),
     _endSystems(std::move(endSystems))
 {}
@@ -27,7 +27,7 @@ bool SystemTreeNode::addSystemGroup(int group, int neighbourGroup, bool addBefor
 {
   if (group == _group && addInside) {
     if (addBefore) {
-      _children.emplace_front(neighbourGroup);
+      _children.emplace(_children.begin(), neighbourGroup);
     } else {
       _children.emplace_back(neighbourGroup);
     }
@@ -63,7 +63,7 @@ bool SystemTreeNode::addSystem(ISystem *system, int group, bool atStart)
   return false;
 }
 
-void SystemTreeNode::registerEntityPool(Entities::IEntityPool *entityPool)
+void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
 {
   for (auto &startSystem : _startSystems) { startSystem->tryAddEntityPool(entityPool); }
   for (auto &child : _children) { child.registerEntityPool(entityPool); }
@@ -81,7 +81,7 @@ void SystemTreeNode::runNode()
 int SystemTreeNode::getGroup() const { return _group; }
 
 SystemTree::SystemTree()
-  : _root(ROOTSYSGROUP, std::list<ISystem *>(), std::list<ISystem *>(), std::list<SystemTreeNode>())
+  : _root(ROOTSYSGROUP, std::vector<ISystem *>(), std::vector<ISystem *>(), std::vector<SystemTreeNode>())
 {}
 
 SystemTree::~SystemTree() = default;
@@ -93,7 +93,7 @@ bool SystemTree::addSystemGroup(int group, int neighbourGroup, bool addBefore, b
 
 bool SystemTree::addSystem(ISystem *system, int group, bool atStart) { return _root.addSystem(system, group, atStart); }
 
-void SystemTree::registerEntityPool(Entities::IEntityPool *entityPool) { _root.registerEntityPool(entityPool); }
+void SystemTree::registerEntityPool(E::IEntityPool *entityPool) { _root.registerEntityPool(entityPool); }
 
 void SystemTree::runTree()
 {
@@ -101,4 +101,4 @@ void SystemTree::runTree()
   _root.runNode();
   std::cout << "\n" BLUE "-----[END SYSTEM RUN]-----" RESET "\n";
 }
-} }// namespace ECS::Systems
+} }// namespace ECS::S

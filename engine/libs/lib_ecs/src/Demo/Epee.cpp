@@ -8,14 +8,14 @@
 #include "Epee.hpp"
 
 // ENTITY
-namespace ECS { namespace Entities {
+namespace ECS { namespace E {
 
 // ENTITY REF
-EpeeRef::EpeeRef(Components::EntityStatusRef *status,
-  Components::ChunkPosRef *cPos,
-  Components::DamageRef *Damage,
-  Components::StatRef *Stat,
-  Components::UpgradableRef *Upgradable)
+EpeeRef::EpeeRef(C::EntityStatusRef *status,
+  C::ChunkPosRef *cPos,
+  C::DamageRef *Damage,
+  C::StatRef *Stat,
+  C::UpgradableRef *Upgradable)
   : AEntityRef(status, cPos), _damage(Damage), _stat(Stat), _upgradable(Upgradable)
 {}
 
@@ -27,37 +27,36 @@ EpeeRef::~EpeeRef()
 }
 
 
-[[nodiscard]] Components::DamageRef *Entities::EpeeRef::getDamage() const { return _damage; }
+[[nodiscard]] C::DamageRef *E::EpeeRef::getDamage() const { return _damage; }
 
-void Entities::EpeeRef::setDamage(const Components::DamageRef &damage) { *_damage = damage; }
+void E::EpeeRef::setDamage(const C::DamageRef &damage) { *_damage = damage; }
 
-[[nodiscard]] Components::StatRef *Entities::EpeeRef::getStat() const { return _stat; }
+[[nodiscard]] C::StatRef *E::EpeeRef::getStat() const { return _stat; }
 
-void Entities::EpeeRef::setStat(const Components::StatRef &stat) { *_stat = stat; }
+void E::EpeeRef::setStat(const C::StatRef &stat) { *_stat = stat; }
 
-[[nodiscard]] Components::UpgradableRef *Entities::EpeeRef::getUpgradable() const { return _upgradable; }
+[[nodiscard]] C::UpgradableRef *E::EpeeRef::getUpgradable() const { return _upgradable; }
 
-void Entities::EpeeRef::setUpgradable(const Components::UpgradableRef &upgradable) { *_upgradable = upgradable; }
+void E::EpeeRef::setUpgradable(const C::UpgradableRef &upgradable) { *_upgradable = upgradable; }
 
 
 // ENTITY POOL
 EpeePool::EpeePool() : AEntityPool("Epee", EpeeChunkSize) {}
 
-std::unique_ptr<Entities::IEntityRef> EpeePool::getEntity(Chunks::ChunkPos cPos) { return getRawEntity(cPos); }
+std::unique_ptr<E::IEntityRef> EpeePool::getEntity(Chunks::ChunkPos cPos) { return getRawEntity(cPos); }
 
-std::unique_ptr<Entities::EpeeRef> EpeePool::getRawEntity(Chunks::ChunkPos cPos)
+std::unique_ptr<E::EpeeRef> EpeePool::getRawEntity(Chunks::ChunkPos cPos)
 {
-  auto ptr = std::make_unique<Entities::EpeeRef>(
-    dynamic_cast<Components::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
-    dynamic_cast<Components::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
-    dynamic_cast<Components::DamageRef *>(_damagePool.getComponentRef(cPos)),
-    dynamic_cast<Components::StatRef *>(_statPool.getComponentRef(cPos)),
-    dynamic_cast<Components::UpgradableRef *>(_upgradablePool.getComponentRef(cPos)));
+  auto ptr = std::make_unique<E::EpeeRef>(dynamic_cast<C::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
+    dynamic_cast<C::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
+    dynamic_cast<C::DamageRef *>(_damagePool.getComponentRef(cPos)),
+    dynamic_cast<C::StatRef *>(_statPool.getComponentRef(cPos)),
+    dynamic_cast<C::UpgradableRef *>(_upgradablePool.getComponentRef(cPos)));
   return ptr;
 }
 
-std::vector<Components::IComponentPool *> EpeePool::getComponentPools()
+std::vector<C::IComponentPool *> EpeePool::getComponentPools()
 {
   return { &_entityStatusPool, &_chunkPosPool, &_damagePool, &_statPool, &_upgradablePool };
 }
-} }// namespace ECS::Entities
+} }// namespace ECS::E

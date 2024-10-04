@@ -8,7 +8,6 @@
 #include "Demo/Systems.hpp"
 #include "Components/PureComponentPools.hpp"
 #include "Demo/ExamplePoint.hpp"
-#include <cmath>
 #include <iomanip>
 #include <iostream>
 
@@ -17,18 +16,14 @@
 #define YELLOW "\033[33m"
 #define RESET "\033[0m"
 
-namespace ECS {
+namespace ECS { namespace S {
 // SYSTEM
 
-MoveUpSystem::MoveUpSystem() : AMonoSystem(false) {}
+MoveUpSystem::MoveUpSystem() : AStatusMonoSystem(false, C::ENT_ALIVE) {}
 
 
-void MoveUpSystem::_innerOperate(Components::EntityStatusPool::Types &cstatus,
-  Components::PositionPool::Types &cposition,
-  Components::VelocityPool::Types &cvelocity)
+void MoveUpSystem::_statusOperate(C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity)
 {
-  auto [status] = cstatus;
-  if (status != Components::EntityStatusEnum::ENT_ALIVE) { return; }
   auto [x, y] = cposition;
   auto [vX, vY] = cvelocity;
   x += vX;
@@ -40,26 +35,25 @@ InitSystem::InitSystem(float velocityMin, float velocityMax)
 {}
 
 
-void InitSystem::_innerOperate(Components::EntityStatusPool::Types &cstatus, Components::VelocityPool::Types &cvelocity)
+void InitSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity)
 {
   auto [status] = cstatus;
-  if (status != Components::EntityStatusEnum::ENT_NEEDS_INIT) { return; }
+  if (status != C::EntityStatusEnum::ENT_NEEDS_INIT) { return; }
   std::cout << YELLOW "Initializing...\n" RESET;
   auto [x, y] = cvelocity;
   x += _velocityMin + (rand() % (int)(_velocityMax - _velocityMin));
   y += _velocityMin + (rand() % (int)(_velocityMax - _velocityMin));
-  status = Components::EntityStatusEnum::ENT_ALIVE;
+  status = C::EntityStatusEnum::ENT_ALIVE;
 }
 
 PrintSystem::PrintSystem() : AMonoSystem(false) {}
 
 
-void PrintSystem::_innerOperate(Components::EntityStatusPool::Types &cstatus,
-  Components::PositionPool::Types &cposition)
+void PrintSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition)
 {
   std::cout << RESET;
   auto [status] = cstatus;
-  if (status != Components::EntityStatusEnum::ENT_ALIVE) {
+  if (status != C::EntityStatusEnum::ENT_ALIVE) {
     std::cout << RED "{--------}" RESET;
     return;
   }
@@ -70,16 +64,16 @@ void PrintSystem::_innerOperate(Components::EntityStatusPool::Types &cstatus,
 
 DualExampleSystem::DualExampleSystem() : ADualSystem(false) {}
 
-void DualExampleSystem::_innerOperate(Components::EntityStatusPool::Types &cStatusA,
-  Components::ChunkPosPool::Types &cChunkPosA,
-  Components::EntityStatusPool::Types &cStatusB,
-  Components::ChunkPosPool::Types &cChunkPosB)
+void DualExampleSystem::_innerOperate(C::EntityStatusPool::Types &cStatusA,
+  C::ChunkPosPool::Types &cChunkPosA,
+  C::EntityStatusPool::Types &cStatusB,
+  C::ChunkPosPool::Types &cChunkPosB)
 {
   auto [statusA] = cStatusA;
 
   auto [statusB] = cStatusB;
 
-  if (statusA != Components::EntityStatusEnum::ENT_ALIVE || statusB != Components::EntityStatusEnum::ENT_ALIVE) {
+  if (statusA != C::EntityStatusEnum::ENT_ALIVE || statusB != C::EntityStatusEnum::ENT_ALIVE) {
     std::cout << "x";
     return;
   }
@@ -90,4 +84,4 @@ void DualExampleSystem::_innerOperate(Components::EntityStatusPool::Types &cStat
   std::cout << "-";
 }
 
-}// namespace ECS
+} }// namespace ECS::S

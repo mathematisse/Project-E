@@ -10,7 +10,7 @@
 #include "Entities/IEntityPool.hpp"
 
 
-namespace ECS::Systems {
+namespace ECS::S {
 class ISystem
 {
 public:
@@ -20,7 +20,7 @@ public:
   ISystem(ISystem &&other) = default;
   ISystem &operator=(const ISystem &other) = default;
   ISystem &operator=(ISystem &&other) = default;
-  virtual bool tryAddEntityPool(Entities::IEntityPool *entityPool) = 0;
+  virtual bool tryAddEntityPool(E::IEntityPool *entityPool) = 0;
   virtual void run() = 0;
 };
-}// namespace ECS::Systems
+}// namespace ECS::S

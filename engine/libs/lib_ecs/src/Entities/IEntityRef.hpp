@@ -10,7 +10,7 @@
 #include "Chunks/ChunkPos.hpp"
 #include "Components/PureComponentPools.hpp"
 
-namespace ECS::Entities {
+namespace ECS::E {
 /**
  * @brief Interface for an Entity in the ECS system.
  *
@@ -40,7 +40,7 @@ public:
    *
    * @return entity_status_t The status of the entity.
    */
-  [[nodiscard]] virtual Components::entity_status_t getStatus() const = 0;
+  [[nodiscard]] virtual C::entity_status_t getStatus() const = 0;
 
   /**
    * @brief Get the chunk position of the entity.
@@ -54,7 +54,7 @@ public:
    *
    * @param status The new status of the entity.
    */
-  virtual void setStatus(Components::entity_status_t status) = 0;
+  virtual void setStatus(C::entity_status_t status) = 0;
 
   /**
    * @brief Set the chunk position of the entity.
@@ -63,4 +63,4 @@ public:
    */
   virtual void setChunkPos(Chunks::ChunkPos cPos) = 0;
 };
-}// namespace ECS::Entities
+}// namespace ECS::E

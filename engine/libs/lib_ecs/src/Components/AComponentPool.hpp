@@ -7,14 +7,13 @@
 
 #pragma once
 
-#include "Chunks/IChunkPool.hpp"
 #include "Chunks/StandardChunkPool.hpp"
 #include "Components/ComponentRefs.hpp"
 #include "Components/IComponentPool.hpp"
 #include <tuple>
 #include <vector>
 
-namespace ECS::Components {
+namespace ECS::C {
 
 /**
  * @brief Variadic component pool class template for managing pools of multiple component types.
@@ -35,6 +34,10 @@ public:
   AComponentPool &operator=(const AComponentPool &) = default;
   AComponentPool(AComponentPool &&) = default;
   AComponentPool &operator=(AComponentPool &&) = default;
+
+  using Types = std::tuple<Ts &...>;///< The types of the components managed by the pool.
+  using VTypes = std::tuple<std::vector<Ts> &...>;///< The vector types of the components managed by the pool.
+  using ATypes = std::tuple<std::vector<Ts> *...>;///< The vector pointer types of the components managed by the pool.
 
   /**
    * @brief Retrieve a reference to a component at the specified chunk position.
@@ -93,7 +96,13 @@ public:
   std::tuple<Chunks::StandardChunkPool<Ts>...> &getChunkPools() { return _pools; }
 
 
-  std::tuple<std::vector<Ts> &...> getRawStdVectors(size_t index)
+  VTypes getRawStdVectors(size_t index)
+  {
+    // Access the chunk pools using index-based access, not type-based.
+    return getRawStdVectorsImpl(index, std::index_sequence_for<Ts...>{});
+  }
+
+  ATypes getRawAdrrStdVectors(size_t index)
   {
     // Access the chunk pools using index-based access, not type-based.
     return getRawStdVectorsImpl(index, std::index_sequence_for<Ts...>{});
@@ -102,9 +111,6 @@ public:
   [[nodiscard]] const char *getComponentName() const override { return componentName; }
 
   static constexpr const char *componentName = Name;
-
-  using Types = std::tuple<Ts &...>;///< The types of the components managed by the pool.
-  using VTypes = std::tuple<std::vector<Ts> &...>;///< The vector types of the components managed by the pool.
 
 protected:
   std::tuple<Chunks::StandardChunkPool<Ts>...> _pools;///< The chunk pools for each component type.
@@ -131,11 +137,16 @@ private:
   }
 
   // Helper function to access the raw vectors by index
-  template<std::size_t... Is>
-  std::tuple<std::vector<Ts> &...> getRawStdVectorsImpl(size_t index, std::index_sequence<Is...> /*unused*/)
+  template<std::size_t... Is> VTypes getRawStdVectorsImpl(size_t index, std::index_sequence<Is...> /*unused*/)
   {
     return std::tie((*static_cast<Chunks::StandardChunk<Ts> *>(std::get<Is>(_pools).getChunk(index))->getElems())...);
   }
+
+  // Ensure that getRawStdVectorsImpl returns pointers to vectors.
+  template<size_t... Is> ATypes *getRawAddrStdVectorsImpl(size_t index, std::index_sequence<Is...> /*unused*/)
+  {
+    return std::tie((std::get<Is>(_pools).getChunk(index)->getElems())...);
+  }
 };
 
-}// namespace ECS::Components
+}// namespace ECS::C

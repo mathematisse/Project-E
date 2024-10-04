@@ -24,40 +24,45 @@ bool EntityManager::registerSystemGroup(int group, int neighbourGroup, bool addB
   return _systemTree.addSystemGroup(group, neighbourGroup, addBefore, addInside);
 }
 
-bool EntityManager::registerSystem(Systems::ISystem &system, int group, bool atStart)
+bool EntityManager::registerSystem(S::ISystem &system, int group, bool atStart)
 {
   for (auto &entityPool : _entityPools) { system.tryAddEntityPool(entityPool); }
   return _systemTree.addSystem(&system, group, atStart);
 }
 
-bool EntityManager::registerEntityPool(Entities::IEntityPool *entityPool)
+bool EntityManager::registerEntityPool(E::IEntityPool *entityPool)
 {
   _systemTree.registerEntityPool(entityPool);
   _entityPools.push_back(entityPool);
   return true;
 }
 
-std::unique_ptr<Entities::IEntityRef> EntityManager::getEntity(const Entities::EntityPtrRef &entityPtr)
+S::IQuery &EntityManager::initializeQuery(S::IQuery &query)
+{
+  std::cout << "\n" BLUE "Initializing Query" RESET "\n";
+  for (auto &entityPool : _entityPools) { query.tryAddEntityPool(entityPool); }
+  return query;
+}
+
+std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const E::EntityPtrRef &entityPtr)
 {
   return (*(_entityPools[entityPtr.getPoolId()])).getEntity(entityPtr.getChunkPos());
 }
 
-std::unique_ptr<Entities::IEntityRef> EntityManager::getEntity(const Chunks::ChunkPos &cPos)
+std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const Chunks::ChunkPos &cPos)
 {
   auto entityPtr = _entityPtrPool.getRawEntity(cPos);
   return (*(_entityPools[entityPtr->getPoolId()])).getEntity(entityPtr->getChunkPos());
 }
 
-std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPool *entityPool,
-  size_t count,
-  size_t poolId,
-  Components::EntityStatusEnum status)
+std::vector<Chunks::ChunkPos>
+  EntityManager::_createEntities(E::IEntityPool *entityPool, size_t count, size_t poolId, C::EntityStatusEnum status)
 {
-  std::list<Chunks::ChunkPos> &freePos = entityPool->getFreePos();
-  std::list<Chunks::ChunkPos> &freePtrPos = _entityPtrPool.getFreePos();
+  std::vector<Chunks::ChunkPos> &freePos = entityPool->getFreePos();
+  std::vector<Chunks::ChunkPos> &freePtrPos = _entityPtrPool.getFreePos();
 
   std::vector<Chunks::ChunkPos> cPosArr;
-  // Entities::IEntity* entity;
+  // E::IEntity* entity;
 
   for (size_t i = 0; i < count; i++) {
     if (freePos.empty()) { entityPool->addChunk(); }
@@ -70,26 +75,26 @@ std::vector<Chunks::ChunkPos> EntityManager::_createEntities(Entities::IEntityPo
     entity->setChunkPos(nextFreePtrPos);
 
     auto entityPtr = _entityPtrPool.getRawEntity(nextFreePtrPos);
-    entityPtr->setStatus(Components::ENT_ALIVE);
+    entityPtr->setStatus(C::ENT_ALIVE);
     entityPtr->setChunkPos(nextFreePos);
     entityPtr->setPoolId(poolId);
 
     cPosArr.push_back(nextFreePtrPos);
 
-    freePtrPos.pop_front();
-    freePos.pop_front();
+    freePtrPos.erase(freePtrPos.begin());
+    freePos.erase(freePos.begin());
   }
   return cPosArr;
 }
 
-Chunks::ChunkPos EntityManager::createEntity(const std::string &entityName, Components::EntityStatusEnum status)
+Chunks::ChunkPos EntityManager::createEntity(const std::string &entityName, C::EntityStatusEnum status)
 {
   auto cPosArr = createEntities(entityName, 1, status);
   return cPosArr.empty() ? Chunks::ChunkPos{ 0, 0 } : cPosArr[0];
 }
 
 std::vector<Chunks::ChunkPos>
-  EntityManager::createEntities(const std::string &entityName, size_t count, Components::EntityStatusEnum status)
+  EntityManager::createEntities(const std::string &entityName, size_t count, C::EntityStatusEnum status)
 {
   size_t idx = 0;
 
@@ -105,16 +110,17 @@ std::vector<Chunks::ChunkPos>
 
 void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
 {
-  auto entityPtr = std::unique_ptr<Entities::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
+  std::cout << "\n" RED "Destroying entity" RESET "\n";
+  auto entityPtr = std::unique_ptr<E::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
 
   auto poolId = entityPtr->getPoolId();
   auto entCPos = entityPtr->getChunkPos();
   auto entity = _entityPools[poolId]->getEntity(entCPos);
 
-  entityPtr->setStatus(Components::ENT_NONE);
+  entityPtr->setStatus(C::ENT_NONE);
   _entityPtrPool.getFreePos().push_back(cPos);
 
-  entity->setStatus(Components::ENT_NONE);
+  entity->setStatus(C::ENT_NONE);
   _entityPools[poolId]->getFreePos().push_back(entCPos);
 }
 

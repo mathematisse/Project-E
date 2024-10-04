@@ -20,12 +20,12 @@ HPP_TEMPLATE = """/*
 #include "Entities/AEntityRef.hpp"
 #include "Entities/AEntityPool.hpp"
 
-namespace ECS::Components
+namespace ECS::C
 {{
     {new_components_declarations}
 }}
 
-namespace ECS::Entities
+namespace ECS::E
 {{
     const size_t {entity_name}ChunkSize = {chunk_size};
 
@@ -34,8 +34,8 @@ namespace ECS::Entities
     {{
     public:
         {entity_name}Ref(
-            Components::EntityStatusRef *status,
-            Components::ChunkPosRef *cPos,
+            C::EntityStatusRef *status,
+            C::ChunkPosRef *cPos,
             {constructor_args}
         );
         ~{entity_name}Ref() override;
@@ -68,7 +68,7 @@ namespace ECS::Entities
 
         std::unique_ptr<Entities::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
         std::unique_ptr<Entities::{entity_name}Ref> getRawEntity(Chunks::ChunkPos cPos);
-        std::vector<Components::IComponentPool *> getComponentPools() override;
+        std::vector<C::IComponentPool *> getComponentPools() override;
     protected:
         {component_pools}
     }};
@@ -86,13 +86,13 @@ CPP_TEMPLATE = """/*
 #include "{entity_name}.hpp"
 
 // ENTITY
-namespace ECS::Entities
+namespace ECS::E
 {{
     
     // ENTITY REF
     {entity_name}Ref::{entity_name}Ref(
-        Components::EntityStatusRef *status,
-        Components::ChunkPosRef *cPos,
+        C::EntityStatusRef *status,
+        C::ChunkPosRef *cPos,
         {constructor_args}
     ) : AEntityRef(status, cPos),
         {constructor_decl}
@@ -121,14 +121,14 @@ namespace ECS::Entities
     std::unique_ptr<Entities::{entity_name}Ref> {entity_name}Pool::getRawEntity(Chunks::ChunkPos cPos)
     {{
         auto ptr = std::make_unique<Entities::{entity_name}Ref>(
-            static_cast<Components::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
-            static_cast<Components::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
+            static_cast<C::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
+            static_cast<C::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
             {get_raw_ents}
         );
         return ptr;
     }}
 
-    std::vector<Components::IComponentPool *> {entity_name}Pool::getComponentPools()
+    std::vector<C::IComponentPool *> {entity_name}Pool::getComponentPools()
     {{
         return {{
             &_entityStatusPool,
@@ -146,18 +146,18 @@ def to_lower_camel_case(string: str) -> str:
 
 def get_hpp_accessors(entity_name: str, components: list[str]) -> str:
     return ''.join([f"""
-        [[nodiscard]] Components::{c}Ref *get{c}() const;
-        void set{c}(const Components::{c}Ref &{to_lower_camel_case(c)});
+        [[nodiscard]] C::{c}Ref *get{c}() const;
+        void set{c}(const C::{c}Ref &{to_lower_camel_case(c)});
 """ for c in components])
 
 def get_cpp_accessors(entity_name: str, components: list[str]) -> str:
     return ''.join([f"""
-    [[nodiscard]] Components::{c}Ref *Entities::{entity_name}Ref::get{c}() const
+    [[nodiscard]] C::{c}Ref *Entities::{entity_name}Ref::get{c}() const
     {{
         return _{to_lower_camel_case(c)};
     }}
 
-    void Entities::{entity_name}Ref::set{c}(const Components::{c}Ref &{to_lower_camel_case(c)})
+    void Entities::{entity_name}Ref::set{c}(const C::{c}Ref &{to_lower_camel_case(c)})
     {{
         *_{to_lower_camel_case(c)} = {to_lower_camel_case(c)};
     }}
@@ -168,20 +168,20 @@ def get_hpp_content(entity_name, components, new_components_declarations, chunk_
         entity_name=entity_name,
         chunk_size=chunk_size,
         new_components_declarations=new_components_declarations,
-        constructor_args=",\n            ".join([f"Components::{c}Ref *{to_lower_camel_case(c)}" for c in components]),
+        constructor_args=",\n            ".join([f"C::{c}Ref *{to_lower_camel_case(c)}" for c in components]),
         accessors=get_hpp_accessors(entity_name, components),
-        component_refs="\n        ".join([f"Components::{c}Ref *_{to_lower_camel_case(c)};" for c in components]),
-        component_pools="\n        ".join([f"Components::{c}Pool _{to_lower_camel_case(c)}Pool;" for c in components])
+        component_refs="\n        ".join([f"C::{c}Ref *_{to_lower_camel_case(c)};" for c in components]),
+        component_pools="\n        ".join([f"C::{c}Pool _{to_lower_camel_case(c)}Pool;" for c in components])
     )
 
 def get_cpp_content(entity_name, components):
     return CPP_TEMPLATE.format(
         entity_name=entity_name,
-        constructor_args=",\n        ".join([f"Components::{c}Ref *{c}" for c in components]),
+        constructor_args=",\n        ".join([f"C::{c}Ref *{c}" for c in components]),
         constructor_decl=",\n        ".join([f"_{to_lower_camel_case(c)}({c})" for c in components]),
         delete_components="\n        ".join([f"delete _{to_lower_camel_case(c)};" for c in components]),
         accessors=get_cpp_accessors(entity_name, components),
-        get_raw_ents=",\n            ".join([f"static_cast<Components::{c}Ref *>(_{to_lower_camel_case(c)}Pool.getComponentRef(cPos))" for c in components]),
+        get_raw_ents=",\n            ".join([f"static_cast<C::{c}Ref *>(_{to_lower_camel_case(c)}Pool.getComponentRef(cPos))" for c in components]),
         get_component_pools=",\n            ".join([f"&_{to_lower_camel_case(c)}Pool" for c in components])
     )
 

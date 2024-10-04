@@ -5,60 +5,91 @@
 ** Demo lib ecs
 */
 
+#include "Components/PureComponentPools.hpp"
 #include "Demo/ExamplePoint.hpp"
 #include "Demo/Systems.hpp"
 #include "EntityManager.hpp"
-#include "Systems/ISystem.hpp"
+#include "Systems/Query.hpp"
+
+using namespace ECS;
 
 int main()
 {
   // INITIALIZATION
-  ECS::EntityManager entityManager = ECS::EntityManager();
+  EntityManager _eM = EntityManager();
 
-  ECS::InitSystem initSystem = ECS::InitSystem();
-  ECS::MoveUpSystem moveUpSystem = ECS::MoveUpSystem();
-  ECS::PrintSystem printSystem = ECS::PrintSystem();
-  ECS::DualExampleSystem dualExampleSystem = ECS::DualExampleSystem();
+  S::InitSystem initSystem = S::InitSystem();
+  S::MoveUpSystem moveUpSystem = S::MoveUpSystem();
+  S::PrintSystem printSystem = S::PrintSystem();
+  S::DualExampleSystem dualExampleSystem = S::DualExampleSystem();
 
-  ECS::Entities::ExamplePointPool pointsPool = ECS::Entities::ExamplePointPool();
-  pointsPool.addChunk();
+  E::ExamplePointPool pointsPool = E::ExamplePointPool();
+  // pointsPool.addChunk();
 
-  // Register the system with the entity manager
-  entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&initSystem), ECS::Systems::ROOTSYSGROUP);
-  entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&moveUpSystem), ECS::Systems::ROOTSYSGROUP);
-  entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&printSystem), ECS::Systems::ROOTSYSGROUP);
-  entityManager.registerSystem(*static_cast<ECS::Systems::ISystem *>(&dualExampleSystem), ECS::Systems::ROOTSYSGROUP);
-  entityManager.registerEntityPool(&pointsPool);
 
-  // Create entities
-  auto entities = entityManager.createEntities("ExamplePoint", 5, ECS::Components::ENT_NEEDS_INIT);
-  entityManager.runSystems();
+  // Register the systems
+  _eM.registerSystem(initSystem, S::ROOTSYSGROUP);
+  _eM.registerSystem(moveUpSystem, S::ROOTSYSGROUP);
+  _eM.registerSystem(printSystem, S::ROOTSYSGROUP);
+  _eM.registerSystem(dualExampleSystem, S::ROOTSYSGROUP);
+  // Register the entity pools
+  _eM.registerEntityPool(&pointsPool);
 
-  auto entities2 = entityManager.createEntities("ExamplePoint", 5, ECS::Components::ENT_NEEDS_INIT);
-  entityManager.runSystems();
+  // Create entities with a status
+  auto entities = _eM.createEntities("ExamplePoint", 5, C::ENT_NEEDS_INIT);
+  _eM.runSystems();
 
-  // Destroy entities
-  entityManager.destroyEntities(entities);
-  entityManager.runSystems();
-  entityManager.destroyEntities(entities2);
-  entityManager.runSystems();
+  using SimpleQuery = S::Query<C::EntityStatusPool, C::ChunkPosPool>;
+
+  // Run a query
+  // There is a version without the ent manager, but you will need to initialize the query yourself
+  SimpleQuery().map(_eM, [](auto &cStatus, auto &cChunkPos) {
+    auto [status] = cStatus;
+    auto [cIdx, eIdx] = cChunkPos;
+    std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx << ", " << eIdx << "]\n";
+  });
+
+  // Run a 'cross' query, the template of cross is the second query
+  // You can also use cross with lvalues, without the ent manager. (both will need to be initialized):
+  // firstQuery.cross(secondQuery, ...), no template args needed, will be inferred from secondQuery
+  SimpleQuery().cross<C::ChunkPosPool>(_eM, [](auto &cStatusA, auto &cChunkPosA, auto &cChunkPosB) {
+    auto [status] = cStatusA;
+    auto [cIdx2, eIdx2] = cChunkPosB;
+    // if not the same ent, print an return
+    if (cChunkPosA != cChunkPosB) {
+      std::cout << "ents are not the same\n";
+      return;
+    }
+    std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx2 << ", " << eIdx2 << "]\n";
+  });
+
 
   // Create more entities
-  auto lastEntities = entityManager.createEntities("ExamplePoint", 11, ECS::Components::ENT_NEEDS_INIT);
-  entityManager.runSystems();
+  auto entities2 = _eM.createEntities("ExamplePoint", 5, C::ENT_NEEDS_INIT);
+  _eM.runSystems();
+
+  // Destroy entities
+  _eM.destroyEntities(entities);
+  _eM.runSystems();
+  _eM.destroyEntities(entities2);
+  _eM.runSystems();
+
+  // Create more entities
+  auto lastEntities = _eM.createEntities("ExamplePoint", 11, C::ENT_NEEDS_INIT);
+  _eM.runSystems();
 
   // Call a system yourself
   printSystem.run();
 
   // Destroy some entities
-  entityManager.destroyEntity(lastEntities[0]);
-  entityManager.destroyEntity(lastEntities[1]);
-  entityManager.destroyEntity(lastEntities[2]);
-  entityManager.runSystems();
+  _eM.destroyEntity(lastEntities[0]);
+  _eM.destroyEntity(lastEntities[1]);
+  _eM.destroyEntity(lastEntities[2]);
+  _eM.runSystems();
 
   // Create more entities
-  auto trueLastEntities = entityManager.createEntities("ExamplePoint", 10, ECS::Components::ENT_NEEDS_INIT);
-  entityManager.runSystems();
+  auto trueLastEntities = _eM.createEntities("ExamplePoint", 10, C::ENT_NEEDS_INIT);
+  _eM.runSystems();
 
   // No memory leaks
   std::cout << "\n" << std::flush;

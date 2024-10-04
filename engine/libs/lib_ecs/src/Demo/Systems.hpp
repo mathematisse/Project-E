@@ -12,9 +12,8 @@
 #include "Systems/AMonoSystem.hpp"
 
 
-namespace ECS {
-class MoveUpSystem
-  : public Systems::AMonoSystem<Components::EntityStatusPool, Components::PositionPool, Components::VelocityPool>
+namespace ECS::S {
+class MoveUpSystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool>
 {
 public:
   explicit MoveUpSystem();
@@ -26,12 +25,10 @@ public:
   MoveUpSystem &operator=(MoveUpSystem &&other) = default;
 
 protected:
-  void _innerOperate(typename Components::EntityStatusPool::Types &cstatus,
-    typename Components::PositionPool::Types &cposition,
-    typename Components::VelocityPool::Types &cvelocity) override;
+  void _statusOperate(typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity) override;
 };
 
-class InitSystem : public Systems::AMonoSystem<Components::EntityStatusPool, Components::VelocityPool>
+class InitSystem : public S::AMonoSystem<C::EntityStatusPool, C::VelocityPool>
 {
 public:
   explicit InitSystem(float velocityMin = 0.5, float velocityMax = 1.5);
@@ -43,13 +40,12 @@ public:
   InitSystem &operator=(InitSystem &&other) = default;
 
 protected:
-  void _innerOperate(typename Components::EntityStatusPool::Types &cstatus,
-    typename Components::VelocityPool::Types &cvelocity) override;
+  void _innerOperate(typename C::EntityStatusPool::Types &cstatus, typename C::VelocityPool::Types &cvelocity) override;
   float _velocityMin;
   float _velocityMax;
 };
 
-class PrintSystem : public Systems::AMonoSystem<Components::EntityStatusPool, Components::PositionPool>
+class PrintSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool>
 {
 public:
   explicit PrintSystem();
@@ -61,13 +57,12 @@ public:
   PrintSystem &operator=(PrintSystem &&other) = default;
 
 protected:
-  void _innerOperate(typename Components::EntityStatusPool::Types &cstatus,
-    typename Components::PositionPool::Types &cposition) override;
+  void _innerOperate(typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition) override;
 };
 
 class DualExampleSystem
-  : public Systems::ADualSystem<std::tuple<Components::EntityStatusPool, Components::ChunkPosPool>,
-      std::tuple<Components::EntityStatusPool, Components::ChunkPosPool>>
+  : public S::ADualSystem<std::tuple<C::EntityStatusPool, C::ChunkPosPool>,
+      std::tuple<C::EntityStatusPool, C::ChunkPosPool>>
 {
 public:
   explicit DualExampleSystem();
@@ -79,9 +74,9 @@ public:
   DualExampleSystem &operator=(DualExampleSystem &&other) = default;
 
 protected:
-  void _innerOperate(Components::EntityStatusPool::Types &cStatusA,
-    Components::ChunkPosPool::Types &cChunkPosA,
-    Components::EntityStatusPool::Types &cStatusB,
-    Components::ChunkPosPool::Types &cChunkPosB) override;
+  void _innerOperate(C::EntityStatusPool::Types &cStatusA,
+    C::ChunkPosPool::Types &cChunkPosA,
+    C::EntityStatusPool::Types &cStatusB,
+    C::ChunkPosPool::Types &cChunkPosB) override;
 };
-}// namespace ECS
+}// namespace ECS::S
