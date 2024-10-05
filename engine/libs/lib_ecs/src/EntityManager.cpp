@@ -11,7 +11,7 @@
 #include "Entities/PureEntities.hpp"
 #include "Systems/SystemTree.hpp"
 #include <iostream>
-#include <list>
+#include <tuple>
 
 #define BLUE "\033[34m"
 #define RED "\033[31m"
@@ -49,66 +49,91 @@ std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const E::EntityPtrRef &e
   return (*(_entityPools[entityPtr.getPoolId()])).getEntity(entityPtr.getChunkPos());
 }
 
-std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const Chunks::ChunkPos &cPos)
+std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const Chunks::chunkPos_t &cPos)
 {
   auto entityPtr = _entityPtrPool.getRawEntity(cPos);
   return (*(_entityPools[entityPtr->getPoolId()])).getEntity(entityPtr->getChunkPos());
 }
 
-std::vector<Chunks::ChunkPos>
-  EntityManager::_createEntities(E::IEntityPool *entityPool, size_t count, size_t poolId, C::EntityStatusEnum status)
+Chunks::cPosArr_t EntityManager::_createEntities(std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> ePool,
+  size_t count,
+  C::EntityStatusEnum status)
 {
-  std::vector<Chunks::ChunkPos> &freePos = entityPool->getFreePos();
-  std::vector<Chunks::ChunkPos> &freePtrPos = _entityPtrPool.getFreePos();
+  auto [entityPool, poolId] = ePool;
 
-  std::vector<Chunks::ChunkPos> cPosArr;
-  // E::IEntity* entity;
+  auto &freePos = entityPool->getFreePos();
+  auto &freePtrPos = _entityPtrPool.getFreePos();
 
-  for (size_t i = 0; i < count; i++) {
-    if (freePos.empty()) { entityPool->addChunk(); }
-    if (freePtrPos.empty()) { _entityPtrPool.addChunk(); }
-    auto nextFreePos = freePos.front();
-    auto nextFreePtrPos = freePtrPos.front();
+  Chunks::cPosArr_t cPosArr;// Results
 
-    auto entity = entityPool->getEntity(nextFreePos);
-    entity->setStatus(status);
-    entity->setChunkPos(nextFreePtrPos);
+  while (freePos.size() < count) { entityPool->addChunk(); }
+  while (freePtrPos.size() < count) { _entityPtrPool.addChunk(); }
 
-    auto entityPtr = _entityPtrPool.getRawEntity(nextFreePtrPos);
-    entityPtr->setStatus(C::ENT_ALIVE);
-    entityPtr->setChunkPos(nextFreePos);
-    entityPtr->setPoolId(poolId);
+  auto nextFreePosArr = std::vector(freePos.begin(), freePos.begin() + static_cast<long>(count));
+  auto nextFreePtrPosArr = std::vector(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
 
-    cPosArr.push_back(nextFreePtrPos);
+  entityPool->getEntityStatusPool().setComponentAtIndexes(nextFreePosArr, status);
+  entityPool->getChunkPosPool().setComponentsAtIndexes(nextFreePosArr, nextFreePtrPosArr);
 
-    freePtrPos.erase(freePtrPos.begin());
-    freePos.erase(freePos.begin());
-  }
-  return cPosArr;
+  _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(nextFreePtrPosArr, C::ENT_ALIVE);
+  _entityPtrPool.getChunkPosPool().setComponentsAtIndexes(nextFreePtrPosArr, nextFreePosArr);
+  _entityPtrPool.getEntityPoolIdPool().setComponentAtIndexes(nextFreePtrPosArr, poolId);
+
+  freePtrPos.erase(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
+  freePos.erase(freePos.begin(), freePos.begin() + static_cast<long>(count));
+
+  return nextFreePtrPosArr;
 }
 
-Chunks::ChunkPos EntityManager::createEntity(const std::string &entityName, C::EntityStatusEnum status)
+Chunks::chunkPos_t EntityManager::createEntity(const std::string &entityName, C::EntityStatusEnum status)
 {
-  auto cPosArr = createEntities(entityName, 1, status);
-  return cPosArr.empty() ? Chunks::ChunkPos{ 0, 0 } : cPosArr[0];
+  auto ePool = _getEntityPool(entityName);
+  if (std::get<0>(ePool) == nullptr) { return { 0, 0 }; }
+  return _createEntity(ePool, status);
 }
 
-std::vector<Chunks::ChunkPos>
-  EntityManager::createEntities(const std::string &entityName, size_t count, C::EntityStatusEnum status)
+Chunks::chunkPos_t EntityManager::_createEntity(std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> ePool,
+  C::EntityStatusEnum status)
+{
+  auto [entityPool, poolId] = ePool;
+  auto &freePos = entityPool->getFreePos();
+  auto &freePtrPos = _entityPtrPool.getFreePos();
+
+  if (freePos.empty()) { entityPool->addChunk(); }
+  if (freePtrPos.empty()) { _entityPtrPool.addChunk(); }
+  auto nextFreePos = freePos.front();
+  auto nextFreePtrPos = freePtrPos.front();
+
+  auto entity = entityPool->getEntity(Chunks::chunkPos_t(nextFreePos));
+  entity->setStatus(status);
+  entity->setChunkPos(Chunks::chunkPos_t(nextFreePtrPos));
+
+  auto entityPtr = _entityPtrPool.getRawEntity(Chunks::chunkPos_t(nextFreePtrPos));
+  entityPtr->setStatus(C::ENT_ALIVE);
+  entityPtr->setChunkPos(Chunks::chunkPos_t(nextFreePos));
+  entityPtr->setPoolId(poolId);
+
+  freePtrPos.erase(freePtrPos.begin());
+  freePos.erase(freePos.begin());
+
+  return { nextFreePtrPos };
+}
+
+Chunks::cPosArr_t EntityManager::createEntities(const std::string &entityName, size_t count, C::EntityStatusEnum status)
 {
   size_t idx = 0;
 
   for (auto &entityPool : _entityPools) {
     if (entityPool->getEntityName() == entityName) {
       std::cout << "\n" BLUE "Creating " << count << " entities of type " RESET << entityName << "\n";
-      return _createEntities(entityPool, count, idx, status);
+      return _createEntities(std::make_tuple(entityPool, idx), count, status);
     }
     idx++;
   }
   return {};
 }
 
-void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
+void EntityManager::destroyEntity(const Chunks::chunkPos_t &cPos)
 {
   std::cout << "\n" RED "Destroying entity" RESET "\n";
   auto entityPtr = std::unique_ptr<E::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
@@ -124,12 +149,65 @@ void EntityManager::destroyEntity(const Chunks::ChunkPos &cPos)
   _entityPools[poolId]->getFreePos().push_back(entCPos);
 }
 
-void EntityManager::destroyEntities(const std::vector<Chunks::ChunkPos> &cPosArr)
+void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
 {
   std::cout << "\n" RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
-  for (const auto &cPos : cPosArr) { destroyEntity(cPos); }
+
+  _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosArr, C::ENT_NONE);
+  _entityPtrPool.getFreePos().insert(_entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end());
+
+  Chunks::cPosArr_t deletedcPos;
+  deletedcPos.resize(cPosArr.size());
+  _entityPtrPool.getChunkPosPool().getComponentsAtIndexes(cPosArr, deletedcPos);
+
+  std::vector<std::tuple<C::entity_pool_id_t>> poolIds;
+  poolIds.resize(cPosArr.size());
+  _entityPtrPool.getEntityPoolIdPool().getComponentsAtIndexes(cPosArr, poolIds);
+
+  for (size_t i = 0; i < cPosArr.size(); i++) {
+    auto [poolId] = poolIds[i];
+    auto entCPos = deletedcPos[i];
+    auto entity = _entityPools[poolId]->getEntity(entCPos);
+    entity->setStatus(C::ENT_NONE);
+    _entityPools[poolId]->getFreePos().push_back(entCPos);
+  }
+}
+
+void EntityManager::_destroyEntities(const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool)
+{
+  std::cout << "\n" RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
+
+  _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosArr, C::ENT_NONE);
+  _entityPtrPool.getFreePos().insert(_entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end());
+
+  Chunks::cPosArr_t deletedcPos;
+  deletedcPos.resize(cPosArr.size());
+  _entityPtrPool.getChunkPosPool().getComponentsAtIndexes(cPosArr, deletedcPos);
+
+  entityPool->getEntityStatusPool().setComponentAtIndexes(deletedcPos, C::ENT_NONE);
+  entityPool->getFreePos().insert(entityPool->getFreePos().end(), deletedcPos.begin(), deletedcPos.end());
+}
+
+void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr, const std::string &entityName)
+{
+  for (auto &entityPool : _entityPools) {
+    if (entityPool->getEntityName() == entityName) {
+      _destroyEntities(cPosArr, entityPool);
+      return;
+    }
+  }
 }
 
 void EntityManager::runSystems() { _systemTree.runTree(); }
+
+std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> EntityManager::_getEntityPool(const std::string &entityName)
+{
+  size_t idx = 0;
+  for (auto &entityPool : _entityPools) {
+    if (entityPool->getEntityName() == entityName) { return { entityPool, idx }; }
+    idx++;
+  }
+  return { nullptr, 0 };
+}
 
 }// namespace ECS

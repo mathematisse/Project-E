@@ -12,6 +12,7 @@
 
 
 namespace ECS::E {
+
 class AEntityPool : public IEntityPool
 {
 public:
@@ -23,18 +24,21 @@ public:
   AEntityPool &operator=(AEntityPool &&other) = default;
 
   [[nodiscard]] const std::string &getEntityName() const override;
-  std::vector<Chunks::ChunkPos> &getFreePos() override;
-  Chunks::chunk_pos_t getTotalSize() override;
-  Chunks::chunk_pos_t getUsedSize() override;
-  [[nodiscard]] Chunks::chunk_pos_t getChunkCount() const override;
+  Chunks::cPosArr_t &getFreePos() override;
+  Chunks::chunk_idx_t getTotalSize() override;
+  Chunks::chunk_idx_t getUsedSize() override;
+  [[nodiscard]] Chunks::chunk_idx_t getChunkCount() const override;
   C::IComponentPool *getComponentPool(const std::string &name) override;
   void addChunk() override;
+
+  C::EntityStatusPool &getEntityStatusPool() override;
+  C::ChunkPosPool &getChunkPosPool() override;
 
 protected:
   std::string _entityName;
   size_t _chunkSize;
 
-  std::vector<Chunks::ChunkPos> _freePos;
+  Chunks::cPosArr_t _freePos;
   C::EntityStatusPool _entityStatusPool;
   C::ChunkPosPool _chunkPosPool;
 };

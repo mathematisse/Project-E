@@ -71,7 +71,7 @@ int main()
   // Destroy entities
   _eM.destroyEntities(entities);
   _eM.runSystems();
-  _eM.destroyEntities(entities2);
+  _eM.destroyEntities(entities2, "ExamplePoint");// Giving a name is optionnal but will yield better performance
   _eM.runSystems();
 
   // Create more entities

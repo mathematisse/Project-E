@@ -68,8 +68,8 @@ public:
   EpeePool(EpeePool &&other) = default;
   EpeePool &operator=(EpeePool &&other) = default;
 
-  std::unique_ptr<E::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
-  std::unique_ptr<E::EpeeRef> getRawEntity(Chunks::ChunkPos cPos);
+  std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
+  std::unique_ptr<E::EpeeRef> getRawEntity(Chunks::chunkPos_t cPos);
   std::vector<C::IComponentPool *> getComponentPools() override;
 
 protected:

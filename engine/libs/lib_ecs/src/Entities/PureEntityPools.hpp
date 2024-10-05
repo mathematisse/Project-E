@@ -20,9 +20,11 @@ class EntityPtrPool : public AEntityPool
 {
 public:
   EntityPtrPool();
-  std::unique_ptr<IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
-  std::unique_ptr<E::EntityPtrRef> getRawEntity(Chunks::ChunkPos cPos);
+  std::unique_ptr<IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
+  std::unique_ptr<E::EntityPtrRef> getRawEntity(Chunks::chunkPos_t cPos);
   std::vector<C::IComponentPool *> getComponentPools() override;
+
+  C::EntityPoolIdPool &getEntityPoolIdPool();
 
 protected:
   C::EntityPoolIdPool _entityPoolIdPool;

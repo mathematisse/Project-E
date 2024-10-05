@@ -10,6 +10,7 @@
 #include "Chunks/ChunkPos.hpp"
 #include "Chunks/IChunk.hpp"
 #include "Chunks/IChunkPool.hpp"
+#include <iostream>
 #include <vector>
 
 namespace ECS::Chunks {
@@ -42,7 +43,7 @@ public:
    * @param pos The position of the element.
    * @return T* Pointer to the element.
    */
-  T *getElem(ChunkPos pos) override { return _chunks[pos.chunkIndex]->getElem(pos.elemIndex); }
+  T *getElem(chunkPos_t pos) override { return _chunks[std::get<0>(pos)]->getElem(std::get<1>(pos)); }
 
   /**
    * @brief Access an element by its position (const version).
@@ -50,7 +51,7 @@ public:
    * @param pos The position of the element.
    * @return const T* Pointer to the element.
    */
-  const T *getElem(ChunkPos pos) const override { return _chunks[pos.chunkIndex]->getElem(pos.elemIndex); }
+  const T *getElem(chunkPos_t pos) const override { return _chunks[std::get<0>(pos)]->getElem(std::get<1>(pos)); }
 
   /**
    * @brief Access a chunk by index.
@@ -76,13 +77,38 @@ public:
   std::vector<IChunk<T> *> getChunks() override { return _chunks; }
 
   /**
+   * @brief set values at indexes
+   *
+   * @param indexes The indexes of the elements.
+   */
+  void setValueAtIndexes(const cPosArr_t &indexes, const T &value) override
+  {
+    for (const auto &index : indexes) { *(_chunks[std::get<0>(index)]->getElem(std::get<1>(index))) = value; }
+  }
+
+  void setValuesAtIndexes(const cPosArr_t &indexes, const std::vector<T> &values) override
+  {
+    for (size_t i = 0; i < indexes.size(); i++) {
+      *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i]))) = values[i];
+    }
+  }
+
+  template<std::size_t Idx, typename... Ts>
+  void getValuesAtIndexes(const cPosArr_t &indexes, std::vector<std::tuple<Ts...>> &values)
+  {
+    for (size_t i = 0; i < indexes.size(); i++) {
+      std::get<Idx>(values[i]) = *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i])));
+    }
+  }
+
+  /**
    * @brief Get the total number of elements in all chunks.
    *
    * @return chunk_pos_t The total number of elements.
    */
-  [[nodiscard]] chunk_pos_t elemCount() const override
+  [[nodiscard]] chunk_idx_t elemCount() const override
   {
-    chunk_pos_t size = 0;
+    chunk_idx_t size = 0;
     for (size_t i = 0; i < _chunks.size(); i++) { size += _chunks[i]->elemCount(); }
     return size;
   }
@@ -92,7 +118,7 @@ public:
    *
    * @return chunk_pos_t The total number of chunks.
    */
-  [[nodiscard]] chunk_pos_t chunkCount() const override { return _chunks.size(); }
+  [[nodiscard]] chunk_idx_t chunkCount() const override { return _chunks.size(); }
 
   /**
    * @brief Add a new chunk with a specified number of elements.

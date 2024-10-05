@@ -50,9 +50,9 @@ public:
   /**
    * @brief Gets the chunk position of the entity.
    *
-   * @return The chunk position of the entity as a Chunks::ChunkPos.
+   * @return The chunk position of the entity as a Chunks::chunkPos_t.
    */
-  [[nodiscard]] Chunks::ChunkPos getChunkPos() const override;
+  [[nodiscard]] Chunks::chunkPos_t getChunkPos() const override;
 
   /**
    * @brief Sets the status of the entity.
@@ -64,9 +64,9 @@ public:
   /**
    * @brief Sets the chunk position of the entity.
    *
-   * @param cPos The new chunk position of the entity as a Chunks::ChunkPos.
+   * @param cPos The new chunk position of the entity as a Chunks::chunkPos_t.
    */
-  void setChunkPos(Chunks::ChunkPos cPos) override;
+  void setChunkPos(Chunks::chunkPos_t cPos) override;
 
   C::EntityStatusRef *_status;///< Pointer to the status component of the entity.
   C::ChunkPosRef *_cPos;///< Pointer to the chunk position component of the entity.

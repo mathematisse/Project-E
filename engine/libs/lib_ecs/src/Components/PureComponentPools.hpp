@@ -28,7 +28,7 @@ using entity_status_t = int8_t;
 DECLARE_COMPONENT(EntityStatus, entity_status_t);
 
 // Serves multiple purposes, in entity ptrs or for known pool entities references
-DECLARE_COMPONENT(ChunkPos, Chunks::chunk_pos_t, Chunks::chunk_pos_t);
+DECLARE_COMPONENT(ChunkPos, Chunks::chunk_idx_t, Chunks::elem_idx_t);
 
 // Identifies the entity pool in the core manager
 DECLARE_COMPONENT(EntityPoolId, entity_pool_id_t);

@@ -8,8 +8,8 @@
 #pragma once
 
 #include "Components/IComponentPool.hpp"
+#include "Components/PureComponentPools.hpp"
 #include "Entities/IEntityRef.hpp"
-#include <list>
 #include <memory>
 #include <vector>
 
@@ -25,13 +25,16 @@ public:
   IEntityPool &operator=(const IEntityPool &other) = default;
   IEntityPool &operator=(IEntityPool &&other) = default;
   [[nodiscard]] virtual const std::string &getEntityName() const = 0;
-  virtual std::unique_ptr<IEntityRef> getEntity(Chunks::ChunkPos cPos) = 0;
-  virtual std::vector<Chunks::ChunkPos> &getFreePos() = 0;
-  virtual Chunks::chunk_pos_t getTotalSize() = 0;
-  virtual Chunks::chunk_pos_t getUsedSize() = 0;
-  [[nodiscard]] virtual Chunks::chunk_pos_t getChunkCount() const = 0;
+  virtual std::unique_ptr<IEntityRef> getEntity(Chunks::chunkPos_t cPos) = 0;
+  virtual Chunks::cPosArr_t &getFreePos() = 0;
+  virtual Chunks::chunk_idx_t getTotalSize() = 0;
+  virtual Chunks::chunk_idx_t getUsedSize() = 0;
+  [[nodiscard]] virtual Chunks::chunk_idx_t getChunkCount() const = 0;
   virtual std::vector<C::IComponentPool *> getComponentPools() = 0;
   virtual C::IComponentPool *getComponentPool(const std::string &name) = 0;
   virtual void addChunk() = 0;
+
+  virtual C::EntityStatusPool &getEntityStatusPool() = 0;
+  virtual C::ChunkPosPool &getChunkPosPool() = 0;
 };
 }// namespace ECS::E

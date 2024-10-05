@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Chunks/ChunkPos.hpp"
+#include "Components/PureComponentPools.hpp"
 #include "Entities/IEntityPool.hpp"
 #include "Entities/IEntityRef.hpp"
 #include "Entities/PureEntities.hpp"
@@ -26,18 +27,22 @@ public:
   bool registerEntityPool(ECS::E::IEntityPool *entityPool);
   S::IQuery &initializeQuery(S::IQuery &query);
   std::unique_ptr<ECS::E::IEntityRef> getEntity(const ECS::E::EntityPtrRef &entityPtr);
-  std::unique_ptr<ECS::E::IEntityRef> getEntity(const Chunks::ChunkPos &cPos);
-  Chunks::ChunkPos createEntity(const std::string &entityName, C::EntityStatusEnum status = C::ENT_ALIVE);
-  std::vector<Chunks::ChunkPos>
+  std::unique_ptr<ECS::E::IEntityRef> getEntity(const Chunks::chunkPos_t &cPos);
+  Chunks::chunkPos_t createEntity(const std::string &entityName, C::EntityStatusEnum status = C::ENT_ALIVE);
+  Chunks::cPosArr_t
     createEntities(const std::string &entityName, size_t count = 0, C::EntityStatusEnum status = C::ENT_ALIVE);
-  void destroyEntity(const Chunks::ChunkPos &cPos);
-  void destroyEntities(const std::vector<Chunks::ChunkPos> &cPosArr);
+  void destroyEntity(const Chunks::chunkPos_t &cPos);
+  void destroyEntities(const Chunks::cPosArr_t &cPosArr);
+  void destroyEntities(const Chunks::cPosArr_t &cPosArr, const std::string &entityName);
 
   void runSystems();
 
 private:
-  std::vector<Chunks::ChunkPos>
-    _createEntities(ECS::E::IEntityPool *entityPool, size_t count, size_t poolId, C::EntityStatusEnum status);
+  Chunks::cPosArr_t
+    _createEntities(std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, size_t count, C::EntityStatusEnum status);
+  Chunks::chunkPos_t _createEntity(std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, C::EntityStatusEnum status);
+  std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> _getEntityPool(const std::string &entityName);
+  void _destroyEntities(const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool);
 
   ECS::E::EntityPtrPool _entityPtrPool;
   std::vector<ECS::E::IEntityPool *> _entityPools;

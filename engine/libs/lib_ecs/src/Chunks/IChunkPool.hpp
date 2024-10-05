@@ -52,12 +52,21 @@ public:
   virtual const IChunk<T> *getChunk(size_t index) const = 0;
 
   /**
+   * @brief set values at indexes
+   *
+   * @param indexes The indexes of the elements.
+   */
+  virtual void setValueAtIndexes(const cPosArr_t &indexes, const T &value) = 0;
+
+  virtual void setValuesAtIndexes(const cPosArr_t &indexes, const std::vector<T> &values) = 0;
+
+  /**
    * @brief Get an element by its position.
    *
    * @param pos The position of the element.
    * @return T* Pointer to the element.
    */
-  virtual T *getElem(ChunkPos pos) = 0;
+  virtual T *getElem(chunkPos_t pos) = 0;
 
   /**
    * @brief Get an element by its position (const version).
@@ -65,7 +74,7 @@ public:
    * @param pos The position of the element.
    * @return const T* Const pointer to the element.
    */
-  virtual const T *getElem(ChunkPos pos) const = 0;
+  virtual const T *getElem(chunkPos_t pos) const = 0;
 
   /**
    * @brief Add a new chunk with a specified number of elements.
@@ -86,13 +95,13 @@ public:
    *
    * @return chunk_pos_t The total number of elements.
    */
-  [[nodiscard]] virtual chunk_pos_t elemCount() const = 0;
+  [[nodiscard]] virtual chunk_idx_t elemCount() const = 0;
 
   /**
    * @brief Get the total number of chunks.
    *
    * @return chunk_pos_t The total number of chunks.
    */
-  [[nodiscard]] virtual chunk_pos_t chunkCount() const = 0;
+  [[nodiscard]] virtual chunk_idx_t chunkCount() const = 0;
 };
 }// namespace ECS::Chunks

@@ -45,7 +45,7 @@ public:
    * @param cPos Position of the chunk.
    * @return IComponentRef* Reference to the component.
    */
-  IComponentRef *getComponentRef(Chunks::ChunkPos cPos) override
+  IComponentRef *getComponentRef(Chunks::chunkPos_t cPos) override
   {
     return getComponentRefImpl(cPos, std::index_sequence_for<Ts...>{});
   }
@@ -56,9 +56,34 @@ public:
    * @param cPos Position of the chunk.
    * @return const IComponentRef* Dummy reference to the component.
    */
-  [[nodiscard]] const IComponentRef *getDummyComponentRef(Chunks::ChunkPos cPos) const override
+  [[nodiscard]] const IComponentRef *getDummyComponentRef(Chunks::chunkPos_t cPos) const override
   {
     return getDummyComponentRefImpl(cPos, std::index_sequence_for<Ts...>{});
+  }
+
+  void setComponentAtIndex(const Chunks::chunkPos_t &index, const std::tuple<Ts...> &component)
+  {
+    setComponentAtIndexImpl(index, component, std::index_sequence_for<Ts...>{});
+  }
+
+  /**
+   * @brief Set components at the specified indexes.
+   * @param indexes The indexes at which to set the components.
+   * @param component The component to set.
+   */
+  void setComponentAtIndexes(const Chunks::cPosArr_t &indexes, const std::tuple<Ts...> &component)
+  {
+    setComponentAtIndexesImpl(indexes, component, std::index_sequence_for<Ts...>{});
+  }
+
+  void setComponentsAtIndexes(const Chunks::cPosArr_t &indexes, const std::vector<std::tuple<Ts...>> &components)
+  {
+    for (size_t i = 0; i < indexes.size(); i++) { setComponentAtIndex(indexes[i], components[i]); }
+  }
+
+  void getComponentsAtIndexes(const Chunks::cPosArr_t &indexes, std::vector<std::tuple<Ts...>> &components)
+  {
+    getComponentsAtIndexesImpl(indexes, components, std::index_sequence_for<Ts...>{});
   }
 
   /**
@@ -66,7 +91,7 @@ public:
    *
    * @return chunk_pos_t Number of elements.
    */
-  [[nodiscard]] Chunks::chunk_pos_t elemCount() const override
+  [[nodiscard]] Chunks::chunk_idx_t elemCount() const override
   {
     return std::get<0>(_pools).elemCount();// Assume all pools have the same element count.
   }
@@ -76,7 +101,7 @@ public:
    *
    * @return chunk_pos_t Number of chunks.
    */
-  [[nodiscard]] Chunks::chunk_pos_t chunkCount() const override
+  [[nodiscard]] Chunks::chunk_idx_t chunkCount() const override
   {
     return std::get<0>(_pools).chunkCount();// Assume all pools have the same chunk count.
   }
@@ -116,16 +141,41 @@ protected:
   std::tuple<Chunks::StandardChunkPool<Ts>...> _pools;///< The chunk pools for each component type.
 
 private:
+  template<std::size_t... Indices>
+  inline void setComponentAtIndexImpl(const Chunks::chunkPos_t &index,
+    const std::tuple<Ts...> &component,
+    std::index_sequence<Indices...> /*unused*/)
+  {
+    (std::get<Indices>(_pools).setValueAtIndexes({ index }, std::get<Indices>(component)), ...);
+  }
+
+  template<std::size_t... Indices>
+  inline void setComponentAtIndexesImpl(const Chunks::cPosArr_t &indexes,
+    const std::tuple<Ts...> &component,
+    std::index_sequence<Indices...> /*unused*/)
+  {
+    (std::get<Indices>(_pools).setValueAtIndexes(indexes, std::get<Indices>(component)), ...);
+  }
+
+  template<std::size_t... Indices>
+  inline void getComponentsAtIndexesImpl(const Chunks::cPosArr_t &indexes,
+    std::vector<std::tuple<Ts...>> &components,
+    std::index_sequence<Indices...> /*unused*/)
+  {
+    ((std::get<Indices>(_pools).template getValuesAtIndexes<Indices, Ts...>(indexes, components)), ...);
+  }
+
   // Helper function to retrieve component reference using index sequence
   template<std::size_t... Indices>
-  IComponentRef *getComponentRefImpl(Chunks::ChunkPos cPos, std::index_sequence<Indices...> /*unused*/)
+  IComponentRef *getComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/)
   {
     return new ComponentRef<Ts...>(std::get<Indices>(_pools).getElem(cPos)...);
   }
 
   // Helper function to retrieve dummy component reference using index sequence
   template<std::size_t... Indices>
-  const IComponentRef *getDummyComponentRefImpl(Chunks::ChunkPos cPos, std::index_sequence<Indices...> /*unused*/) const
+  const IComponentRef *getDummyComponentRefImpl(Chunks::chunkPos_t cPos,
+    std::index_sequence<Indices...> /*unused*/) const
   {
     return new ComponentRef<Ts...>(*(std::get<Indices>(_pools).getElem(cPos))...);
   }

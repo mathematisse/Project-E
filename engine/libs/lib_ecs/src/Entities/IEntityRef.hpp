@@ -45,9 +45,9 @@ public:
   /**
    * @brief Get the chunk position of the entity.
    *
-   * @return Chunks::ChunkPos The chunk position of the entity.
+   * @return Chunks::chunkPos_t The chunk position of the entity.
    */
-  [[nodiscard]] virtual Chunks::ChunkPos getChunkPos() const = 0;
+  [[nodiscard]] virtual Chunks::chunkPos_t getChunkPos() const = 0;
 
   /**
    * @brief Set the status of the entity.
@@ -61,6 +61,6 @@ public:
    *
    * @param cPos The new chunk position of the entity.
    */
-  virtual void setChunkPos(Chunks::ChunkPos cPos) = 0;
+  virtual void setChunkPos(Chunks::chunkPos_t cPos) = 0;
 };
 }// namespace ECS::E
