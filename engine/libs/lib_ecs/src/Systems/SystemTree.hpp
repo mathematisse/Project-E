@@ -8,7 +8,6 @@
 #pragma once
 
 #include "Systems/ISystem.hpp"
-#include <list>
 
 
 namespace ECS::S {
@@ -30,8 +29,9 @@ public:
   SystemTreeNode(SystemTreeNode &&other) = default;
   SystemTreeNode &operator=(const SystemTreeNode &other) = default;
   SystemTreeNode &operator=(SystemTreeNode &&other) = default;
-  bool addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside);
+  bool addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside);
   bool addSystem(ISystem *system, int group, bool atStart);
+  bool addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside);
   void registerEntityPool(E::IEntityPool *entityPool);
   void runNode();
   [[nodiscard]] int getGroup() const;
@@ -54,9 +54,9 @@ public:
   SystemTree(SystemTree &&other) = default;
   SystemTree &operator=(const SystemTree &other) = default;
   SystemTree &operator=(SystemTree &&other) = default;
-  bool addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside);
+  bool addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside);
   bool addSystem(ISystem *system, int group, bool atStart);
-  bool addSystemTreeNodes(SystemTreeNode &node, int group, bool atStart);
+  bool addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside);
   void registerEntityPool(E::IEntityPool *entityPool);
   void runTree();
 

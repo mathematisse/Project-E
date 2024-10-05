@@ -24,26 +24,34 @@ namespace S {
       _endSystems(std::move(endSystems))
   {}
 
-  bool SystemTreeNode::addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
+  bool SystemTreeNode::addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
   {
-    if (group == _group && addInside) {
+    // First check if are in a match case (will add in children)
+    if (targetGroup == _group && addInside) {
       if (addBefore) {
-        _children.emplace(_children.begin(), neighbourGroup);
+        _children.emplace(_children.begin(), newGroup);
       } else {
-        _children.emplace_back(neighbourGroup);
+        _children.emplace_back(newGroup);
       }
       return true;
     }
+    // If not, check if we have to go deeper for insertion (could add in any sub-nodes)
+    if (addInside) {
+      for (auto &child : _children) {
+        if (child.addSystemGroup(targetGroup, newGroup, addBefore, addInside)) { return true; }
+      }
+      return false;
+    }
+    // Else check if we match with a child, to add as neighbour
     for (auto it = _children.begin(); it != _children.end(); ++it) {
       auto &child = *it;
-      if (child.getGroup() == group && !addInside) {
-        if (addBefore) {
-          _children.insert(it, SystemTreeNode(neighbourGroup));
-        } else {
-          _children.insert(std::next(it), SystemTreeNode(neighbourGroup));
-        }
-        return true;
+      if (child.getGroup() != targetGroup) { continue; }
+      if (addBefore) {
+        _children.insert(it, SystemTreeNode(newGroup));
+      } else {
+        _children.insert(std::next(it), SystemTreeNode(newGroup));
       }
+      return true;
     }
     return false;
   }
@@ -60,6 +68,35 @@ namespace S {
     }
     for (auto &child : _children) {
       if (child.addSystem(system, group, atStart)) { return true; }
+    }
+    return false;
+  }
+
+  bool SystemTreeNode::addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside)
+  {
+    if (targetGroup == _group && addInside) {
+      if (addBefore) {
+        _children.insert(_children.begin(), node);
+      } else {
+        _children.push_back(node);
+      }
+      return true;
+    }
+    if (addInside) {
+      for (auto &child : _children) {
+        if (child.addSystemTreeNode(node, targetGroup, addBefore, addInside)) { return true; }
+      }
+      return false;
+    }
+    for (auto it = _children.begin(); it != _children.end(); ++it) {
+      auto &child = *it;
+      if (child.getGroup() != targetGroup) { continue; }
+      if (addBefore) {
+        _children.insert(it, node);
+      } else {
+        _children.insert(std::next(it), node);
+      }
+      return true;
     }
     return false;
   }
@@ -87,14 +124,19 @@ namespace S {
 
   SystemTree::~SystemTree() = default;
 
-  bool SystemTree::addSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
+  bool SystemTree::addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
   {
-    return _root.addSystemGroup(group, neighbourGroup, addBefore, addInside);
+    return _root.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
   }
 
   bool SystemTree::addSystem(ISystem *system, int group, bool atStart)
   {
     return _root.addSystem(system, group, atStart);
+  }
+
+  bool SystemTree::addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside)
+  {
+    return _root.addSystemTreeNode(node, targetGroup, addBefore, addInside);
   }
 
   void SystemTree::registerEntityPool(E::IEntityPool *entityPool) { _root.registerEntityPool(entityPool); }

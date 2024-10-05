@@ -19,9 +19,9 @@
 
 namespace ECS {
 
-bool EntityManager::registerSystemGroup(int group, int neighbourGroup, bool addBefore, bool addInside)
+bool EntityManager::registerSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
 {
-  return _systemTree.addSystemGroup(group, neighbourGroup, addBefore, addInside);
+  return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
 bool EntityManager::registerSystem(S::ISystem &system, int group, bool atStart)
@@ -35,6 +35,12 @@ bool EntityManager::registerEntityPool(E::IEntityPool *entityPool)
   _systemTree.registerEntityPool(entityPool);
   _entityPools.push_back(entityPool);
   return true;
+}
+
+bool EntityManager::registerSystemNode(S::SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside)
+{
+  for (auto &entityPool : _entityPools) { node.registerEntityPool(entityPool); }
+  return _systemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }
 
 S::IQuery &EntityManager::initializeQuery(S::IQuery &query)

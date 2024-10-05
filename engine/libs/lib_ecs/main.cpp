@@ -10,28 +10,31 @@
 #include "Demo/Systems.hpp"
 #include "EntityManager.hpp"
 #include "Systems/Query.hpp"
+#include "Systems/SystemTree.hpp"
 
 using namespace ECS;
 
 int main()
 {
   // INITIALIZATION
-  EntityManager _eM = EntityManager();
+  EntityManager _eM;
 
-  S::InitSystem initSystem = S::InitSystem();
-  S::MoveUpSystem moveUpSystem = S::MoveUpSystem();
-  S::PrintSystem printSystem = S::PrintSystem();
-  S::DualExampleSystem dualExampleSystem = S::DualExampleSystem();
+  S::InitSystem initSystem;
+  S::MoveUpSystem moveUpSystem;
+  S::PrintSystem printSystem;
+  S::DualExampleSystem dualExampleSystem;
 
-  E::ExamplePointPool pointsPool = E::ExamplePointPool();
-  // pointsPool.addChunk();
+  E::ExamplePointPool pointsPool;
+
+  // create a system tree node with start and end systems
+  S::SystemTreeNode demoNode(42, { &initSystem, &moveUpSystem }, { &printSystem, &dualExampleSystem });
 
 
-  // Register the systems
-  _eM.registerSystem(initSystem, S::ROOTSYSGROUP);
-  _eM.registerSystem(moveUpSystem, S::ROOTSYSGROUP);
-  _eM.registerSystem(printSystem, S::ROOTSYSGROUP);
-  _eM.registerSystem(dualExampleSystem, S::ROOTSYSGROUP);
+  // This means : we register demoNode to the ROOTSYSGROUP at the end of the children
+  // true false means before rootsysgroup itself, in the children of it's parent
+  _eM.registerSystemNode(demoNode, S::ROOTSYSGROUP, false, true);
+
+
   // Register the entity pools
   _eM.registerEntityPool(&pointsPool);
 

@@ -22,7 +22,8 @@ namespace ECS {
 class EntityManager
 {
 public:
-  bool registerSystemGroup(int group, int neighbourGroup, bool addBefore = false, bool addInside = false);
+  bool registerSystemGroup(int targetGroup, int newGroup, bool addBefore = false, bool addInside = false);
+  bool registerSystemNode(S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false);
   bool registerSystem(S::ISystem &system, int group, bool atStart = false);
   bool registerEntityPool(ECS::E::IEntityPool *entityPool);
   S::IQuery &initializeQuery(S::IQuery &query);
