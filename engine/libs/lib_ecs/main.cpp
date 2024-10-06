@@ -27,6 +27,7 @@ int main()
   E::ExamplePointPool pointsPool;
 
   // create a system tree node with start and end systems
+  // there is another optionnal argument to give child nodes to the node
   S::SystemTreeNode demoNode(42, { &initSystem, &moveUpSystem }, { &printSystem, &dualExampleSystem });
 
 
@@ -64,6 +65,16 @@ int main()
       return;
     }
     std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx2 << ", " << eIdx2 << "]\n";
+  });
+
+  // Run a chunk query (because of cMap, the lambda will receive tuple of refs to vectors)
+  S::Query<C::EntityStatusPool>().cMap(_eM, [](auto &cStatusVector) {
+    auto &[statusVector] = cStatusVector;
+    std::size_t i = 0;
+    for (auto status : statusVector) {
+      std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " [" << i << "]\n";
+      i++;
+    }
   });
 
 

@@ -58,6 +58,8 @@ public:
 
 protected:
   void _innerOperate(typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition) override;
+  void _endCMapCallBack(typename C::EntityStatusPool::VTypes &cstatus,
+    typename C::PositionPool::VTypes &cposition) override;
 };
 
 class DualExampleSystem

@@ -63,6 +63,11 @@ namespace S {
               << y << "}" << RESET;
   }
 
+  void PrintSystem::_endCMapCallBack(C::EntityStatusPool::VTypes & /*unused*/, C::PositionPool::VTypes & /*unused*/)
+  {
+    std::cout << "\n";
+  }
+
   DualExampleSystem::DualExampleSystem() : ADualSystem(false) {}
 
   void DualExampleSystem::_innerOperate(C::EntityStatusPool::Types &cStatusA,
