@@ -10,6 +10,7 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
 #include <iostream>
+#include "AssetsPath.hpp"
 #include <raylib.h>
 
 #define RED_CLI "\033[31m"
@@ -26,15 +27,58 @@ DrawSystem::DrawSystem():
 {
 }
 
-void DrawSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition)
+void DrawSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::ColorPool::Types &ccolor,
+    C::SizePool::Types &csize
+)
+{
+    auto [status] = cstatus;
+    if (status != C::EntityStatusEnum::ENT_ALIVE || !IsKeyDown(KEY_H)) {
+        return;
+    }
+    auto [x, y] = cposition;
+    auto [r, g, b, a] = ccolor;
+    auto [sizeX, sizeY, rotation] = csize;
+    DrawRectangle((int) x, (int) y, sizeX, sizeY, {r, g, b, a});
+}
+
+DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader)
+{
+}
+
+void DrawSpriteSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
+    C::TypePool::Types &ctype, C::SpritePool::Types &csprite
+)
 {
     auto [status] = cstatus;
     if (status != C::EntityStatusEnum::ENT_ALIVE) {
         return;
     }
+    auto [sprite_id] = csprite;
+    if (sprite_id == 0) {
+        return;
+    }
     auto [x, y] = cposition;
-    std::cout << "Drawing square at [" << x << ", " << y << "]\n";
-    DrawRectangle((int)x, (int)y, 50, 50, {255, 0, 0, 255});
+    auto [sizeX, sizeY, rotation] = csize;
+    auto [type] = ctype;
+    auto texture = assetsLoader.get_asset_from_id(sprite_id);
+    float scale = texture.width / sizeX;
+    float adjustedX = x;
+    float adjustedY = y;
+    if (rotation == 90) {
+        adjustedX += sizeX;
+    }
+    if (rotation == -90) {
+        adjustedY += sizeY;
+    }
+    DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
+    if (type == SquareType::BACKGROUND) {
+        DrawTextureEx(texture, {adjustedX - 3000, adjustedY}, rotation, 1 / scale, WHITE);
+        DrawTextureEx(texture, {adjustedX + 3000, adjustedY}, rotation, 1 / scale, WHITE);
+    }
 }
 
 ApplyVelocitySystem::ApplyVelocitySystem():
@@ -55,7 +99,9 @@ MovePlayerSystem::MovePlayerSystem():
 {
 }
 
-void MovePlayerSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
+void MovePlayerSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+)
 {
     auto [status] = cstatus;
     auto [type] = ctype;
@@ -77,6 +123,155 @@ void MovePlayerSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::Vel
     }
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
+    }
+}
+
+SpawnEnnemySystem::SpawnEnnemySystem(
+    EntityManager &entityManager, AssetsLoader &assetsLoader, Camera2D &camera, size_t maxEnnemyCount
+):
+    AMonoSystem(false),
+    entityManager(entityManager),
+    assetsLoader(assetsLoader),
+    camera(camera),
+    _maxEnnemyCount(maxEnnemyCount)
+{
+}
+
+void SpawnEnnemySystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+)
+{
+    auto [status] = cstatus;
+    auto [type] = ctype;
+
+    if (status == C::EntityStatusEnum::ENT_ALIVE && type != SquareType::BACKGROUND &&
+        type != SquareType::WALL) {
+        auto [x, y] = cposition;
+        if (type == SquareType::ENEMY && x < camera.target.x - 1000) {
+            _ennemyCount--;
+            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        } else if (x < camera.target.x - 1000) {
+            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+    }
+
+    if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::PLAYER) {
+        return;
+    }
+    auto need_to_spawn = _maxEnnemyCount - _ennemyCount;
+    if (need_to_spawn <= 0) {
+        return;
+    }
+    auto [x, y] = cposition;
+    auto ennemies = entityManager.createEntities("Square", need_to_spawn, ECS::C::ENT_ALIVE);
+
+    for (const auto &entity : ennemies) {
+        auto ref = entityManager.getEntity(entity);
+
+        auto square_ennemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (!square_ennemy) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return;
+        }
+        square_ennemy->getVelocity()->set<0>(0.0F);
+        square_ennemy->getVelocity()->set<1>(0.0F);
+        square_ennemy->getVelocity()->set<2>(150.0F);
+        square_ennemy->getType()->set<0>(SquareType::ENEMY);
+        square_ennemy->getColor()->set<0>(255);
+        square_ennemy->getColor()->set<1>(0);
+        square_ennemy->getColor()->set<2>(0);
+        square_ennemy->getColor()->set<3>(255);
+        square_ennemy->getSize()->set<0>(80);
+        square_ennemy->getSize()->set<1>(80);
+        square_ennemy->getSize()->set<2>(90);
+
+        square_ennemy->getPosition()->set<0>(x + 500 + rand() % (int) (x + 1000));
+        square_ennemy->getPosition()->set<1>(100 + rand() % 800);
+        square_ennemy->getCanShoot()->set<0>(true);
+        square_ennemy->getCanShoot()->set<1>(1.5F);
+        square_ennemy->getSprite()->set<0>(assetsLoader.get_asset(E1FC).id);
+    }
+    _ennemyCount += need_to_spawn;
+}
+
+ShootSystem::ShootSystem(EntityManager &entityManager, AssetsLoader &assetsLoader):
+    AMonoSystem(false),
+    entityManager(entityManager),
+    assetsLoader(assetsLoader)
+{
+}
+
+void ShootSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype,
+    C::CanShootPool::Types &canshoot
+)
+{
+    auto [status] = cstatus;
+    auto [type] = ctype;
+    auto [canShoot, base_delay, delay] = canshoot;
+    if (status != C::EntityStatusEnum::ENT_ALIVE || !canShoot) {
+        return;
+    }
+    if (delay > 0) {
+        delay -= deltaTime;
+        return;
+    }
+    if ((IsKeyDown(KEY_SPACE) && type == SquareType::PLAYER) || type == SquareType::ENEMY) {
+        delay = base_delay;
+        auto [x, y] = cposition;
+        auto bullets = entityManager.createEntities("Square", 1, ECS::C::ENT_ALIVE);
+
+        for (const auto &entity : bullets) {
+            auto ref = entityManager.getEntity(entity);
+
+            auto square_bullet = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+            if (!square_bullet) {
+                std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+                return;
+            }
+            if (type == SquareType::PLAYER) {
+                square_bullet->getVelocity()->set<0>(1.0F);
+                square_bullet->getPosition()->set<0>(x + 80 + 35);
+                square_bullet->getSize()->set<2>(90);
+            } else {
+                square_bullet->getVelocity()->set<0>(-1.0F);
+                square_bullet->getPosition()->set<0>(x - 35);
+                square_bullet->getSize()->set<2>(-90);
+            }
+            square_bullet->getVelocity()->set<1>(0.0F);
+            square_bullet->getVelocity()->set<2>(500.0F);
+            square_bullet->getType()->set<0>(SquareType::BULLET);
+            square_bullet->getColor()->set<0>(0);
+            square_bullet->getColor()->set<1>(0);
+            square_bullet->getColor()->set<2>(0);
+            square_bullet->getColor()->set<3>(255);
+            square_bullet->getPosition()->set<1>(y + 25);
+            square_bullet->getCanShoot()->set<0>(false);
+            square_bullet->getSize()->set<0>(30);
+            square_bullet->getSize()->set<1>(30);
+            square_bullet->getSprite()->set<0>(assetsLoader.get_asset(CUT_BULLET_PATH).id);
+        }
+    }
+}
+
+MoveBackgroundSystem::MoveBackgroundSystem(Camera2D &camera):
+    AMonoSystem(false),
+    camera(camera)
+{
+}
+
+void MoveBackgroundSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+)
+{
+    auto [status] = cstatus;
+    auto [type] = ctype;
+    if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::BACKGROUND) {
+        return;
+    }
+    auto [x, y] = cposition;
+    if (camera.target.x > x + 3000) {
+        x += 3000;
     }
 }
 

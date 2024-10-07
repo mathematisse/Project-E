@@ -1,9 +1,10 @@
+#include <cstdlib>
 #ifndef EXAMPLE
 #include <chrono>
 #include <thread>
 
 #include <raylib.h>
-#include "AssetsLoader.hpp"
+#include "AssetsPath.hpp"
 
 // ECS includes
 #include "lib_ecs/Components/PureComponentPools.hpp"
@@ -13,39 +14,145 @@
 #include "lib_ecs/Systems/Query.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 
+void init_camera(Camera2D &camera)
+{
+    camera.target = {1920 / 2, 1080 / 2};
+    camera.offset = {1920 / 2.0f, 1080 / 2.0f};
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+}
+
+void update_camera(Camera2D &camera, float dt)
+{
+    static float camera_cooldown = 0.01;
+
+    if (camera_cooldown > 0) {
+        camera_cooldown -= dt;
+        return;
+    }
+
+    camera_cooldown = 0.01;
+    Vector2 old = camera.target;
+    camera.target = {old.x + 3, 1080 / 2};
+}
+
 int main()
 {
     InitWindow(1920, 1080, "R-Type");
 
+    Camera2D camera = {};
+    init_camera(camera);
+
     SetTargetFPS(60);
+    srand(time(NULL));
 
     AssetsLoader assetsLoader;
+    assetsLoader.load_assets(paths);
+
     ECS::EntityManager _eM;
 
     ECS::S::DrawSystem drawSystem;
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
+    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, assetsLoader, camera);
+    ECS::S::ShootSystem shootSystem(_eM, assetsLoader);
+    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
+    ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
 
     ECS::E::SquarePool squarePool;
 
-    ECS::S::SystemTreeNode demoNode(42, {&applyVelocitySystem, &moveSystem}, {&drawSystem});
+    ECS::S::SystemTreeNode demoNode(
+        42, {&spawnEnnemySystem},
+        {&moveBackgroundSystem, &moveSystem, &applyVelocitySystem, &shootSystem, &drawSystem,
+         &drawSpriteSystem}
+    );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
 
     _eM.registerEntityPool(&squarePool);
 
+    auto background = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
+
+    for (const auto &entity : background) {
+        auto ref = _eM.getEntity(entity);
+
+        auto square_background = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (!square_background) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return -1;
+        }
+        square_background->getType()->set<0>(SquareType::BACKGROUND);
+        square_background->getColor()->set<3>(255);
+        square_background->getSize()->set<0>(3000);
+        square_background->getSize()->set<1>(1080);
+        square_background->getSprite()->set<0>(assetsLoader.get_asset(BACKGROUND_PATH).id);
+    }
+
+    auto ground = _eM.createEntities("Square", 250, ECS::C::ENT_ALIVE);
+
+    int i = 0;
+    for (const auto &entity : ground) {
+        auto ref = _eM.getEntity(entity);
+
+        auto square_ground = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (!square_ground) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return -1;
+        }
+        square_ground->getType()->set<0>(SquareType::WALL);
+        square_ground->getColor()->set<2>(255);
+        square_ground->getColor()->set<3>(255);
+        square_ground->getSize()->set<0>(80);
+        square_ground->getSize()->set<1>(100);
+        square_ground->getPosition()->set<0>(i * 80);
+        square_ground->getPosition()->set<1>(1080 - 100);
+        square_ground->getSprite()->set<0>(assetsLoader.get_asset(FLOOR).id);
+        i++;
+    }
+
+    auto ceiling = _eM.createEntities("Square", 250, ECS::C::ENT_ALIVE);
+
+    i = 0;
+    for (const auto &entity : ceiling) {
+        auto ref = _eM.getEntity(entity);
+
+        auto square_ceiling = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (!square_ceiling) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return -1;
+        }
+        square_ceiling->getType()->set<0>(SquareType::WALL);
+        square_ceiling->getColor()->set<2>(255);
+        square_ceiling->getColor()->set<3>(255);
+        square_ceiling->getSize()->set<0>(80);
+        square_ceiling->getSize()->set<1>(100);
+        square_ceiling->getPosition()->set<0>(i * 80);
+        square_ceiling->getSprite()->set<0>(assetsLoader.get_asset(CEILING).id);
+        i++;
+    }
+
     auto player = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
 
-    for (auto &entity : player) {
+    for (const auto &entity : player) {
         auto ref = _eM.getEntity(entity);
-        
-        auto square_player = dynamic_cast<ECS::E::SquareRef*>(ref.get());
+
+        auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
         if (!square_player) {
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
             return -1;
         }
-        square_player->setVelocity(ECS::C::VelocityRef(0.0f, 0.0f, 200.0f));
-        square_player->setType(ECS::C::TypeRef(SquareType::PLAYER));
+        square_player->getPosition()->set<0>(1920 / 4);
+        square_player->getPosition()->set<1>(1080 / 2);
+        square_player->getVelocity()->set<2>(300.0F);
+        square_player->getType()->set<0>(SquareType::PLAYER);
+        square_player->getColor()->set<1>(255);
+        square_player->getColor()->set<3>(255);
+        square_player->getCanShoot()->set<0>(true);
+        square_player->getCanShoot()->set<1>(0.3F);
+        square_player->getSize()->set<0>(80);
+        square_player->getSize()->set<1>(80);
+        square_player->getSize()->set<2>(90);
+        square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
     }
 
     auto curr_time = std::chrono::steady_clock::now();
@@ -54,11 +161,15 @@ int main()
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
 
+        update_camera(camera, dt);
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
             applyVelocitySystem.deltaTime = dt;
+            shootSystem.deltaTime = dt;
+            BeginMode2D(camera);
             _eM.runSystems();
+            EndMode2D();
         }
         EndDrawing();
         // sleep for 16ms

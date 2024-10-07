@@ -32,11 +32,20 @@ const std::string base_path = "";
 class AssetsLoader {
 public:
     AssetsLoader() = default;
-    ~AssetsLoader() = default;
+    ~AssetsLoader()
+    {
+        for (auto &asset : assets) {
+            UnloadTexture(asset.second);
+        }
+        for (auto &image : images) {
+            UnloadImage(image.second);
+        }
+    };
 
 private:
     std::map<std::string, Image> images;
     std::map<std::string, Texture2D> assets;
+    std::map<size_t, std::string> assets_id;
     std::vector<Texture2D> tiles;
 
 public:
@@ -63,6 +72,7 @@ public:
             std::cerr << "Error loading texture: " << path << std::endl;
             return 1;
         }
+        assets_id[assets[path].id] = path;
         return 0;
     }
 
@@ -81,6 +91,8 @@ public:
         std::string path = get_real_path(path_array);
         return assets[path];
     }
+
+    Texture2D &get_asset_from_id(size_t id) { return assets[assets_id[id]]; }
 
     Texture2D &get_asset_with_string(std::string path) { return assets[path]; }
 
