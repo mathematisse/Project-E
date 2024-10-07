@@ -7,8 +7,8 @@
 
 // ECS includes
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include "lib_ecs/Demo/ExamplePoint.hpp"
-#include "lib_ecs/Demo/Systems.hpp"
+#include "Square.hpp"
+#include "Systems.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
@@ -22,6 +22,21 @@ int main()
     AssetsLoader assetsLoader;
     ECS::EntityManager _eM;
 
+    ECS::S::InitSystem initSystem(200, SquareType::PLAYER);
+    ECS::S::DrawSystem drawSystem;
+    ECS::S::MovePlayerSystem moveSystem;
+    ECS::S::ApplyVelocitySystem applyVelocitySystem;
+
+    ECS::E::SquarePool squarePool;
+
+    ECS::S::SystemTreeNode demoNode(42, {&initSystem}, {&applyVelocitySystem, &moveSystem, &drawSystem});
+
+    _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
+
+    _eM.registerEntityPool(&squarePool);
+
+    auto player = _eM.createEntities("Square", 1, ECS::C::ENT_NEEDS_INIT);
+
     auto curr_time = std::chrono::steady_clock::now();
     while (!WindowShouldClose()) {
         auto new_time = std::chrono::steady_clock::now();
@@ -31,6 +46,8 @@ int main()
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
+            applyVelocitySystem.deltaTime = dt;
+            _eM.runSystems();
         }
         EndDrawing();
         // sleep for 16ms

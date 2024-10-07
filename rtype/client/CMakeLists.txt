@@ -9,7 +9,9 @@ set(PHYSICS_ENABLED ON)
 set(ECS_ENABLED OFF)
 set(NETWORK_ENABLED ON)
 
-add_executable(r-type_client main.cpp)
+file(GLOB_RECURSE SOURCES "*.cpp")
+
+add_executable(r-type_client ${SOURCES})
 
 target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib)
 
