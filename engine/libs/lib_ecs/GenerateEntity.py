@@ -66,8 +66,8 @@ namespace ECS::E
         {entity_name}Pool({entity_name}Pool &&other) = default;
         {entity_name}Pool &operator=({entity_name}Pool &&other) = default;
 
-        std::unique_ptr<Entities::IEntityRef> getEntity(Chunks::ChunkPos cPos) override;
-        std::unique_ptr<Entities::{entity_name}Ref> getRawEntity(Chunks::ChunkPos cPos);
+        std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
+        std::unique_ptr<E::{entity_name}Ref> getRawEntity(Chunks::chunkPos_t cPos);
         std::vector<C::IComponentPool *> getComponentPools() override;
     protected:
         {component_pools}
@@ -113,14 +113,14 @@ namespace ECS::E
     {{
     }}
 
-    std::unique_ptr<Entities::IEntityRef> {entity_name}Pool::getEntity(Chunks::ChunkPos cPos)
+    std::unique_ptr<E::IEntityRef> {entity_name}Pool::getEntity(Chunks::chunkPos_t cPos)
     {{
         return getRawEntity(cPos);
     }}
 
-    std::unique_ptr<Entities::{entity_name}Ref> {entity_name}Pool::getRawEntity(Chunks::ChunkPos cPos)
+    std::unique_ptr<E::{entity_name}Ref> {entity_name}Pool::getRawEntity(Chunks::chunkPos_t cPos)
     {{
-        auto ptr = std::make_unique<Entities::{entity_name}Ref>(
+        auto ptr = std::make_unique<E::{entity_name}Ref>(
             static_cast<C::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
             static_cast<C::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
             {get_raw_ents}
@@ -152,12 +152,12 @@ def get_hpp_accessors(entity_name: str, components: list[str]) -> str:
 
 def get_cpp_accessors(entity_name: str, components: list[str]) -> str:
     return ''.join([f"""
-    [[nodiscard]] C::{c}Ref *Entities::{entity_name}Ref::get{c}() const
+    [[nodiscard]] C::{c}Ref *E::{entity_name}Ref::get{c}() const
     {{
         return _{to_lower_camel_case(c)};
     }}
 
-    void Entities::{entity_name}Ref::set{c}(const C::{c}Ref &{to_lower_camel_case(c)})
+    void E::{entity_name}Ref::set{c}(const C::{c}Ref &{to_lower_camel_case(c)})
     {{
         *_{to_lower_camel_case(c)} = {to_lower_camel_case(c)};
     }}
