@@ -14,57 +14,56 @@
 namespace ECS::C {
 DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Velocity, float, float);
-}// namespace ECS::C
+} // namespace ECS::C
 
 namespace ECS::E {
 const size_t ExamplePointChunkSize = 3;
 
 // ENTITY REF
-class ExamplePointRef : public AEntityRef
-{
+class ExamplePointRef : public AEntityRef {
 public:
-  ExamplePointRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity);
-  ~ExamplePointRef() override;
+    ExamplePointRef(
+        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity
+    );
+    ~ExamplePointRef() override;
 
-  // Default rule of five
-  ExamplePointRef(const ExamplePointRef &other) = default;
-  ExamplePointRef &operator=(const ExamplePointRef &other) = default;
-  ExamplePointRef(ExamplePointRef &&other) = default;
-  ExamplePointRef &operator=(ExamplePointRef &&other) = default;
+    // Default rule of five
+    ExamplePointRef(const ExamplePointRef &other) = default;
+    ExamplePointRef &operator=(const ExamplePointRef &other) = default;
+    ExamplePointRef(ExamplePointRef &&other) = default;
+    ExamplePointRef &operator=(ExamplePointRef &&other) = default;
 
-  // Accessors
+    // Accessors
 
-  [[nodiscard]] C::PositionRef *getPosition() const;
-  void setPosition(const C::PositionRef &position);
+    [[nodiscard]] C::PositionRef *getPosition() const;
+    void setPosition(const C::PositionRef &position);
 
-  [[nodiscard]] C::VelocityRef *getVelocity() const;
-  void setVelocity(const C::VelocityRef &velocity);
-
+    [[nodiscard]] C::VelocityRef *getVelocity() const;
+    void setVelocity(const C::VelocityRef &velocity);
 
 protected:
-  C::PositionRef *_position;
-  C::VelocityRef *_velocity;
+    C::PositionRef *_position;
+    C::VelocityRef *_velocity;
 };
 
 // ENTITY POOL
-class ExamplePointPool : public AEntityPool
-{
+class ExamplePointPool : public AEntityPool {
 public:
-  ExamplePointPool();
-  ~ExamplePointPool() override = default;
+    ExamplePointPool();
+    ~ExamplePointPool() override = default;
 
-  // default rule of five
-  ExamplePointPool(const ExamplePointPool &other) = default;
-  ExamplePointPool &operator=(const ExamplePointPool &other) = default;
-  ExamplePointPool(ExamplePointPool &&other) = default;
-  ExamplePointPool &operator=(ExamplePointPool &&other) = default;
+    // default rule of five
+    ExamplePointPool(const ExamplePointPool &other) = default;
+    ExamplePointPool &operator=(const ExamplePointPool &other) = default;
+    ExamplePointPool(ExamplePointPool &&other) = default;
+    ExamplePointPool &operator=(ExamplePointPool &&other) = default;
 
-  std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-  std::unique_ptr<E::ExamplePointRef> getRawEntity(Chunks::chunkPos_t cPos);
-  std::vector<C::IComponentPool *> getComponentPools() override;
+    std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
+    std::unique_ptr<E::ExamplePointRef> getRawEntity(Chunks::chunkPos_t cPos);
+    std::vector<C::IComponentPool *> getComponentPools() override;
 
 protected:
-  C::PositionPool _positionPool;
-  C::VelocityPool _velocityPool;
+    C::PositionPool _positionPool;
+    C::VelocityPool _velocityPool;
 };
-}// namespace ECS::E
+} // namespace ECS::E

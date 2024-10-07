@@ -15,24 +15,23 @@ namespace ECS::C {
  * The IComponent class provides a common interface for all components in the ECS.
  * It ensures that all derived components can be properly managed and destroyed.
  */
-class IComponentRef
-{
+class IComponentRef {
 public:
-  /**
-   * @brief Default constructor for IComponent.
-   */
-  IComponentRef() = default;
+    /**
+     * @brief Default constructor for IComponent.
+     */
+    IComponentRef() = default;
 
-  /**
-   * @brief Virtual destructor for IComponent.
-   *
-   * Ensures that derived components are properly destroyed.
-   */
-  virtual ~IComponentRef() = default;
+    /**
+     * @brief Virtual destructor for IComponent.
+     *
+     * Ensures that derived components are properly destroyed.
+     */
+    virtual ~IComponentRef() = default;
 
-  IComponentRef(const IComponentRef &other) = default;
-  IComponentRef(IComponentRef &&other) = default;
-  IComponentRef &operator=(const IComponentRef &other) = default;
-  IComponentRef &operator=(IComponentRef &&other) = default;
+    IComponentRef(const IComponentRef &other) = default;
+    IComponentRef(IComponentRef &&other) = default;
+    IComponentRef &operator=(const IComponentRef &other) = default;
+    IComponentRef &operator=(IComponentRef &&other) = default;
 };
-}// namespace ECS::C
+} // namespace ECS::C
