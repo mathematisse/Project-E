@@ -6,12 +6,12 @@
 #include "AssetsLoader.hpp"
 
 // ECS includes
-// #include "Components/PureComponentPools.hpp"
-// #include "Demo/ExamplePoint.hpp"
-// #include "Demo/Systems.hpp"
-// #include "EntityManager.hpp"
-// #include "Systems/Query.hpp"
-// #include "Systems/SystemTree.hpp"
+#include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_ecs/Demo/ExamplePoint.hpp"
+#include "lib_ecs/Demo/Systems.hpp"
+#include "lib_ecs/EntityManager.hpp"
+#include "lib_ecs/Systems/Query.hpp"
+#include "lib_ecs/Systems/SystemTree.hpp"
 
 int main()
 {
@@ -20,7 +20,7 @@ int main()
     SetTargetFPS(60);
 
     AssetsLoader assetsLoader;
-    // EntityManager _eM;
+    ECS::EntityManager _eM;
 
     auto curr_time = std::chrono::steady_clock::now();
     while (!WindowShouldClose()) {
@@ -36,6 +36,7 @@ int main()
         // sleep for 16ms
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
+    CloseWindow();
     return 0;
 }
 

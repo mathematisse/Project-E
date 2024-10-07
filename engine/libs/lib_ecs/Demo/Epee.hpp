@@ -14,7 +14,7 @@
 namespace ECS::C {
 DECLARE_COMPONENT(Damage, float, float, uint8_t);
 DECLARE_COMPONENT(Stat, long, long, long, long, long, long, uint64_t);
-DECLARE_COMPONENT(Upgradable, bool);
+DECLARE_COMPONENT(Upgradable, char);
 } // namespace ECS::C
 
 namespace ECS::E {

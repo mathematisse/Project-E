@@ -29,13 +29,11 @@ template<typename... Ts>
 struct all_derived_from_base;
 
 template<typename T>
-struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> {
-};
+struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> { };
 
 template<typename T, typename... Ts>
 struct all_derived_from_base<T, Ts...>
-    : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> {
-};
+    : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> { };
 
 template<typename... Ts>
 class Query : public IQuery {
