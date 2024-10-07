@@ -164,14 +164,14 @@ void Smovement_update(World &world, float dt)
             auto notplayer = !world.template has<CPlayer>(entity);
 
             if (notplayer) {
-                std::cout << "Position: " << pos << std::endl;
+                // std::cout << "Position: " << pos << std::endl;
             }
             pos.x += velocity.x * speed.horizontal * dt;
             pos.y += velocity.y * speed.horizontal * dt;
-            if (notplayer) {
-                std::cout << "NEW Position: " << pos << ", " << velocity << ", " << speed << ", " << dt
-                          << std::endl;
-            }
+            // if (notplayer) {
+            //     std::cout << "NEW Position: " << pos << ", " << velocity << ", " << speed << ", " << dt
+            //               << std::endl;
+            // }
         }
     }
 }
@@ -304,9 +304,9 @@ void Scollision_update(World &world, float dt)
             );
             position.x -= velocity.x * speed.horizontal * collision_time * dt;
             position.y -= velocity.y * speed.horizontal * collision_time * dt;
-            if (!world.template has<CPlayer>(entity)) {
-                std::cout << "New Position: " << position << std::endl;
-            }
+            // if (!world.template has<CPlayer>(entity)) {
+            //     std::cout << "New Position: " << position << std::endl;
+            // }
             float remaining_time = 1.0f - collision_time;
             // slide
             float dotprod = (velocity.x * normaly + velocity.y * normalx) * remaining_time;
@@ -390,16 +390,17 @@ void Splayer_SpawnEntity(World &world, float dt)
 {
     static float spawn_cooldown = 0;
 
+    if (spawn_cooldown > 0) {
+        spawn_cooldown -= dt;
+        std::cout << "Spawn cooldown: " << spawn_cooldown << std::endl;
+        return;
+    }
+
     for (auto entity : world.template view<CInput>()) {
         if (auto opt = world.template get<CInput>(entity); opt.has_value()) {
             auto &[input] = opt.value();
             if (input & CInput::Key::Spawn) {
-                if (spawn_cooldown > 0) {
-                    spawn_cooldown -= dt;
-                    continue;
-                } else {
-                    spawn_cooldown = 1000;
-                }
+                spawn_cooldown = 0.1;
                 auto new_entity = world.new_entity();
                 std::cout << "\nNew entity: " << new_entity << "\n" << std::endl;
                 world.template add<CPosition>(
