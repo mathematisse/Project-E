@@ -21,27 +21,6 @@ namespace ECS {
 namespace S {
 // SYSTEM
 
-InitSystem::InitSystem(float speed, SquareType type):
-    AMonoSystem(false),
-    _speed(speed),
-    _type(type)
-{
-}
-
-void InitSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
-{
-    auto [status] = cstatus;
-    if (status != C::EntityStatusEnum::ENT_NEEDS_INIT) {
-        return;
-    }
-    auto [vx, vy, speed] = cvelocity;
-    auto [type] = ctype;
-
-    speed = _speed;
-    status = C::EntityStatusEnum::ENT_ALIVE;
-    type = _type;
-}
-
 DrawSystem::DrawSystem():
     AMonoSystem(false)
 {
@@ -58,11 +37,6 @@ void DrawSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::PositionP
     DrawRectangle((int)x, (int)y, 50, 50, {255, 0, 0, 255});
 }
 
-void DrawSystem::
-    _endCMapCallBack(C::EntityStatusPool::VTypes & /*unused*/, C::PositionPool::VTypes & /*unused*/)
-{
-}
-
 ApplyVelocitySystem::ApplyVelocitySystem():
     AMonoSystem(false)
 {
@@ -74,11 +48,6 @@ void ApplyVelocitySystem::_innerOperate(C::PositionPool::Types &cposition, C::Ve
     auto [vX, vY, speed] = cvelocity;
     x += vX * deltaTime * speed;
     y += vY * deltaTime * speed;
-}
-
-void ApplyVelocitySystem::
-    _endCMapCallBack(C::PositionPool::VTypes &cposition, C::VelocityPool::VTypes &cvelocity)
-{
 }
 
 MovePlayerSystem::MovePlayerSystem():
@@ -109,11 +78,6 @@ void MovePlayerSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::Vel
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
     }
-}
-
-void MovePlayerSystem::
-    _endCMapCallBack(C::EntityStatusPool::VTypes & /*unused*/, C::VelocityPool::VTypes & /*unused*/, C::TypePool::VTypes & /*unused*/)
-{
 }
 
 } // namespace S

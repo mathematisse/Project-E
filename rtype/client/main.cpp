@@ -22,20 +22,31 @@ int main()
     AssetsLoader assetsLoader;
     ECS::EntityManager _eM;
 
-    ECS::S::InitSystem initSystem(200, SquareType::PLAYER);
     ECS::S::DrawSystem drawSystem;
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
 
     ECS::E::SquarePool squarePool;
 
-    ECS::S::SystemTreeNode demoNode(42, {&initSystem}, {&applyVelocitySystem, &moveSystem, &drawSystem});
+    ECS::S::SystemTreeNode demoNode(42, {&applyVelocitySystem, &moveSystem}, {&drawSystem});
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
 
     _eM.registerEntityPool(&squarePool);
 
-    auto player = _eM.createEntities("Square", 1, ECS::C::ENT_NEEDS_INIT);
+    auto player = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
+
+    for (auto &entity : player) {
+        auto ref = _eM.getEntity(entity);
+        
+        auto square_player = dynamic_cast<ECS::E::SquareRef*>(ref.get());
+        if (!square_player) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return -1;
+        }
+        square_player->setVelocity(ECS::C::VelocityRef(0.0f, 0.0f, 200.0f));
+        square_player->setType(ECS::C::TypeRef(SquareType::PLAYER));
+    }
 
     auto curr_time = std::chrono::steady_clock::now();
     while (!WindowShouldClose()) {

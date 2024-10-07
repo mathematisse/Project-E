@@ -12,24 +12,6 @@
 
 namespace ECS::S {
 
-class InitSystem : public S::AMonoSystem<C::EntityStatusPool, C::VelocityPool, C::TypePool> {
-public:
-    explicit InitSystem(float speed = 1.0f, SquareType type = SquareType::PLAYER);
-    ~InitSystem() override = default;
-
-    InitSystem(const InitSystem &other) = default;
-    InitSystem(InitSystem &&other) = default;
-    InitSystem &operator=(const InitSystem &other) = default;
-    InitSystem &operator=(InitSystem &&other) = default;
-
-protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::VelocityPool::Types &cvelocity, typename C::TypePool::Types &ctype
-    ) override;
-    float _speed;
-    SquareType _type;
-};
-
 class DrawSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool> {
 public:
     explicit DrawSystem();
@@ -43,9 +25,6 @@ public:
 protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition
-    ) override;
-    void _endCMapCallBack(
-        typename C::EntityStatusPool::VTypes &cstatus, typename C::PositionPool::VTypes &cposition
     ) override;
 };
 
@@ -65,10 +44,6 @@ protected:
     void _innerOperate(
         typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity
     ) override;
-
-    void _endCMapCallBack(
-        typename C::PositionPool::VTypes &cposition, typename C::VelocityPool::VTypes &cvelocity
-    ) override;
 };
 
 class MovePlayerSystem : public S::AMonoSystem<C::EntityStatusPool, C::VelocityPool, C::TypePool> {
@@ -84,10 +59,6 @@ public:
 protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::VelocityPool::Types &cvelocity, typename C::TypePool::Types &ctype
-    ) override;
-
-    void _endCMapCallBack(
-        typename C::EntityStatusPool::VTypes &cstatus, typename C::VelocityPool::VTypes &cvelocity, typename C::TypePool::VTypes &ctype
     ) override;
 };
 
