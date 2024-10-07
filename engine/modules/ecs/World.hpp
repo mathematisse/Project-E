@@ -12,7 +12,7 @@
 #include <vector>
 
 template<typename... Components>
-    requires are_types_unique_v<Components...>
+requires are_types_unique_v<Components...>
 class World {
 public:
     class Exist;
@@ -56,8 +56,8 @@ public:
     //     return std::nullopt;
     // }
     template<typename... Cs>
-        requires are_types_unique_v<Cs...> && (World::are_from_components_v<Cs> && ...)
-    inline auto get(size_t idx) -> std::optional<std::tuple<Cs &...>>
+    requires are_types_unique_v<Cs...> &&(World::are_from_components_v<Cs> &&...) inline auto get(size_t idx)
+        -> std::optional<std::tuple<Cs &...>>
     {
         if ((status[idx].template isActive<Cs>() && ...)) {
             return std::make_optional(std::tie(std::get<container_t<Cs>>(tables)[idx]...));
@@ -73,14 +73,14 @@ public:
     // }
 
     template<typename... Cs>
-        requires are_types_unique_v<Cs...> && (World::are_from_components_v<Cs> && ...)
-    inline auto has(size_t idx) -> bool
+    requires are_types_unique_v<Cs...> &&(World::are_from_components_v<Cs> &&...) inline auto has(size_t idx)
+        -> bool
     {
         return (status[idx].template isActive<Cs>() && ...);
     }
 
     template<typename C>
-        requires are_from_components_v<C>
+    requires are_from_components_v<C>
     inline auto add(size_t idx, C &&component) -> void
     {
         std::get<container_t<C>>(tables)[idx] = std::forward<C>(component);
@@ -88,11 +88,8 @@ public:
     }
 
     template<typename C>
-        requires are_from_components_v<C>
-    inline auto remove(size_t idx) -> void
-    {
-        status[idx].template deactivate<C>();
-    }
+    requires are_from_components_v<C>
+    inline auto remove(size_t idx) -> void { status[idx].template deactivate<C>(); }
 
 private:
     // returns the first NonExisting entity index or the tables_capacity if there are no more entities
@@ -200,7 +197,7 @@ public:
     inline auto end() const -> iterator<Exist> { return iterator<Exist>(*this, number_of_entities); }
 
     template<typename... FilterComponents>
-        requires are_types_unique_v<FilterComponents...>
+    requires are_types_unique_v<FilterComponents...>
     class View {
     public:
         using iterator = typename World::template iterator<FilterComponents...>;
@@ -222,8 +219,8 @@ public:
     };
 
     template<typename... Cs>
-        requires are_types_unique_v<Cs...> && (World::are_from_components_v<Cs> && ...)
-    [[nodiscard]] inline auto view() const -> View<Cs...>
+    requires are_types_unique_v<Cs...> &&(World::are_from_components_v<Cs> &&...)
+        [[nodiscard]] inline auto view() const -> View<Cs...>
     {
         return View<Cs...>(*this);
     }

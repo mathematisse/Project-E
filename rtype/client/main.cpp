@@ -20,7 +20,7 @@ int main()
     SetTargetFPS(60);
 
     AssetsLoader assetsLoader;
-    //EntityManager _eM;
+    // EntityManager _eM;
 
     auto curr_time = std::chrono::steady_clock::now();
     while (!WindowShouldClose()) {

@@ -16,9 +16,9 @@ HPP_TEMPLATE = """/*
 
 #pragma once
 
-#include "Components/PureComponentPools.hpp"
-#include "Entities/AEntityRef.hpp"
-#include "Entities/AEntityPool.hpp"
+#include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_ecs/Entities/AEntityRef.hpp"
+#include "lib_ecs/Entities/AEntityPool.hpp"
 
 namespace ECS::C
 {{
@@ -83,7 +83,7 @@ CPP_TEMPLATE = """/*
 ** Source for {entity_name} entity declarations
 */
 
-#include "{entity_name}.hpp"
+#include "lib_ecs/{entity_name}.hpp"
 
 // ENTITY
 namespace ECS::E
