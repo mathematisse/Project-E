@@ -35,7 +35,7 @@ protected:
 class DrawSpriteSystem
     : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool> {
 public:
-    explicit DrawSpriteSystem(AssetsLoader &assetsLoader);
+    explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
     ~DrawSpriteSystem() override = default;
 
     DrawSpriteSystem(const DrawSpriteSystem &other) = default;
@@ -44,6 +44,7 @@ public:
     DrawSpriteSystem &operator=(DrawSpriteSystem &&other) = default;
 
     AssetsLoader &assetsLoader;
+    Camera2D &camera;
 
 protected:
     void _innerOperate(

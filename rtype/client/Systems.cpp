@@ -42,9 +42,10 @@ void DrawSystem::_innerOperate(
     DrawRectangle((int) x, (int) y, sizeX, sizeY, {r, g, b, a});
 }
 
-DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader):
+DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
     AMonoSystem(false),
-    assetsLoader(assetsLoader)
+    assetsLoader(assetsLoader),
+    camera(camera)
 {
 }
 
@@ -73,6 +74,9 @@ void DrawSpriteSystem::_innerOperate(
     }
     if (rotation == -90) {
         adjustedY += sizeY;
+    }
+    if (type != SquareType::BACKGROUND && (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
+        return;
     }
     DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
     if (type == SquareType::BACKGROUND) {

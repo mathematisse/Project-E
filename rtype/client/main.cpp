@@ -56,7 +56,7 @@ int main()
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, assetsLoader, camera);
     ECS::S::ShootSystem shootSystem(_eM, assetsLoader);
-    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
+    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
 
     ECS::E::SquarePool squarePool;
