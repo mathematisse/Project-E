@@ -55,7 +55,7 @@ void DrawSpriteSystem::_innerOperate(
 )
 {
     auto [status] = cstatus;
-    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+    if (status != C::EntityStatusEnum::ENT_ALIVE || IsKeyDown(KEY_H)) {
         return;
     }
     auto [sprite_id] = csprite;
@@ -248,8 +248,8 @@ void ShootSystem::_innerOperate(
             square_bullet->getVelocity()->set<1>(0.0F);
             square_bullet->getVelocity()->set<2>(500.0F);
             square_bullet->getType()->set<0>(SquareType::BULLET);
-            square_bullet->getColor()->set<0>(0);
-            square_bullet->getColor()->set<1>(0);
+            square_bullet->getColor()->set<0>(255);
+            square_bullet->getColor()->set<1>(255);
             square_bullet->getColor()->set<2>(0);
             square_bullet->getColor()->set<3>(255);
             square_bullet->getPosition()->set<1>(y + 25);

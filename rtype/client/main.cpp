@@ -24,16 +24,8 @@ void init_camera(Camera2D &camera)
 
 void update_camera(Camera2D &camera, float dt)
 {
-    static float camera_cooldown = 0.01;
-
-    if (camera_cooldown > 0) {
-        camera_cooldown -= dt;
-        return;
-    }
-
-    camera_cooldown = 0.01;
     Vector2 old = camera.target;
-    camera.target = {old.x + 3, 1080 / 2};
+    camera.target = {old.x + 80 * dt, 1080 / 2};
 }
 
 Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
@@ -79,8 +71,8 @@ int main()
 
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem, &drawSystem,
-         &drawSpriteSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
+         &drawSpriteSystem, &drawSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
