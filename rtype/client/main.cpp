@@ -72,8 +72,8 @@ int main()
 
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &colliderSystem, &shootSystem,
-         &drawSpriteSystem, &drawSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &colliderSystem,
+         &shootSystem, &drawSpriteSystem, &drawSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);

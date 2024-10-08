@@ -158,7 +158,8 @@ protected:
     ) override;
 };
 
-class MoveEnnemySystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::TypePool> {
+class MoveEnnemySystem
+    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::TypePool> {
 public:
     explicit MoveEnnemySystem();
     ~MoveEnnemySystem() override = default;
@@ -169,15 +170,16 @@ public:
     MoveEnnemySystem &operator=(MoveEnnemySystem &&other) = default;
 
     Vector2 playerPosition;
+
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+        C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition,
+        C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
     ) override;
 };
 
-class ColliderSystem : public S::ADualSystem<
-                              std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool>,
-                              std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool>> {
+class ColliderSystem
+    : public S::ASelfDualSystem<std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool>> {
 public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
@@ -189,8 +191,9 @@ public:
 
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
-        C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
+        C::TypePool::Types &ctypeA, C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
+        C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
     ) override;
 };
 

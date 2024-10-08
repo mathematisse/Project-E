@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <iostream>
 #include "AssetsPath.hpp"
+#include "lib_ecs/Systems/ADualSystem.hpp"
 #include <raylib.h>
 
 #define RED_CLI "\033[31m"
@@ -76,7 +77,8 @@ void DrawSpriteSystem::_innerOperate(
     if (rotation == -90) {
         adjustedY += sizeY;
     }
-    if (type != SquareType::BACKGROUND && (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
+    if (type != SquareType::BACKGROUND &&
+        (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
         return;
     }
     BeginMode2D(camera);
@@ -224,7 +226,9 @@ void ShootSystem::_innerOperate(
     }
     if ((IsKeyDown(KEY_SPACE) && type == SquareType::PLAYER) || type == SquareType::ENEMY) {
         auto [x, y] = cposition;
-        if (type == SquareType::ENEMY && ((x - playerPosition.x) > 1000 || x <= playerPosition.x || y < playerPosition.y || y > playerPosition.y + 50)) {
+        if (type == SquareType::ENEMY &&
+            ((x - playerPosition.x) > 1000 || x <= playerPosition.x || y < playerPosition.y ||
+             y > playerPosition.y + 50)) {
             return;
         }
         delay = base_delay;
@@ -291,11 +295,12 @@ MoveEnnemySystem::MoveEnnemySystem():
 }
 
 void MoveEnnemySystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+    C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
+    C::TypePool::Types &ctype
 )
 {
     auto [status] = cStatus;
-    if (status != C::EntityStatusEnum::ENT_ALIVE ) {
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
         return;
     }
     auto [type] = ctype;
@@ -324,13 +329,14 @@ void MoveEnnemySystem::_innerOperate(
 }
 
 ColliderSystem::ColliderSystem():
-    ADualSystem(false)
+    ASelfDualSystem(false)
 {
 }
 
 void ColliderSystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
-    C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
+    C::TypePool::Types &ctypeA, C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
+    C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
 )
 {
     auto [statusA] = cStatusA;
