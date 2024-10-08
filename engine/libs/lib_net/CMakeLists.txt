@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(lib_net STATIC lib.cpp)
 
-target_link_libraries(lib_net Boost::asio)
+target_link_libraries(lib_net ${boostincludedir})
 
 if(MINGW)
   target_link_libraries(lib_net ws2_32 wsock32)
@@ -14,5 +14,5 @@ endif()
 # Required for testing
 enable_testing()
 add_executable(lnet_test tests/basic.cpp)
-target_link_libraries(lnet_test Boost::unit_test_framework)
+target_link_libraries(lnet_test ${boostincludedir})
 add_test(NAME LnetTest COMMAND Lnet_test)
