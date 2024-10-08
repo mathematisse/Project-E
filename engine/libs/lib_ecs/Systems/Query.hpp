@@ -211,6 +211,8 @@ public:
         }
     }
 
+    void selfCross(TCrossLambda<Ts...> f) { cross<Ts...>(*this, f, true); }
+
 protected:
     template<typename... TOthers>
     constexpr static void _cross(
