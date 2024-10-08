@@ -172,22 +172,18 @@ int main()
         curr_time = new_time;
 
         update_camera(camera, dt);
+        playerPosition = get_player_position(_eM, player);
+        moveEnnemySystem.playerPosition = playerPosition;
+        shootSystem.playerPosition = playerPosition;
+        applyVelocitySystem.deltaTime = dt;
+        shootSystem.deltaTime = dt;
+        drawSpriteSystem.deltaTime = dt;
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
-            playerPosition = get_player_position(_eM, player);
-            moveEnnemySystem.playerPosition = playerPosition;
-            shootSystem.playerPosition = playerPosition;
-            applyVelocitySystem.deltaTime = dt;
-            shootSystem.deltaTime = dt;
-            drawSpriteSystem.deltaTime = dt;
-            BeginMode2D(camera);
             _eM.runSystems();
-            EndMode2D();
         }
         EndDrawing();
-        // sleep for 16ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
     CloseWindow();
     return 0;

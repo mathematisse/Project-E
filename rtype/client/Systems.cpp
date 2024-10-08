@@ -40,6 +40,7 @@ void DrawSystem::_innerOperate(
     auto [r, g, b, a] = ccolor;
     auto [sizeX, sizeY, rotation] = csize;
     DrawRectangle((int) x, (int) y, sizeX, sizeY, {r, g, b, a});
+    EndMode2D();
 }
 
 DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
@@ -78,6 +79,7 @@ void DrawSpriteSystem::_innerOperate(
     if (type != SquareType::BACKGROUND && (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
         return;
     }
+    BeginMode2D(camera);
     DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
     if (type == SquareType::BACKGROUND) {
         DrawTextureEx(texture, {adjustedX - 3000, adjustedY}, rotation, 1 / scale, WHITE);
