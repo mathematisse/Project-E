@@ -1,38 +1,43 @@
 
+#pragma once
+
 #include <array>
 #include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <sys/types.h>
 #include <vector>
+
 #include "lib_net/Packet.hpp"
-#include "net.hpp"
+#include "lib_net/net.hpp"
+#include "lib_net/Buffer.hpp"
 
 namespace net {
-struct UDPSocket {
-    int sock;
-    struct sockaddr_in dest;
-    std::array<uint8_t, MAX_BUFFER_SIZE> recv_queue;
+class UDPSocket {
+public:
+    UDPSocket() = default;
+    // return true if create is successful
+
+    bool create();
+    // return true if bind is successful
+    [[nodiscard]] auto bind(const std::string &ip, uint16_t port) const -> bool;
+    // return number of bytes sent
+    ssize_t send(const std::vector<std::uint8_t> &data) const;
+    ssize_t recvToBuffer();
+
+    auto readPacket() -> std::optional<Packet>;
+    auto readPackets() -> std::vector<Packet>;
+    void close();
+
+private:
+    ssize_t recv(std::vector<std::uint8_t> &buffer, size_t size);
 
 public:
-    auto send(const std::vector<Packet> &packets) -> void
-    {
-        for (const auto &packet : packets) {
-            sendto(
-                sock, /*packet.data.data()*/, /*packet.data.size()*/, 0, (struct sockaddr *) &dest,
-                sizeof(dest)
-            );
-        }
-    }
-
-    auto recv() -> std::vector<Packet>
-    {
-        std::vector<Packet> packets;
-        constexpr auto len = sizeof(dest);
-        auto bytes =
-            recvfrom(sock, /*recv_queue.data()*/, /*recv_queue.size()*/, 0, (struct sockaddr *) &dest, &len);
-        if (bytes <= 0) {
-            return packets;
-        }
-        packets.emplace_back(recv_queue.data(), bytes);
-        return packets;
-    }
+    socket_t socket_fd {};
+    sockaddr_in udp_address; // Store the client's address for sending responses
+    BufReader buf_reader; // Buffer reader for UDP
 };
+
 }

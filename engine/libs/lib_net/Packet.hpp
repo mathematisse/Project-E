@@ -13,7 +13,7 @@ struct Packet {
     Header header;
     std::vector<std::uint8_t> data;
 
-    std::vector<std::uint8_t> serialize();
+    std::vector<std::uint8_t> serialize() const;
     static Packet deserialize(std::uint32_t type, const std::vector<std::uint8_t> &data);
 };
 }

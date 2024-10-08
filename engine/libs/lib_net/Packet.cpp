@@ -1,12 +1,12 @@
 #include <cstring>
 #include "Packet.hpp"
 
-std::vector<std::uint8_t> net::Packet::serialize()
+std::vector<std::uint8_t> net::Packet::serialize() const
 {
     std::vector<std::uint8_t> buffer(sizeof(Header) + data.size());
 
     std::memcpy(buffer.data(), &header, sizeof(Header));
-    std::memcpy(buffer.data() + sizeof(Header), data.data(), data.size());
+    std::copy(data.begin(), data.end(), buffer.begin() + sizeof(Header));
     return buffer;
 }
 

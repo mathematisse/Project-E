@@ -1,4 +1,6 @@
 
+#pragma once
+
 #ifdef _WIN32
 /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
 #ifndef _WIN32_WINNT
@@ -17,10 +19,17 @@
 namespace net {
 
 constexpr size_t MAX_BUFFER_SIZE = 1024;
+constexpr size_t MAX_LISTEN_BACKLOG = 5;
 
 #ifdef _WIN32
 using socket_t = SOCKET;
+// #define SOCKET_ERROR (SOCKET_ERROR)
+// #define INVALID_SOCKET (INVALID_SOCKET)
+inline void close_socket(socket_t socket) { closesocket(socket); }
 #else
 using socket_t = int;
+#define SOCKET_ERROR (-1)
+#define INVALID_SOCKET (-1)
+inline void close_socket(socket_t socket) { close(socket); }
 #endif
 }
