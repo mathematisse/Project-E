@@ -286,8 +286,8 @@ protected:
         // here the size of the vectors is the same (self cross)
         size_t vectorSize1 = std::get<0>(std::get<0>(std::tie(componentVectors1...))).size();
 
-        bool sameVecs = &std::get<0>(std::get<0>(std::tie(componentVectors1...))) ==
-            &std::get<0>(std::get<0>(std::tie(componentVectors2...)));
+        bool sameVecs = (void *) &std::get<0>(std::get<0>(std::tie(componentVectors1...))) ==
+            (void *) &std::get<0>(std::get<0>(std::tie(componentVectors2...)));
 
         auto vectorTuple1 = std::tie(componentVectors1...);
         auto vectorTuple2 = std::tie(componentVectors2...);
