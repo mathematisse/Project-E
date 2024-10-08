@@ -65,10 +65,10 @@ template<typename Tuple>
 class ASelfDualSystem;
 
 template<typename... Ts>
-class ASelfDualSystem<std::tuple<Ts...>> : public ADualSystem<Ts..., Ts...> {
+class ASelfDualSystem<std::tuple<Ts...>> : public ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>> {
 public:
     explicit ASelfDualSystem(bool isParallel):
-        ADualSystem<Ts..., Ts...>(isParallel)
+        ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>>(isParallel)
     {
     }
     ~ASelfDualSystem() override = default;
@@ -91,6 +91,9 @@ protected:
         // now); std::cout << "SelfDualSystem " << typeid(this).name() << " took " << duration.count() << "
         // microseconds\n";
     }
+
+    virtual inline void
+    _innerOperate(typename Ts::Types &...componentPools1, typename Ts::Types &...componentPools2) = 0;
 };
 
 } // namespace ECS::S
