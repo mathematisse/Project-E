@@ -12,6 +12,7 @@
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 #include <iostream>
+// # include <chrono>
 
 namespace ECS::S {
 template<typename... Ts>
@@ -32,7 +33,8 @@ public:
 
     void run() override
     {
-        std::cout << "Running system\n";
+        // auto now = std::chrono::high_resolution_clock::now();
+
         _query.map(
             [this](auto &...componentPools) {
                 _innerOperate(componentPools...);
@@ -50,7 +52,11 @@ public:
                 _endCPMapCallBack(componentPools...);
             }
         );
-        std::cout << "System done\n";
+
+        // auto duration =
+        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
+        // now); std::cout << "MonoSystem " << typeid(this).name() << " took " << duration.count() << "
+        // microseconds\n";
     }
 
 protected:

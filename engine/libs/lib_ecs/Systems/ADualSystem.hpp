@@ -11,6 +11,8 @@
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 
+// #include <chrono>
+
 namespace ECS::S {
 
 template<typename Tuple1, typename Tuple2>
@@ -40,9 +42,15 @@ public:
 
     void run() override
     {
+        // auto now = std::chrono::high_resolution_clock::now();
         _query1.cross(_query2, [this](auto &...componentPools1, auto &...componentPools2) {
             _innerOperate(componentPools1..., componentPools2...);
         });
+
+        // auto duration =
+        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
+        // now); std::cout << "DualSystem " << typeid(this).name() << " took " << duration.count() << "
+        // microseconds\n";
     }
 
 protected:
@@ -52,4 +60,34 @@ protected:
     virtual inline void
     _innerOperate(typename T1s::Types &...componentPools1, typename T2s::Types &...componentPools2) = 0;
 };
+
+template<typename... Ts>
+class ASelfDualSystem : public ADualSystem<Ts..., Ts...> {
+public:
+    explicit ASelfDualSystem(bool isParallel):
+        ADualSystem<Ts..., Ts...>(isParallel)
+    {
+    }
+    ~ASelfDualSystem() override = default;
+
+    ASelfDualSystem(const ASelfDualSystem &other) = default;
+    ASelfDualSystem(ASelfDualSystem &&other) = default;
+    ASelfDualSystem &operator=(const ASelfDualSystem &other) = default;
+    ASelfDualSystem &operator=(ASelfDualSystem &&other) = default;
+
+protected:
+    void run() override
+    {
+        // auto now = std::chrono::high_resolution_clock::now();
+        this->_query1.selfCross([this](auto &...componentPools1, auto &...componentPools2) {
+            _innerOperate(componentPools1..., componentPools2...);
+        });
+
+        // auto duration =
+        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
+        // now); std::cout << "SelfDualSystem " << typeid(this).name() << " took " << duration.count() << "
+        // microseconds\n";
+    }
+};
+
 } // namespace ECS::S
