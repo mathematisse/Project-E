@@ -175,4 +175,23 @@ protected:
     ) override;
 };
 
+class ColliderSystem : public S::ADualSystem<
+                              std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool>,
+                              std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool>> {
+public:
+    explicit ColliderSystem();
+    ~ColliderSystem() override = default;
+
+    ColliderSystem(const ColliderSystem &other) = default;
+    ColliderSystem(ColliderSystem &&other) = default;
+    ColliderSystem &operator=(const ColliderSystem &other) = default;
+    ColliderSystem &operator=(ColliderSystem &&other) = default;
+
+protected:
+    void _innerOperate(
+        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
+        C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+    ) override;
+};
+
 } // namespace ECS::S

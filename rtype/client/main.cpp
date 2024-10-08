@@ -66,12 +66,13 @@ int main()
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
     ECS::S::MoveEnnemySystem moveEnnemySystem;
+    ECS::S::ColliderSystem colliderSystem;
 
     ECS::E::SquarePool squarePool;
 
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &colliderSystem, &shootSystem,
          &drawSpriteSystem, &drawSystem}
     );
 

@@ -15,6 +15,7 @@ enum class SquareType {
     PLAYER,
     ENEMY,
     BULLET,
+    BULLET_ENNEMY,
     WALL,
     POWERUP,
     BACKGROUND

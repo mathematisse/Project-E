@@ -242,14 +242,15 @@ void ShootSystem::_innerOperate(
                 square_bullet->getVelocity()->set<0>(1.0F);
                 square_bullet->getPosition()->set<0>(x + 80 + 35);
                 square_bullet->getSize()->set<2>(90);
+                square_bullet->getType()->set<0>(SquareType::BULLET);
             } else {
                 square_bullet->getVelocity()->set<0>(-1.0F);
                 square_bullet->getPosition()->set<0>(x - 35);
                 square_bullet->getSize()->set<2>(-90);
+                square_bullet->getType()->set<0>(SquareType::BULLET_ENNEMY);
             }
             square_bullet->getVelocity()->set<1>(0.0F);
             square_bullet->getVelocity()->set<2>(500.0F);
-            square_bullet->getType()->set<0>(SquareType::BULLET);
             square_bullet->getColor()->set<0>(255);
             square_bullet->getColor()->set<1>(255);
             square_bullet->getColor()->set<2>(0);
@@ -322,6 +323,60 @@ void MoveEnnemySystem::_innerOperate(
     }
 }
 
+ColliderSystem::ColliderSystem():
+    ADualSystem(false)
+{
+}
+
+void ColliderSystem::_innerOperate(
+    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
+    C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+)
+{
+    auto [statusA] = cStatusA;
+    auto [statusB] = cStatusB;
+
+    if (statusA != C::EntityStatusEnum::ENT_ALIVE || statusB != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    auto [xA, yA] = cpositionA;
+    auto [sizeXA, sizeYA, _] = csizeA;
+    auto [typeA] = ctypeA;
+
+    auto [xB, yB] = cpositionB;
+    auto [sizeXB, sizeYB, _2] = csizeB;
+    auto [typeB] = ctypeB;
+    bool collide = false;
+
+    if (xA + sizeXA > xB && xA < xB + sizeXB && yA + sizeYA > yB && yA < yB + sizeYB) {
+        collide = true;
+    }
+
+    if (collide) {
+        if (typeA == SquareType::PLAYER && typeB == SquareType::ENEMY) {
+            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (typeA == SquareType::ENEMY && typeB == SquareType::PLAYER) {
+            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (typeA == SquareType::BULLET && typeB == SquareType::ENEMY) {
+            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (typeA == SquareType::BULLET_ENNEMY && typeB == SquareType::PLAYER) {
+            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (typeA == SquareType::BULLET || typeA == SquareType::BULLET_ENNEMY) {
+            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (typeB == SquareType::BULLET || typeB == SquareType::BULLET_ENNEMY) {
+            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+    }
+}
 
 } // namespace S
 } // namespace ECS
