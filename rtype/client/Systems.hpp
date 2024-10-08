@@ -179,7 +179,8 @@ protected:
 };
 
 class ColliderSystem
-    : public S::ASelfDualSystem<std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool>> {
+    : public S::ASelfDualSystem<
+          std::tuple<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::SizePool, C::TypePool>> {
 public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
@@ -191,9 +192,10 @@ public:
 
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
-        C::TypePool::Types &ctypeA, C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
-        C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
+        C::VelocityPool::Types &cvelocityA, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
+        C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
+        C::VelocityPool::Types &cvelocityB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
     ) override;
 };
 

@@ -16,11 +16,13 @@ template<typename T, typename... Structures>
 struct BitPosition;
 
 template<typename T, typename First, typename... Rest>
-struct BitPosition<T, First, Rest...> : BitPosition<T, Rest...> { };
+struct BitPosition<T, First, Rest...> : BitPosition<T, Rest...> {
+};
 
 // TODO: add custom type for bitfield over 64 bits
 template<typename T, typename... Rest>
-struct BitPosition<T, T, Rest...> : std::integral_constant<uint64_t, 1ULL << sizeof...(Rest)> { };
+struct BitPosition<T, T, Rest...> : std::integral_constant<uint64_t, 1ULL << sizeof...(Rest)> {
+};
 
 template<typename T>
 static constexpr size_t sizeInBits = sizeof(T) * 8;
@@ -165,7 +167,7 @@ constexpr auto select_storage_type()
 
 // Structure container holding the bitfield and binary operations
 template<typename... Structures>
-    requires are_types_unique_v<Structures...>
+requires are_types_unique_v<Structures...>
 class ComponentStatus {
 public:
     static constexpr size_t num_of_structures = sizeof...(Structures);

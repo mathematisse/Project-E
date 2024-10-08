@@ -10,29 +10,17 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/Entities/AEntityRef.hpp"
 #include "lib_ecs/Entities/AEntityPool.hpp"
-
-enum class SquareType {
-    PLAYER,
-    ENEMY,
-    BULLET,
-    BULLET_ENNEMY,
-    WALL,
-    POWERUP,
-    BACKGROUND
-};
+#include "DecorSquare.hpp"
 
 namespace ECS::C {
-DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Velocity, float, float, float); // 3rd param is the speed
 DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned char);
-DECLARE_COMPONENT(Size, float, float, float); // 3rd param is the rotation
-DECLARE_COMPONENT(Type, SquareType);
+
 DECLARE_COMPONENT(CanShoot, char, float, float)
-DECLARE_COMPONENT(Sprite, size_t)
 }
 
 namespace ECS::E {
-const size_t SquareChunkSize = 1024;
+const size_t SquareChunkSize = 64;
 
 // ENTITY REF
 class SquareRef : public AEntityRef {

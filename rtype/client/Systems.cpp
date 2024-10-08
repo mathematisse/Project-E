@@ -334,9 +334,10 @@ ColliderSystem::ColliderSystem():
 }
 
 void ColliderSystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
-    C::TypePool::Types &ctypeA, C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
-    C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
+    C::VelocityPool::Types & /*unused*/, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
+    C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
+    C::VelocityPool::Types & /*unused*/, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
 )
 {
     auto [statusA] = cStatusA;
