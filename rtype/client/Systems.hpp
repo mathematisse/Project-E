@@ -45,6 +45,7 @@ public:
 
     AssetsLoader &assetsLoader;
     Camera2D &camera;
+    float deltaTime = 0.0f;
 
 protected:
     void _innerOperate(

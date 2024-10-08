@@ -167,6 +167,7 @@ int main()
             ClearBackground(RAYWHITE);
             applyVelocitySystem.deltaTime = dt;
             shootSystem.deltaTime = dt;
+            drawSpriteSystem.deltaTime = dt;
             BeginMode2D(camera);
             _eM.runSystems();
             EndMode2D();
