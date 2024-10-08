@@ -61,8 +61,11 @@ protected:
     _innerOperate(typename T1s::Types &...componentPools1, typename T2s::Types &...componentPools2) = 0;
 };
 
+template<typename Tuple>
+class ASelfDualSystem;
+
 template<typename... Ts>
-class ASelfDualSystem : public ADualSystem<Ts..., Ts...> {
+class ASelfDualSystem<std::tuple<Ts...>> : public ADualSystem<Ts..., Ts...> {
 public:
     explicit ASelfDualSystem(bool isParallel):
         ADualSystem<Ts..., Ts...>(isParallel)
