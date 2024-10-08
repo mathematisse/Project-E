@@ -10,5 +10,5 @@ target_link_libraries(render raylib)
 # Required for testing
 enable_testing()
 add_executable(render_test tests/render_test.cpp)
-target_link_libraries(render_test Boost::unit_test_framework raylib)
+target_link_libraries(render_test${boostincludedir} raylib)
 add_test(NAME RenderTest COMMAND render_test)
