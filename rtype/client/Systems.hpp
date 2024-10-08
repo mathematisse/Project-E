@@ -130,6 +130,7 @@ public:
     EntityManager &entityManager;
     AssetsLoader &assetsLoader;
     float deltaTime = 0.0f;
+    Vector2 playerPosition;
 
 protected:
     void _innerOperate(
@@ -154,6 +155,23 @@ protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
         typename C::TypePool::Types &ctype
+    ) override;
+};
+
+class MoveEnnemySystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::TypePool> {
+public:
+    explicit MoveEnnemySystem();
+    ~MoveEnnemySystem() override = default;
+
+    MoveEnnemySystem(const MoveEnnemySystem &other) = default;
+    MoveEnnemySystem(MoveEnnemySystem &&other) = default;
+    MoveEnnemySystem &operator=(const MoveEnnemySystem &other) = default;
+    MoveEnnemySystem &operator=(MoveEnnemySystem &&other) = default;
+
+    Vector2 playerPosition;
+protected:
+    void _innerOperate(
+        C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
     ) override;
 };
 

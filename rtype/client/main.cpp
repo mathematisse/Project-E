@@ -36,6 +36,21 @@ void update_camera(Camera2D &camera, float dt)
     camera.target = {old.x + 3, 1080 / 2};
 }
 
+Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
+{
+    auto player = chunks;
+    if (player.empty()) {
+        return {0, 0};
+    }
+    auto ref = _eM.getEntity(player[0]);
+    auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+    if (!square_player) {
+        std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+        return {0, 0};
+    }
+    return {*square_player->getPosition()->get<0>(), *square_player->getPosition()->get<1>()};
+}
+
 int main()
 {
     InitWindow(1920, 1080, "R-Type");
@@ -58,12 +73,13 @@ int main()
     ECS::S::ShootSystem shootSystem(_eM, assetsLoader);
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
+    ECS::S::MoveEnnemySystem moveEnnemySystem;
 
     ECS::E::SquarePool squarePool;
 
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem},
-        {&moveBackgroundSystem, &moveSystem, &applyVelocitySystem, &shootSystem, &drawSystem,
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem, &drawSystem,
          &drawSpriteSystem}
     );
 
@@ -155,6 +171,8 @@ int main()
         square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
     }
 
+    Vector2 playerPosition = get_player_position(_eM, player);
+
     auto curr_time = std::chrono::steady_clock::now();
     while (!WindowShouldClose()) {
         auto new_time = std::chrono::steady_clock::now();
@@ -165,6 +183,9 @@ int main()
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
+            playerPosition = get_player_position(_eM, player);
+            moveEnnemySystem.playerPosition = playerPosition;
+            shootSystem.playerPosition = playerPosition;
             applyVelocitySystem.deltaTime = dt;
             shootSystem.deltaTime = dt;
             drawSpriteSystem.deltaTime = dt;

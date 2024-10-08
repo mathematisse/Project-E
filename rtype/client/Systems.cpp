@@ -221,8 +221,11 @@ void ShootSystem::_innerOperate(
         return;
     }
     if ((IsKeyDown(KEY_SPACE) && type == SquareType::PLAYER) || type == SquareType::ENEMY) {
-        delay = base_delay;
         auto [x, y] = cposition;
+        if (type == SquareType::ENEMY && ((x - playerPosition.x) > 1000 || x <= playerPosition.x || y < playerPosition.y || y > playerPosition.y + 50)) {
+            return;
+        }
+        delay = base_delay;
         auto bullets = entityManager.createEntities("Square", 1, ECS::C::ENT_ALIVE);
 
         for (const auto &entity : bullets) {
@@ -278,6 +281,45 @@ void MoveBackgroundSystem::_innerOperate(
         x += 3000;
     }
 }
+
+MoveEnnemySystem::MoveEnnemySystem():
+    AMonoSystem(false)
+{
+}
+
+void MoveEnnemySystem::_innerOperate(
+    C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+)
+{
+    auto [status] = cStatus;
+    if (status != C::EntityStatusEnum::ENT_ALIVE ) {
+        return;
+    }
+    auto [type] = ctype;
+
+    if (type != SquareType::ENEMY) {
+        return;
+    }
+    auto [ennemyX, ennemyY] = cposition;
+    auto [vX, vY, speed] = cvelocity;
+    float playerX = playerPosition.x;
+    float playerY = playerPosition.y;
+    vX = 0;
+    vY = 0;
+
+    if ((ennemyX - playerX) > 1000)
+        return;
+    if (playerY < ennemyY) {
+        vY = -1;
+    }
+    if (playerY > ennemyY) {
+        vY = 1;
+    }
+    if (playerY < ennemyY && playerY + 50 > ennemyY) {
+        vY = 0;
+    }
+}
+
 
 } // namespace S
 } // namespace ECS
