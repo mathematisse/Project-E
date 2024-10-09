@@ -27,6 +27,10 @@ public:
 
     std::optional<Packet> readPacket();
     std::vector<Packet> readPackets();
+    [[nodiscard]] BufReader &getBufReader();
+    [[nodiscard]] BufWriter &getBufWriter();
+
+    [[nodiscard]] socket_t getFD() const;
     void close();
 
 private:
@@ -36,6 +40,7 @@ public:
     socket_t socket_fd = INVALID_SOCKET;
     sockaddr_in udp_address; // Store the client's address for sending responses
     BufReader buf_reader; // Buffer reader for UDP
+    BufWriter buf_writer;
 };
 
 }

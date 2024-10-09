@@ -5,8 +5,10 @@
 
 namespace net {
 struct Packet {
+    using MsgType = std::uint32_t;
+
     struct Header {
-        std::uint32_t type;
+        MsgType type;
         std::uint16_t size;
     };
 
@@ -14,6 +16,6 @@ struct Packet {
     std::vector<std::uint8_t> data;
 
     std::vector<std::uint8_t> serialize() const;
-    static Packet deserialize(std::uint32_t type, const std::vector<std::uint8_t> &data);
+    static Packet deserialize(MsgType type, const std::vector<std::uint8_t> &data);
 };
 }

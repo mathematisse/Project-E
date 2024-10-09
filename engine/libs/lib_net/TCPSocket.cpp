@@ -65,6 +65,20 @@ ssize_t TCPSocket::recvToBuffer()
 
 std::optional<Packet> TCPSocket::readPacket() { return buf_reader.readPacket(); }
 
+std::vector<Packet> TCPSocket::readPackets()
+{
+    std::vector<Packet> packets;
+
+    while (auto packet = readPacket()) {
+        packets.push_back(*packet);
+    }
+    return packets;
+}
+
+BufReader &TCPSocket::getBufReader() { return buf_reader; }
+
+BufWriter &TCPSocket::getBufWriter() { return buf_writer; }
+
 socket_t TCPSocket::getFD() const { return socket_fd; }
 
 void TCPSocket::close()
@@ -75,4 +89,13 @@ void TCPSocket::close()
     }
 }
 
+TCPSocket TCPSocket::accept(socket_t listenFD)
+{
+    TCPSocket clientSocket;
+    sockaddr_in client_addr {};
+    socklen_t client_len = sizeof(client_addr);
+    clientSocket.socket_fd =
+        ::accept(listenFD, reinterpret_cast<struct sockaddr *>(&client_addr), &client_len);
+    return clientSocket;
+}
 }

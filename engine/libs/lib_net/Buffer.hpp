@@ -24,9 +24,12 @@ class BufWriter {
 public:
     void write(const std::vector<std::uint8_t> &data);
     void appendPacket(const Packet &packet);
+    void appendPackets(const std::vector<Packet> &packets);
     [[nodiscard]] std::vector<std::uint8_t> getBuffer() const;
     void consume(size_t size);
     void clear();
+
+private:
     std::vector<std::uint8_t> buffer;
 };
 

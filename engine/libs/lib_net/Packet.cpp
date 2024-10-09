@@ -10,7 +10,7 @@ std::vector<std::uint8_t> net::Packet::serialize() const
     return buffer;
 }
 
-net::Packet net::Packet::deserialize(std::uint32_t type, const std::vector<std::uint8_t> &data)
+net::Packet net::Packet::deserialize(MsgType type, const std::vector<std::uint8_t> &data)
 {
     Packet packet;
 

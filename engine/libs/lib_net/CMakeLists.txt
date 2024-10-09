@@ -5,6 +5,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(lib_net STATIC lib.cpp)
 
+file(GLOB_RECURSE LIB_NET_SOURCES "*.cpp")
+target_sources(lib_net PRIVATE ${LIB_NET_SOURCES})
+
 target_link_libraries(lib_net Boost::asio)
 
 if(MINGW)

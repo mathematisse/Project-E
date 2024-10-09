@@ -1,4 +1,5 @@
 #include "lib_net/UDPSocket.hpp"
+#include "UDPSocket.hpp"
 
 namespace net {
 
@@ -56,16 +57,23 @@ ssize_t UDPSocket::recvToBuffer()
     return bytes_received;
 }
 
-auto UDPSocket::readPacket() -> std::optional<Packet> { return buf_reader.readPacket(); }
+std::optional<Packet> UDPSocket::readPacket() { return buf_reader.readPacket(); }
 
-auto UDPSocket::readPackets() -> std::vector<Packet>
+std::vector<Packet> UDPSocket::readPackets()
 {
     std::vector<Packet> packets;
+
     while (auto packet = readPacket()) {
         packets.push_back(*packet);
     }
     return packets;
 }
+
+BufReader &UDPSocket::getBufReader() { return buf_reader; }
+
+BufWriter &UDPSocket::getBufWriter() { return buf_writer; }
+
+socket_t UDPSocket::getFD() const { return socket_fd; }
 
 void UDPSocket::close()
 {

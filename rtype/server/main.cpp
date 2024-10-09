@@ -1,14 +1,15 @@
 
-#include "network/Server.hpp"
+#include "network/TestServer.hpp"
 
 int main()
 {
-    CustomServer server(60000);
-    server.start();
+    net::TestServer server;
+    std::uint16_t port = 4242;
 
+    server.host(port);
+    std::cout << "Server started on port " << port << std::endl;
     while (true) {
-        server.update(-1, true);
+        server.update();
     }
-
     return 0;
 }

@@ -24,13 +24,18 @@ public:
     ssize_t recv(std::vector<std::uint8_t> &buffer, size_t size) const;
     ssize_t recvToBuffer();
     std::optional<Packet> readPacket();
-    auto readPackets() -> std::vector<Packet>;
+    std::vector<Packet> readPackets();
+    [[nodiscard]] BufReader &getBufReader();
+    [[nodiscard]] BufWriter &getBufWriter();
 
     [[nodiscard]] socket_t getFD() const;
     void close();
 
+    static TCPSocket accept(socket_t listenFD);
+
 private:
     net::socket_t socket_fd = INVALID_SOCKET;
     BufReader buf_reader;
+    BufWriter buf_writer;
 };
 }

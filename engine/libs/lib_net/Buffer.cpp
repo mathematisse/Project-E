@@ -44,6 +44,15 @@ void BufWriter::appendPacket(const Packet &packet)
     write(serialized);
 }
 
+void BufWriter::appendPackets(const std::vector<Packet> &packets)
+{
+    for (const auto &packet : packets) {
+        appendPacket(packet);
+    }
+}
+
+std::vector<std::uint8_t> BufWriter::getBuffer() const { return buffer; }
+
 void BufWriter::consume(size_t size)
 {
     if (size > buffer.size()) {
