@@ -1,68 +1,72 @@
 #include "Server.hpp"
+#include <optional>
 
 bool net::Server::host(std::uint16_t port) { return host_tcp(port) && host_udp(port); }
 
 void net::Server::send_tcp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data)
 {
-    std::optional<Gateway *> opt_gateway = get_gateway(id);
-
-    if (!opt_gateway.has_value()) {
-        return;
+    if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
+        Gateway &gateway = opt_gateway.value();
+        gateway.send_tcp_queue.push_back(Packet::deserialize(type, data));
     }
-    Gateway &gateway = *opt_gateway.value();
-    gateway.send_tcp_queue.push_back(Packet::deserialize(type, data));
 }
 
 void net::Server::send_udp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data)
 {
-    std::optional<Gateway *> opt_gateway = get_gateway(id);
-
-    if (!opt_gateway.has_value()) {
-        return;
+    if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
+        Gateway &gateway = opt_gateway.value();
+        gateway.send_udp_queue.push_back(Packet::deserialize(type, data));
     }
-    Gateway &gateway = *opt_gateway.value();
-    gateway.send_udp_queue.push_back(Packet::deserialize(type, data));
 }
 
-std::optional<net::Gateway *> net::Server::get_gateway(client_id id)
+std::optional<std::reference_wrapper<net::Gateway>> net::Server::get_gateway(client_id id)
 {
     auto it = clients.find(id);
 
     if (it == clients.end()) {
         return std::nullopt;
     }
-    return &it->second;
+    return std::ref(it->second);
 }
 
 void net::Server::update()
 {
     std::vector<socket_t> fds = {listenFd, udpFd};
 
-    for (auto &c : clients) {
-        fds.push_back(c.second.tcp_socket.getFD());
-        fds.push_back(c.second.udp_socket.getFD());
+    for (auto &[clientId, gateway] : clients) {
+        fds.push_back(gateway.tcp_socket.getFD());
+        if (gateway.udp_socket.getFD() != INVALID_SOCKET) {
+            fds.push_back(gateway.udp_socket.getFD());
+        }
     }
     context.select(fds);
     handle_connections();
-    for (auto &c : clients) {
-        Gateway &gateway = c.second;
+
+    std::vector<std::pair<client_id, Packet>> packets_to_process;
+
+    for (auto &[clientId, gateway] : clients) {
 
         // TCP
         if (context.is_readable(gateway.tcp_socket.getFD())) {
             for (Packet &packet : gateway.tcp_socket.readPackets()) {
-                on_packet(packet, c.first);
+                packets_to_process.emplace_back(clientId, packet);
             }
         }
         if (context.is_writable(gateway.tcp_socket.getFD())) {
             gateway.tcp_socket.getBufWriter().appendPackets(gateway.send_tcp_queue);
+            gateway.send_tcp_queue.clear();
             ssize_t byte_sent = gateway.tcp_socket.send(gateway.tcp_socket.getBufWriter().getBuffer());
-            gateway.tcp_socket.getBufWriter().consume(byte_sent);
+            if (byte_sent == -1) {
+                gateway.tcp_socket.close();
+            } else {
+                gateway.tcp_socket.getBufWriter().consume(byte_sent);
+            }
         }
 
         // // UDP
         // if (context.is_readable(gateway.udp_socket.getFD())) {
         //     for (Packet &packet : gateway.udp_socket.readPackets()) {
-        //         on_packet(packet, c.first);
+        //         packets_to_process.emplace_back(c.first, packet);
         //     }
         // }
         // if (context.is_writable(gateway.udp_socket.getFD())) {
@@ -70,6 +74,10 @@ void net::Server::update()
         //     ssize_t byte_sent = gateway.udp_socket.send(gateway.udp_socket.getBufWriter().getBuffer());
         //     gateway.udp_socket.getBufWriter().consume(byte_sent);
         // }
+    }
+
+    for (const auto &[clientId, packet] : packets_to_process) {
+        on_packet(packet, clientId);
     }
 }
 
@@ -173,14 +181,12 @@ bool net::Server::host_udp(std::uint16_t port)
 
 void net::Server::handle_connections()
 {
-    static client_id id = 1;
-
     if (context.is_readable(listenFd)) {
         Gateway gateway;
         gateway.tcp_socket = TCPSocket::accept(listenFd);
         gateway.udp_socket.udp_address = {};
-        clients.insert({id, gateway});
-        on_connect(id++);
+        clients.insert({next_client_id, gateway});
+        on_connect(next_client_id++);
     }
     for (auto it = clients.begin(); it != clients.end();) {
         if (!it->second.tcp_socket.is_connected()) {

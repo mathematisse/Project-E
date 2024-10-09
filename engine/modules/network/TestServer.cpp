@@ -8,13 +8,12 @@ void net::TestServer::on_connect(client_id id)
 
 void net::TestServer::on_disconnect(client_id id) { std::cout << "Client disconnected: " << id << std::endl; }
 
-void net::TestServer::on_packet(Packet &packet, client_id id)
+void net::TestServer::on_packet(const Packet &packet, client_id id)
 {
     std::cout << "Received packet from client " << id << std::endl;
     std::cout << "Packet size: " << packet.header.size << std::endl;
     std::cout << "Packet data: ";
-    for (auto &byte : packet.data) {
-        std::cout << static_cast<char>(byte);
-    }
-    std::cout << std::endl;
+    // convert to string
+    std::string data(packet.data.begin(), packet.data.end());
+    std::cout << data << std::endl;
 }
