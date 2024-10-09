@@ -18,6 +18,7 @@ public:
     [[nodiscard]] bool listen(int backlog = MAX_LISTEN_BACKLOG) const;
     [[nodiscard]] TCPSocket accept() const;
     [[nodiscard]] bool connect(const std::string &ipAddress, uint16_t port) const;
+    [[nodiscard]] inline bool is_connected() const { return socket_fd != INVALID_SOCKET; };
 
     [[nodiscard]] ssize_t send(const std::vector<std::uint8_t> &data) const;
     ssize_t recv(std::vector<std::uint8_t> &buffer, size_t size) const;

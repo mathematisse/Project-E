@@ -23,6 +23,7 @@ namespace net {
 
 constexpr size_t MAX_BUFFER_SIZE = 8192;
 constexpr size_t MAX_LISTEN_BACKLOG = 5;
+constexpr size_t MAX_LISTEN_QUEUE_SIZE = 100;
 
 #ifdef _WIN32
 using socket_t = SOCKET;
