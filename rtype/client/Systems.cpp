@@ -422,12 +422,12 @@ void ColliderSystem::_innerOperate(
             healthA -= 1;
             healthB -= 1;
         }
-        if (healthA <= 0) {
-            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-        }
-        if (healthB <= 0) {
-            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-        }
+    }
+    if (healthA <= 0) {
+        statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+    }
+    if (healthB <= 0) {
+        statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
     }
 }
 
