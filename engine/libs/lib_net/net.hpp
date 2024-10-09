@@ -2,7 +2,7 @@
 #pragma once
 
 #include <iostream>
-#include <stdexcept>
+
 #ifdef _WIN32
 /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
 #ifndef _WIN32_WINNT

@@ -7,7 +7,7 @@
 namespace net {
 struct Gateway {
     TCPSocket tcp_socket;
-    TCPSocket udp_socket;
+    UDPSocket udp_socket;
     std::uint64_t generated_number = 0;
     std::vector<Packet> send_tcp_queue;
     std::vector<Packet> send_udp_queue;
