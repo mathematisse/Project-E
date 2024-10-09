@@ -23,8 +23,9 @@ namespace ECS {
 namespace S {
 // SYSTEM
 
-DrawSystem::DrawSystem():
-    AMonoSystem(false)
+DrawSystem::DrawSystem(Camera2D &camera):
+    AMonoSystem(false),
+    camera(camera)
 {
 }
 
@@ -40,8 +41,8 @@ void DrawSystem::_innerOperate(
     auto [x, y] = cposition;
     auto [r, g, b, a] = ccolor;
     auto [sizeX, sizeY, rotation] = csize;
+    BeginMode2D(camera);
     DrawRectangle((int) x, (int) y, sizeX, sizeY, {r, g, b, a});
-    EndMode2D();
 }
 
 DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
@@ -134,6 +135,21 @@ void MovePlayerSystem::_innerOperate(
     }
 }
 
+CountEnnemyAliveSystem::CountEnnemyAliveSystem(size_t &ennemyCount):
+    AMonoSystem(false),
+    ennemyCount(ennemyCount)
+{
+}
+
+void CountEnnemyAliveSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::TypePool::Types &ctype)
+{
+    auto [status] = cstatus;
+    auto [type] = ctype;
+    if (status == C::EntityStatusEnum::ENT_ALIVE && type == SquareType::ENEMY) {
+        ennemyCount++;
+    }
+}
+
 SpawnEnnemySystem::SpawnEnnemySystem(
     EntityManager &entityManager, AssetsLoader &assetsLoader, Camera2D &camera, size_t maxEnnemyCount
 ):
@@ -152,21 +168,13 @@ void SpawnEnnemySystem::_innerOperate(
     auto [status] = cstatus;
     auto [type] = ctype;
 
-    if (status == C::EntityStatusEnum::ENT_ALIVE && type != SquareType::BACKGROUND &&
-        type != SquareType::WALL) {
-        auto [x, y] = cposition;
-        if (type == SquareType::ENEMY && x < camera.target.x - 1000) {
-            _ennemyCount--;
-            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-        } else if (x < camera.target.x - 1000) {
-            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-        }
-    }
-
     if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::PLAYER) {
         return;
     }
-    auto need_to_spawn = _maxEnnemyCount - _ennemyCount;
+    if (ennemyCount >= _maxEnnemyCount) {
+        return;
+    }
+    auto need_to_spawn = _maxEnnemyCount - ennemyCount;
     if (need_to_spawn <= 0) {
         return;
     }
@@ -198,8 +206,8 @@ void SpawnEnnemySystem::_innerOperate(
         square_ennemy->getCanShoot()->set<0>(true);
         square_ennemy->getCanShoot()->set<1>(1.5F);
         square_ennemy->getSprite()->set<0>(assetsLoader.get_asset(E1FC).id);
+        square_ennemy->getHealth()->set<0>(2);
     }
-    _ennemyCount += need_to_spawn;
 }
 
 ShootSystem::ShootSystem(EntityManager &entityManager, AssetsLoader &assetsLoader):
@@ -264,6 +272,7 @@ void ShootSystem::_innerOperate(
             square_bullet->getSize()->set<0>(30);
             square_bullet->getSize()->set<1>(30);
             square_bullet->getSprite()->set<0>(assetsLoader.get_asset(CUT_BULLET_PATH).id);
+            square_bullet->getHealth()->set<0>(1);
         }
     }
 }
@@ -280,6 +289,18 @@ void MoveBackgroundSystem::_innerOperate(
 {
     auto [status] = cstatus;
     auto [type] = ctype;
+
+    if (status == C::EntityStatusEnum::ENT_ALIVE && type != SquareType::BACKGROUND &&
+        type != SquareType::WALL) {
+        auto [x, y] = cposition;
+        if (x < camera.target.x - 1000) {
+            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (type == SquareType::BULLET && x > camera.target.x + 1000) {
+            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+    }
+
     if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::BACKGROUND) {
         return;
     }
@@ -334,10 +355,10 @@ ColliderSystem::ColliderSystem():
 }
 
 void ColliderSystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
-    C::VelocityPool::Types & /*unused*/, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
-    C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
-    C::VelocityPool::Types & /*unused*/, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
+    C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA, C::EntityStatusPool::Types &cStatusB,
+    C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB,
+    C::HealthPool::Types &chealthB
 )
 {
     auto [statusA] = cStatusA;
@@ -353,35 +374,98 @@ void ColliderSystem::_innerOperate(
     auto [xB, yB] = cpositionB;
     auto [sizeXB, sizeYB, _2] = csizeB;
     auto [typeB] = ctypeB;
+    auto [healthA] = chealthA;
+    auto [healthB] = chealthB;
+
     bool collide = false;
 
     if (xA + sizeXA > xB && xA < xB + sizeXB && yA + sizeYA > yB && yA < yB + sizeYB) {
         collide = true;
     }
 
+    if (yA < 100 || yA + sizeYA > 980) {
+        healthA = 0;
+    }
+
+    if (yB < 100 || yB + sizeYB > 980) {
+        healthB = 0;
+    }
+
     if (collide) {
         if (typeA == SquareType::PLAYER && typeB == SquareType::ENEMY) {
-            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            healthA -= 1;
+            healthB -= 1;
         }
         if (typeA == SquareType::ENEMY && typeB == SquareType::PLAYER) {
-            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            healthA -= 1;
+            healthB -= 1;
         }
         if (typeA == SquareType::BULLET && typeB == SquareType::ENEMY) {
-            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            healthA -= 1;
+            healthB -= 1;
         }
         if (typeA == SquareType::BULLET_ENNEMY && typeB == SquareType::PLAYER) {
-            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            healthA -= 1;
+            healthB -= 1;
         }
-        if (typeA == SquareType::BULLET || typeA == SquareType::BULLET_ENNEMY) {
-            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        if ((typeA == SquareType::BULLET || typeA == SquareType::BULLET_ENNEMY) &&
+            typeB == SquareType::WALL) {
+            healthA -= 1;
         }
-        if (typeB == SquareType::BULLET || typeB == SquareType::BULLET_ENNEMY) {
-            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        if ((typeB == SquareType::BULLET || typeB == SquareType::BULLET_ENNEMY) &&
+            typeA == SquareType::WALL) {
+            healthB -= 1;
         }
+
+        if ((typeA == SquareType::BULLET && typeB == SquareType::BULLET_ENNEMY) ||
+            ((typeB == SquareType::BULLET && typeA == SquareType::BULLET_ENNEMY))) {
+            healthA -= 1;
+            healthB -= 1;
+        }
+    }
+}
+
+UpdateHealthSystem::UpdateHealthSystem():
+    AMonoSystem(false)
+{
+}
+
+void UpdateHealthSystem::_innerOperate(
+    C::EntityStatusPool::Types &cStatus, C::TypePool::Types &ctype, C::HealthPool::Types &chealth
+)
+{
+    auto [status] = cStatus;
+
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    auto [type] = ctype;
+    auto [health] = chealth;
+
+    if (type == SquareType::PLAYER || type == SquareType::ENEMY || type == SquareType::BULLET_ENNEMY ||
+        type == SquareType::BULLET) {
+        if (health <= 0) {
+            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+    }
+}
+
+ShowInfoSystem::ShowInfoSystem(Camera2D &camera):
+    AMonoSystem(false),
+    camera(camera)
+{
+}
+
+void ShowInfoSystem::_innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth)
+{
+    auto [type] = ctype;
+
+    if (type == SquareType::PLAYER && !one_time) {
+        one_time = true;
+        auto [health] = chealth;
+        Vector2 top_left = {camera.target.x - 1920 / 2, camera.target.y - 1080 / 2};
+        DrawText("Player health: ", top_left.x + 10, top_left.y + 10, 20, RED);
+        DrawText(std::to_string(health).c_str(), top_left.x + 200, top_left.y + 10, 20, RED);
     }
 }
 

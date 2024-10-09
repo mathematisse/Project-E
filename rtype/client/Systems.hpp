@@ -17,13 +17,15 @@ namespace ECS::S {
 
 class DrawSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::ColorPool, C::SizePool> {
 public:
-    explicit DrawSystem();
+    explicit DrawSystem(Camera2D &camera);
     ~DrawSystem() override = default;
 
     DrawSystem(const DrawSystem &other) = default;
     DrawSystem(DrawSystem &&other) = default;
     DrawSystem &operator=(const DrawSystem &other) = default;
     DrawSystem &operator=(DrawSystem &&other) = default;
+
+    Camera2D &camera;
 
 protected:
     void _innerOperate(
@@ -89,6 +91,22 @@ protected:
     ) override;
 };
 
+class CountEnnemyAliveSystem : public S::AMonoSystem<C::EntityStatusPool, C::TypePool> {
+public:
+    explicit CountEnnemyAliveSystem(size_t &ennemyCount);
+    ~CountEnnemyAliveSystem() override = default;
+
+    CountEnnemyAliveSystem(const CountEnnemyAliveSystem &other) = default;
+    CountEnnemyAliveSystem(CountEnnemyAliveSystem &&other) = default;
+    CountEnnemyAliveSystem &operator=(const CountEnnemyAliveSystem &other) = default;
+    CountEnnemyAliveSystem &operator=(CountEnnemyAliveSystem &&other) = default;
+
+    size_t ennemyCount = 0;
+
+protected:
+    void _innerOperate(C::EntityStatusPool::Types &cStatus, C::TypePool::Types &ctype) override;
+};
+
 class SpawnEnnemySystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
 public:
     explicit SpawnEnnemySystem(
@@ -104,6 +122,7 @@ public:
     EntityManager &entityManager;
     AssetsLoader &assetsLoader;
     Camera2D &camera;
+    size_t ennemyCount = 0;
 
 protected:
     void _innerOperate(
@@ -112,7 +131,6 @@ protected:
     ) override;
 
 private:
-    size_t _ennemyCount = 0;
     size_t _maxEnnemyCount = 0;
 };
 
@@ -180,7 +198,7 @@ protected:
 
 class ColliderSystem
     : public S::ASelfDualSystem<
-          std::tuple<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::SizePool, C::TypePool>> {
+          std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::HealthPool>> {
 public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
@@ -192,11 +210,44 @@ public:
 
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
-        C::VelocityPool::Types &cvelocityA, C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA,
-        C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
-        C::VelocityPool::Types &cvelocityB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB
+        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
+        C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA, C::EntityStatusPool::Types &cStatusB,
+        C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB,
+        C::HealthPool::Types &chealthB
     ) override;
+};
+
+class UpdateHealthSystem : public S::AMonoSystem<C::EntityStatusPool, C::TypePool, C::HealthPool> {
+public:
+    explicit UpdateHealthSystem();
+    ~UpdateHealthSystem() override = default;
+
+    UpdateHealthSystem(const UpdateHealthSystem &other) = default;
+    UpdateHealthSystem(UpdateHealthSystem &&other) = default;
+    UpdateHealthSystem &operator=(const UpdateHealthSystem &other) = default;
+    UpdateHealthSystem &operator=(UpdateHealthSystem &&other) = default;
+
+protected:
+    void _innerOperate(
+        C::EntityStatusPool::Types &cStatus, C::TypePool::Types &ctype, C::HealthPool::Types &chealth
+    ) override;
+};
+
+class ShowInfoSystem : public S::AMonoSystem<C::TypePool, C::HealthPool> {
+public:
+    explicit ShowInfoSystem(Camera2D &camera);
+    ~ShowInfoSystem() override = default;
+
+    ShowInfoSystem(const ShowInfoSystem &other) = default;
+    ShowInfoSystem(ShowInfoSystem &&other) = default;
+    ShowInfoSystem &operator=(const ShowInfoSystem &other) = default;
+    ShowInfoSystem &operator=(ShowInfoSystem &&other) = default;
+
+    Camera2D &camera;
+    bool one_time = false;
+
+protected:
+    void _innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth) override;
 };
 
 } // namespace ECS::S

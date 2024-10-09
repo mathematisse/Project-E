@@ -57,7 +57,7 @@ int main()
 
     ECS::EntityManager _eM;
 
-    ECS::S::DrawSystem drawSystem;
+    ECS::S::DrawSystem drawSystem(camera);
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, assetsLoader, camera);
@@ -66,14 +66,17 @@ int main()
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
+    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
+    ECS::S::UpdateHealthSystem updateHealthSystem;
+    ECS::S::ShowInfoSystem showInfoSystem(camera);
 
     ECS::E::SquarePool squarePool;
     ECS::E::DecorSquarePool decorSquarePool;
 
     ECS::S::SystemTreeNode demoNode(
-        42, {&spawnEnnemySystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &colliderSystem,
-         &shootSystem, &drawSpriteSystem, &drawSystem}
+        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
+         &colliderSystem, &updateHealthSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -158,6 +161,7 @@ int main()
         square_player->getSize()->set<1>(80);
         square_player->getSize()->set<2>(90);
         square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
+        square_player->getHealth()->set<0>(3);
     }
 
     Vector2 playerPosition = get_player_position(_eM, player);
@@ -175,12 +179,16 @@ int main()
         applyVelocitySystem.deltaTime = dt;
         shootSystem.deltaTime = dt;
         drawSpriteSystem.deltaTime = dt;
+        countEnnemyAliveSystem.ennemyCount = 0;
+        showInfoSystem.one_time = false;
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
             _eM.runSystems();
+            EndMode2D();
         }
         EndDrawing();
+        spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
     }
     CloseWindow();
     return 0;

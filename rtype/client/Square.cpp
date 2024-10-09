@@ -13,7 +13,8 @@ namespace ECS::E {
 // ENTITY REF
 SquareRef::SquareRef(
     C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position, C::VelocityRef *Velocity,
-    C::ColorRef *Color, C::SizeRef *Size, C::TypeRef *Type, C::CanShootRef *CanShoot, C::SpriteRef *Sprite
+    C::ColorRef *Color, C::SizeRef *Size, C::TypeRef *Type, C::CanShootRef *CanShoot, C::SpriteRef *Sprite,
+    C::HealthRef *Health
 ):
     AEntityRef(status, cPos),
     _position(Position),
@@ -22,7 +23,8 @@ SquareRef::SquareRef(
     _size(Size),
     _type(Type),
     _canShoot(CanShoot),
-    _sprite(Sprite)
+    _sprite(Sprite),
+    _health(Health)
 {
 }
 
@@ -35,6 +37,7 @@ SquareRef::~SquareRef()
     delete _type;
     delete _canShoot;
     delete _sprite;
+    delete _health;
 }
 
 [[nodiscard]] C::PositionRef *E::SquareRef::getPosition() const { return _position; }
@@ -65,6 +68,10 @@ void E::SquareRef::setCanShoot(const C::CanShootRef &canShoot) { *_canShoot = ca
 
 void E::SquareRef::setSprite(const C::SpriteRef &sprite) { *_sprite = sprite; }
 
+[[nodiscard]] C::HealthRef *E::SquareRef::getHealth() const { return _health; }
+
+void E::SquareRef::setHealth(const C::HealthRef &health) { *_health = health; }
+
 // ENTITY POOL
 SquarePool::SquarePool():
     AEntityPool("Square", SquareChunkSize)
@@ -84,7 +91,8 @@ std::unique_ptr<E::SquareRef> SquarePool::getRawEntity(Chunks::chunkPos_t cPos)
         static_cast<C::SizeRef *>(_sizePool.getComponentRef(cPos)),
         static_cast<C::TypeRef *>(_typePool.getComponentRef(cPos)),
         static_cast<C::CanShootRef *>(_canShootPool.getComponentRef(cPos)),
-        static_cast<C::SpriteRef *>(_spritePool.getComponentRef(cPos))
+        static_cast<C::SpriteRef *>(_spritePool.getComponentRef(cPos)),
+        static_cast<C::HealthRef *>(_healthPool.getComponentRef(cPos))
     );
     return ptr;
 }
@@ -92,6 +100,6 @@ std::unique_ptr<E::SquareRef> SquarePool::getRawEntity(Chunks::chunkPos_t cPos)
 std::vector<C::IComponentPool *> SquarePool::getComponentPools()
 {
     return {&_entityStatusPool, &_chunkPosPool, &_positionPool, &_velocityPool, &_colorPool,
-            &_sizePool,         &_typePool,     &_canShootPool, &_spritePool};
+            &_sizePool,         &_typePool,     &_canShootPool, &_spritePool,   &_healthPool};
 }
 }

@@ -17,6 +17,7 @@ DECLARE_COMPONENT(Velocity, float, float, float); // 3rd param is the speed
 DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned char);
 
 DECLARE_COMPONENT(CanShoot, char, float, float)
+DECLARE_COMPONENT(Health, size_t)
 }
 
 namespace ECS::E {
@@ -27,7 +28,8 @@ class SquareRef : public AEntityRef {
 public:
     SquareRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity,
-        C::ColorRef *color, C::SizeRef *size, C::TypeRef *type, C::CanShootRef *canShoot, C::SpriteRef *sprite
+        C::ColorRef *color, C::SizeRef *size, C::TypeRef *type, C::CanShootRef *canShoot,
+        C::SpriteRef *sprite, C::HealthRef *health
     );
     ~SquareRef() override;
 
@@ -60,6 +62,9 @@ public:
     [[nodiscard]] C::SpriteRef *getSprite() const;
     void setSprite(const C::SpriteRef &sprite);
 
+    [[nodiscard]] C::HealthRef *getHealth() const;
+    void setHealth(const C::HealthRef &health);
+
 protected:
     C::PositionRef *_position;
     C::VelocityRef *_velocity;
@@ -68,6 +73,7 @@ protected:
     C::TypeRef *_type;
     C::CanShootRef *_canShoot;
     C::SpriteRef *_sprite;
+    C::HealthRef *_health;
 };
 
 // ENTITY POOL
@@ -94,5 +100,6 @@ protected:
     C::TypePool _typePool;
     C::CanShootPool _canShootPool;
     C::SpritePool _spritePool;
+    C::HealthPool _healthPool;
 };
 }
