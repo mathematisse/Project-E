@@ -10,6 +10,7 @@
 #endif
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
 #else
 /* Assume that any non-Windows platform uses POSIX-style sockets instead. */
 #include <sys/socket.h>
