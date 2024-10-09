@@ -422,30 +422,11 @@ void ColliderSystem::_innerOperate(
             healthA -= 1;
             healthB -= 1;
         }
-    }
-}
-
-UpdateHealthSystem::UpdateHealthSystem():
-    AMonoSystem(false)
-{
-}
-
-void UpdateHealthSystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatus, C::TypePool::Types &ctype, C::HealthPool::Types &chealth
-)
-{
-    auto [status] = cStatus;
-
-    if (status != C::EntityStatusEnum::ENT_ALIVE) {
-        return;
-    }
-    auto [type] = ctype;
-    auto [health] = chealth;
-
-    if (type == SquareType::PLAYER || type == SquareType::ENEMY || type == SquareType::BULLET_ENNEMY ||
-        type == SquareType::BULLET) {
-        if (health <= 0) {
-            status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        if (healthA <= 0) {
+            statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        }
+        if (healthB <= 0) {
+            statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         }
     }
 }

@@ -217,22 +217,6 @@ protected:
     ) override;
 };
 
-class UpdateHealthSystem : public S::AMonoSystem<C::EntityStatusPool, C::TypePool, C::HealthPool> {
-public:
-    explicit UpdateHealthSystem();
-    ~UpdateHealthSystem() override = default;
-
-    UpdateHealthSystem(const UpdateHealthSystem &other) = default;
-    UpdateHealthSystem(UpdateHealthSystem &&other) = default;
-    UpdateHealthSystem &operator=(const UpdateHealthSystem &other) = default;
-    UpdateHealthSystem &operator=(UpdateHealthSystem &&other) = default;
-
-protected:
-    void _innerOperate(
-        C::EntityStatusPool::Types &cStatus, C::TypePool::Types &ctype, C::HealthPool::Types &chealth
-    ) override;
-};
-
 class ShowInfoSystem : public S::AMonoSystem<C::TypePool, C::HealthPool> {
 public:
     explicit ShowInfoSystem(Camera2D &camera);

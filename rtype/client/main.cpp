@@ -67,7 +67,6 @@ int main()
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
-    ECS::S::UpdateHealthSystem updateHealthSystem;
     ECS::S::ShowInfoSystem showInfoSystem(camera);
 
     ECS::E::SquarePool squarePool;
@@ -76,7 +75,7 @@ int main()
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
         {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
-         &colliderSystem, &updateHealthSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem}
+         &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
