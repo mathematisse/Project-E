@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <iostream>
+#include <stdexcept>
 #ifdef _WIN32
 /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
 #ifndef _WIN32_WINNT
@@ -18,7 +20,7 @@
 
 namespace net {
 
-constexpr size_t MAX_BUFFER_SIZE = 1024;
+constexpr size_t MAX_BUFFER_SIZE = 8192;
 constexpr size_t MAX_LISTEN_BACKLOG = 5;
 
 #ifdef _WIN32
@@ -32,4 +34,32 @@ using socket_t = int;
 #define INVALID_SOCKET (-1)
 inline void close_socket(socket_t socket) { close(socket); }
 #endif
+
+class SocketInitializer {
+public:
+    SocketInitializer() noexcept
+    {
+#ifdef _WIN32
+        WSADATA wsa_data;
+        auto ret = WSAStartup(MAKEWORD(1, 1), &wsa_data);
+#else
+        auto ret = 0;
+#endif
+        if (ret != 0) {
+            std::cerr << "Error initializing socket library: " << ret << std::endl;
+        }
+    }
+
+    ~SocketInitializer() noexcept
+    {
+#ifdef _WIN32
+        WSACleanup();
+#else
+#endif
+    }
+};
+
+// Create a global instance of SocketInitializer to ensure initialization and cleanup
+static const SocketInitializer socketInitializer;
+
 }
