@@ -1,7 +1,4 @@
 
-#include <netinet/in.h>
-#include <sys/socket.h>
-
 #include "lib_net/TCPSocket.hpp"
 
 namespace net {

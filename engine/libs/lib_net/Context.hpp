@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arpa/inet.h>
+#include "lib_net/net.hpp"
 #include <cstdint>
 
 namespace net {
