@@ -10,19 +10,19 @@ bool UDPSocket::create()
 }
 
 // return true if bind is successful
-[[nodiscard]] auto UDPSocket::bind(const std::string &ip, uint16_t port) const -> bool
+[[nodiscard]] auto UDPSocket::bind(const std::string &ipAddress, uint16_t port) const -> bool
 {
     sockaddr_in addr {};
     std::memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    if (ip.empty()) {
+    if (ipAddress.empty()) {
         addr.sin_addr.s_addr = htonl(INADDR_ANY);
     } else {
-        addr.sin_addr.s_addr = inet_addr(ip.c_str());
+        addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
     }
     addr.sin_port = htons(port);
 
-    return ::bind(socket_fd, (struct sockaddr *) &addr, sizeof(addr)) == 0;
+    return ::bind(socket_fd, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) == 0;
 }
 
 ssize_t UDPSocket::send(const std::vector<std::uint8_t> &data) const

@@ -11,12 +11,12 @@ bool TCPSocket::create()
     return socket_fd != INVALID_SOCKET;
 }
 
-bool TCPSocket::bind(const std::string &ip, uint16_t port) const
+bool TCPSocket::bind(const std::string &ipAddress, uint16_t port) const
 {
-    sockaddr_in addr;
+    sockaddr_in addr {};
     std::memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(ip.c_str());
+    addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
     addr.sin_port = htons(port);
 
     return ::bind(socket_fd, (struct sockaddr *) &addr, sizeof(addr)) == 0;
@@ -27,19 +27,19 @@ bool TCPSocket::listen(int backlog) const { return ::listen(socket_fd, backlog) 
 TCPSocket TCPSocket::accept() const
 {
     TCPSocket clientSocket;
-    sockaddr_in client_addr;
+    sockaddr_in client_addr {};
     socklen_t client_len = sizeof(client_addr);
     clientSocket.socket_fd =
         ::accept(socket_fd, reinterpret_cast<struct sockaddr *>(&client_addr), &client_len);
     return clientSocket;
 }
 
-bool TCPSocket::connect(const std::string &ip, uint16_t port) const
+bool TCPSocket::connect(const std::string &ipAddress, uint16_t port) const
 {
-    sockaddr_in addr;
+    sockaddr_in addr {};
     std::memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(ip.c_str());
+    addr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
     addr.sin_port = htons(port);
 
     return ::connect(socket_fd, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) == 0;
