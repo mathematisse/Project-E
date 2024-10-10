@@ -25,7 +25,7 @@ namespace ECS::C {
 DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Size, float, float, float); // 3rd param is the rotation
 DECLARE_COMPONENT(Type, SquareType);
-DECLARE_COMPONENT(Sprite, size_t);
+DECLARE_COMPONENT(Sprite, size_t, char, float, float, float, float, float);
 }
 
 namespace ECS::E {

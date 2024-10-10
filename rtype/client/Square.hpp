@@ -18,6 +18,7 @@ DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned c
 
 DECLARE_COMPONENT(CanShoot, char, float, float)
 DECLARE_COMPONENT(Health, size_t)
+DECLARE_COMPONENT(Timer, float, float)
 }
 
 namespace ECS::E {
@@ -29,7 +30,7 @@ public:
     SquareRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity,
         C::ColorRef *color, C::SizeRef *size, C::TypeRef *type, C::CanShootRef *canShoot,
-        C::SpriteRef *sprite, C::HealthRef *health
+        C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time
     );
     ~SquareRef() override;
 
@@ -65,6 +66,9 @@ public:
     [[nodiscard]] C::HealthRef *getHealth() const;
     void setHealth(const C::HealthRef &health);
 
+    [[nodiscard]] C::TimerRef *getTimer() const;
+    void setTimer(const C::TimerRef &time);
+
 protected:
     C::PositionRef *_position;
     C::VelocityRef *_velocity;
@@ -74,6 +78,7 @@ protected:
     C::CanShootRef *_canShoot;
     C::SpriteRef *_sprite;
     C::HealthRef *_health;
+    C::TimerRef *_time;
 };
 
 // ENTITY POOL
@@ -101,5 +106,6 @@ protected:
     C::CanShootPool _canShootPool;
     C::SpritePool _spritePool;
     C::HealthPool _healthPool;
+    C::TimerPool _timerPool;
 };
 }

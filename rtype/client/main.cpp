@@ -68,6 +68,7 @@ int main()
     ECS::S::ColliderSystem colliderSystem;
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
     ECS::S::ShowInfoSystem showInfoSystem(camera);
+    ECS::S::ClockSystem clockSystem(assetsLoader);
 
     ECS::E::SquarePool squarePool;
     ECS::E::DecorSquarePool decorSquarePool;
@@ -75,7 +76,7 @@ int main()
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
         {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
-         &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem}
+         &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -180,6 +181,7 @@ int main()
         drawSpriteSystem.deltaTime = dt;
         countEnnemyAliveSystem.ennemyCount = 0;
         showInfoSystem.one_time = false;
+        clockSystem.deltaTime = dt;
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);

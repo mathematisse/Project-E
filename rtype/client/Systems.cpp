@@ -61,32 +61,46 @@ void DrawSpriteSystem::_innerOperate(
     if (status != C::EntityStatusEnum::ENT_ALIVE || IsKeyDown(KEY_H)) {
         return;
     }
-    auto [sprite_id] = csprite;
-    if (sprite_id == 0) {
+    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
+    if (id == 0) {
         return;
     }
     auto [x, y] = cposition;
     auto [sizeX, sizeY, rotation] = csize;
     auto [type] = ctype;
-    auto texture = assetsLoader.get_asset_from_id(sprite_id);
+    auto texture = assetsLoader.get_asset_from_id(id);
     float scale = texture.width / sizeX;
     float adjustedX = x;
     float adjustedY = y;
-    if (rotation == 90) {
-        adjustedX += sizeX;
-    }
-    if (rotation == -90) {
-        adjustedY += sizeY;
-    }
-    if (type != SquareType::BACKGROUND &&
-        (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
-        return;
-    }
-    BeginMode2D(camera);
-    DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
-    if (type == SquareType::BACKGROUND) {
-        DrawTextureEx(texture, {adjustedX - 3000, adjustedY}, rotation, 1 / scale, WHITE);
-        DrawTextureEx(texture, {adjustedX + 3000, adjustedY}, rotation, 1 / scale, WHITE);
+    if (flag == 0) {
+        if (rotation == 90) {
+            adjustedX += sizeX;
+        }
+        if (rotation == -90) {
+            adjustedY += sizeY;
+        }
+        if (type != SquareType::BACKGROUND &&
+            (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
+            return;
+        }
+        BeginMode2D(camera);
+        DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
+        if (type == SquareType::BACKGROUND) {
+            DrawTextureEx(texture, {adjustedX - 3000, adjustedY}, rotation, 1 / scale, WHITE);
+            DrawTextureEx(texture, {adjustedX + 3000, adjustedY}, rotation, 1 / scale, WHITE);
+        }
+    } else {
+        if (rotation == 90) {
+            DrawTexturePro(
+                texture, {start_position, 0, texture.width / nbr_frame, (float) texture.height},
+                {x, y, sprite_x, sprite_y}, Vector2 {0, 0}, rotation, WHITE
+            );
+        } else if (rotation == -90 || rotation == 270) {
+            DrawTexturePro(
+                texture, {start_position, 0, texture.width / nbr_frame, (float) texture.height},
+                {x, y + sprite_y, sprite_x, sprite_y}, Vector2 {0, 0}, rotation, WHITE
+            );
+        }
     }
 }
 
@@ -271,8 +285,15 @@ void ShootSystem::_innerOperate(
             square_bullet->getCanShoot()->set<0>(false);
             square_bullet->getSize()->set<0>(30);
             square_bullet->getSize()->set<1>(30);
-            square_bullet->getSprite()->set<0>(assetsLoader.get_asset(CUT_BULLET_PATH).id);
+            square_bullet->getSprite()->set<0>(assetsLoader.get_asset(BASE_BULLET_PATH).id);
+            square_bullet->getSprite()->set<1>(true);
+            square_bullet->getSprite()->set<2>(30.0F);
+            square_bullet->getSprite()->set<3>(30.0F);
+            square_bullet->getSprite()->set<4>(4.0F);
+            square_bullet->getSprite()->set<5>(0);
             square_bullet->getHealth()->set<0>(1);
+            square_bullet->getTimer()->set<0>(0.0F);
+            square_bullet->getTimer()->set<1>(8.0F);
         }
     }
 }
@@ -447,6 +468,33 @@ void ShowInfoSystem::_innerOperate(C::TypePool::Types &ctype, C::HealthPool::Typ
         Vector2 top_left = {camera.target.x - 1920 / 2, camera.target.y - 1080 / 2};
         DrawText("Player health: ", top_left.x + 10, top_left.y + 10, 20, RED);
         DrawText(std::to_string(health).c_str(), top_left.x + 200, top_left.y + 10, 20, RED);
+    }
+}
+
+ClockSystem::ClockSystem(AssetsLoader &assetsLoader):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader)
+{
+}
+
+void ClockSystem::_innerOperate(C::SpritePool::Types &csprite, C::TimerPool::Types &ctimer)
+{
+    float deltaTime = GetFrameTime();
+    auto [id, animated, x, y, nbr_frame, sprite_pos, animation_time] = csprite;
+    auto [clock, end_clock] = ctimer;
+    clock += deltaTime * 100;
+    std::cout << "Clock: " << clock << std::endl;
+    auto texture = assetsLoader.get_asset_from_id(id);
+    if (clock >= end_clock) {
+
+        std::cout << "postion " << sprite_pos << std::endl;
+        clock = 0;
+        if (sprite_pos < (float) texture.width) {
+            sprite_pos += (float) (texture.width) / nbr_frame;
+            std::cout << "new postion " << sprite_pos << std::endl;
+        } else {
+            sprite_pos = 0;
+        }
     }
 }
 
