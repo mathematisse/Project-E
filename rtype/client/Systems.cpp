@@ -273,6 +273,8 @@ void ShootSystem::_innerOperate(
             square_bullet->getSize()->set<1>(30);
             square_bullet->getSprite()->set<0>(assetsLoader.get_asset(CUT_BULLET_PATH).id);
             square_bullet->getHealth()->set<0>(1);
+            square_bullet->getTimer()->set<0>(0.0F);
+            square_bullet->getTimer()->set<1>(8.0F);
         }
     }
 }
@@ -447,6 +449,32 @@ void ShowInfoSystem::_innerOperate(C::TypePool::Types &ctype, C::HealthPool::Typ
         Vector2 top_left = {camera.target.x - 1920 / 2, camera.target.y - 1080 / 2};
         DrawText("Player health: ", top_left.x + 10, top_left.y + 10, 20, RED);
         DrawText(std::to_string(health).c_str(), top_left.x + 200, top_left.y + 10, 20, RED);
+    }
+}
+
+ClockSystem::ClockSystem(AssetsLoader &assetsLoader):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader)
+{
+}
+
+void ClockSystem::_innerOperate(C::SpritePool::Types &csprite, C::TimerPool::Types &ctimer)
+{
+    std::cout << "Test" << std::endl;
+    float deltaTime = GetFrameTime();
+    auto [id] = csprite;
+    auto [clock, end_clock] = ctimer;
+    clock += deltaTime;
+    std::cout << "Clock: " << clock << std::endl;
+    auto texture = assetsLoader.get_asset_from_id(id);
+    if (clock > end_clock) {
+        std::cout << "Test" << std::endl;
+        clock = 0;
+        // if (sprite_pos < (float)texture.width) {
+        //     sprite_pos += (float)(texture.width) / nbr_frame;
+        // } else {
+        //     sprite_pos = 0;
+        // }
     }
 }
 

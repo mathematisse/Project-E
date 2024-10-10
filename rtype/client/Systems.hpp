@@ -234,4 +234,21 @@ protected:
     void _innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth) override;
 };
 
+class ClockSystem : public S::AMonoSystem<C::SpritePool, C::TimerPool> {
+public:
+    explicit ClockSystem(AssetsLoader &assetsLoader);
+    ~ClockSystem() override = default;
+
+    ClockSystem(const ClockSystem &other) = default;
+    ClockSystem(ClockSystem &&other) = default;
+    ClockSystem &operator=(const ClockSystem &other) = default;
+    ClockSystem &operator=(ClockSystem &&other) = default;
+
+    AssetsLoader &assetsLoader;
+    float deltaTime = 0.0f;
+
+protected:
+    void _innerOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
+};
+
 } // namespace ECS::S
