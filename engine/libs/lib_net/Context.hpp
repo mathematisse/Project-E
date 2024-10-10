@@ -15,7 +15,13 @@ struct Context {
     ssize_t readyCount;
 
     void select(std::vector<socket_t> &fds);
-    [[nodiscard]] bool is_readable(socket_t fd) const;
-    [[nodiscard]] bool is_writable(socket_t fd) const;
+    [[nodiscard]] inline bool is_readable(socket_t fd) const
+    {
+        return (fd != INVALID_SOCKET && FD_ISSET(fd, &readFds));
+    }
+    [[nodiscard]] inline bool is_writable(socket_t fd) const
+    {
+        return (fd != INVALID_SOCKET && FD_ISSET(fd, &writeFds));
+    }
 };
 };

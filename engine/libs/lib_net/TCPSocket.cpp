@@ -1,4 +1,7 @@
 
+#include <cstring>
+#include <optional>
+
 #include "lib_net/TCPSocket.hpp"
 
 namespace net {
@@ -20,16 +23,6 @@ bool TCPSocket::bind(const std::string &ipAddress, uint16_t port) const
 }
 
 bool TCPSocket::listen(int backlog) const { return ::listen(socket_fd, backlog) == 0; }
-
-TCPSocket TCPSocket::accept() const
-{
-    TCPSocket clientSocket;
-    sockaddr_in client_addr {};
-    socklen_t client_len = sizeof(client_addr);
-    clientSocket.socket_fd =
-        ::accept(socket_fd, reinterpret_cast<struct sockaddr *>(&client_addr), &client_len);
-    return clientSocket;
-}
 
 bool TCPSocket::connect(const std::string &ipAddress, uint16_t port) const
 {
@@ -53,11 +46,14 @@ ssize_t TCPSocket::recv(std::vector<std::uint8_t> &buffer, size_t size) const
     return ::recv(socket_fd, reinterpret_cast<char *>(buffer.data()), size, 0);
 }
 
+// TODO remove temp_buffer and write directly to buf_reader
 ssize_t TCPSocket::recvToBuffer()
 {
-    std::vector<std::uint8_t> temp_buffer(MAX_BUFFER_SIZE); // Adjust size as needed
+    std::vector<std::uint8_t> temp_buffer(MAX_BUFFER_SIZE);
     ssize_t bytes_received = recv(temp_buffer, temp_buffer.size());
     if (bytes_received > 0) {
+        // only append the part of the buffer that was received
+        temp_buffer.resize(bytes_received);
         buf_reader.append(temp_buffer);
     }
     return bytes_received;
@@ -89,13 +85,17 @@ void TCPSocket::close()
     }
 }
 
-TCPSocket TCPSocket::accept(socket_t listenFD)
+std::optional<TCPSocket> TCPSocket::accept(socket_t listenFD)
 {
     TCPSocket clientSocket;
     sockaddr_in client_addr {};
     socklen_t client_len = sizeof(client_addr);
     clientSocket.socket_fd =
         ::accept(listenFD, reinterpret_cast<struct sockaddr *>(&client_addr), &client_len);
+    if (clientSocket.socket_fd == INVALID_SOCKET) {
+        return std::nullopt;
+    }
+    clientSocket.set_address(client_addr);
     return clientSocket;
 }
 }

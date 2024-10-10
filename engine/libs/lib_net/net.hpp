@@ -29,12 +29,26 @@ constexpr size_t MAX_LISTEN_QUEUE_SIZE = 100;
 using socket_t = SOCKET;
 // #define SOCKET_ERROR (SOCKET_ERROR)
 // #define INVALID_SOCKET (INVALID_SOCKET)
-inline void close_socket(socket_t socket) { closesocket(socket); }
+inline int close_socket(socket_t socket)
+{
+    int status = shutdown(socket, SD_BOTH);
+    if (status == 0) {
+        status = closesocket(socket);
+    }
+    return status;
+}
 #else
 using socket_t = int;
 #define SOCKET_ERROR (-1)
 #define INVALID_SOCKET (-1)
-inline void close_socket(socket_t socket) { close(socket); }
+inline int close_socket(socket_t socket)
+{
+    int status = shutdown(socket, SHUT_RDWR);
+    if (status == 0) {
+        status = close(socket);
+    }
+    return status;
+}
 #endif
 
 class SocketInitializer {

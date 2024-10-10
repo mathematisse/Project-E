@@ -13,22 +13,23 @@ void BufReader::append(const std::vector<std::uint8_t> &data)
 
 auto BufReader::readPacket() -> std::optional<Packet>
 {
-    if (buffer.size() < sizeof(Packet::Header)) {
-        return std::nullopt;
+    if (buffer.size() >= sizeof(Packet::Header)) {
+        // cast buffer to Header
+        const auto *header = reinterpret_cast<const Packet::Header *>(buffer.data());
+        if (buffer.size() >= sizeof(Packet::Header) + header->size) {
+            // copy header and data from buffer, and then remove them from buffer
+            Packet packet;
+            packet.header = *header;
+            packet.data.assign(
+                buffer.begin() + sizeof(Packet::Header),
+                buffer.begin() + sizeof(Packet::Header) + header->size
+            );
+            // remove header and data from buffer
+            buffer.erase(buffer.begin(), buffer.begin() + sizeof(Packet::Header) + header->size);
+            return packet;
+        }
     }
-    // cast buffer to Header
-    const auto *header = reinterpret_cast<const Packet::Header *>(buffer.data());
-    if (buffer.size() < sizeof(Packet::Header) + header->size) {
-        return std::nullopt;
-    }
-    // copy header and data from buffer, and then remove them from buffer
-    Packet packet;
-    packet.header = *header;
-    packet.data.assign(
-        buffer.begin() + sizeof(Packet::Header), buffer.begin() + sizeof(Packet::Header) + header->size
-    );
-    buffer.erase(buffer.begin(), buffer.begin() + sizeof(Packet::Header) + header->size);
-    return packet;
+    return std::nullopt;
 }
 
 size_t BufReader::size() const { return buffer.size(); }

@@ -15,11 +15,12 @@ public:
     std::optional<std::reference_wrapper<Gateway>> get_gateway(client_id id);
     void update();
 
-    virtual void on_connect(client_id id) = 0;
-    virtual void on_disconnect(client_id id) = 0;
+    virtual void on_tcp_connect(client_id id) = 0;
+    virtual void on_tcp_disconnect(client_id id) = 0;
+    virtual void on_udp_connect(client_id id) = 0;
     virtual void on_packet(const Packet &packet, client_id id) = 0;
 
-private:
+protected:
     socket_t udpFd;
     socket_t listenFd;
     std::map<client_id, Gateway> clients;

@@ -15,7 +15,3 @@ void net::Context::select(std::vector<socket_t> &fds)
     }
     readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, nullptr);
 }
-
-bool net::Context::is_readable(socket_t fd) const { return FD_ISSET(fd, &readFds); }
-
-bool net::Context::is_writable(socket_t fd) const { return FD_ISSET(fd, &writeFds); }
