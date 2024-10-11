@@ -187,7 +187,7 @@ int main()
         square_engine->getSprite()->set<5>(0);
         square_engine->getTimer()->set<0>(0.0F);
         square_engine->getTimer()->set<1>(8.0F);
-        std::cout << "Engine created " << square_engine->getSprite()->get<0>() << std::endl;
+        square_engine->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
 
     auto player = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
