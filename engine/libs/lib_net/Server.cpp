@@ -56,7 +56,7 @@ void net::Server::update()
             gateway.tcp_socket.getBufWriter().appendPackets(gateway.send_tcp_queue);
             gateway.send_tcp_queue.clear();
             ssize_t byte_sent = gateway.tcp_socket.send(gateway.tcp_socket.getBufWriter().getBuffer());
-            if (byte_sent == -1) {
+            if (byte_sent < 0) {
                 gateway.tcp_socket.close();
             } else {
                 gateway.tcp_socket.getBufWriter().consume(byte_sent);
@@ -88,7 +88,9 @@ void net::Server::update()
                     }
                 );
                 it != clients.end()) {
-                it->second.udp_info.buf_reader.append(buffer);
+                auto &gateway = it->second;
+                buffer.resize(bytes_received);
+                gateway.udp_info.buf_reader.append(buffer);
             } else {
                 // new udp connection, deserialize packet, check if the packet has the correct number & find
                 // the client with the same generated number
@@ -102,7 +104,7 @@ void net::Server::update()
                                 clients.begin(), clients.end(),
                                 [number, addr](const auto &client) {
                                     return client.second.generated_number == number &&
-                                        !client.second.tcp_socket.is_same_address(addr);
+                                        client.second.tcp_socket.is_same_address(addr);
                                 }
                             );
                             it != clients.end()) {
@@ -117,6 +119,7 @@ void net::Server::update()
         }
     }
 
+    // can be done in another thread
     for (auto it = clients.begin(); it != clients.end();) {
         if (!it->second.tcp_socket.is_connected()) {
             on_tcp_disconnect(it->first);
