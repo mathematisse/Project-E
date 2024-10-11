@@ -27,6 +27,7 @@ DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Size, float, float, float); // 3rd param is the rotation
 DECLARE_COMPONENT(Type, SquareType);
 DECLARE_COMPONENT(Sprite, size_t, char, float, float, float, float, float);
+DECLARE_COMPONENT(NetworkID, size_t);
 }
 
 namespace ECS::E {
@@ -37,7 +38,7 @@ class DecorSquareRef : public AEntityRef {
 public:
     DecorSquareRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::SizeRef *size,
-        C::TypeRef *type, C::SpriteRef *sprite
+        C::TypeRef *type, C::SpriteRef *sprite, C::NetworkIDRef *networkID
     );
     ~DecorSquareRef() override;
 
@@ -61,11 +62,15 @@ public:
     [[nodiscard]] C::SpriteRef *getSprite() const;
     void setSprite(const C::SpriteRef &sprite);
 
+    [[nodiscard]] C::NetworkIDRef *getNetworkID() const;
+    void setNetworkID(const C::NetworkIDRef &networkID);
+
 protected:
     C::PositionRef *_position;
     C::SizeRef *_size;
     C::TypeRef *_type;
     C::SpriteRef *_sprite;
+    C::NetworkIDRef *_networkID;
 };
 
 // ENTITY POOL
@@ -89,5 +94,6 @@ protected:
     C::SizePool _sizePool;
     C::TypePool _typePool;
     C::SpritePool _spritePool;
+    C::NetworkIDPool _networkIDPool;
 };
 }

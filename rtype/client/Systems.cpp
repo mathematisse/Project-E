@@ -6,6 +6,7 @@
 */
 
 #include "Systems.hpp"
+#include "DecorSquare.hpp"
 #include "Square.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
@@ -165,10 +166,12 @@ void CountEnnemyAliveSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, 
 }
 
 SpawnEnnemySystem::SpawnEnnemySystem(
-    EntityManager &entityManager, AssetsLoader &assetsLoader, Camera2D &camera, size_t maxEnnemyCount
+    EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader,
+    Camera2D &camera, size_t maxEnnemyCount
 ):
     AMonoSystem(false),
     entityManager(entityManager),
+    networkManager(networkManager),
     assetsLoader(assetsLoader),
     camera(camera),
     _maxEnnemyCount(maxEnnemyCount)
@@ -221,12 +224,16 @@ void SpawnEnnemySystem::_innerOperate(
         square_ennemy->getCanShoot()->set<1>(1.5F);
         square_ennemy->getSprite()->set<0>(assetsLoader.get_asset(E1FC).id);
         square_ennemy->getHealth()->set<0>(2);
+        square_ennemy->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
 }
 
-ShootSystem::ShootSystem(EntityManager &entityManager, AssetsLoader &assetsLoader):
+ShootSystem::ShootSystem(
+    EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader
+):
     AMonoSystem(false),
     entityManager(entityManager),
+    networkManager(networkManager),
     assetsLoader(assetsLoader)
 {
 }
@@ -294,6 +301,7 @@ void ShootSystem::_innerOperate(
             square_bullet->getHealth()->set<0>(1);
             square_bullet->getTimer()->set<0>(0.0F);
             square_bullet->getTimer()->set<1>(8.0F);
+            square_bullet->getNetworkID()->set<0>(networkManager.getnewNetID());
         }
     }
 }
@@ -483,18 +491,66 @@ void ClockSystem::_innerOperate(C::SpritePool::Types &csprite, C::TimerPool::Typ
     auto [id, animated, x, y, nbr_frame, sprite_pos, animation_time] = csprite;
     auto [clock, end_clock] = ctimer;
     clock += deltaTime * 100;
-    std::cout << "Clock: " << clock << std::endl;
     auto texture = assetsLoader.get_asset_from_id(id);
     if (clock >= end_clock) {
 
-        std::cout << "postion " << sprite_pos << std::endl;
         clock = 0;
         if (sprite_pos < (float) texture.width) {
             sprite_pos += (float) (texture.width) / nbr_frame;
-            std::cout << "new postion " << sprite_pos << std::endl;
         } else {
             sprite_pos = 0;
         }
+    }
+}
+
+SendDecorStateSystem::SendDecorStateSystem():
+    AMonoSystem(false)
+{
+}
+
+void SendDecorStateSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
+    C::TypePool::Types &ctype, C::SpritePool::Types &csprite, C::NetworkIDPool::Types &cnetworkID
+)
+{
+    auto [status] = cstatus;
+    auto [x, y] = cposition;
+    auto [sizeX, sizeY, _] = csize;
+    auto [type] = ctype;
+    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
+    auto [netid] = cnetworkID;
+
+    if (type != SquareType::BACKGROUND && type != SquareType::WALL) {
+        return;
+    }
+}
+
+SendSquareStateSystem::SendSquareStateSystem():
+    AMonoSystem(false)
+{
+}
+
+void SendSquareStateSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
+    C::ColorPool::Types &ccolor, C::SizePool::Types &csize, C::TypePool::Types &ctype,
+    C::CanShootPool::Types &canshoot, C::SpritePool::Types &csprite, C::HealthPool::Types &chealth,
+    C::TimerPool::Types &ctimer, C::NetworkIDPool::Types &cnetworkID
+)
+{
+    auto [status] = cstatus;
+    auto [x, y] = cposition;
+    auto [vX, vY, speed] = cvelocity;
+    auto [r, g, b, a] = ccolor;
+    auto [sizeX, sizeY, rotation] = csize;
+    auto [type] = ctype;
+    auto [canShoot, base_delay, delay] = canshoot;
+    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
+    auto [health] = chealth;
+    auto [clock, end_clock] = ctimer;
+    auto [netid] = cnetworkID;
+
+    if (type == SquareType::BACKGROUND || type == SquareType::WALL) {
+        return;
     }
 }
 

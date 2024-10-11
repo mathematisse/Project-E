@@ -5,12 +5,14 @@
 ** Demo lib ecs
 */
 
+#include "DecorSquare.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "Square.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "AssetsLoader.hpp"
+#include "NetworkManager.hpp"
 #include "raylib.h"
 
 namespace ECS::S {
@@ -110,7 +112,8 @@ protected:
 class SpawnEnnemySystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
 public:
     explicit SpawnEnnemySystem(
-        EntityManager &entityManager, AssetsLoader &assetsLoader, Camera2D &camera, size_t maxEnnemyCount = 5
+        EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader,
+        Camera2D &camera, size_t maxEnnemyCount = 5
     );
     ~SpawnEnnemySystem() override = default;
 
@@ -120,6 +123,7 @@ public:
     SpawnEnnemySystem &operator=(SpawnEnnemySystem &&other) = default;
 
     EntityManager &entityManager;
+    NetworkManager &networkManager;
     AssetsLoader &assetsLoader;
     Camera2D &camera;
     size_t ennemyCount = 0;
@@ -137,7 +141,9 @@ private:
 class ShootSystem
     : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool, C::CanShootPool> {
 public:
-    explicit ShootSystem(EntityManager &entityManager, AssetsLoader &assetsLoader);
+    explicit ShootSystem(
+        EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader
+    );
     ~ShootSystem() override = default;
 
     ShootSystem(const ShootSystem &other) = default;
@@ -146,6 +152,7 @@ public:
     ShootSystem &operator=(ShootSystem &&other) = default;
 
     EntityManager &entityManager;
+    NetworkManager &networkManager;
     AssetsLoader &assetsLoader;
     float deltaTime = 0.0f;
     Vector2 playerPosition;
@@ -249,6 +256,50 @@ public:
 
 protected:
     void _innerOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
+};
+
+class SendDecorStateSystem
+    : public S::AMonoSystem<
+          C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool, C::NetworkIDPool> {
+public:
+    explicit SendDecorStateSystem();
+    ~SendDecorStateSystem() override = default;
+
+    SendDecorStateSystem(const SendDecorStateSystem &other) = default;
+    SendDecorStateSystem(SendDecorStateSystem &&other) = default;
+    SendDecorStateSystem &operator=(const SendDecorStateSystem &other) = default;
+    SendDecorStateSystem &operator=(SendDecorStateSystem &&other) = default;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cpos,
+        typename C::SizePool::Types &csize, typename C::TypePool::Types &ctype,
+        typename C::SpritePool::Types &csprite, typename C::NetworkIDPool::Types &cnet
+    ) override;
+};
+
+class SendSquareStateSystem
+    : public S::AMonoSystem<
+          C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::ColorPool, C::SizePool, C::TypePool,
+          C::CanShootPool, C::SpritePool, C::HealthPool, C::TimerPool, C::NetworkIDPool> {
+public:
+    explicit SendSquareStateSystem();
+    ~SendSquareStateSystem() override = default;
+
+    SendSquareStateSystem(const SendSquareStateSystem &other) = default;
+    SendSquareStateSystem(SendSquareStateSystem &&other) = default;
+    SendSquareStateSystem &operator=(const SendSquareStateSystem &other) = default;
+    SendSquareStateSystem &operator=(SendSquareStateSystem &&other) = default;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cpos,
+        typename C::VelocityPool::Types &cvel, typename C::ColorPool::Types &ccol,
+        typename C::SizePool::Types &csize, typename C::TypePool::Types &ctype,
+        typename C::CanShootPool::Types &cshoot, typename C::SpritePool::Types &csprite,
+        typename C::HealthPool::Types &chealth, typename C::TimerPool::Types &ctimer,
+        typename C::NetworkIDPool::Types &cnet
+    ) override;
 };
 
 } // namespace ECS::S

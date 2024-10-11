@@ -14,7 +14,7 @@ namespace ECS::E {
 SquareRef::SquareRef(
     C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position, C::VelocityRef *Velocity,
     C::ColorRef *Color, C::SizeRef *Size, C::TypeRef *Type, C::CanShootRef *CanShoot, C::SpriteRef *Sprite,
-    C::HealthRef *Health, C::TimerRef *time
+    C::HealthRef *Health, C::TimerRef *time, C::NetworkIDRef *networkID
 ):
     AEntityRef(status, cPos),
     _position(Position),
@@ -25,7 +25,8 @@ SquareRef::SquareRef(
     _canShoot(CanShoot),
     _sprite(Sprite),
     _health(Health),
-    _time(time)
+    _time(time),
+    _networkID(networkID)
 {
 }
 
@@ -40,6 +41,7 @@ SquareRef::~SquareRef()
     delete _sprite;
     delete _health;
     delete _time;
+    delete _networkID;
 }
 
 [[nodiscard]] C::PositionRef *E::SquareRef::getPosition() const { return _position; }
@@ -78,6 +80,10 @@ void E::SquareRef::setHealth(const C::HealthRef &health) { *_health = health; }
 
 void E::SquareRef::setTimer(const C::TimerRef &time) { *_time = time; }
 
+[[nodiscard]] C::NetworkIDRef *E::SquareRef::getNetworkID() const { return _networkID; }
+
+void E::SquareRef::setNetworkID(const C::NetworkIDRef &networkID) { *_networkID = networkID; }
+
 // ENTITY POOL
 SquarePool::SquarePool():
     AEntityPool("Square", SquareChunkSize)
@@ -99,7 +105,8 @@ std::unique_ptr<E::SquareRef> SquarePool::getRawEntity(Chunks::chunkPos_t cPos)
         static_cast<C::CanShootRef *>(_canShootPool.getComponentRef(cPos)),
         static_cast<C::SpriteRef *>(_spritePool.getComponentRef(cPos)),
         static_cast<C::HealthRef *>(_healthPool.getComponentRef(cPos)),
-        static_cast<C::TimerRef *>(_timerPool.getComponentRef(cPos))
+        static_cast<C::TimerRef *>(_timerPool.getComponentRef(cPos)),
+        static_cast<C::NetworkIDRef *>(_networkIDPool.getComponentRef(cPos))
 
     );
     return ptr;
@@ -108,6 +115,6 @@ std::unique_ptr<E::SquareRef> SquarePool::getRawEntity(Chunks::chunkPos_t cPos)
 std::vector<C::IComponentPool *> SquarePool::getComponentPools()
 {
     return {&_entityStatusPool, &_chunkPosPool, &_positionPool, &_velocityPool, &_colorPool, &_sizePool,
-            &_typePool,         &_canShootPool, &_spritePool,   &_healthPool,   &_timerPool};
+            &_typePool,         &_canShootPool, &_spritePool,   &_healthPool,   &_timerPool, &_networkIDPool};
 }
 }

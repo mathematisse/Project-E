@@ -30,7 +30,7 @@ public:
     SquareRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity,
         C::ColorRef *color, C::SizeRef *size, C::TypeRef *type, C::CanShootRef *canShoot,
-        C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time
+        C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time, C::NetworkIDRef *networkID
     );
     ~SquareRef() override;
 
@@ -69,6 +69,9 @@ public:
     [[nodiscard]] C::TimerRef *getTimer() const;
     void setTimer(const C::TimerRef &time);
 
+    [[nodiscard]] C::NetworkIDRef *getNetworkID() const;
+    void setNetworkID(const C::NetworkIDRef &networkID);
+
 protected:
     C::PositionRef *_position;
     C::VelocityRef *_velocity;
@@ -79,6 +82,7 @@ protected:
     C::SpriteRef *_sprite;
     C::HealthRef *_health;
     C::TimerRef *_time;
+    C::NetworkIDRef *_networkID;
 };
 
 // ENTITY POOL
@@ -107,5 +111,6 @@ protected:
     C::SpritePool _spritePool;
     C::HealthPool _healthPool;
     C::TimerPool _timerPool;
+    C::NetworkIDPool _networkIDPool;
 };
 }
