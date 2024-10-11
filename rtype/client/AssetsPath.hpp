@@ -38,7 +38,11 @@
     {                           \
         "assets", "ceiling.png" \
     }
+#define ENGINE_1                                                                                            \
+    {                                                                                                       \
+        "assets", "Main Ship", "Main Ship - Bases", "Main Ship - Engine Effects", "Aseprite", "Engine1.png" \
+    }
 
-const std::vector<std::vector<std::string>> paths = {BASE_BULLET_PATH, P1F,   P1FR,    E1F,
-                                                     BACKGROUND_PATH,  FLOOR, CEILING, E1FC,
-                                                     CUT_BULLET_PATH};
+const std::vector<std::vector<std::string>> paths = {BASE_BULLET_PATH, P1F,     P1FR,    E1F,
+                                                     BACKGROUND_PATH,  FLOOR,   CEILING, E1FC,
+                                                     CUT_BULLET_PATH,  ENGINE_1};

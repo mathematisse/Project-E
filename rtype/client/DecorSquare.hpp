@@ -18,7 +18,8 @@ enum class SquareType {
     BULLET_ENNEMY,
     WALL,
     POWERUP,
-    BACKGROUND
+    BACKGROUND,
+    ENGINE1
 };
 
 namespace ECS::C {

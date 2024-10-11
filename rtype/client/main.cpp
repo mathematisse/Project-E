@@ -164,6 +164,31 @@ int main()
         square_player->getHealth()->set<0>(3);
     }
 
+    // auto engine = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
+
+    // for (const auto &entity : engine) {
+    //     auto ref = _eM.getEntity(entity);
+
+    //     auto square_engine = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+    //     if (!square_engine) {
+    //         std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+    //         return -1;
+    //     }
+    //     square_engine->getPosition()->set<0>(1920 / 4);
+    //     square_engine->getPosition()->set<1>(1080 / 2);
+    //     square_engine->getVelocity()->set<2>(300.0F);
+    //     square_engine->getType()->set<0>(SquareType::ENGINE);
+    //     square_engine->getColor()->set<1>(255);
+    //     square_engine->getColor()->set<3>(255);
+    //     square_engine->getCanShoot()->set<0>(false);
+    //     square_engine->getSize()->set<0>(80);
+    //     square_engine->getSize()->set<1>(80);
+    //     square_engine->getSize()->set<2>(90);
+    //     square_engine->getSprite()->set<0>(assetsLoader.get_asset(ENGINE_1).id);
+    //     std::cout << "Engine created" << square_engine->getSprite()->get<0>() << std::endl;
+
+    // }
+
     Vector2 playerPosition = get_player_position(_eM, player);
 
     auto curr_time = std::chrono::steady_clock::now();
