@@ -5,6 +5,7 @@
 ** Demo lib ecs
 */
 
+#include "DecorSquare.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "Square.hpp"
 #include "lib_ecs/EntityManager.hpp"
@@ -249,6 +250,25 @@ public:
 
 protected:
     void _innerOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
+};
+
+class UpdateEnginePosition : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+public:
+    explicit UpdateEnginePosition();
+    ~UpdateEnginePosition() override = default;
+
+    UpdateEnginePosition(const UpdateEnginePosition &other) = default;
+    UpdateEnginePosition(UpdateEnginePosition &&other) = default;
+    UpdateEnginePosition &operator=(const UpdateEnginePosition &other) = default;
+    UpdateEnginePosition &operator=(UpdateEnginePosition &&other) = default;
+
+    Vector2 playerPosition;
+    char playerAlive;
+
+protected:
+    void _innerOperate(
+        C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+    ) override;
 };
 
 } // namespace ECS::S

@@ -42,6 +42,22 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chu
     return {*square_player->getPosition()->get<0>(), *square_player->getPosition()->get<1>()};
 }
 
+char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
+{
+    auto player = chunks;
+    if (player.empty()) {
+        std::cout << "Player is dead" << std::endl;
+        return 0;
+    }
+    auto ref = _eM.getEntity(player[0]);
+    auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+    if (!square_player) {
+        std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+        return 0;
+    }
+    return *square_player->getHealth()->get<0>();
+}
+
 int main()
 {
     InitWindow(1920, 1080, "R-Type");
@@ -69,14 +85,15 @@ int main()
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
     ECS::S::ShowInfoSystem showInfoSystem(camera);
     ECS::S::ClockSystem clockSystem(assetsLoader);
+    ECS::S::UpdateEnginePosition updateEnginePosition;
 
     ECS::E::SquarePool squarePool;
     ECS::E::DecorSquarePool decorSquarePool;
 
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
-         &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &updateEnginePosition,
+         &shootSystem, &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -139,6 +156,33 @@ int main()
         i++;
     }
 
+    auto engine = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
+
+    for (const auto &entity : engine) {
+        auto ref = _eM.getEntity(entity);
+
+        auto square_engine = dynamic_cast<ECS::E::DecorSquareRef *>(ref.get());
+        if (!square_engine) {
+            std::cerr << "Failed to cast IEntityRef to DecorSquareRef" << std::endl;
+            return -1;
+        }
+        square_engine->getType()->set<0>(SquareType::ENGINE);
+        square_engine->getSize()->set<0>(80);
+        square_engine->getSize()->set<1>(80);
+        square_engine->getSize()->set<2>(90);
+        square_engine->getPosition()->set<0>(1920 / 4);
+        square_engine->getPosition()->set<1>(1080 / 2);
+        square_engine->getSprite()->set<0>(assetsLoader.get_asset(ENGINE_1).id);
+        square_engine->getSprite()->set<1>(true);
+        square_engine->getSprite()->set<2>(80.0F);
+        square_engine->getSprite()->set<3>(80.0F);
+        square_engine->getSprite()->set<4>(4.0F);
+        square_engine->getSprite()->set<5>(0);
+        square_engine->getTimer()->set<0>(0.0F);
+        square_engine->getTimer()->set<1>(8.0F);
+        std::cout << "Engine created " << square_engine->getSprite()->get<0>() << std::endl;
+    }
+
     auto player = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
 
     for (const auto &entity : player) {
@@ -164,32 +208,8 @@ int main()
         square_player->getHealth()->set<0>(3);
     }
 
-    // auto engine = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
-
-    // for (const auto &entity : engine) {
-    //     auto ref = _eM.getEntity(entity);
-
-    //     auto square_engine = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-    //     if (!square_engine) {
-    //         std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-    //         return -1;
-    //     }
-    //     square_engine->getPosition()->set<0>(1920 / 4);
-    //     square_engine->getPosition()->set<1>(1080 / 2);
-    //     square_engine->getVelocity()->set<2>(300.0F);
-    //     square_engine->getType()->set<0>(SquareType::ENGINE);
-    //     square_engine->getColor()->set<1>(255);
-    //     square_engine->getColor()->set<3>(255);
-    //     square_engine->getCanShoot()->set<0>(false);
-    //     square_engine->getSize()->set<0>(80);
-    //     square_engine->getSize()->set<1>(80);
-    //     square_engine->getSize()->set<2>(90);
-    //     square_engine->getSprite()->set<0>(assetsLoader.get_asset(ENGINE_1).id);
-    //     std::cout << "Engine created" << square_engine->getSprite()->get<0>() << std::endl;
-
-    // }
-
     Vector2 playerPosition = get_player_position(_eM, player);
+    char playerAlive = player_is_alive(_eM, player);
 
     auto curr_time = std::chrono::steady_clock::now();
     while (!WindowShouldClose()) {
@@ -199,6 +219,7 @@ int main()
 
         update_camera(camera, dt);
         playerPosition = get_player_position(_eM, player);
+        playerAlive = player_is_alive(_eM, player);
         moveEnnemySystem.playerPosition = playerPosition;
         shootSystem.playerPosition = playerPosition;
         applyVelocitySystem.deltaTime = dt;
@@ -207,6 +228,8 @@ int main()
         countEnnemyAliveSystem.ennemyCount = 0;
         showInfoSystem.one_time = false;
         clockSystem.deltaTime = dt;
+        updateEnginePosition.playerPosition = playerPosition;
+        updateEnginePosition.playerAlive = playerAlive;
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);

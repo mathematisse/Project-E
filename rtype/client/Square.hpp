@@ -18,7 +18,6 @@ DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned c
 
 DECLARE_COMPONENT(CanShoot, char, float, float)
 DECLARE_COMPONENT(Health, size_t)
-DECLARE_COMPONENT(Timer, float, float)
 }
 
 namespace ECS::E {

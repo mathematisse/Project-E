@@ -6,6 +6,7 @@
 */
 
 #include "Systems.hpp"
+#include "DecorSquare.hpp"
 #include "Square.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
@@ -483,18 +484,40 @@ void ClockSystem::_innerOperate(C::SpritePool::Types &csprite, C::TimerPool::Typ
     auto [id, animated, x, y, nbr_frame, sprite_pos, animation_time] = csprite;
     auto [clock, end_clock] = ctimer;
     clock += deltaTime * 100;
-    std::cout << "Clock: " << clock << std::endl;
     auto texture = assetsLoader.get_asset_from_id(id);
     if (clock >= end_clock) {
 
-        std::cout << "postion " << sprite_pos << std::endl;
         clock = 0;
         if (sprite_pos < (float) texture.width) {
             sprite_pos += (float) (texture.width) / nbr_frame;
-            std::cout << "new postion " << sprite_pos << std::endl;
         } else {
             sprite_pos = 0;
         }
+    }
+}
+
+UpdateEnginePosition::UpdateEnginePosition():
+    AMonoSystem(false)
+{
+}
+
+void UpdateEnginePosition::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+)
+{
+    auto [engine_status] = cstatus;
+    auto [x, y] = cposition;
+    auto [type] = ctype;
+    if (type == SquareType::ENGINE) {
+        if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
+            return;
+        }
+        if (playerAlive == 0) {
+            engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+            return;
+        }
+        x = playerPosition.x + 80;
+        y = playerPosition.y;
     }
 }
 

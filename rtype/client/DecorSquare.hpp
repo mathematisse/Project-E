@@ -19,7 +19,7 @@ enum class SquareType {
     WALL,
     POWERUP,
     BACKGROUND,
-    ENGINE1
+    ENGINE
 };
 
 namespace ECS::C {
@@ -27,6 +27,7 @@ DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Size, float, float, float); // 3rd param is the rotation
 DECLARE_COMPONENT(Type, SquareType);
 DECLARE_COMPONENT(Sprite, size_t, char, float, float, float, float, float);
+DECLARE_COMPONENT(Timer, float, float);
 }
 
 namespace ECS::E {
@@ -37,7 +38,7 @@ class DecorSquareRef : public AEntityRef {
 public:
     DecorSquareRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::SizeRef *size,
-        C::TypeRef *type, C::SpriteRef *sprite
+        C::TypeRef *type, C::SpriteRef *sprite, C::TimerRef *timer
     );
     ~DecorSquareRef() override;
 
@@ -61,11 +62,15 @@ public:
     [[nodiscard]] C::SpriteRef *getSprite() const;
     void setSprite(const C::SpriteRef &sprite);
 
+    [[nodiscard]] C::TimerRef *getTimer() const;
+    void setTimer(const C::TimerRef &timer);
+
 protected:
     C::PositionRef *_position;
     C::SizeRef *_size;
     C::TypeRef *_type;
     C::SpriteRef *_sprite;
+    C::TimerRef *_timer;
 };
 
 // ENTITY POOL
@@ -89,5 +94,6 @@ protected:
     C::SizePool _sizePool;
     C::TypePool _typePool;
     C::SpritePool _spritePool;
+    C::TimerPool _timerPool;
 };
 }
