@@ -18,6 +18,18 @@
     {                                                                                  \
         "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "MainShipFResized.png" \
     }
+#define P1SD                                                               \
+    {                                                                      \
+        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1SD.png" \
+    }
+#define P1D                                                               \
+    {                                                                     \
+        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1D.png" \
+    }
+#define P1VD                                                               \
+    {                                                                      \
+        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1VD.png" \
+    }
 #define E1F                                                        \
     {                                                              \
         "assets", "Kla'ed", "Weapons", "Aseprite", "FigtherT1.png" \
@@ -43,6 +55,7 @@
         "assets", "Main Ship", "Main Ship - Engine Effects", "Aseprite", "Engine1.png" \
     }
 
-const std::vector<std::vector<std::string>> paths = {BASE_BULLET_PATH, P1F,     P1FR,    E1F,
-                                                     BACKGROUND_PATH,  FLOOR,   CEILING, E1FC,
-                                                     CUT_BULLET_PATH,  ENGINE_1};
+const std::vector<std::vector<std::string>> paths = {
+    BASE_BULLET_PATH, P1F,     P1FR, P1SD, P1D, P1VD, E1F, BACKGROUND_PATH, FLOOR, CEILING, E1FC,
+    CUT_BULLET_PATH,  ENGINE_1
+};

@@ -58,6 +58,29 @@ char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
     return *square_player->getHealth()->get<0>();
 }
 
+void update_player_sprite(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks, AssetsLoader &assetsLoader)
+{
+    auto player = chunks;
+    if (player.empty()) {
+        return;
+    }
+    auto ref = _eM.getEntity(player[0]);
+    auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+    if (!square_player) {
+        std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+        return;
+    }
+    if (*square_player->getHealth()->get<0>() == 1) {
+        square_player->getSprite()->set<0>(assetsLoader.get_asset(P1VD).id);
+    } else if (*square_player->getHealth()->get<0>() == 2) {
+        square_player->getSprite()->set<0>(assetsLoader.get_asset(P1D).id);
+    } else if (*square_player->getHealth()->get<0>() == 3) {
+        square_player->getSprite()->set<0>(assetsLoader.get_asset(P1SD).id);
+    } else if (*square_player->getHealth()->get<0>() == 4) {
+        square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
+    }
+}
+
 int main()
 {
     InitWindow(1920, 1080, "R-Type");
@@ -212,7 +235,7 @@ int main()
         square_player->getSize()->set<1>(80);
         square_player->getSize()->set<2>(90);
         square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
-        square_player->getHealth()->set<0>(3);
+        square_player->getHealth()->set<0>(4);
         square_player->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
 
@@ -238,6 +261,7 @@ int main()
         clockSystem.deltaTime = dt;
         updateEnginePosition.playerPosition = playerPosition;
         updateEnginePosition.playerAlive = playerAlive;
+        update_player_sprite(_eM, player, assetsLoader);
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
