@@ -68,6 +68,8 @@ int main()
     SetTargetFPS(60);
     srand(time(NULL));
 
+    NetworkManager networkManager;
+
     AssetsLoader assetsLoader;
     assetsLoader.load_assets(paths);
 
@@ -76,8 +78,8 @@ int main()
     ECS::S::DrawSystem drawSystem(camera);
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
-    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, assetsLoader, camera);
-    ECS::S::ShootSystem shootSystem(_eM, assetsLoader);
+    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader, camera);
+    ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader);
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
     ECS::S::MoveEnnemySystem moveEnnemySystem;
@@ -86,6 +88,7 @@ int main()
     ECS::S::ShowInfoSystem showInfoSystem(camera);
     ECS::S::ClockSystem clockSystem(assetsLoader);
     ECS::S::UpdateEnginePosition updateEnginePosition;
+    ECS::S::SendDecorStateSystem sendDecorStateSystem;
 
     ECS::E::SquarePool squarePool;
     ECS::E::DecorSquarePool decorSquarePool;
@@ -93,7 +96,8 @@ int main()
     ECS::S::SystemTreeNode demoNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
         {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &updateEnginePosition,
-         &shootSystem, &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem}
+         &shootSystem, &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem,
+         &sendDecorStateSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -115,6 +119,7 @@ int main()
         square_background->getSize()->set<0>(3000);
         square_background->getSize()->set<1>(1080);
         square_background->getSprite()->set<0>(assetsLoader.get_asset(BACKGROUND_PATH).id);
+        square_background->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
 
     auto ground = _eM.createEntities("DecorSquare", 250, ECS::C::ENT_ALIVE);
@@ -134,6 +139,7 @@ int main()
         square_ground->getPosition()->set<0>(i * 80);
         square_ground->getPosition()->set<1>(1080 - 100);
         square_ground->getSprite()->set<0>(assetsLoader.get_asset(FLOOR).id);
+        square_ground->getNetworkID()->set<0>(networkManager.getnewNetID());
         i++;
     }
 
@@ -153,6 +159,7 @@ int main()
         square_ceiling->getSize()->set<1>(100);
         square_ceiling->getPosition()->set<0>(i * 80);
         square_ceiling->getSprite()->set<0>(assetsLoader.get_asset(CEILING).id);
+        square_ceiling->getNetworkID()->set<0>(networkManager.getnewNetID());
         i++;
     }
 
@@ -206,6 +213,7 @@ int main()
         square_player->getSize()->set<2>(90);
         square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
         square_player->getHealth()->set<0>(3);
+        square_player->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
 
     Vector2 playerPosition = get_player_position(_eM, player);

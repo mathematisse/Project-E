@@ -166,10 +166,12 @@ void CountEnnemyAliveSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, 
 }
 
 SpawnEnnemySystem::SpawnEnnemySystem(
-    EntityManager &entityManager, AssetsLoader &assetsLoader, Camera2D &camera, size_t maxEnnemyCount
+    EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader,
+    Camera2D &camera, size_t maxEnnemyCount
 ):
     AMonoSystem(false),
     entityManager(entityManager),
+    networkManager(networkManager),
     assetsLoader(assetsLoader),
     camera(camera),
     _maxEnnemyCount(maxEnnemyCount)
@@ -222,12 +224,16 @@ void SpawnEnnemySystem::_innerOperate(
         square_ennemy->getCanShoot()->set<1>(1.5F);
         square_ennemy->getSprite()->set<0>(assetsLoader.get_asset(E1FC).id);
         square_ennemy->getHealth()->set<0>(2);
+        square_ennemy->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
 }
 
-ShootSystem::ShootSystem(EntityManager &entityManager, AssetsLoader &assetsLoader):
+ShootSystem::ShootSystem(
+    EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader
+):
     AMonoSystem(false),
     entityManager(entityManager),
+    networkManager(networkManager),
     assetsLoader(assetsLoader)
 {
 }
@@ -295,6 +301,7 @@ void ShootSystem::_innerOperate(
             square_bullet->getHealth()->set<0>(1);
             square_bullet->getTimer()->set<0>(0.0F);
             square_bullet->getTimer()->set<1>(8.0F);
+            square_bullet->getNetworkID()->set<0>(networkManager.getnewNetID());
         }
     }
 }
@@ -518,6 +525,57 @@ void UpdateEnginePosition::_innerOperate(
         }
         x = playerPosition.x + 80;
         y = playerPosition.y;
+    }
+}
+
+SendDecorStateSystem::SendDecorStateSystem():
+    AMonoSystem(false)
+{
+}
+
+void SendDecorStateSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
+    C::TypePool::Types &ctype, C::SpritePool::Types &csprite, C::NetworkIDPool::Types &cnetworkID
+)
+{
+    auto [status] = cstatus;
+    auto [x, y] = cposition;
+    auto [sizeX, sizeY, _] = csize;
+    auto [type] = ctype;
+    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
+    auto [netid] = cnetworkID;
+
+    if (type != SquareType::BACKGROUND && type != SquareType::WALL) {
+        return;
+    }
+}
+
+SendSquareStateSystem::SendSquareStateSystem():
+    AMonoSystem(false)
+{
+}
+
+void SendSquareStateSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
+    C::ColorPool::Types &ccolor, C::SizePool::Types &csize, C::TypePool::Types &ctype,
+    C::CanShootPool::Types &canshoot, C::SpritePool::Types &csprite, C::HealthPool::Types &chealth,
+    C::TimerPool::Types &ctimer, C::NetworkIDPool::Types &cnetworkID
+)
+{
+    auto [status] = cstatus;
+    auto [x, y] = cposition;
+    auto [vX, vY, speed] = cvelocity;
+    auto [r, g, b, a] = ccolor;
+    auto [sizeX, sizeY, rotation] = csize;
+    auto [type] = ctype;
+    auto [canShoot, base_delay, delay] = canshoot;
+    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
+    auto [health] = chealth;
+    auto [clock, end_clock] = ctimer;
+    auto [netid] = cnetworkID;
+
+    if (type == SquareType::BACKGROUND || type == SquareType::WALL) {
+        return;
     }
 }
 

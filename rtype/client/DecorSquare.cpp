@@ -14,14 +14,16 @@ namespace ECS::E {
 // ENTITY REF
 DecorSquareRef::DecorSquareRef(
     C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position, C::SizeRef *Size,
-    C::TypeRef *Type, C::SpriteRef *Sprite, C::TimerRef *Timer
+    C::TypeRef *Type, C::SpriteRef *Sprite, C::TimerRef *Timer, C::NetworkIDRef *networkID
+
 ):
     AEntityRef(status, cPos),
     _position(Position),
     _size(Size),
     _type(Type),
     _sprite(Sprite),
-    _timer(Timer)
+    _timer(Timer),
+    _networkID(networkID)
 {
 }
 
@@ -32,6 +34,7 @@ DecorSquareRef::~DecorSquareRef()
     delete _type;
     delete _sprite;
     delete _timer;
+    delete _networkID;
 }
 
 [[nodiscard]] C::PositionRef *E::DecorSquareRef::getPosition() const { return _position; }
@@ -53,6 +56,9 @@ void E::DecorSquareRef::setSprite(const C::SpriteRef &sprite) { *_sprite = sprit
 [[nodiscard]] C::TimerRef *E::DecorSquareRef::getTimer() const { return _timer; }
 
 void E::DecorSquareRef::setTimer(const C::TimerRef &timer) { *_timer = timer; }
+[[nodiscard]] C::NetworkIDRef *E::DecorSquareRef::getNetworkID() const { return _networkID; }
+
+void E::DecorSquareRef::setNetworkID(const C::NetworkIDRef &networkID) { *_networkID = networkID; }
 
 // ENTITY POOL
 DecorSquarePool::DecorSquarePool():
@@ -74,7 +80,8 @@ std::unique_ptr<E::DecorSquareRef> DecorSquarePool::getRawEntity(Chunks::chunkPo
         static_cast<C::SizeRef *>(_sizePool.getComponentRef(cPos)),
         static_cast<C::TypeRef *>(_typePool.getComponentRef(cPos)),
         static_cast<C::SpriteRef *>(_spritePool.getComponentRef(cPos)),
-        static_cast<C::TimerRef *>(_timerPool.getComponentRef(cPos))
+        static_cast<C::TimerRef *>(_timerPool.getComponentRef(cPos)),
+        static_cast<C::NetworkIDRef *>(_networkIDPool.getComponentRef(cPos))
     );
     return ptr;
 }
@@ -82,6 +89,6 @@ std::unique_ptr<E::DecorSquareRef> DecorSquarePool::getRawEntity(Chunks::chunkPo
 std::vector<C::IComponentPool *> DecorSquarePool::getComponentPools()
 {
     return {&_entityStatusPool, &_chunkPosPool, &_positionPool, &_sizePool,
-            &_typePool,         &_spritePool,   &_timerPool};
+            &_typePool,         &_spritePool,   &_timerPool,    &_networkIDPool};
 }
 }
