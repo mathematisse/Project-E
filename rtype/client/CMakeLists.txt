@@ -11,7 +11,7 @@ set(NETWORK_ENABLED ON)
 
 add_executable(r-type_client main.cpp)
 
-target_link_libraries(r-type_client r-type_common render physics ecs raylib)
+target_link_libraries(r-type_client r-type_common render physics ecs raylib network)
 
 if(UNIX)
     target_link_libraries(r-type_client ncurses)

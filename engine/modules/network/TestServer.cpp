@@ -12,6 +12,7 @@ void net::TestServer::on_tcp_connect(client_id id)
             reinterpret_cast<std::uint8_t *>(&number),
             reinterpret_cast<std::uint8_t *>(&number) + sizeof(number)
         );
+        std::cout << "Sending generated number (" << number << ") to client " << id << std::endl;
         send_tcp(id, net::Packet::ASKUDP_NUMBER, number_interpreted_as_vector);
     } catch (const std::out_of_range &e) {
         std::cerr << "Client not found: " << id << std::endl;
