@@ -14,6 +14,7 @@ int main(int ac, char **av)
 
     std::cout << "Connecting to server on port " << port << std::endl;
     client.connect_tcp("127.0.0.1", port);
+    client.connect_udp("127.0.0.1", port);
     while (true) {
         client.update();
     }

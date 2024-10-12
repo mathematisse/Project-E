@@ -12,6 +12,10 @@ bool net::Client::connect_udp(const std::string &ip, uint16_t port)
     addr.sin_port = htons(port);
     inet_pton(AF_INET, ip.c_str(), &addr.sin_addr);
 
+    udpFd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (udpFd == INVALID_SOCKET) {
+        return false;
+    }
     gateway.udp_info.udp_address = addr;
     return true;
 }
@@ -28,7 +32,7 @@ void net::Client::send_udp(Packet::MsgType type, const std::vector<std::uint8_t>
 
 void net::Client::update()
 {
-    std::vector<socket_t> fds = {gateway.tcp_socket.getFD()};
+    std::vector<socket_t> fds = {gateway.tcp_socket.getFD(), udpFd};
 
     context.select(fds);
 
@@ -65,6 +69,28 @@ void net::Client::update()
         if (bytes_received > 0) {
             buffer.resize(bytes_received);
             gateway.udp_info.buf_reader.append(buffer);
+        }
+    }
+
+    if (context.readyCount <= 0) {
+        return;
+    }
+
+    if (context.is_writable(udpFd)) {
+        context.readyCount--;
+        gateway.udp_info.buf_writer.appendPackets(gateway.send_udp_queue);
+        gateway.send_udp_queue.clear();
+        ssize_t byte_sent = sendto(
+            udpFd, reinterpret_cast<const char *>(gateway.udp_info.buf_writer.getBuffer().data()),
+            gateway.udp_info.buf_writer.getBuffer().size(), 0,
+            reinterpret_cast<struct sockaddr *>(&gateway.udp_info.udp_address),
+            sizeof(gateway.udp_info.udp_address)
+        );
+
+        if (byte_sent < 0) {
+            gateway.tcp_socket.close();
+        } else {
+            gateway.udp_info.buf_writer.consume(byte_sent);
         }
     }
 

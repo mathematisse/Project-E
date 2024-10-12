@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "lib_net/Context.hpp"
+#include "lib_net/Gateway.hpp"
 #include "lib_net/Packet.hpp"
+#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -78,7 +80,6 @@ void net::Server::update()
             udpFd, reinterpret_cast<char *>(buffer.data()), buffer.size(), 0,
             reinterpret_cast<struct sockaddr *>(&addr), &addr_len
         );
-
         if (bytes_received > 0) {
             // check if the client already has a UDP connection stored
             if (auto it = std::find_if(
@@ -103,7 +104,8 @@ void net::Server::update()
                         if (auto it = std::find_if(
                                 clients.begin(), clients.end(),
                                 [number, addr](const auto &client) {
-                                    return client.second.generated_number == number &&
+                                    return Gateway::transformNumberFunction(client.second.generated_number) ==
+                                        number &&
                                         client.second.tcp_socket.is_same_address(addr);
                                 }
                             );

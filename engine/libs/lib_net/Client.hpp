@@ -23,7 +23,6 @@ public:
 
 protected:
     socket_t udpFd;
-    socket_t listenFd;
     Context context;
     Gateway gateway;
 };
