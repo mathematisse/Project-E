@@ -121,6 +121,44 @@ void net::Server::update()
         }
     }
 
+    if (context.readyCount <= 0) {
+        return;
+    }
+
+    if (context.is_writable(udpFd)) {
+        context.readyCount--;
+        for (auto &[clientId, gateway] : clients) {
+            if (!gateway.udp_info.udp_address.sin_port) {
+                std::cout << "UDP address not set for client " << clientId << std::endl;
+                continue;
+            }
+            if (gateway.send_udp_queue.empty()) {
+                continue;
+            }
+            std::clog << "Sending UDP packet to client " << clientId << " at address and port "
+                      << inet_ntoa(gateway.udp_info.udp_address.sin_addr) << ":"
+                      << ntohs(gateway.udp_info.udp_address.sin_port) << std::endl;
+            gateway.udp_info.buf_writer.appendPackets(gateway.send_udp_queue);
+            gateway.send_udp_queue.clear();
+            ssize_t byte_sent = sendto(
+                udpFd, reinterpret_cast<const char *>(gateway.udp_info.buf_writer.getBuffer().data()),
+                gateway.udp_info.buf_writer.getBuffer().size(), 0,
+                reinterpret_cast<struct sockaddr *>(&gateway.udp_info.udp_address),
+                sizeof(gateway.udp_info.udp_address)
+            );
+            if (byte_sent < 0) {
+                gateway.tcp_socket.close();
+            } else {
+                gateway.udp_info.buf_writer.consume(byte_sent);
+            }
+
+            // break early if no more ready events
+            if (context.readyCount <= 0) {
+                return;
+            }
+        }
+    }
+
     // can be done in another thread
     for (auto it = clients.begin(); it != clients.end();) {
         if (!it->second.tcp_socket.is_connected()) {
@@ -133,6 +171,9 @@ void net::Server::update()
 
     for (auto &[clientId, gateway] : clients) {
         for (Packet &packet : gateway.tcp_socket.readPackets()) {
+            on_packet(packet, clientId);
+        }
+        for (Packet &packet : gateway.udp_info.readPackets()) {
             on_packet(packet, clientId);
         }
     }

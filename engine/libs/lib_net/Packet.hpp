@@ -15,6 +15,8 @@ public:
         ASKUDP_NUMBER = 1,
         // client responds with the transformed number (using UDP)
         ASKUDP_RESPONSE = 2,
+        PING = 3,
+        PONG = 4,
     };
 
     struct Header {

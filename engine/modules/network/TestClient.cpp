@@ -1,4 +1,5 @@
 #include "TestClient.hpp"
+#include "lib_net/Packet.hpp"
 
 void net::TestClient::on_packet(const Packet &packet)
 {
@@ -18,6 +19,10 @@ void net::TestClient::on_packet(const Packet &packet)
             reinterpret_cast<std::uint8_t *>(&transformed_number) + sizeof(transformed_number)
         );
         send_udp(Packet::ASKUDP_RESPONSE, transformed_number_vector);
+        break;
+    case Packet::PING:
+        std::cout << "Received PING from server" << std::endl;
+        send_udp(Packet::PONG, {});
         break;
     default:
         std::cout << "Received packet from server" << std::endl;

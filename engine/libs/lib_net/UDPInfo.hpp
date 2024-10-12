@@ -21,6 +21,18 @@ public:
         return udp_address.sin_addr.s_addr == addr.sin_addr.s_addr && udp_address.sin_port == addr.sin_port;
     }
 
+    std::optional<Packet> readPacket() { return buf_reader.readPacket(); }
+
+    std::vector<Packet> readPackets()
+    {
+        std::vector<Packet> packets;
+
+        while (auto packet = readPacket()) {
+            packets.push_back(*packet);
+        }
+        return packets;
+    }
+
 public:
     sockaddr_in udp_address;
     BufReader buf_reader;

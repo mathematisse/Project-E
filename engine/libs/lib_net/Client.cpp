@@ -97,4 +97,8 @@ void net::Client::update()
     for (Packet &packet : gateway.tcp_socket.readPackets()) {
         on_packet(packet);
     }
+
+    for (Packet &packet : gateway.udp_info.readPackets()) {
+        on_packet(packet);
+    }
 }

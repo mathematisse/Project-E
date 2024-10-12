@@ -1,5 +1,6 @@
 #include "TestServer.hpp"
 #include "lib_net/Packet.hpp"
+#include <iostream>
 
 void net::TestServer::on_tcp_connect(client_id id)
 {
@@ -22,6 +23,9 @@ void net::TestServer::on_tcp_connect(client_id id)
 void net::TestServer::on_udp_connect(client_id id)
 {
     std::cout << "UDP client connected: " << id << std::endl;
+
+    std::cout << "Sending PING to client " << id << std::endl;
+    send_udp(id, Packet::PING, {});
 }
 
 void net::TestServer::on_tcp_disconnect(client_id id)
@@ -33,6 +37,11 @@ void net::TestServer::on_packet(const Packet &packet, client_id id)
 {
     std::cout << "Received packet from client " << id << std::endl;
     std::cout << "Packet size: " << packet.header.size << std::endl;
+    switch (packet.header.type) {
+    case Packet::PONG:
+        std::cout << "Received PONG from client " << id << std::endl;
+        break;
+    }
     if (packet.header.size == 0) {
         return;
     }
