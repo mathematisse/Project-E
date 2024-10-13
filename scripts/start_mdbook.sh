@@ -1,0 +1,1 @@
+mdbook serve docs --open
