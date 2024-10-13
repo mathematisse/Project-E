@@ -1,43 +1,76 @@
 <a id="readme-top"></a>
 
+<!-- PROJECT HEADER -->
+# R-Type
 
+R-Type is a horizontal-scrolling shooter arcade game developed and published by Irem in 1987. This project aims to recreate a similar game with multiplayer capabilities.
 
-<!-- TABLE OF CONTENTS -->
+## Table of Contents
 <details>
-  <summary>Table of Contents</summary>
+  <summary>Click to expand</summary>
   <ol>
-    <li>
-      <a href="#R-Type">R-Type</a>
-    </li>
-    <li><a href="#Contributors">Contributors</a></li>
-    <li><a href="#documentation">Usage</a></li>
+    <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#contributors">Contributors</a></li>
+    <li><a href="#license">License</a></li>
   </ol>
 </details>
 
-<!-- R-Type -->
-## R-Type
+## About The Project
 
 R-Type is a horizontal-scrolling shooter arcade game developed and published by Irem in 1987. The player controls a space fighter named the R-9 to defend humanity against a mysterious powerful alien life-form known as the Bydo.
 
-The goal of this project is to recreate the a game similar to R-Type with multiplayer capabilities.
-The challenges are to create a standalone game engine that can handle multiple players using UDP protocol and
-to create a game that is fun to play.
+The goal of this project is to recreate a game similar to R-Type with multiplayer capabilities. The challenges are to create a standalone game engine that can handle multiple players using the UDP protocol and to create a game that is fun to play.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## Getting Started
+
+### Dependencies/Requirements
+- C++20
+- Raylib 5.0 # fetch automatically if not found
+- Boost 1.83 # fetched automatically if not found
+- CMake 3.10 or higher
+
+### Supported Platforms
+- Windows
+- macOS
+- Linux
+
+### Build Instructions
+1. Clone the repository:
+2. Build the project using CMake:
+```sh
+cmake -B build -S .
+cmake --build build
+```
+
+## Usage
+
+### Server
+```sh
+./r-type_server [port]
+./r-type_client [ip] [port]
+```
+
+## Documentation
+
+The documentation is available in the `docs` folder. You can read it [here](docs/src/SUMMARY.md).
+use mdbook to open the documentation in your browser:
+```sh
+mdbook serve docs --open
+```
 
 ## Contributors
 
 - [Léo Wehrle - Rentmeister](https://github.com/leoWherle)
 - [Théodore Magna](https://github.com/TheodoreMagna)
-- [Lucien Pineau](https://github.com/)
-- [Alexis Hachemi](https://github.com/)
-- [Ugo Blanc](https://github.com/)
+- [Lucien Pineau](https://github.com/mathematisse)
+- [Alexis Hachemi](https://github.com/alexishachemi)
+- [Ugo Blanc](https://github.com/HUMMMCHARAL)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## License
 
-## Documentation
-
-_For more examples, please refer to the [Documentation](docs/src/SUMMARY.md)_
+Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
