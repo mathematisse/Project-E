@@ -25,7 +25,7 @@ namespace S {
 // SYSTEM
 
 ApplyVelocitySystem::ApplyVelocitySystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+    AStatusMonoSystem(true, C::ENT_ALIVE)
 {
 }
 
@@ -261,7 +261,7 @@ void MoveBackgroundSystem::_innerOperate(
 }
 
 MoveEnnemySystem::MoveEnnemySystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+    AStatusMonoSystem(true, C::ENT_ALIVE)
 {
 }
 
@@ -296,7 +296,7 @@ void MoveEnnemySystem::_statusOperate(
 }
 
 ColliderSystem::ColliderSystem():
-    ASelfDualSystem(false)
+    ASelfDualSystem(true)
 {
 }
 
@@ -325,54 +325,42 @@ void ColliderSystem::_innerOperate(
 
     bool collide = false;
 
-    if (xA + sizeXA > xB && xA < xB + sizeXB && yA + sizeYA > yB && yA < yB + sizeYB) {
-        collide = true;
-    }
-
+    // Check if entities are colliding with walls
     if (yA < 100 || yA + sizeYA > 980) {
         healthA = 0;
     }
-
     if (yB < 100 || yB + sizeYB > 980) {
         healthB = 0;
     }
 
-    if (collide) {
-        if (typeA == SquareType::PLAYER && typeB == SquareType::ENEMY) {
-            healthA -= 1;
-            healthB -= 1;
-        }
-        if (typeA == SquareType::ENEMY && typeB == SquareType::PLAYER) {
-            healthA -= 1;
-            healthB -= 1;
-        }
-        if (typeA == SquareType::BULLET && typeB == SquareType::ENEMY) {
-            healthA -= 1;
-            healthB -= 1;
-        }
-        if (typeA == SquareType::BULLET_ENNEMY && typeB == SquareType::PLAYER) {
-            healthA -= 1;
-            healthB -= 1;
-        }
-        if ((typeA == SquareType::BULLET || typeA == SquareType::BULLET_ENNEMY) &&
-            typeB == SquareType::WALL) {
-            healthA -= 1;
-        }
-        if ((typeB == SquareType::BULLET || typeB == SquareType::BULLET_ENNEMY) &&
-            typeA == SquareType::WALL) {
-            healthB -= 1;
-        }
-
-        if ((typeA == SquareType::BULLET && typeB == SquareType::BULLET_ENNEMY) ||
-            ((typeB == SquareType::BULLET && typeA == SquareType::BULLET_ENNEMY))) {
-            healthA -= 1;
-            healthB -= 1;
-        }
+    // "Allies" can't collide
+    if ((typeA == SquareType::BULLET || typeA == SquareType::PLAYER) &&
+        (typeB == SquareType::BULLET || typeB == SquareType::PLAYER)) {
+        return;
     }
-    if (healthA <= 0) {
+    if ((typeA == SquareType::BULLET_ENNEMY || typeA == SquareType::ENEMY) &&
+        (typeB == SquareType::BULLET_ENNEMY || typeB == SquareType::ENEMY)) {
+        return;
+    }
+    if ((typeA == SquareType::WALL && typeB == SquareType::WALL)) {
+        return;
+    }
+
+    // Check if entities are colliding
+    if (xA + sizeXA > xB && xA < xB + sizeXB && yA + sizeYA > yB && yA < yB + sizeYB) {
+        collide = true;
+    }
+
+    if (collide) {
+        healthA -= 1;
+        healthB -= 1;
+    }
+
+    // Set flags to destroy entities
+    if (healthA <= 0 && typeA != SquareType::WALL) {
         statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
     }
-    if (healthB <= 0) {
+    if (healthB <= 0 && typeB != SquareType::WALL) {
         statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
     }
 }

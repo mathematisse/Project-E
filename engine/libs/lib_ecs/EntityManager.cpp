@@ -51,7 +51,7 @@ bool EntityManager::registerSystemNode(
 
 S::IQuery &EntityManager::initializeQuery(S::IQuery &query)
 {
-    std::cout << "\n" BLUE "Initializing Query" RESET "\n";
+    std::cout << BLUE "Initializing Query" RESET "\n";
     for (auto &entityPool : _entityPools) {
         query.tryAddEntityPool(entityPool);
     }
@@ -151,7 +151,7 @@ EntityManager::createEntities(const std::string &entityName, size_t count, C::En
 
     for (auto &entityPool : _entityPools) {
         if (entityPool->getEntityName() == entityName) {
-            std::cout << "\n" BLUE "Creating " << count << " entities of type " RESET << entityName << "\n";
+            std::cout << BLUE "Creating " << count << " entities of type " RESET << entityName << "\n";
             return _createEntities(std::make_tuple(entityPool, idx), count, status);
         }
         idx++;
@@ -161,7 +161,7 @@ EntityManager::createEntities(const std::string &entityName, size_t count, C::En
 
 void EntityManager::destroyEntity(const Chunks::chunkPos_t &cPos)
 {
-    std::cout << "\n" RED "Destroying entity" RESET "\n";
+    std::cout << RED "Destroying entity" RESET "\n";
     auto entityPtr = std::unique_ptr<E::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
 
     auto poolId = entityPtr->getPoolId();
@@ -177,7 +177,7 @@ void EntityManager::destroyEntity(const Chunks::chunkPos_t &cPos)
 
 void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
 {
-    std::cout << "\n" RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
+    std::cout << RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
 
     _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosArr, C::ENT_NONE);
     _entityPtrPool.getFreePos().insert(_entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end());
@@ -201,7 +201,7 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
 
 void EntityManager::_destroyEntities(const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool)
 {
-    std::cout << "\n" RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
+    std::cout << RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
 
     _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosArr, C::ENT_NONE);
     _entityPtrPool.getFreePos().insert(_entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end());

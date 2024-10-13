@@ -14,6 +14,7 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
 template<typename First, typename... Rest>
@@ -29,11 +30,13 @@ template<typename... Ts>
 struct all_derived_from_base;
 
 template<typename T>
-struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> { };
+struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> {
+};
 
 template<typename T, typename... Ts>
 struct all_derived_from_base<T, Ts...>
-    : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> { };
+    : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> {
+};
 
 template<typename... Ts>
 class Query : public IQuery {
@@ -86,41 +89,41 @@ public:
     template<typename... TOthers>
     using TCrossLambda = std::function<void(typename Ts::Types &..., typename TOthers::Types &...)>;
 
-    void map(EntityManager &eM, TMapLambda f)
+    void map(EntityManager &eM, TMapLambda f, bool isParallel = false)
     {
         eM.initializeQuery(*this);
-        map(f);
+        map(f, isParallel);
     }
 
-    void cMap(EntityManager &eM, TCMapLambda f)
+    void cMap(EntityManager &eM, TCMapLambda f, bool isParallel = false)
     {
         eM.initializeQuery(*this);
-        cMap(f);
+        cMap(f, isParallel);
     }
 
-    void pMap(EntityManager &eM, TPMapLambda f)
+    void pMap(EntityManager &eM, TPMapLambda f, bool isParallel = false)
     {
         eM.initializeQuery(*this);
-        pMap(f);
+        pMap(f, isParallel);
     }
 
-    void selfCross(EntityManager &eM, TCrossLambda<Ts...> f)
+    void selfCross(EntityManager &eM, TCrossLambda<Ts...> f, bool isParallel = false)
     {
         eM.initializeQuery(*this);
-        cross<Ts...>(*this, f, true);
+        cross<Ts...>(*this, f, true, isParallel);
     }
 
     template<typename... TOthers>
-    void cross(EntityManager &eM, TCrossLambda<TOthers...> f)
+    void cross(EntityManager &eM, TCrossLambda<TOthers...> f, bool isParallel = false)
     {
         Query<TOthers...> otherQuery;
         eM.initializeQuery(*this);
         eM.initializeQuery(otherQuery);
-        cross(otherQuery, f);
+        cross(otherQuery, f, false, isParallel);
     }
 
     void
-    map(TMapLambda f, TCMapLambda startCB = nullptr, TCMapLambda endCB = nullptr,
+    map(TMapLambda f, bool isParallel = false, TCMapLambda startCB = nullptr, TCMapLambda endCB = nullptr,
         TPMapLambda pMapStartCB = nullptr, TPMapLambda pMapEndCB = nullptr)
     {
         cMap(
@@ -143,73 +146,157 @@ public:
                     endCB(componentVectors...);
                 }
             },
-            pMapStartCB, pMapEndCB
+            isParallel, pMapStartCB, pMapEndCB
         );
     }
 
-    void cMap(TCMapLambda f, TPMapLambda startCB = nullptr, TPMapLambda endCB = nullptr)
+    void
+    cMap(TCMapLambda f, bool isParallel = false, TPMapLambda startCB = nullptr, TPMapLambda endCB = nullptr)
     {
-        pMap([f, startCB, endCB](Ts *...componentPools) {
-            if (startCB) {
-                startCB(componentPools...);
-            }
+        if (isParallel) {
+            // Run the pMap function in parallel using multiple threads
+            std::vector<std::thread> threads;
 
-            size_t chunkCount = getFirstArg(componentPools...)->chunkCount();
-            for (size_t i = 0; i < chunkCount; i++) {
-                auto componentPoolsTuple = std::apply(
-                    [i](auto &...pools) {
-                        return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i)...);
-                    },
-                    std::tie(componentPools...)
-                );
+            pMap(
+                [f](Ts *...componentPools) {
+                    size_t chunkCount = getFirstArg(componentPools...)->chunkCount();
+                    for (size_t i = 0; i < chunkCount; i++) {
+                        auto componentPoolsTuple = std::apply(
+                            [i](auto &...pools) {
+                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i)...);
+                            },
+                            std::tie(componentPools...)
+                        );
 
-                std::apply(
-                    [f](auto &...componentPools) {
-                        f(componentPools...);
-                    },
-                    componentPoolsTuple
-                );
-            }
-
-            if (endCB) {
-                endCB(componentPools...);
-            }
-        });
-    }
-
-    void pMap(TPMapLambda f)
-    {
-        for (auto &componentPools : _componentPoolsArrays) {
-            std::apply(
-                [&f](auto &...pools) {
-                    f(dynamic_cast<Ts *>(pools)...);
+                        std::apply(
+                            [f](auto &...componentPools) {
+                                f(componentPools...);
+                            },
+                            componentPoolsTuple
+                        );
+                    }
                 },
-                componentPools
+                true
+            );
+
+            // Wait for all threads to finish
+            for (auto &t : threads) {
+                if (t.joinable()) {
+                    t.join();
+                }
+            }
+
+        } else {
+            // Default behavior: run pMap sequentially
+            pMap(
+                [f](Ts *...componentPools) {
+                    size_t chunkCount = getFirstArg(componentPools...)->chunkCount();
+                    for (size_t i = 0; i < chunkCount; i++) {
+                        auto componentPoolsTuple = std::apply(
+                            [i](auto &...pools) {
+                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i)...);
+                            },
+                            std::tie(componentPools...)
+                        );
+
+                        std::apply(
+                            [f](auto &...componentPools) {
+                                f(componentPools...);
+                            },
+                            componentPoolsTuple
+                        );
+                    }
+                },
+                false
             );
         }
     }
 
-    template<typename... TOthers>
-    void cross(Query<TOthers...> &otherQuery, TCrossLambda<TOthers...> f, bool selfCross = false)
+    void pMap(TPMapLambda f, bool isParallel = false)
     {
-        auto &otherComponentPoolsArrays = otherQuery.getComponentPoolsArrays();
+        if (isParallel) {
+            // Run the pMap function in parallel using multiple threads
+            std::vector<std::thread> threads;
 
-        for (size_t i = 0; i < _componentPoolsArrays.size(); i++) {
-            for (size_t j = 0; j < otherComponentPoolsArrays.size(); j++) {
-                size_t chunkCount1 = _componentPoolsArrays[i][0]->chunkCount();
-                size_t chunkCount2 = otherComponentPoolsArrays[j][0]->chunkCount();
-                for (size_t k = 0; k < chunkCount1; k++) {
-                    for (size_t l = 0; l < chunkCount2; l++) {
-                        _cross<TOthers...>(
-                            f, _componentPoolsArrays[i], otherComponentPoolsArrays[j], k, l, selfCross
-                        );
+            for (auto &componentPools : _componentPoolsArrays) {
+                threads.emplace_back([&f, &componentPools]() {
+                    std::apply(
+                        [&f](auto &...pools) {
+                            f(dynamic_cast<Ts *>(pools)...);
+                        },
+                        componentPools
+                    );
+                });
+            }
+
+            // Wait for all threads to finish
+            for (auto &t : threads) {
+                if (t.joinable()) {
+                    t.join();
+                }
+            }
+
+        } else {
+            // Default behavior: run pMap sequentially
+            for (auto &componentPools : _componentPoolsArrays) {
+                std::apply(
+                    [&f](auto &...pools) {
+                        f(dynamic_cast<Ts *>(pools)...);
+                    },
+                    componentPools
+                );
+            }
+        }
+    }
+
+    template<typename... TOthers>
+    void cross(
+        Query<TOthers...> &otherQuery, TCrossLambda<TOthers...> f, bool selfCross = false,
+        bool isParallel = false
+    )
+    {
+        if (isParallel) {
+            // Run the cross function in parallel using multiple threads
+            std::vector<std::thread> threads;
+
+            for (auto &componentPools1 : _componentPoolsArrays) {
+                threads.emplace_back([&otherQuery, &f, &componentPools1, selfCross]() {
+                    for (auto &componentPools2 : otherQuery.getComponentPoolsArrays()) {
+                        size_t chunkCount1 = componentPools1[0]->chunkCount();
+                        size_t chunkCount2 = componentPools2[0]->chunkCount();
+                        for (size_t k = 0; k < chunkCount1; k++) {
+                            for (size_t l = 0; l < chunkCount2; l++) {
+                                _cross<TOthers...>(f, componentPools1, componentPools2, k, l, selfCross);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Wait for all threads to finish
+            for (auto &t : threads) {
+                if (t.joinable()) {
+                    t.join();
+                }
+            }
+
+        } else {
+            // Default behavior: run cross sequentially
+            for (auto &componentPools1 : _componentPoolsArrays) {
+                for (auto &componentPools2 : otherQuery.getComponentPoolsArrays()) {
+                    size_t chunkCount1 = componentPools1[0]->chunkCount();
+                    size_t chunkCount2 = componentPools2[0]->chunkCount();
+                    for (size_t k = 0; k < chunkCount1; k++) {
+                        for (size_t l = 0; l < chunkCount2; l++) {
+                            _cross<TOthers...>(f, componentPools1, componentPools2, k, l, selfCross);
+                        }
                     }
                 }
             }
         }
     }
 
-    void selfCross(TCrossLambda<Ts...> f) { cross<Ts...>(*this, f, true); }
+    void selfCross(TCrossLambda<Ts...> f, bool isParallel) { cross<Ts...>(*this, f, true, isParallel); }
 
 protected:
     template<typename... TOthers>

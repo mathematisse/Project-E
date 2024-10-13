@@ -43,9 +43,13 @@ public:
     void run() override
     {
         // auto now = std::chrono::high_resolution_clock::now();
-        _query1.cross(_query2, [this](auto &...componentPools1, auto &...componentPools2) {
-            _innerOperate(componentPools1..., componentPools2...);
-        });
+        _query1.cross(
+            _query2,
+            [this](auto &...componentPools1, auto &...componentPools2) {
+                _innerOperate(componentPools1..., componentPools2...);
+            },
+            _isParallel
+        );
 
         // auto duration =
         // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
@@ -82,9 +86,12 @@ protected:
     void run() override
     {
         // auto now = std::chrono::high_resolution_clock::now();
-        this->_query1.selfCross([this](auto &...componentPools1, auto &...componentPools2) {
-            _innerOperate(componentPools1..., componentPools2...);
-        });
+        this->_query1.selfCross(
+            [this](auto &...componentPools1, auto &...componentPools2) {
+                _innerOperate(componentPools1..., componentPools2...);
+            },
+            this->_isParallel
+        );
 
         // auto duration =
         // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -

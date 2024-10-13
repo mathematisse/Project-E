@@ -39,6 +39,7 @@ public:
             [this](auto &...componentPools) {
                 _innerOperate(componentPools...);
             },
+            _isParallel,
             [this](auto &...componentPools) {
                 _startCMapCallBack(componentPools...);
             },
