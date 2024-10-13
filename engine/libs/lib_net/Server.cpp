@@ -4,24 +4,51 @@
 #include "lib_net/Packet.hpp"
 #include <iostream>
 #include <optional>
+#include <thread>
 #include <vector>
 
 bool net::Server::host(std::uint16_t port) { return host_tcp(port) && host_udp(port); }
 
+void net::Server::start()
+{
+    context_thread = std::thread([this]() {
+        std::cout << "Server running" << std::endl;
+        stop_flag = false;
+        while (!stop_flag) {
+            processConnections();
+        }
+        clients.clear();
+    });
+}
+
+void net::Server::stop()
+{
+    stop_flag = true;
+    if (context_thread.joinable()) {
+        context_thread.join();
+    }
+}
+
 void net::Server::send_tcp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data)
 {
-    if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
-        Gateway &gateway = opt_gateway.value();
-        gateway.send_tcp_queue.push_back(Packet::deserialize(type, data));
-    }
+    // if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
+    //     Gateway &gateway = opt_gateway.value();
+    //     gateway.send_tcp_queue.push_back(Packet::deserialize(type, data));
+    // }
+    std::cout << "send_tcp" << std::endl;
+    send_queue_tcp.push({id, Packet::deserialize(type, data)});
 }
 
 void net::Server::send_udp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data)
 {
-    if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
-        Gateway &gateway = opt_gateway.value();
-        gateway.send_udp_queue.push_back(Packet::deserialize(type, data));
-    }
+    // if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
+    //     Gateway &gateway = opt_gateway.value();
+    //     gateway.send_udp_queue.push_back(Packet::deserialize(type, data));
+    // }
+
+    // using send_queue
+    std::cout << "send_udp" << std::endl;
+    send_queue_udp.push({id, Packet::deserialize(type, data)});
 }
 
 std::optional<std::reference_wrapper<net::Gateway>> net::Server::get_gateway(client_id id)
@@ -34,8 +61,34 @@ std::optional<std::reference_wrapper<net::Gateway>> net::Server::get_gateway(cli
     return std::ref(it->second);
 }
 
-void net::Server::update()
+void net::Server::processConnections()
 {
+    std::cout << "processConnections" << std::endl;
+    for (auto &[clientId, gateway] : clients) {
+        for (Packet &packet : gateway.tcp_socket.readPackets()) {
+            receive_queue.push({clientId, packet});
+        }
+        for (Packet &packet : gateway.udp_info.readPackets()) {
+            receive_queue.push({clientId, packet});
+        }
+    }
+
+    // iterate over the send_queue_tcp & send_queue_udp and append the packets to the corresponding client
+    while (!send_queue_tcp.empty()) {
+        std::cout << "send_queue_tcp" << std::endl;
+        auto [clientId, packet] = send_queue_tcp.wait_and_pop().value();
+        if (auto it = clients.find(clientId); it != clients.end()) {
+            it->second.send_tcp_queue.push_back(packet);
+        }
+    }
+
+    while (!send_queue_udp.empty()) {
+        std::cout << "send_queue_udp" << std::endl;
+        auto [clientId, packet] = send_queue_udp.wait_and_pop().value();
+        if (auto it = clients.find(clientId); it != clients.end()) {
+            it->second.send_udp_queue.push_back(packet);
+        }
+    }
     // always listen for new connections and udp packets
     std::vector<socket_t> read_fds = {listenFd, udpFd};
     std::vector<socket_t> write_fds = {};
@@ -58,9 +111,16 @@ void net::Server::update()
     if (should_add_udp) {
         write_fds.push_back(udpFd);
     }
-    context.select(read_fds, write_fds);
+
+    std::cout << "select" << std::endl;
+    context.select(read_fds, write_fds, 80);
+    std::cout << "select end" << std::endl;
+    // if (context.readyCount <= 0) {
+    //     return;
+    // }
     handle_new_tcp_connections();
 
+    std::cout << "TCP READ" << std::endl;
     for (auto &[clientId, gateway] : clients) {
 
         if (context.is_readable(gateway.tcp_socket.getFD())) {
@@ -88,6 +148,7 @@ void net::Server::update()
     if (context.readyCount <= 0) {
         return;
     }
+    std::cout << "UDP READ" << std::endl;
 
     // should only treat the first packet if the client has already an existing TCP connection
     if (context.is_readable(udpFd)) {
@@ -139,6 +200,7 @@ void net::Server::update()
             }
         }
     }
+    std::cout << "UDP WRITE" << std::endl;
 
     if (context.is_writable(udpFd)) {
         context.readyCount--;
@@ -178,14 +240,24 @@ void net::Server::update()
             ++it;
         }
     }
+    std::cout << "processConnections end" << std::endl;
 
-    for (auto &[clientId, gateway] : clients) {
-        for (Packet &packet : gateway.tcp_socket.readPackets()) {
-            on_packet(packet, clientId);
-        }
-        for (Packet &packet : gateway.udp_info.readPackets()) {
-            on_packet(packet, clientId);
-        }
+    // for (auto &[clientId, gateway] : clients) {
+    //     for (Packet &packet : gateway.tcp_socket.readPackets()) {
+    //         on_packet(packet, clientId);
+    //     }
+    //     for (Packet &packet : gateway.udp_info.readPackets()) {
+    //         on_packet(packet, clientId);
+    //     }
+    // }
+
+}
+
+void net::Server::update()
+{
+    while (!receive_queue.empty()) {
+        auto [clientId, packet] = receive_queue.wait_and_pop().value();
+        on_packet(packet, clientId);
     }
 }
 
@@ -205,7 +277,11 @@ bool net::Server::host_tcp(std::uint16_t port)
     listenFd = socket(result.ai_family, result.ai_socktype, result.ai_protocol);
     if (listenFd == INVALID_SOCKET) {
         freeaddrinfo(result);
-        return false;
+        return false;    if (context.readyCount < 0) {
+        // use errno
+        std::cerr << "Error in select" << std::endl;
+        return;
+    }
     }
     if (bind(listenFd, result->ai_addr, static_cast<int>(result->ai_addrlen)) == SOCKET_ERROR) {
         freeaddrinfo(result);
@@ -289,10 +365,14 @@ bool net::Server::host_udp(std::uint16_t port)
 
 void net::Server::handle_new_tcp_connections()
 {
+    std::cout << "handle_new_tcp_connections" << std::endl;
     if (context.is_readable(listenFd)) {
+        std::cout << "context.is_readable(listenFd)" << std::endl;
         context.readyCount--;
         Gateway gateway;
+        std::cout << "accept" << std::endl;
         if (auto opt_socket = TCPSocket::accept(listenFd); opt_socket.has_value()) {
+            std::cout << "accept2" << std::endl;
             gateway.tcp_socket = opt_socket.value();
             if (gateway.tcp_socket.getFD() == INVALID_SOCKET) {
                 std::cerr << "Error accepting connection" << std::endl;
@@ -300,7 +380,10 @@ void net::Server::handle_new_tcp_connections()
             }
             gateway.udp_info.udp_address = {};
             clients.insert({next_client_id, gateway});
+            std::cout << "New client connected" << std::endl;
             on_tcp_connect(next_client_id++);
+            std::cout << "handle_new_tcp_connections end" << std::endl;
         }
     }
+    std::cout << "handle_new_tcp_connections end" << std::endl;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <map>
 
 #include "lib_net/net.hpp"
@@ -13,7 +14,7 @@ struct Context {
     fd_set writeFds;
     ssize_t readyCount;
 
-    void select(const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds);
+    void select(const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds, uint64_t timeout);
     [[nodiscard]] inline bool is_readable(socket_t fd) const
     {
         return (fd != INVALID_SOCKET && FD_ISSET(fd, &readFds));

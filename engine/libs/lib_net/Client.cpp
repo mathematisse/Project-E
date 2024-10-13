@@ -45,7 +45,7 @@ void net::Client::update()
         write_fds.push_back(udpFd);
     }
 
-    context.select(read_fds, write_fds);
+    context.select(read_fds, write_fds, 8);
 
     // TCP
     if (context.is_readable(gateway.tcp_socket.getFD())) {

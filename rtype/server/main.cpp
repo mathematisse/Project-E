@@ -13,8 +13,11 @@ int main(int ac, char **av)
     port = std::stoi(av[1]);
 
     server.host(port);
+    server.start();
     std::cout << "Server started on port " << port << std::endl;
     while (true) {
+        // sleep 1 second
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         server.update();
     }
     return 0;
