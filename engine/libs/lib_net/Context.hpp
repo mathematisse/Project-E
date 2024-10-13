@@ -14,7 +14,7 @@ struct Context {
     sigset_t mask;
     ssize_t readyCount;
 
-    void select(std::vector<socket_t> &fds);
+    void select(const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds);
     [[nodiscard]] inline bool is_readable(socket_t fd) const
     {
         return (fd != INVALID_SOCKET && FD_ISSET(fd, &readFds));

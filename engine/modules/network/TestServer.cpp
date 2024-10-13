@@ -40,6 +40,11 @@ void net::TestServer::on_packet(const Packet &packet, client_id id)
     switch (packet.header.type) {
     case Packet::PONG:
         std::cout << "Received PONG from client " << id << std::endl;
+        pong_count++;
+        if (pong_count < 10) {
+            std::cout << "Sending PING to client " << id << std::endl;
+            send_udp(id, Packet::PING, {'P', 'I', 'N', 'G'});
+        }
         break;
     }
     if (packet.header.size == 0) {

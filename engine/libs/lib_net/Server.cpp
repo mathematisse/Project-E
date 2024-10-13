@@ -36,17 +36,33 @@ std::optional<std::reference_wrapper<net::Gateway>> net::Server::get_gateway(cli
 
 void net::Server::update()
 {
-    std::vector<socket_t> fds = {listenFd, udpFd};
+    // always listen for new connections and udp packets
+    std::vector<socket_t> read_fds = {listenFd, udpFd};
+    std::vector<socket_t> write_fds = {};
+    bool should_add_udp = false;
 
     for (auto &[clientId, gateway] : clients) {
-        fds.push_back(gateway.tcp_socket.getFD());
+        const auto &fd = gateway.tcp_socket.getFD();
+        if (fd != INVALID_SOCKET) {
+            read_fds.push_back(fd);
+            // if there is something to send, add the socket to the write_fds
+            if (!gateway.send_tcp_queue.empty()) {
+                write_fds.push_back(fd);
+            }
+        }
+        // append the udp socket to the write_fds if there is something to send in any of the clients
+        if (!gateway.send_udp_queue.empty()) {
+            should_add_udp = true;
+        }
     }
-    context.select(fds);
-    handle_connections();
+    if (should_add_udp) {
+        write_fds.push_back(udpFd);
+    }
+    context.select(read_fds, write_fds);
+    handle_new_tcp_connections();
 
     for (auto &[clientId, gateway] : clients) {
 
-        // TCP
         if (context.is_readable(gateway.tcp_socket.getFD())) {
             context.readyCount--;
             if (gateway.tcp_socket.recvToBuffer() == 0) {
@@ -69,7 +85,10 @@ void net::Server::update()
         }
     }
 
-    // TODO: UDP connection handling
+    if (context.readyCount <= 0) {
+        return;
+    }
+
     // should only treat the first packet if the client has already an existing TCP connection
     if (context.is_readable(udpFd)) {
         context.readyCount--;
@@ -121,23 +140,14 @@ void net::Server::update()
         }
     }
 
-    if (context.readyCount <= 0) {
-        return;
-    }
-
     if (context.is_writable(udpFd)) {
         context.readyCount--;
         for (auto &[clientId, gateway] : clients) {
-            if (!gateway.udp_info.udp_address.sin_port) {
-                std::cout << "UDP address not set for client " << clientId << std::endl;
+            // if the udp_address is not set, ignore the client
+            if (gateway.udp_info.udp_address.sin_port == 0U) {
                 continue;
             }
-            if (gateway.send_udp_queue.empty()) {
-                continue;
-            }
-            std::clog << "Sending UDP packet to client " << clientId << " at address and port "
-                      << inet_ntoa(gateway.udp_info.udp_address.sin_addr) << ":"
-                      << ntohs(gateway.udp_info.udp_address.sin_port) << std::endl;
+
             gateway.udp_info.buf_writer.appendPackets(gateway.send_udp_queue);
             gateway.send_udp_queue.clear();
             ssize_t byte_sent = sendto(
@@ -277,7 +287,7 @@ bool net::Server::host_udp(std::uint16_t port)
     return true;
 }
 
-void net::Server::handle_connections()
+void net::Server::handle_new_tcp_connections()
 {
     if (context.is_readable(listenFd)) {
         context.readyCount--;
@@ -285,7 +295,7 @@ void net::Server::handle_connections()
         if (auto opt_socket = TCPSocket::accept(listenFd); opt_socket.has_value()) {
             gateway.tcp_socket = opt_socket.value();
             if (gateway.tcp_socket.getFD() == INVALID_SOCKET) {
-                std::cout << "Error accepting connection" << std::endl;
+                std::cerr << "Error accepting connection" << std::endl;
                 return;
             }
             gateway.udp_info.udp_address = {};

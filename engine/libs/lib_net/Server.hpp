@@ -29,6 +29,6 @@ protected:
 
     bool host_tcp(std::uint16_t port);
     bool host_udp(std::uint16_t port);
-    void handle_connections();
+    void handle_new_tcp_connections();
 };
 }

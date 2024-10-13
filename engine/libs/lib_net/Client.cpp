@@ -32,9 +32,20 @@ void net::Client::send_udp(Packet::MsgType type, const std::vector<std::uint8_t>
 
 void net::Client::update()
 {
-    std::vector<socket_t> fds = {gateway.tcp_socket.getFD(), udpFd};
+    std::vector<socket_t> read_fds = {udpFd};
+    std::vector<socket_t> write_fds = {};
 
-    context.select(fds);
+    if (gateway.tcp_socket.getFD() != INVALID_SOCKET) {
+        read_fds.push_back(gateway.tcp_socket.getFD());
+    }
+    if (gateway.tcp_socket.getFD() != INVALID_SOCKET && !gateway.send_tcp_queue.empty()) {
+        write_fds.push_back(gateway.tcp_socket.getFD());
+    }
+    if (!gateway.send_udp_queue.empty()) {
+        write_fds.push_back(udpFd);
+    }
+
+    context.select(read_fds, write_fds);
 
     // TCP
     if (context.is_readable(gateway.tcp_socket.getFD())) {
@@ -55,6 +66,10 @@ void net::Client::update()
         }
     }
 
+    if (context.readyCount < 0) {
+        return;
+    }
+
     // UDP
     if (context.is_readable(udpFd)) {
         context.readyCount--;
@@ -70,10 +85,6 @@ void net::Client::update()
             buffer.resize(bytes_received);
             gateway.udp_info.buf_reader.append(buffer);
         }
-    }
-
-    if (context.readyCount <= 0) {
-        return;
     }
 
     if (context.is_writable(udpFd)) {
