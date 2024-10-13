@@ -112,12 +112,27 @@ void net::Server::processConnections()
         write_fds.push_back(udpFd);
     }
 
-    std::cout << "select" << std::endl;
-    context.select(read_fds, write_fds, 80);
-    std::cout << "select end" << std::endl;
-    // if (context.readyCount <= 0) {
-    //     return;
-    // }
+    std::cout << "select (" << "read_fds: " << read_fds.size() << ", " << "write_fds: " << write_fds.size()
+              << ")" << std::endl;
+    std::cout << "read_fds: ";
+    for (const auto &fd : read_fds) {
+        std::cout << fd << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "write_fds: ";
+    for (const auto &fd : write_fds) {
+        std::cout << fd << " ";
+    }
+    std::cout << std::endl;
+    context.select(read_fds, write_fds, 800);
+    std::cout << "select end: " << context.readyCount << std::endl;
+    if (context.readyCount < 0) {
+        perror("select");
+        exit(EXIT_FAILURE);
+    }
+    if (context.readyCount == 0 || (context.tv.tv_sec == 0 && context.tv.tv_usec == 0)) {
+        return;
+    }
     handle_new_tcp_connections();
 
     std::cout << "TCP READ" << std::endl;
@@ -145,10 +160,9 @@ void net::Server::processConnections()
         }
     }
 
-    if (context.readyCount <= 0) {
-        return;
-    }
-    std::cout << "UDP READ" << std::endl;
+    // if (context.readyCount <= 0) {
+    //     return;
+    // }
 
     // should only treat the first packet if the client has already an existing TCP connection
     if (context.is_readable(udpFd)) {
@@ -200,7 +214,6 @@ void net::Server::processConnections()
             }
         }
     }
-    std::cout << "UDP WRITE" << std::endl;
 
     if (context.is_writable(udpFd)) {
         context.readyCount--;
@@ -250,7 +263,6 @@ void net::Server::processConnections()
     //         on_packet(packet, clientId);
     //     }
     // }
-
 }
 
 void net::Server::update()
@@ -277,11 +289,7 @@ bool net::Server::host_tcp(std::uint16_t port)
     listenFd = socket(result.ai_family, result.ai_socktype, result.ai_protocol);
     if (listenFd == INVALID_SOCKET) {
         freeaddrinfo(result);
-        return false;    if (context.readyCount < 0) {
-        // use errno
-        std::cerr << "Error in select" << std::endl;
-        return;
-    }
+        return false;
     }
     if (bind(listenFd, result->ai_addr, static_cast<int>(result->ai_addrlen)) == SOCKET_ERROR) {
         freeaddrinfo(result);
@@ -369,10 +377,10 @@ void net::Server::handle_new_tcp_connections()
     if (context.is_readable(listenFd)) {
         std::cout << "context.is_readable(listenFd)" << std::endl;
         context.readyCount--;
-        Gateway gateway;
         std::cout << "accept" << std::endl;
         if (auto opt_socket = TCPSocket::accept(listenFd); opt_socket.has_value()) {
             std::cout << "accept2" << std::endl;
+            Gateway gateway;
             gateway.tcp_socket = opt_socket.value();
             if (gateway.tcp_socket.getFD() == INVALID_SOCKET) {
                 std::cerr << "Error accepting connection" << std::endl;
@@ -380,9 +388,17 @@ void net::Server::handle_new_tcp_connections()
             }
             gateway.udp_info.udp_address = {};
             clients.insert({next_client_id, gateway});
-            std::cout << "New client connected" << std::endl;
+            std::cout << "New client connected, nb: " << next_client_id << std::endl;
             on_tcp_connect(next_client_id++);
             std::cout << "handle_new_tcp_connections end" << std::endl;
+        } else {
+            if ((errno != EINTR) && (errno != EAGAIN)) { // try again later
+                if (errno != ENFILE) {
+                    perror("accept");
+                    exit(1);
+                }
+                fprintf(stderr, "out of file descriptor table ... (maxconn)\n");
+            }
         }
     }
     std::cout << "handle_new_tcp_connections end" << std::endl;

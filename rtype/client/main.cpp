@@ -13,8 +13,18 @@ int main(int ac, char **av)
     port = std::stoi(av[1]);
 
     std::cout << "Connecting to server on port " << port << std::endl;
-    client.connect_tcp("127.0.0.1", port);
-    client.connect_udp("127.0.0.1", port);
+    if (client.connect_tcp("127.0.0.1", port)) {
+        std::cout << "Connected to server" << std::endl;
+    } else {
+        std::cerr << "Failed to connect to server" << std::endl;
+        return 1;
+    }
+    if (client.establish_udp_connection("127.0.0.1", port)) {
+        std::cout << "Set up UDP Socket" << std::endl;
+    } else {
+        std::cerr << "Failed to set up UDP Socket" << std::endl;
+        return 1;
+    }
     while (true) {
         client.update();
     }

@@ -1,11 +1,12 @@
 #include "Client.hpp"
+#include <optional>
 
 bool net::Client::connect_tcp(const std::string &ip, uint16_t port)
 {
     return gateway.tcp_socket.create() && gateway.tcp_socket.connect(ip, port);
 }
 
-bool net::Client::connect_udp(const std::string &ip, uint16_t port)
+bool net::Client::establish_udp_connection(const std::string &ip, uint16_t port)
 {
     sockaddr_in addr {};
     addr.sin_family = AF_INET;
@@ -45,7 +46,7 @@ void net::Client::update()
         write_fds.push_back(udpFd);
     }
 
-    context.select(read_fds, write_fds, 8);
+    context.select(read_fds, write_fds, std::nullopt);
 
     // TCP
     if (context.is_readable(gateway.tcp_socket.getFD())) {
