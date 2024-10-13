@@ -17,5 +17,5 @@ endif()
 # Required for testing
 enable_testing()
 add_executable(lnet_test tests/basic.cpp)
-target_link_libraries(lnet_test Boost::unit_test_framework)
+target_link_libraries(lnet_test ${Boost_LIBRARIES})
 add_test(NAME LnetTest COMMAND Lnet_test)
