@@ -1,60 +1,54 @@
 #pragma once
 
 #include <cstdint>
-#include <cstring>
-#include <ostream>
+#include <optional>
 #include <vector>
 
 namespace net {
-using byte = uint8_t;
 
-template<typename T>
 struct Packet {
 public:
+    // from uint32 0 to 255 are reserved for system messages
+    using MsgType = std::uint32_t;
+    enum SystemTypes : Packet::MsgType {
+        // server sends generated number to client (using TCP)
+        ASKUDP_NUMBER = 1,
+        // client responds with the transformed number (using UDP)
+        ASKUDP_RESPONSE = 2,
+        PING = 3,
+        PONG = 4,
+    };
+
     struct Header {
-        T type;
-        uint32_t size;
+        MsgType type;
+        std::uint16_t size;
     };
 
     Header header;
-    std::vector<byte> data;
+    std::vector<std::uint8_t> data;
 
-    [[nodiscard]] constexpr std::size_t get_header_size() const { return sizeof(Header); }
+    std::vector<std::uint8_t> serialize() const;
 
-    [[nodiscard]] std::size_t size() const { return data.size(); }
-
-    friend std::ostream &operator<<(std::ostream &os, const Packet<T> &packet)
+    template<typename T>
+    static auto serializeStruct(const T &data) -> std::vector<std::uint8_t>
     {
-        os << "Type:" << int(packet.header.type) << " Size:" << packet.header.size;
-        return os;
+        return std::vector<std::uint8_t>(
+            reinterpret_cast<const std::uint8_t *>(&data),
+            reinterpret_cast<const std::uint8_t *>(&data) + sizeof(T)
+        );
     }
 
-    template<typename DataType>
-    friend Packet<T> &operator<<(Packet<T> &packet, const DataType &data)
+    static Packet deserialize(MsgType type, const std::vector<std::uint8_t> &data);
+    static std::optional<Packet> deserialize(const std::vector<std::uint8_t> &data);
+
+    template<typename T>
+    static auto deserializeStruct(const std::vector<std::uint8_t> &data) -> std::optional<T>
     {
-        static_assert(
-            std::is_standard_layout<DataType>::value, "Data is too complex to be pushed into vector"
-        );
-
-        size_t size = packet.data.size();
-        packet.data.resize(packet.data.size() + sizeof(DataType));
-        std::memcpy(packet.data.data() + size, &data, sizeof(DataType));
-        packet.header.size = packet.size();
-        return packet;
-    }
-
-    template<typename DataType>
-    friend Packet<T> &operator>>(Packet<T> &packet, DataType &data)
-    {
-        static_assert(
-            std::is_standard_layout<DataType>::value, "Data is too complex to be pulled from vector"
-        );
-
-        size_t size = packet.data.size() - sizeof(DataType);
-        std::memcpy(&data, packet.data.data() + size, sizeof(DataType));
-        packet.data.resize(size);
-        packet.header.size = packet.size();
-        return packet;
+        if (data.size() != sizeof(T)) {
+            return std::nullopt;
+        }
+        return *reinterpret_cast<const T *>(data.data());
     }
 };
+
 }
