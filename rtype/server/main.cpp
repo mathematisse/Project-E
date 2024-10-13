@@ -130,20 +130,19 @@ int main(int ac, char **av)
     std::cout << "Server started on port " << port << std::endl;
     while (true) {
         server.update();
+        auto new_time = std::chrono::steady_clock::now();
+        auto dt = std::chrono::duration<float>(new_time - curr_time).count();
+        curr_time = new_time;
+
+        cameraX += 80 * dt;
+        moveBackgroundSystem.cameraX = cameraX;
+        playerPosition = get_player_position(_eM, player);
+        moveEnnemySystem.playerPosition = playerPosition;
+        shootSystem.playerPosition = playerPosition;
+
+        countEnnemyAliveSystem.ennemyCount = 0;
+        frame += static_cast<size_t>(_eM.addTime(dt));
+        spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
     }
-    auto new_time = std::chrono::steady_clock::now();
-    auto dt = std::chrono::duration<float>(new_time - curr_time).count();
-    curr_time = new_time;
-
-    cameraX += 80 * dt;
-    moveBackgroundSystem.cameraX = cameraX;
-    playerPosition = get_player_position(_eM, player);
-    moveEnnemySystem.playerPosition = playerPosition;
-    shootSystem.playerPosition = playerPosition;
-
-    countEnnemyAliveSystem.ennemyCount = 0;
-    frame += static_cast<size_t>(_eM.addTime(dt));
-    spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
-}
-return 0;
+    return 0;
 }

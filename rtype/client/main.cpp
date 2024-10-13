@@ -1,6 +1,5 @@
 #include "DecorSquare.hpp"
 #include <cstdlib>
-#ifndef EXAMPLE
 #include <chrono>
 
 #include <raylib.h>
@@ -15,6 +14,7 @@
 #include "DrawSystems.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
+#include "network/TestClient.hpp"
 
 void init_camera(Camera2D &camera)
 {
@@ -204,8 +204,21 @@ setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoad
     return player;
 }
 
-int main()
+int main(int ac, char **av)
 {
+    net::TestClient client;
+    std::uint16_t port = 0;
+
+    if (ac != 2) {
+        std::cerr << "Usage: ./rtype_client port" << std::endl;
+        return 1;
+    }
+    port = std::stoi(av[1]);
+
+    std::cout << "Connecting to server on port " << port << std::endl;
+    client.connect_tcp("127.0.0.1", port);
+    client.connect_udp("127.0.0.1", port);
+
     InitWindow(1920, 1080, "R-Type");
 
     Camera2D camera = {};
@@ -274,6 +287,7 @@ int main()
     size_t frame = 0;
 
     while (!WindowShouldClose()) {
+        client.update();
         auto new_time = std::chrono::steady_clock::now();
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
@@ -300,26 +314,7 @@ int main()
         }
         EndDrawing();
         spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
-
-#include "network/TestClient.hpp"
-
-        int main(int ac, char **av)
-        {
-            net::TestClient client;
-            std::uint16_t port = 0;
-
-            if (ac != 2) {
-                std::cerr << "Usage: ./rtype_client port" << std::endl;
-                return 1;
-            }
-            port = std::stoi(av[1]);
-
-            std::cout << "Connecting to server on port " << port << std::endl;
-            client.connect_tcp("127.0.0.1", port);
-            client.connect_udp("127.0.0.1", port);
-            while (true) {
-                client.update();
-            }
-            CloseWindow();
-            return 0;
-        }
+    }
+    CloseWindow();
+    return 0;
+}
