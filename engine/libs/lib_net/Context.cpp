@@ -18,5 +18,11 @@ void net::Context::select(const std::vector<socket_t> &read_fds, const std::vect
             maxFd = fd;
         }
     }
-    readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, nullptr);
+
+    // set timeout to 0 to return make select non-blocking (not a good idea)
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+
+    readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, &tv);
 }
