@@ -1,4 +1,5 @@
 
+#include "network/TestServer.hpp"
 #include "DecorSquare.hpp"
 #include <cstdlib>
 #include <chrono>
@@ -71,7 +72,7 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
     return player;
 }
 
-int main()
+int main(int ac, char **av)
 {
     srand(time(NULL));
 
@@ -116,20 +117,33 @@ int main()
 
     size_t frame = 0;
 
-    while (true) {
-        auto new_time = std::chrono::steady_clock::now();
-        auto dt = std::chrono::duration<float>(new_time - curr_time).count();
-        curr_time = new_time;
+    net::TestServer server;
+    std::uint16_t port = 0;
 
-        cameraX += 80 * dt;
-        moveBackgroundSystem.cameraX = cameraX;
-        playerPosition = get_player_position(_eM, player);
-        moveEnnemySystem.playerPosition = playerPosition;
-        shootSystem.playerPosition = playerPosition;
-
-        countEnnemyAliveSystem.ennemyCount = 0;
-        frame += static_cast<size_t>(_eM.addTime(dt));
-        spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+    if (ac != 2) {
+        std::cerr << "Usage: ./rtype_server port" << std::endl;
+        return 1;
     }
-    return 0;
+    port = std::stoi(av[1]);
+
+    server.host(port);
+    std::cout << "Server started on port " << port << std::endl;
+    while (true) {
+        server.update();
+    }
+    auto new_time = std::chrono::steady_clock::now();
+    auto dt = std::chrono::duration<float>(new_time - curr_time).count();
+    curr_time = new_time;
+
+    cameraX += 80 * dt;
+    moveBackgroundSystem.cameraX = cameraX;
+    playerPosition = get_player_position(_eM, player);
+    moveEnnemySystem.playerPosition = playerPosition;
+    shootSystem.playerPosition = playerPosition;
+
+    countEnnemyAliveSystem.ennemyCount = 0;
+    frame += static_cast<size_t>(_eM.addTime(dt));
+    spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+}
+return 0;
 }

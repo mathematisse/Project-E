@@ -13,7 +13,7 @@ file(GLOB_RECURSE SOURCES "*.cpp")
 
 add_executable(r-type_client ${SOURCES})
 
-target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib)
+target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network)
 
 if(UNIX)
     target_link_libraries(r-type_client ncurses)
