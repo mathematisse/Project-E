@@ -53,7 +53,7 @@ protected:
 class SpawnEnnemySystem : public S::AStatusMonoSystem<C::PositionPool, C::TypePool> {
 public:
     explicit SpawnEnnemySystem(
-        EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId, Camera2D &camera,
+        EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
         size_t maxEnnemyCount = 5
     );
     ~SpawnEnnemySystem() override = default;
@@ -65,7 +65,6 @@ public:
 
     EntityManager &entityManager;
     NetworkManager &networkManager;
-    Camera2D &camera;
     size_t ennemyCount = 0;
 
 protected:
@@ -118,7 +117,7 @@ protected:
 
 class MoveBackgroundSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
 public:
-    explicit MoveBackgroundSystem(Camera2D &camera);
+    explicit MoveBackgroundSystem();
     ~MoveBackgroundSystem() override = default;
 
     MoveBackgroundSystem(const MoveBackgroundSystem &other) = default;
@@ -126,7 +125,7 @@ public:
     MoveBackgroundSystem &operator=(const MoveBackgroundSystem &other) = default;
     MoveBackgroundSystem &operator=(MoveBackgroundSystem &&other) = default;
 
-    Camera2D &camera;
+    float cameraX;
 
 protected:
     void _innerOperate(

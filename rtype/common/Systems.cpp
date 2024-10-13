@@ -9,10 +9,8 @@
 #include "DecorSquare.hpp"
 #include "Square.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include <iomanip>
 #include <iostream>
 #include "lib_ecs/Systems/ADualSystem.hpp"
-#include <raylib.h>
 
 #define RED_CLI "\033[31m"
 #define GREEN_CLI "\033[32m"
@@ -51,13 +49,11 @@ void CountEnnemyAliveSystem::_statusOperate(C::TypePool::Types &ctype)
 }
 
 SpawnEnnemySystem::SpawnEnnemySystem(
-    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId, Camera2D &camera,
-    size_t maxEnnemyCount
+    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId, size_t maxEnnemyCount
 ):
     AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
     networkManager(networkManager),
-    camera(camera),
     _spriteId(spriteId),
     _maxEnnemyCount(maxEnnemyCount)
 {
@@ -100,13 +96,17 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
         square_ennemy->getSize()->set<1>(80);
         square_ennemy->getSize()->set<2>(90);
 
-        square_ennemy->getPosition()->set<0>(x + 500 + rand() % (int) (x + 1000));
-        square_ennemy->getPosition()->set<1>(100 + rand() % 800);
+        float _x = x + 500 + rand() % (int) (x + 1000);
+        float _y = 100 + rand() % 800;
+        square_ennemy->getPosition()->set<0>(_x);
+        square_ennemy->getPosition()->set<1>(_y);
         square_ennemy->getCanShoot()->set<0>(true);
         square_ennemy->getCanShoot()->set<1>(1.5F);
         square_ennemy->getSprite()->set<0>(_spriteId);
         square_ennemy->getHealth()->set<0>(2);
-        square_ennemy->getNetworkID()->set<0>(networkManager.getnewNetID());
+        auto _netId = networkManager.getnewNetID();
+
+        square_ennemy->getNetworkID()->set<0>(_netId);
     }
 }
 
@@ -191,14 +191,15 @@ void ShootSystem::_statusOperate(
             square_bullet->getHealth()->set<0>(1);
             square_bullet->getTimer()->set<0>(0.0F);
             square_bullet->getTimer()->set<1>(8.0F);
-            square_bullet->getNetworkID()->set<0>(networkManager.getnewNetID());
+
+            auto _netId = networkManager.getnewNetID();
+            square_bullet->getNetworkID()->set<0>(_netId);
         }
     }
 }
 
-MoveBackgroundSystem::MoveBackgroundSystem(Camera2D &camera):
-    AMonoSystem(false),
-    camera(camera)
+MoveBackgroundSystem::MoveBackgroundSystem():
+    AMonoSystem(false)
 {
 }
 
@@ -212,10 +213,10 @@ void MoveBackgroundSystem::_innerOperate(
     if (status == C::EntityStatusEnum::ENT_ALIVE && type != SquareType::BACKGROUND &&
         type != SquareType::WALL) {
         auto [x, y] = cposition;
-        if (x < camera.target.x - 1000) {
+        if (x < cameraX - 1000) {
             status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         }
-        if (type == SquareType::BULLET && x > camera.target.x + 1000) {
+        if (type == SquareType::BULLET && x > cameraX + 1000) {
             status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         }
     }
@@ -224,13 +225,13 @@ void MoveBackgroundSystem::_innerOperate(
         return;
     }
     auto [x, y] = cposition;
-    if (camera.target.x > x + 3000) {
+    if (cameraX > x + 3000) {
         x += 3000;
     }
 }
 
 MoveEnnemySystem::MoveEnnemySystem():
-    AStatusMonoSystem(true, C::ENT_ALIVE)
+    AStatusMonoSystem(false, C::ENT_ALIVE)
 {
 }
 
@@ -265,7 +266,7 @@ void MoveEnnemySystem::_statusOperate(
 }
 
 ColliderSystem::ColliderSystem():
-    ASelfDualSystem(true)
+    ASelfDualSystem(false)
 {
 }
 

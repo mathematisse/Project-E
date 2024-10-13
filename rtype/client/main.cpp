@@ -229,16 +229,16 @@ int main()
 
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
-    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader.get_asset(E1FC).id, camera);
+    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader.get_asset(E1FC).id);
     ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
     ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader.get_asset(BASE_BULLET_PATH).id);
-    ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
+    ECS::S::MoveBackgroundSystem moveBackgroundSystem;
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
 
-    ECS::S::SendDecorStateSystem sendDecorStateSystem;
-    ECS::S::SendSquareStateSystem sendSquareStateSystem;
+    // ECS::S::SendDecorStateSystem sendDecorStateSystem;
+    // ECS::S::SendSquareStateSystem sendSquareStateSystem;
 
     // Entity pools
     ECS::E::SquarePool squarePool;
@@ -246,13 +246,11 @@ int main()
 
     ECS::S::SystemTreeNode demoFixedNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
-         &colliderSystem, &sendDecorStateSystem, &destroyEntitiesSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &updateEnginePosition, &applyVelocitySystem,
+         &shootSystem, &colliderSystem, &destroyEntitiesSystem}
     );
 
-    ECS::S::SystemTreeNode demoNode(
-        42, {&drawSpriteSystem, &drawSystem, &showInfoSystem, &animationSystem, &updateEnginePosition}
-    );
+    ECS::S::SystemTreeNode demoNode(42, {&drawSpriteSystem, &drawSystem, &showInfoSystem, &animationSystem});
 
     _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -281,6 +279,7 @@ int main()
         curr_time = new_time;
 
         update_camera(camera, dt);
+        moveBackgroundSystem.cameraX = camera.target.x;
         update_player_sprite(_eM, player, assetsLoader);
 
         playerPosition = get_player_position(_eM, player);
