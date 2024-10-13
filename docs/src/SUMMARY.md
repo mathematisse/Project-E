@@ -9,3 +9,4 @@
             - [Terminologies](./modules/network/terminologies.md)
 - [Build System](./build_system.md)
 - [Tutorial](./tutorial.md)
+- [Comparative Study](./comparative_study.md)
