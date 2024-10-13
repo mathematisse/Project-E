@@ -29,7 +29,10 @@ public:
     AMonoSystem &operator=(const AMonoSystem &other) = default;
     AMonoSystem &operator=(AMonoSystem &&other) = default;
 
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override { return _query.tryAddEntityPool(entityPool); }
+    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    {
+        return _query.tryAddEntityPool(entityPool);
+    }
 
     void run() override
     {
@@ -80,7 +83,8 @@ public:
 
 protected:
     C::EntityStatusEnum _status;
-    void _innerOperate(C::EntityStatusPool::Types &cStatus, typename Ts::Types &...componentPools) override
+    void _innerOperate(C::EntityStatusPool::Types &cStatus, typename Ts::Types &...componentPools)
+        override
     {
         auto [status] = cStatus;
         if (status == _status) {

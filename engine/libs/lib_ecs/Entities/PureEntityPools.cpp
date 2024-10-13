@@ -17,7 +17,10 @@ EntityPtrPool::EntityPtrPool():
 {
 }
 
-std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::chunkPos_t cPos) { return getRawEntity(cPos); }
+std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::chunkPos_t cPos)
+{
+    return getRawEntity(cPos);
+}
 
 std::unique_ptr<E::EntityPtrRef> EntityPtrPool::getRawEntity(Chunks::chunkPos_t cPos)
 {

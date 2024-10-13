@@ -22,7 +22,8 @@ enum ChunkType : unsigned int {
     AVXCHUNKD = 64, ///< AVX chunk double.
     CUDACHUNK = 128, ///< CUDA chunk.
     CUDALINKCHUNK = 256, ///< CUDA link chunk.
-    SIMDCHUNK = SSECHUNKI | SSECHUNK | SSECHUNKD | AVXCHUNKI | AVXCHUNK | AVXCHUNKD, ///< SIMD chunk.
+    SIMDCHUNK =
+        SSECHUNKI | SSECHUNK | SSECHUNKD | AVXCHUNKI | AVXCHUNK | AVXCHUNKD, ///< SIMD chunk.
     ANYCUDACHUNK = CUDACHUNK | CUDALINKCHUNK ///< Any CUDA chunk.
 };
 

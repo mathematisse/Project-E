@@ -10,9 +10,10 @@
         "assets", "Main ship weapons", "Aseprite", "Cannon_bulletC.png" \
     }
 
-#define P1F                                                                                          \
-    {                                                                                                \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "Main Ship - Base - Full health.png" \
+#define P1F                                                     \
+    {                                                           \
+        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", \
+            "Main Ship - Base - Full health.png"                \
     }
 #define P1FR                                                                           \
     {                                                                                  \
@@ -57,4 +58,5 @@
 
 const std::vector<std::vector<std::string>> paths = {
     BASE_BULLET_PATH, P1F,     P1FR, P1SD, P1D, P1VD, E1F, BACKGROUND_PATH, FLOOR, CEILING, E1FC,
-    CUT_BULLET_PATH,  ENGINE_1};
+    CUT_BULLET_PATH,  ENGINE_1
+};

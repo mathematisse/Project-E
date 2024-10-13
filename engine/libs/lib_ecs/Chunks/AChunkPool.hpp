@@ -43,7 +43,10 @@ public:
      * @param pos The position of the element.
      * @return T* Pointer to the element.
      */
-    T *getElem(chunkPos_t pos) override { return _chunks[std::get<0>(pos)]->getElem(std::get<1>(pos)); }
+    T *getElem(chunkPos_t pos) override
+    {
+        return _chunks[std::get<0>(pos)]->getElem(std::get<1>(pos));
+    }
 
     /**
      * @brief Access an element by its position (const version).
@@ -102,7 +105,8 @@ public:
     void getValuesAtIndexes(const cPosArr_t &indexes, std::vector<std::tuple<Ts...>> &values)
     {
         for (size_t i = 0; i < indexes.size(); i++) {
-            std::get<Idx>(values[i]) = *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i])));
+            std::get<Idx>(values[i]) =
+                *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i])));
         }
     }
 

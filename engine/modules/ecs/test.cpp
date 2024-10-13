@@ -68,8 +68,8 @@ int main()
             }
         });
 
-        std::cerr << "Time taken to create " << num_entities << " entities: " << time << " nanoseconds"
-                  << std::endl;
+        std::cerr << "Time taken to create " << num_entities << " entities: " << time
+                  << " nanoseconds" << std::endl;
     }
     // create a World::View for Position
     {
@@ -84,7 +84,8 @@ int main()
                 }
             }
         });
-        std::cerr << "Time taken to add components to entities: " << time << " nanoseconds" << std::endl;
+        std::cerr << "Time taken to add components to entities: " << time << " nanoseconds"
+                  << std::endl;
     }
 
     {
@@ -110,18 +111,21 @@ int main()
                 }
             }
         });
-        std::cerr << "Time taken to iterate over Position and int components: " << time << " nanoseconds"
-                  << std::endl;
+        std::cerr << "Time taken to iterate over Position and int components: " << time
+                  << " nanoseconds" << std::endl;
     }
 
     {
         auto time = measure([&world]() {
-            std::for_each(world.view<Level>().begin(), world.view<Level>().end(), [&world](auto entityID) {
-                if (auto has_data = world.get<Level>(entityID); has_data.has_value()) {
-                    auto &[data] = has_data.value();
-                    data.value += 10;
+            std::for_each(
+                world.view<Level>().begin(), world.view<Level>().end(),
+                [&world](auto entityID) {
+                    if (auto has_data = world.get<Level>(entityID); has_data.has_value()) {
+                        auto &[data] = has_data.value();
+                        data.value += 10;
+                    }
                 }
-            });
+            );
         });
         std::cerr << "Time taken to iterate over Level components and editing value: " << time
                   << " nanoseconds" << std::endl;
@@ -136,8 +140,8 @@ int main()
                 }
             }
         });
-        std::cerr << "Time taken to remove all Entities with Level component: " << time << " nanoseconds"
-                  << std::endl;
+        std::cerr << "Time taken to remove all Entities with Level component: " << time
+                  << " nanoseconds" << std::endl;
     }
 
     for (auto entityID : world.view<Level>()) {

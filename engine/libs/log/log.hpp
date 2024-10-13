@@ -82,7 +82,8 @@ inline void init()
     boost::log::add_file_log(
         boost::log::keywords::file_name = "app_%N.log",
         boost::log::keywords::rotation_size = MAX_LOG_FILE_SIZE,
-        boost::log::keywords::time_based_rotation = boost::log::sinks::file::rotation_at_time_point(0, 0, 0),
+        boost::log::keywords::time_based_rotation =
+            boost::log::sinks::file::rotation_at_time_point(0, 0, 0),
         boost::log::keywords::format = "[%TimeStamp%] [%Severity%] %Message%"
     );
 

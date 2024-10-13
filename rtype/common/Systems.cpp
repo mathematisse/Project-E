@@ -28,7 +28,9 @@ ApplyVelocitySystem::ApplyVelocitySystem():
 {
 }
 
-void ApplyVelocitySystem::_statusOperate(C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity)
+void ApplyVelocitySystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity
+)
 {
     auto [x, y] = cposition;
     auto [vX, vY, speed] = cvelocity;
@@ -42,7 +44,8 @@ MoveBackgroundSystem::MoveBackgroundSystem():
 }
 
 void MoveBackgroundSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::TypePool::Types &ctype
 )
 {
     auto [status] = cstatus;
@@ -127,10 +130,10 @@ ColliderSystem::ColliderSystem():
 }
 
 void ColliderSystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
-    C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA, C::EntityStatusPool::Types &cStatusB,
-    C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB,
-    C::HealthPool::Types &chealthB
+    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
+    C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA,
+    C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
+    C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB, C::HealthPool::Types &chealthB
 )
 {
     auto [statusA] = cStatusA;
@@ -197,12 +200,14 @@ GetPlayerPositionSystem::GetPlayerPositionSystem():
 }
 
 void GetPlayerPositionSystem::_statusOperate(
-    C::EntityStatusPool::Types &centitystatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+    C::EntityStatusPool::Types &centitystatus, C::PositionPool::Types &cposition,
+    C::TypePool::Types &ctype
 )
 {
     auto [entityStatus] = centitystatus;
     auto [type] = ctype;
-    if ((type != SquareType::LPLAYER && type != SquareType::PLAYER) || entityStatus != C::ENT_ALIVE) {
+    if ((type != SquareType::LPLAYER && type != SquareType::PLAYER) ||
+        entityStatus != C::ENT_ALIVE) {
         return;
     }
     auto [x, y] = cposition;

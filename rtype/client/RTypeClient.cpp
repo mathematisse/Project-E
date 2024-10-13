@@ -130,7 +130,8 @@ void net::RTypeClient::on_packet(const Packet &packet)
         break;
     }
     case ECS::PLAYER_CONNECTION_SUCCESS: {
-        auto playerConnectionSuccess = *Packet::deserializeStruct<ECS::PlayerConnectionSuccess>(packet.data);
+        auto playerConnectionSuccess =
+            *Packet::deserializeStruct<ECS::PlayerConnectionSuccess>(packet.data);
         auto ent = _entityManager.getEntity(playerPos);
         auto *square_player = dynamic_cast<ECS::E::SquareRef *>(ent.get());
         if (square_player == nullptr) {

@@ -99,8 +99,9 @@ int main(int ac, char **av)
 
     ECS::S::SystemTreeNode demoFixedNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &applyVelocitySystem, &shootSystem,
-         &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem, &sendAllDataToNewClients}
+        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &applyVelocitySystem,
+         &shootSystem, &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
+         &sendAllDataToNewClients}
     );
 
     _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);

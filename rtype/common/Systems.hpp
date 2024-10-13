@@ -34,7 +34,8 @@ protected:
     ) override;
 };
 
-class MoveBackgroundSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+class MoveBackgroundSystem
+    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
 public:
     explicit MoveBackgroundSystem();
     ~MoveBackgroundSystem() override = default;
@@ -53,7 +54,8 @@ protected:
     ) override;
 };
 
-class MoveEnnemySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool, C::TypePool> {
+class MoveEnnemySystem
+    : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool, C::TypePool> {
 public:
     explicit MoveEnnemySystem();
     ~MoveEnnemySystem() override = default;
@@ -67,13 +69,14 @@ public:
 
 protected:
     void _statusOperate(
-        C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+        C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
+        C::TypePool::Types &ctype
     ) override;
 };
 
 class ColliderSystem
-    : public S::ASelfDualSystem<
-          std::tuple<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::HealthPool>> {
+    : public S::ASelfDualSystem<std::tuple<
+          C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::HealthPool>> {
 public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
@@ -85,10 +88,10 @@ public:
 
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA, C::SizePool::Types &csizeA,
-        C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA, C::EntityStatusPool::Types &cStatusB,
-        C::PositionPool::Types &cpositionB, C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB,
-        C::HealthPool::Types &chealthB
+        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
+        C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA,
+        C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
+        C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB, C::HealthPool::Types &chealthB
     ) override;
 };
 
@@ -107,8 +110,8 @@ public:
 
 protected:
     void _statusOperate(
-        typename C::EntityStatusPool::Types &cEntityStatus, typename C::PositionPool::Types &cposition,
-        typename C::TypePool::Types &ctype
+        typename C::EntityStatusPool::Types &cEntityStatus,
+        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype
     ) override;
 };
 

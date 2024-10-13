@@ -70,7 +70,8 @@ public:
      * @param cPos The position of the chunk.
      * @return A constant reference to a dummy component at the specified chunk position.
      */
-    [[nodiscard]] virtual const IComponentRef *getDummyComponentRef(Chunks::chunkPos_t cPos) const = 0;
+    [[nodiscard]] virtual const IComponentRef *getDummyComponentRef(Chunks::chunkPos_t cPos
+    ) const = 0;
 
     /**
      * @brief Get the number of elements in the component pool.

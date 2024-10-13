@@ -26,8 +26,10 @@ constexpr auto print_tuple(std::ostream &os, const std::tuple<Types...> &t) -> s
 
 // Template function to generate the operator<< overload
 template<typename T, typename... Args>
-auto print(std::ostream &os, const T & /*obj*/, const std::string &className, const std::tuple<Args...> &args)
-    -> std::ostream &
+auto print(
+    std::ostream &os, const T & /*obj*/, const std::string &className,
+    const std::tuple<Args...> &args
+) -> std::ostream &
 {
     os << className << "(";
     print_tuple(os, args) << ")";

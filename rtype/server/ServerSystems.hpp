@@ -41,8 +41,9 @@ public:
 
 protected:
     size_t _spriteId = 0;
-    void
-    _statusOperate(typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype) override;
+    void _statusOperate(
+        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype
+    ) override;
 
 private:
     size_t _maxEnnemyCount = 0;
@@ -68,8 +69,8 @@ protected:
     ) override;
 };
 
-class ShootSystem
-    : public S::AStatusMonoSystem<C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool> {
+class ShootSystem : public S::AStatusMonoSystem<
+                        C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool> {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,

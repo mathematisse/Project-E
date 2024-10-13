@@ -17,7 +17,8 @@
 
 namespace ECS::S {
 
-class DrawSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::ColorPool, C::SizePool> {
+class DrawSystem
+    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::ColorPool, C::SizePool> {
 public:
     explicit DrawSystem(Camera2D &camera);
     ~DrawSystem() override = default;
@@ -37,7 +38,8 @@ protected:
 };
 
 class DrawSpriteSystem
-    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool> {
+    : public S::AMonoSystem<
+          C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool> {
 public:
     explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
     ~DrawSpriteSystem() override = default;
@@ -89,8 +91,9 @@ public:
     float deltaTime = 0.0f;
 
 protected:
-    void
-    _statusOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
+    void _statusOperate(
+        typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer
+    ) override;
 };
 
 } // namespace ECS::S

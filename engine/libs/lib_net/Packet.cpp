@@ -32,6 +32,8 @@ std::optional<net::Packet> net::Packet::deserialize(const std::vector<std::uint8
     if (data.size() < sizeof(Header) + packet.header.size) {
         return std::nullopt;
     }
-    packet.data.assign(data.begin() + sizeof(Header), data.begin() + sizeof(Header) + packet.header.size);
+    packet.data.assign(
+        data.begin() + sizeof(Header), data.begin() + sizeof(Header) + packet.header.size
+    );
     return packet;
 }

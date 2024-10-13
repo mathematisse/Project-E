@@ -39,8 +39,9 @@ const size_t DecorSquareChunkSize = 64;
 class DecorSquareRef : public AEntityRef {
 public:
     DecorSquareRef(
-        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::SizeRef *size,
-        C::TypeRef *type, C::SpriteRef *sprite, C::TimerRef *timer, C::NetworkIDRef *networkID
+        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position,
+        C::SizeRef *size, C::TypeRef *type, C::SpriteRef *sprite, C::TimerRef *timer,
+        C::NetworkIDRef *networkID
     );
     ~DecorSquareRef() override;
 

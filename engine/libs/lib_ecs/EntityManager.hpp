@@ -21,13 +21,16 @@
 namespace ECS {
 class EntityManager {
 public:
-    bool registerSystemGroup(int targetGroup, int newGroup, bool addBefore = false, bool addInside = false);
+    bool registerSystemGroup(
+        int targetGroup, int newGroup, bool addBefore = false, bool addInside = false
+    );
     bool registerSystemNode(
         S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false
     );
     bool registerSystem(S::ISystem &system, int group, bool atStart = false);
-    bool
-    registerFixedSystemGroup(int targetGroup, int newGroup, bool addBefore = false, bool addInside = false);
+    bool registerFixedSystemGroup(
+        int targetGroup, int newGroup, bool addBefore = false, bool addInside = false
+    );
     bool registerFixedSystemNode(
         S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false
     );
@@ -36,7 +39,8 @@ public:
     S::IQuery &initializeQuery(S::IQuery &query);
     std::unique_ptr<ECS::E::IEntityRef> getEntity(const ECS::E::EntityPtrRef &entityPtr);
     std::unique_ptr<ECS::E::IEntityRef> getEntity(const Chunks::chunkPos_t &cPos);
-    Chunks::chunkPos_t createEntity(const std::string &entityName, C::EntityStatusEnum status = C::ENT_ALIVE);
+    Chunks::chunkPos_t
+    createEntity(const std::string &entityName, C::EntityStatusEnum status = C::ENT_ALIVE);
     Chunks::cPosArr_t createEntities(
         const std::string &entityName, size_t count = 0, C::EntityStatusEnum status = C::ENT_ALIVE
     );
@@ -50,11 +54,14 @@ private:
     void _runSystems();
     void _runFixedSystems();
     Chunks::cPosArr_t _createEntities(
-        std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, size_t count, C::EntityStatusEnum status
+        std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, size_t count,
+        C::EntityStatusEnum status
     );
-    Chunks::chunkPos_t
-    _createEntity(std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, C::EntityStatusEnum status);
-    std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> _getEntityPool(const std::string &entityName);
+    Chunks::chunkPos_t _createEntity(
+        std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, C::EntityStatusEnum status
+    );
+    std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>
+    _getEntityPool(const std::string &entityName);
     void _destroyEntities(const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool);
 
     ECS::E::EntityPtrPool _entityPtrPool;

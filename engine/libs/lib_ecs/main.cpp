@@ -28,7 +28,8 @@ int main()
 
     // // create a system tree node with start and end systems
     // // there is another optionnal argument to give child nodes to the node
-    // S::SystemTreeNode demoNode(42, {&initSystem, &moveUpSystem}, {&printSystem, &dualExampleSystem});
+    // S::SystemTreeNode demoNode(42, {&initSystem, &moveUpSystem}, {&printSystem,
+    // &dualExampleSystem});
 
     // // This means : we register demoNode to the ROOTSYSGROUP at the end of the children
     // // true false means before rootsysgroup itself, in the children of it's parent
@@ -44,18 +45,21 @@ int main()
     // using SimpleQuery = S::Query<C::EntityStatusPool, C::ChunkPosPool>;
 
     // // Run a query
-    // // There is a version without the ent manager, but you will need to initialize the query yourself
-    // SimpleQuery().map(_eM, [](auto &cStatus, auto &cChunkPos) {
+    // // There is a version without the ent manager, but you will need to initialize the query
+    // yourself SimpleQuery().map(_eM, [](auto &cStatus, auto &cChunkPos) {
     //     auto [status] = cStatus;
     //     auto [cIdx, eIdx] = cChunkPos;
-    //     std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx << ", "
+    //     std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx
+    //     << ", "
     //               << eIdx << "]\n";
     // });
 
     // // Run a 'cross' query, the template of cross is the second query
-    // // You can also use cross with lvalues, without the ent manager. (both will need to be initialized):
-    // // firstQuery.cross(secondQuery, ...), no template args needed, will be inferred from secondQuery
-    // SimpleQuery().cross<C::ChunkPosPool>(_eM, [](auto &cStatusA, auto &cChunkPosA, auto &cChunkPosB) {
+    // // You can also use cross with lvalues, without the ent manager. (both will need to be
+    // initialized):
+    // // firstQuery.cross(secondQuery, ...), no template args needed, will be inferred from
+    // secondQuery SimpleQuery().cross<C::ChunkPosPool>(_eM, [](auto &cStatusA, auto &cChunkPosA,
+    // auto &cChunkPosB) {
     //     auto [status] = cStatusA;
     //     auto [cIdx2, eIdx2] = cChunkPosB;
     //     // if not the same ent, print an return
@@ -63,7 +67,8 @@ int main()
     //         std::cout << "ents are not the same\n";
     //         return;
     //     }
-    //     std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx2 << ", "
+    //     std::cout << "Entity Status: " << C::EntityStatusEnum(status) << " ChunkPos: [" << cIdx2
+    //     << ", "
     //               << eIdx2 << "]\n";
     // });
 

@@ -64,7 +64,9 @@ char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
     return *square_player->getHealth()->get<0>();
 }
 
-void update_player_sprite(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks, AssetsLoader &assetsLoader)
+void update_player_sprite(
+    ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks, AssetsLoader &assetsLoader
+)
 {
     auto player = chunks;
     if (player.empty()) {
@@ -87,7 +89,9 @@ void update_player_sprite(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunk
     }
 }
 
-void setup_decor(ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader)
+void setup_decor(
+    ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader
+)
 {
 
     auto background = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
@@ -217,7 +221,8 @@ int main(int ac, char **av)
     ECS::S::MoveOtherPlayerSystem moveOtherPlayerSystem;
     ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
     net::RTypeClient client(
-        _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed, camera.target.x
+        _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed,
+        camera.target.x
     );
     std::uint16_t port = 0;
     if (ac != 2) {
@@ -265,7 +270,8 @@ int main(int ac, char **av)
 
     ECS::S::SystemTreeNode demoFixedNode(
         42,
-        {&moveBackgroundSystem, &moveEnnemySystem, &updateEnginePosition, &applyVelocitySystem, &moveSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &updateEnginePosition, &applyVelocitySystem,
+         &moveSystem}
     );
 
     ECS::S::SystemTreeNode demoNode(
@@ -523,7 +529,8 @@ int main(int ac, char **av)
 
         // create palyer for each player states left over
         for (auto &playerState : moveOtherPlayerSystem.playerStates) {
-            std::cout << "Creating player for player state and netid: " << playerState.netId << std::endl;
+            std::cout << "Creating player for player state and netid: " << playerState.netId
+                      << std::endl;
             auto engine = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
             for (const auto &entity : engine) {
                 auto ref = _eM.getEntity(entity);

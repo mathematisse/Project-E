@@ -40,10 +40,10 @@ public:
     AComponentPool &operator=(AComponentPool &&) = default;
 
     using Types = std::tuple<Ts &...>; ///< The types of the components managed by the pool.
-    using VTypes =
-        std::tuple<std::vector<Ts> &...>; ///< The vector types of the components managed by the pool.
-    using ATypes =
-        std::tuple<std::vector<Ts> *...>; ///< The vector pointer types of the components managed by the pool.
+    using VTypes = std::tuple<std::vector<Ts> &...>; ///< The vector types of the components managed
+                                                     ///< by the pool.
+    using ATypes = std::tuple<std::vector<Ts> *...>; ///< The vector pointer types of the components
+                                                     ///< managed by the pool.
 
     /**
      * @brief Retrieve a reference to a component at the specified chunk position.
@@ -82,15 +82,18 @@ public:
         setComponentAtIndexesImpl(indexes, component, std::index_sequence_for<Ts...> {});
     }
 
-    void
-    setComponentsAtIndexes(const Chunks::cPosArr_t &indexes, const std::vector<std::tuple<Ts...>> &components)
+    void setComponentsAtIndexes(
+        const Chunks::cPosArr_t &indexes, const std::vector<std::tuple<Ts...>> &components
+    )
     {
         for (size_t i = 0; i < indexes.size(); i++) {
             setComponentAtIndex(indexes[i], components[i]);
         }
     }
 
-    void getComponentsAtIndexes(const Chunks::cPosArr_t &indexes, std::vector<std::tuple<Ts...>> &components)
+    void getComponentsAtIndexes(
+        const Chunks::cPosArr_t &indexes, std::vector<std::tuple<Ts...>> &components
+    )
     {
         getComponentsAtIndexesImpl(indexes, components, std::index_sequence_for<Ts...> {});
     }
@@ -120,7 +123,10 @@ public:
      *
      * @param elemCount Number of elements in the chunk.
      */
-    void addChunk(size_t elemCount) override { addChunkImpl(elemCount, std::index_sequence_for<Ts...> {}); }
+    void addChunk(size_t elemCount) override
+    {
+        addChunkImpl(elemCount, std::index_sequence_for<Ts...> {});
+    }
 
     /**
      * @brief Get the chunk pools managed by this component pool.
@@ -146,7 +152,8 @@ public:
     static constexpr const char *componentName = Name;
 
 protected:
-    std::tuple<Chunks::StandardChunkPool<Ts>...> _pools; ///< The chunk pools for each component type.
+    std::tuple<Chunks::StandardChunkPool<Ts>...>
+        _pools; ///< The chunk pools for each component type.
 
 private:
     template<std::size_t... Indices>
@@ -173,12 +180,15 @@ private:
         std::index_sequence<Indices...> /*unused*/
     )
     {
-        ((std::get<Indices>(_pools).template getValuesAtIndexes<Indices, Ts...>(indexes, components)), ...);
+        ((std::get<Indices>(_pools).template getValuesAtIndexes<Indices, Ts...>(indexes, components)
+         ),
+         ...);
     }
 
     // Helper function to retrieve component reference using index sequence
     template<std::size_t... Indices>
-    IComponentRef *getComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/)
+    IComponentRef *
+    getComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/)
     {
         return new ComponentRef<Ts...>(std::get<Indices>(_pools).getElem(cPos)...);
     }
@@ -186,7 +196,8 @@ private:
     // Helper function to retrieve dummy component reference using index sequence
     template<std::size_t... Indices>
     const IComponentRef *
-    getDummyComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/) const
+    getDummyComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/)
+        const
     {
         return new ComponentRef<Ts...>(*(std::get<Indices>(_pools).getElem(cPos))...);
     }
@@ -203,7 +214,8 @@ private:
     VTypes getRawStdVectorsImpl(size_t index, std::index_sequence<Is...> /*unused*/)
     {
         return std::tie(
-            (*static_cast<Chunks::StandardChunk<Ts> *>(std::get<Is>(_pools).getChunk(index))->getElems())...
+            (*static_cast<Chunks::StandardChunk<Ts> *>(std::get<Is>(_pools).getChunk(index))
+                  ->getElems())...
         );
     }
 

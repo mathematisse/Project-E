@@ -9,7 +9,9 @@
 
 namespace ECS {
 namespace E {
-EntityPtrRef::EntityPtrRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::EntityPoolIdRef *poolId):
+EntityPtrRef::EntityPtrRef(
+    C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::EntityPoolIdRef *poolId
+):
     AEntityRef(status, cPos),
     _poolId(poolId)
 {
