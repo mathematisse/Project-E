@@ -18,43 +18,39 @@ namespace ECS::Chunks {
  *
  * @tparam T The type of elements stored in the chunks.
  */
-template<typename T>
-class StandardChunkPool : public AChunkPool<T> {
+template<typename T> class StandardChunkPool : public AChunkPool<T>
+{
 public:
-    /**
-     * @brief Construct a new StandardChunkPool object.
-     *
-     * Initializes the base AChunkPool.
-     */
-    StandardChunkPool():
-        AChunkPool<T>()
-    {
-    }
+  /**
+   * @brief Construct a new StandardChunkPool object.
+   *
+   * Initializes the base AChunkPool.
+   */
+  StandardChunkPool() : AChunkPool<T>() {}
 
-    /**
-     * @brief Destroy the StandardChunkPool object.
-     *
-     * Default destructor.
-     */
-    ~StandardChunkPool()
-    {
-        for (auto &chunk : this->_chunks) {
-            delete chunk;
-        }
-    }
+  /**
+   * @brief Destroy the StandardChunkPool object.
+   *
+   * Default destructor.
+   */
+  ~StandardChunkPool()
+  {
+    for (auto &chunk : this->_chunks) { delete chunk; }
+  }
 
-    StandardChunkPool(const StandardChunkPool &other) = default;
-    StandardChunkPool(StandardChunkPool &&other) = default;
-    StandardChunkPool &operator=(const StandardChunkPool &other) = default;
-    StandardChunkPool &operator=(StandardChunkPool &&other) = default;
 
-    /**
-     * @brief Add a new chunk to the pool.
-     *
-     * Creates a new StandardChunk with the specified element count and adds it to the pool.
-     *
-     * @param elemCount The number of elements in the new chunk.
-     */
-    void addChunk(size_t elemCount) override { this->_chunks.push_back(new StandardChunk<T>(elemCount)); }
+  StandardChunkPool(const StandardChunkPool &other) = default;
+  StandardChunkPool(StandardChunkPool &&other) = default;
+  StandardChunkPool &operator=(const StandardChunkPool &other) = default;
+  StandardChunkPool &operator=(StandardChunkPool &&other) = default;
+
+  /**
+   * @brief Add a new chunk to the pool.
+   *
+   * Creates a new StandardChunk with the specified element count and adds it to the pool.
+   *
+   * @param elemCount The number of elements in the new chunk.
+   */
+  void addChunk(size_t elemCount) override { this->_chunks.push_back(new StandardChunk<T>(elemCount)); }
 };
-} // namespace ECS::Chunks
+}// namespace ECS::Chunks

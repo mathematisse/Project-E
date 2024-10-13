@@ -11,9 +11,10 @@
 
 namespace ECS::S {
 
-class IQuery {
+class IQuery
+{
 public:
-    virtual bool tryAddEntityPool(E::IEntityPool *entityPool) = 0;
+  virtual bool tryAddEntityPool(E::IEntityPool *entityPool) = 0;
 };
 
-} // namespace ECS::S
+}// namespace ECS::S

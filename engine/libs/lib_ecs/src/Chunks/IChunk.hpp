@@ -19,53 +19,53 @@ namespace ECS::Chunks {
  * @tparam T Type of elements stored in the chunk.
  * @tparam TContainer Type of container used to store elements.
  */
-template<typename T>
-class IChunk {
+template<typename T> class IChunk
+{
 public:
-    /**
-     * @brief Constructor.
-     */
-    IChunk() = default;
+  /**
+   * @brief Constructor.
+   */
+  IChunk() = default;
 
-    /**
-     * @brief Destructor.
-     */
-    virtual ~IChunk() = default;
+  /**
+   * @brief Destructor.
+   */
+  virtual ~IChunk() = default;
 
-    IChunk(const IChunk &other) = default;
-    IChunk(IChunk &&other) = default;
-    IChunk &operator=(const IChunk &other) = default;
-    IChunk &operator=(IChunk &&other) = default;
+  IChunk(const IChunk &other) = default;
+  IChunk(IChunk &&other) = default;
+  IChunk &operator=(const IChunk &other) = default;
+  IChunk &operator=(IChunk &&other) = default;
 
-    /**
-     * @brief Get the element at the specified index.
-     *
-     * @param idx Index of the element.
-     * @return T* Pointer to the element.
-     */
-    virtual T *getElem(size_t idx) = 0;
+  /**
+   * @brief Get the element at the specified index.
+   *
+   * @param idx Index of the element.
+   * @return T* Pointer to the element.
+   */
+  virtual T *getElem(size_t idx) = 0;
 
-    /**
-     * @brief Get the element at the specified index (const version).
-     *
-     * @param idx Index of the element.
-     * @return const T* Const pointer to the element.
-     */
-    virtual const T *getElem(size_t idx) const = 0;
+  /**
+   * @brief Get the element at the specified index (const version).
+   *
+   * @param idx Index of the element.
+   * @return const T* Const pointer to the element.
+   */
+  virtual const T *getElem(size_t idx) const = 0;
 
-    /**
-     * @brief Get the count of elements.
-     *
-     * @return size_t Number of elements.
-     */
-    [[nodiscard]] virtual size_t elemCount() const = 0;
+  /**
+   * @brief Get the count of elements.
+   *
+   * @return size_t Number of elements.
+   */
+  [[nodiscard]] virtual size_t elemCount() const = 0;
 
-    /**
-     * @brief Get the type of the chunk.
-     *
-     * @return ChunkType Type of the chunk.
-     */
-    [[nodiscard]] virtual ChunkType getType() const = 0;
+  /**
+   * @brief Get the type of the chunk.
+   *
+   * @return ChunkType Type of the chunk.
+   */
+  [[nodiscard]] virtual ChunkType getType() const = 0;
 };
 
-} // namespace ECS::Chunks
+}// namespace ECS::Chunks
