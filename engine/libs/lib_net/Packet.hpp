@@ -40,6 +40,15 @@ public:
 
     static Packet deserialize(MsgType type, const std::vector<std::uint8_t> &data);
     static std::optional<Packet> deserialize(const std::vector<std::uint8_t> &data);
+
+    template<typename T>
+    static auto deserializeStruct(const std::vector<std::uint8_t> &data) -> std::optional<T>
+    {
+        if (data.size() != sizeof(T)) {
+            return std::nullopt;
+        }
+        return *reinterpret_cast<const T *>(data.data());
+    }
 };
 
 }
