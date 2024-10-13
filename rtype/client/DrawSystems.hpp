@@ -75,4 +75,22 @@ protected:
     void _innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth) override;
 };
 
+class AnimationSystem : public S::AStatusMonoSystem<C::SpritePool, C::TimerPool> {
+public:
+    explicit AnimationSystem(AssetsLoader &assetsLoader);
+    ~AnimationSystem() override = default;
+
+    AnimationSystem(const AnimationSystem &other) = default;
+    AnimationSystem(AnimationSystem &&other) = default;
+    AnimationSystem &operator=(const AnimationSystem &other) = default;
+    AnimationSystem &operator=(AnimationSystem &&other) = default;
+
+    AssetsLoader &assetsLoader;
+    float deltaTime = 0.0f;
+
+protected:
+    void
+    _statusOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
+};
+
 } // namespace ECS::S

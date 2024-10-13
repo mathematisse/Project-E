@@ -11,7 +11,6 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
 #include <iostream>
-#include "AssetsPath.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
 #include <raylib.h>
 
@@ -37,35 +36,6 @@ void ApplyVelocitySystem::_statusOperate(C::PositionPool::Types &cposition, C::V
     y += vY * deltaTime * speed;
 }
 
-MovePlayerSystem::MovePlayerSystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
-{
-}
-
-void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
-{
-    auto [type] = ctype;
-    if (type != SquareType::PLAYER) {
-        return;
-    }
-    auto [vX, vY, _] = cvelocity;
-
-    vX = 0;
-    vY = 0;
-    if (IsKeyDown(KEY_UP)) {
-        vY -= 1;
-    }
-    if (IsKeyDown(KEY_DOWN)) {
-        vY += 1;
-    }
-    if (IsKeyDown(KEY_LEFT)) {
-        vX -= 1;
-    }
-    if (IsKeyDown(KEY_RIGHT)) {
-        vX += 1;
-    }
-}
-
 CountEnnemyAliveSystem::CountEnnemyAliveSystem(size_t &ennemyCount):
     AStatusMonoSystem(false, C::ENT_ALIVE),
     ennemyCount(ennemyCount)
@@ -81,14 +51,14 @@ void CountEnnemyAliveSystem::_statusOperate(C::TypePool::Types &ctype)
 }
 
 SpawnEnnemySystem::SpawnEnnemySystem(
-    EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader,
-    Camera2D &camera, size_t maxEnnemyCount
+    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId, Camera2D &camera,
+    size_t maxEnnemyCount
 ):
     AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
     networkManager(networkManager),
-    assetsLoader(assetsLoader),
     camera(camera),
+    _spriteId(spriteId),
     _maxEnnemyCount(maxEnnemyCount)
 {
 }
@@ -134,7 +104,7 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
         square_ennemy->getPosition()->set<1>(100 + rand() % 800);
         square_ennemy->getCanShoot()->set<0>(true);
         square_ennemy->getCanShoot()->set<1>(1.5F);
-        square_ennemy->getSprite()->set<0>(assetsLoader.get_asset(E1FC).id);
+        square_ennemy->getSprite()->set<0>(_spriteId);
         square_ennemy->getHealth()->set<0>(2);
         square_ennemy->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
@@ -151,13 +121,12 @@ void DestroyEntitiesSystem::_statusOperate(C::ChunkPosPool::Types &cchunkpos)
     entityManager.destroyEntity(cchunkpos);
 }
 
-ShootSystem::ShootSystem(
-    EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader
-):
+ShootSystem::ShootSystem(EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId = 0):
     AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
     networkManager(networkManager),
-    assetsLoader(assetsLoader)
+    playerPosition({0, 0}),
+    _spriteId(spriteId)
 {
 }
 
@@ -213,7 +182,7 @@ void ShootSystem::_statusOperate(
             square_bullet->getCanShoot()->set<0>(false);
             square_bullet->getSize()->set<0>(30);
             square_bullet->getSize()->set<1>(30);
-            square_bullet->getSprite()->set<0>(assetsLoader.get_asset(BASE_BULLET_PATH).id);
+            square_bullet->getSprite()->set<0>(_spriteId);
             square_bullet->getSprite()->set<1>(true);
             square_bullet->getSprite()->set<2>(30.0F);
             square_bullet->getSprite()->set<3>(30.0F);
@@ -362,55 +331,6 @@ void ColliderSystem::_innerOperate(
     }
     if (healthB <= 0 && typeB != SquareType::WALL) {
         statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-    }
-}
-
-ClockSystem::ClockSystem(AssetsLoader &assetsLoader):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
-    assetsLoader(assetsLoader)
-{
-}
-
-void ClockSystem::_statusOperate(C::SpritePool::Types &csprite, C::TimerPool::Types &ctimer)
-{
-    float deltaTime = GetFrameTime();
-    auto [id, animated, x, y, nbr_frame, sprite_pos, animation_time] = csprite;
-    auto [clock, end_clock] = ctimer;
-    clock += deltaTime * 100;
-    auto texture = assetsLoader.get_asset_from_id(id);
-    if (clock >= end_clock) {
-
-        clock = 0;
-        if (sprite_pos < (float) texture.width) {
-            sprite_pos += (float) (texture.width) / nbr_frame;
-        } else {
-            sprite_pos = 0;
-        }
-    }
-}
-
-UpdateEnginePosition::UpdateEnginePosition():
-    AMonoSystem(false)
-{
-}
-
-void UpdateEnginePosition::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
-)
-{
-    auto [engine_status] = cstatus;
-    auto [x, y] = cposition;
-    auto [type] = ctype;
-    if (type == SquareType::ENGINE) {
-        if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
-            return;
-        }
-        if (playerAlive == 0) {
-            engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            return;
-        }
-        x = playerPosition.x + 80;
-        y = playerPosition.y;
     }
 }
 

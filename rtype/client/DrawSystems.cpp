@@ -124,5 +124,28 @@ void ShowInfoSystem::_innerOperate(C::TypePool::Types &ctype, C::HealthPool::Typ
     }
 }
 
+AnimationSystem::AnimationSystem(AssetsLoader &assetsLoader):
+    AStatusMonoSystem(false, C::ENT_ALIVE),
+    assetsLoader(assetsLoader)
+{
+}
+
+void AnimationSystem::_statusOperate(C::SpritePool::Types &csprite, C::TimerPool::Types &ctimer)
+{
+    float deltaTime = GetFrameTime();
+    auto [id, animated, x, y, nbr_frame, sprite_pos, animation_time] = csprite;
+    auto [clock, end_clock] = ctimer;
+    clock += deltaTime * 100;
+    auto texture = assetsLoader.get_asset_from_id(id);
+    if (clock >= end_clock) {
+        clock = 0;
+        if (sprite_pos < (float) texture.width) {
+            sprite_pos += (float) (texture.width) / nbr_frame;
+        } else {
+            sprite_pos = 0;
+        }
+    }
+}
+
 } // namespace S
 } // namespace ECS

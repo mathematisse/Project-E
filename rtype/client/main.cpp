@@ -10,6 +10,7 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "Square.hpp"
 #include "Systems.hpp"
+#include "ClientSystems.hpp"
 #include "NetSystems.hpp"
 #include "DrawSystems.hpp"
 #include "lib_ecs/EntityManager.hpp"
@@ -222,19 +223,19 @@ int main()
 
     ECS::S::DrawSystem drawSystem(camera);
     ECS::S::ShowInfoSystem showInfoSystem(camera);
+    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
+    ECS::S::AnimationSystem animationSystem(assetsLoader);
+    ECS::S::UpdateEnginePosition updateEnginePosition;
 
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
-    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader, camera);
+    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader.get_asset(E1FC).id, camera);
     ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
-    ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader);
-    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
+    ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader.get_asset(BASE_BULLET_PATH).id);
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
-    ECS::S::ClockSystem clockSystem(assetsLoader);
-    ECS::S::UpdateEnginePosition updateEnginePosition;
 
     ECS::S::SendDecorStateSystem sendDecorStateSystem;
     ECS::S::SendSquareStateSystem sendSquareStateSystem;
@@ -245,11 +246,13 @@ int main()
 
     ECS::S::SystemTreeNode demoFixedNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &updateEnginePosition,
-         &shootSystem, &colliderSystem, &clockSystem, &sendDecorStateSystem, &destroyEntitiesSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &shootSystem,
+         &colliderSystem, &sendDecorStateSystem, &destroyEntitiesSystem}
     );
 
-    ECS::S::SystemTreeNode demoNode(42, {&drawSpriteSystem, &drawSystem, &showInfoSystem});
+    ECS::S::SystemTreeNode demoNode(
+        42, {&drawSpriteSystem, &drawSystem, &showInfoSystem, &animationSystem, &updateEnginePosition}
+    );
 
     _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -264,7 +267,7 @@ int main()
     Vector2 playerPosition = {0, 0};
     char playerAlive = 1;
 
-    clockSystem.deltaTime = 0.02F;
+    animationSystem.deltaTime = 0.02F;
     applyVelocitySystem.deltaTime = 0.02F;
     shootSystem.deltaTime = 0.02F;
 
