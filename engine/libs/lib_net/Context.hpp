@@ -11,7 +11,6 @@ using client_id = std::uint32_t;
 struct Context {
     fd_set readFds;
     fd_set writeFds;
-    sigset_t mask;
     ssize_t readyCount;
 
     void select(const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds);
