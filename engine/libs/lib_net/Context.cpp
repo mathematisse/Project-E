@@ -8,11 +8,15 @@ void net::Context::select(const std::vector<socket_t> &read_fds, const std::vect
 
     for (const auto fd : read_fds) {
         FD_SET(fd, &readFds);
-        maxFd = std::max(maxFd, fd);
+        if (fd > maxFd) {
+            maxFd = fd;
+        }
     }
     for (const auto fd : write_fds) {
         FD_SET(fd, &writeFds);
-        maxFd = std::max(maxFd, fd);
+        if (fd > maxFd) {
+            maxFd = fd;
+        }
     }
     readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, nullptr);
 }
