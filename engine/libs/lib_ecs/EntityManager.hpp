@@ -26,6 +26,12 @@ public:
         S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false
     );
     bool registerSystem(S::ISystem &system, int group, bool atStart = false);
+    bool
+    registerFixedSystemGroup(int targetGroup, int newGroup, bool addBefore = false, bool addInside = false);
+    bool registerFixedSystemNode(
+        S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false
+    );
+    bool registerFixedSystem(S::ISystem &system, int group, bool atStart = false);
     bool registerEntityPool(ECS::E::IEntityPool *entityPool);
     S::IQuery &initializeQuery(S::IQuery &query);
     std::unique_ptr<ECS::E::IEntityRef> getEntity(const ECS::E::EntityPtrRef &entityPtr);
@@ -38,9 +44,11 @@ public:
     void destroyEntities(const Chunks::cPosArr_t &cPosArr);
     void destroyEntities(const Chunks::cPosArr_t &cPosArr, const std::string &entityName);
 
-    void runSystems();
+    bool addTime(float time);
 
 private:
+    void _runSystems();
+    void _runFixedSystems();
     Chunks::cPosArr_t _createEntities(
         std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, size_t count, C::EntityStatusEnum status
     );
@@ -52,5 +60,9 @@ private:
     ECS::E::EntityPtrPool _entityPtrPool;
     std::vector<ECS::E::IEntityPool *> _entityPools;
     S::SystemTree _systemTree;
+    S::SystemTree _fixedSystemTree; // run on fixed update
+    float _timePassed = 0;
+    float _timeNotAdded = 0;
+    float _timeSinceLastFixedUpdate = 0;
 };
 } // namespace ECS

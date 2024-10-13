@@ -83,53 +83,8 @@ void update_player_sprite(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunk
     }
 }
 
-int main()
+void setup_decor(ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader)
 {
-    InitWindow(1920, 1080, "R-Type");
-
-    Camera2D camera = {};
-    init_camera(camera);
-
-    SetTargetFPS(60);
-    srand(time(NULL));
-
-    NetworkManager networkManager;
-
-    AssetsLoader assetsLoader;
-    assetsLoader.load_assets(paths);
-
-    ECS::EntityManager _eM;
-
-    ECS::S::DrawSystem drawSystem(camera);
-    ECS::S::MovePlayerSystem moveSystem;
-    ECS::S::ApplyVelocitySystem applyVelocitySystem;
-    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader, camera);
-    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
-    ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader);
-    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
-    ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
-    ECS::S::MoveEnnemySystem moveEnnemySystem;
-    ECS::S::ColliderSystem colliderSystem;
-    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
-    ECS::S::ShowInfoSystem showInfoSystem(camera);
-    ECS::S::ClockSystem clockSystem(assetsLoader);
-    ECS::S::UpdateEnginePosition updateEnginePosition;
-    ECS::S::SendDecorStateSystem sendDecorStateSystem;
-
-    ECS::E::SquarePool squarePool;
-    ECS::E::DecorSquarePool decorSquarePool;
-
-    ECS::S::SystemTreeNode demoNode(
-        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &updateEnginePosition,
-         &shootSystem, &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem,
-         &sendDecorStateSystem, &destroyEntitiesSystem}
-    );
-
-    _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
-
-    _eM.registerEntityPool(&decorSquarePool);
-    _eM.registerEntityPool(&squarePool);
 
     auto background = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
 
@@ -139,7 +94,7 @@ int main()
         auto square_background = dynamic_cast<ECS::E::DecorSquareRef *>(ref.get());
         if (!square_background) {
             std::cerr << "Failed to cast IEntityRef to DecorSquareRef" << std::endl;
-            return -1;
+            return;
         }
         square_background->getType()->set<0>(SquareType::BACKGROUND);
         square_background->getSize()->set<0>(3000);
@@ -157,7 +112,7 @@ int main()
         auto square_ground = dynamic_cast<ECS::E::DecorSquareRef *>(ref.get());
         if (!square_ground) {
             std::cerr << "Failed to cast IEntityRef to DecorSquareRef" << std::endl;
-            return -1;
+            return;
         }
         square_ground->getType()->set<0>(SquareType::WALL);
         square_ground->getSize()->set<0>(80);
@@ -178,7 +133,7 @@ int main()
         auto square_ceiling = dynamic_cast<ECS::E::DecorSquareRef *>(ref.get());
         if (!square_ceiling) {
             std::cerr << "Failed to cast IEntityRef to DecorSquareRef" << std::endl;
-            return -1;
+            return;
         }
         square_ceiling->getType()->set<0>(SquareType::WALL);
         square_ceiling->getSize()->set<0>(80);
@@ -188,16 +143,20 @@ int main()
         square_ceiling->getNetworkID()->set<0>(networkManager.getnewNetID());
         i++;
     }
+}
 
+ECS::Chunks::cPosArr_t
+setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader)
+{
     auto engine = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
 
     for (const auto &entity : engine) {
         auto ref = _eM.getEntity(entity);
 
-        auto square_engine = dynamic_cast<ECS::E::DecorSquareRef *>(ref.get());
-        if (!square_engine) {
+        auto *square_engine = dynamic_cast<ECS::E::DecorSquareRef *>(ref.get());
+        if (square_engine == nullptr) {
             std::cerr << "Failed to cast IEntityRef to DecorSquareRef" << std::endl;
-            return -1;
+            return {};
         }
         square_engine->getType()->set<0>(SquareType::ENGINE);
         square_engine->getSize()->set<0>(80);
@@ -221,10 +180,10 @@ int main()
     for (const auto &entity : player) {
         auto ref = _eM.getEntity(entity);
 
-        auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-        if (!square_player) {
+        auto *square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (square_player == nullptr) {
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-            return -1;
+            return {};
         }
         square_player->getPosition()->set<0>(1920 / 4);
         square_player->getPosition()->set<1>(1080 / 2);
@@ -241,34 +200,100 @@ int main()
         square_player->getHealth()->set<0>(4);
         square_player->getNetworkID()->set<0>(networkManager.getnewNetID());
     }
+    return player;
+}
 
-    Vector2 playerPosition = get_player_position(_eM, player);
-    char playerAlive = player_is_alive(_eM, player);
+int main()
+{
+    InitWindow(1920, 1080, "R-Type");
+
+    Camera2D camera = {};
+    init_camera(camera);
+
+    SetTargetFPS(60);
+    srand(time(NULL));
+
+    NetworkManager networkManager;
+
+    AssetsLoader assetsLoader;
+    assetsLoader.load_assets(paths);
+
+    ECS::EntityManager _eM;
+
+    ECS::S::DrawSystem drawSystem(camera);
+    ECS::S::ShowInfoSystem showInfoSystem(camera);
+
+    ECS::S::MovePlayerSystem moveSystem;
+    ECS::S::ApplyVelocitySystem applyVelocitySystem;
+    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader, camera);
+    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
+    ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader);
+    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
+    ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
+    ECS::S::MoveEnnemySystem moveEnnemySystem;
+    ECS::S::ColliderSystem colliderSystem;
+    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
+    ECS::S::ClockSystem clockSystem(assetsLoader);
+    ECS::S::UpdateEnginePosition updateEnginePosition;
+
+    ECS::S::SendDecorStateSystem sendDecorStateSystem;
+    ECS::S::SendSquareStateSystem sendSquareStateSystem;
+
+    // Entity pools
+    ECS::E::SquarePool squarePool;
+    ECS::E::DecorSquarePool decorSquarePool;
+
+    ECS::S::SystemTreeNode demoFixedNode(
+        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
+        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &updateEnginePosition,
+         &shootSystem, &colliderSystem, &clockSystem, &sendDecorStateSystem, &destroyEntitiesSystem}
+    );
+
+    ECS::S::SystemTreeNode demoNode(42, {&drawSpriteSystem, &drawSystem, &showInfoSystem});
+
+    _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
+    _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
+
+    _eM.registerEntityPool(&decorSquarePool);
+    _eM.registerEntityPool(&squarePool);
+
+    setup_decor(_eM, networkManager, assetsLoader);
+
+    auto player = setup_player(_eM, networkManager, assetsLoader);
+
+    Vector2 playerPosition = {0, 0};
+    char playerAlive = 1;
+
+    clockSystem.deltaTime = 0.02F;
+    applyVelocitySystem.deltaTime = 0.02F;
+    shootSystem.deltaTime = 0.02F;
 
     auto curr_time = std::chrono::steady_clock::now();
+
+    size_t frame = 0;
+
     while (!WindowShouldClose()) {
         auto new_time = std::chrono::steady_clock::now();
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
 
         update_camera(camera, dt);
+        update_player_sprite(_eM, player, assetsLoader);
+
         playerPosition = get_player_position(_eM, player);
-        playerAlive = player_is_alive(_eM, player);
         moveEnnemySystem.playerPosition = playerPosition;
         shootSystem.playerPosition = playerPosition;
-        applyVelocitySystem.deltaTime = dt;
-        shootSystem.deltaTime = dt;
-        drawSpriteSystem.deltaTime = dt;
-        countEnnemyAliveSystem.ennemyCount = 0;
-        showInfoSystem.one_time = false;
-        clockSystem.deltaTime = dt;
         updateEnginePosition.playerPosition = playerPosition;
+
+        playerAlive = player_is_alive(_eM, player);
         updateEnginePosition.playerAlive = playerAlive;
-        update_player_sprite(_eM, player, assetsLoader);
+
+        showInfoSystem.one_time = false;
+        countEnnemyAliveSystem.ennemyCount = 0;
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
-            _eM.runSystems();
+            frame += static_cast<size_t>(_eM.addTime(dt));
             EndMode2D();
         }
         EndDrawing();

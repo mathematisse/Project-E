@@ -32,13 +32,6 @@ bool EntityManager::registerSystem(S::ISystem &system, int group, bool atStart)
     return _systemTree.addSystem(&system, group, atStart);
 }
 
-bool EntityManager::registerEntityPool(E::IEntityPool *entityPool)
-{
-    _systemTree.registerEntityPool(entityPool);
-    _entityPools.push_back(entityPool);
-    return true;
-}
-
 bool EntityManager::registerSystemNode(
     S::SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside
 )
@@ -47,6 +40,37 @@ bool EntityManager::registerSystemNode(
         node.registerEntityPool(entityPool);
     }
     return _systemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
+}
+
+bool EntityManager::registerFixedSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
+{
+    return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
+}
+
+bool EntityManager::registerFixedSystem(S::ISystem &system, int group, bool atStart)
+{
+    for (auto &entityPool : _entityPools) {
+        system.tryAddEntityPool(entityPool);
+    }
+    return _systemTree.addSystem(&system, group, atStart);
+}
+
+bool EntityManager::registerFixedSystemNode(
+    S::SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside
+)
+{
+    for (auto &entityPool : _entityPools) {
+        node.registerEntityPool(entityPool);
+    }
+    return _systemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
+}
+
+bool EntityManager::registerEntityPool(E::IEntityPool *entityPool)
+{
+    _systemTree.registerEntityPool(entityPool);
+    _fixedSystemTree.registerEntityPool(entityPool);
+    _entityPools.push_back(entityPool);
+    return true;
 }
 
 S::IQuery &EntityManager::initializeQuery(S::IQuery &query)
@@ -224,7 +248,24 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr, const std:
     }
 }
 
-void EntityManager::runSystems() { _systemTree.runTree(); }
+bool EntityManager::addTime(float time)
+{
+    _timePassed += time;
+    _timeSinceLastFixedUpdate += time;
+
+    _runSystems();
+    if (_timeSinceLastFixedUpdate >= 0.02F) {
+        _runFixedSystems();
+        _timeSinceLastFixedUpdate -= 0.02F;
+        return true;
+    }
+    _timeSinceLastFixedUpdate += _timePassed;
+    return false;
+}
+
+void EntityManager::_runSystems() { _systemTree.runTree(); }
+
+void EntityManager::_runFixedSystems() { _fixedSystemTree.runTree(); }
 
 std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>
 EntityManager::_getEntityPool(const std::string &entityName)
