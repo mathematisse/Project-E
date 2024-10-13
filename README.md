@@ -9,6 +9,7 @@
     <li>
       <a href="#R-Type">R-Type</a>
     </li>
+    <li><a href="#Contributors">Contributors</a></li>
     <li><a href="#documentation">Usage</a></li>
   </ol>
 </details>
@@ -24,6 +25,15 @@ to create a game that is fun to play.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Contributors
+
+- [Léo Wehrle - Rentmeister](https://github.com/leoWherle)
+- [Théodore Magna](https://github.com/TheodoreMagna)
+- [Lucien Pineau](https://github.com/)
+- [Alexis Hachemi](https://github.com/)
+- [Ugo Blanc](https://github.com/)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Documentation
 
