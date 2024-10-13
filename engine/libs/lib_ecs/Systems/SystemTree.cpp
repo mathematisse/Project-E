@@ -129,7 +129,6 @@ void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
 
 void SystemTreeNode::runNode()
 {
-    std::cout << "\n" BLUE "[SYSTEM RUN] Running node " << _group << RESET "\n";
     for (auto &startSystem : _startSystems) {
         startSystem->run();
     }
@@ -167,11 +166,6 @@ bool SystemTree::addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool a
 
 void SystemTree::registerEntityPool(E::IEntityPool *entityPool) { _root.registerEntityPool(entityPool); }
 
-void SystemTree::runTree()
-{
-    std::cout << "\n" BLUE "----[START SYSTEM RUN]----" RESET "\n";
-    _root.runNode();
-    std::cout << "\n" BLUE "-----[END SYSTEM RUN]-----" RESET "\n";
-}
+void SystemTree::runTree() { _root.runNode(); }
 } // namespace S
 } // namespace ECS

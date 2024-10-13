@@ -25,11 +25,11 @@ namespace S {
 // SYSTEM
 
 ApplyVelocitySystem::ApplyVelocitySystem():
-    AMonoSystem(false)
+    AStatusMonoSystem(false, C::ENT_ALIVE)
 {
 }
 
-void ApplyVelocitySystem::_innerOperate(C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity)
+void ApplyVelocitySystem::_statusOperate(C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity)
 {
     auto [x, y] = cposition;
     auto [vX, vY, speed] = cvelocity;
@@ -38,17 +38,14 @@ void ApplyVelocitySystem::_innerOperate(C::PositionPool::Types &cposition, C::Ve
 }
 
 MovePlayerSystem::MovePlayerSystem():
-    AMonoSystem(false)
+    AStatusMonoSystem(false, C::ENT_ALIVE)
 {
 }
 
-void MovePlayerSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
-)
+void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
 {
-    auto [status] = cstatus;
     auto [type] = ctype;
-    if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::PLAYER) {
+    if (type != SquareType::PLAYER) {
         return;
     }
     auto [vX, vY, _] = cvelocity;
@@ -70,16 +67,15 @@ void MovePlayerSystem::_innerOperate(
 }
 
 CountEnnemyAliveSystem::CountEnnemyAliveSystem(size_t &ennemyCount):
-    AMonoSystem(false),
+    AStatusMonoSystem(false, C::ENT_ALIVE),
     ennemyCount(ennemyCount)
 {
 }
 
-void CountEnnemyAliveSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::TypePool::Types &ctype)
+void CountEnnemyAliveSystem::_statusOperate(C::TypePool::Types &ctype)
 {
-    auto [status] = cstatus;
     auto [type] = ctype;
-    if (status == C::EntityStatusEnum::ENT_ALIVE && type == SquareType::ENEMY) {
+    if (type == SquareType::ENEMY) {
         ennemyCount++;
     }
 }
@@ -88,7 +84,7 @@ SpawnEnnemySystem::SpawnEnnemySystem(
     EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader,
     Camera2D &camera, size_t maxEnnemyCount
 ):
-    AMonoSystem(false),
+    AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
     networkManager(networkManager),
     assetsLoader(assetsLoader),
@@ -97,14 +93,11 @@ SpawnEnnemySystem::SpawnEnnemySystem(
 {
 }
 
-void SpawnEnnemySystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
-)
+void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::TypePool::Types &ctype)
 {
-    auto [status] = cstatus;
     auto [type] = ctype;
 
-    if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::PLAYER) {
+    if (type != SquareType::PLAYER) {
         return;
     }
     if (ennemyCount >= _maxEnnemyCount) {
@@ -147,25 +140,34 @@ void SpawnEnnemySystem::_innerOperate(
     }
 }
 
+DestroyEntitiesSystem::DestroyEntitiesSystem(EntityManager &entityManager):
+    AStatusMonoSystem(false, C::ENT_NEEDS_DESTROY),
+    entityManager(entityManager)
+{
+}
+
+void DestroyEntitiesSystem::_statusOperate(C::ChunkPosPool::Types &cchunkpos)
+{
+    entityManager.destroyEntity(cchunkpos);
+}
+
 ShootSystem::ShootSystem(
     EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader
 ):
-    AMonoSystem(false),
+    AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
     networkManager(networkManager),
     assetsLoader(assetsLoader)
 {
 }
 
-void ShootSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype,
-    C::CanShootPool::Types &canshoot
+void ShootSystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::TypePool::Types &ctype, C::CanShootPool::Types &canshoot
 )
 {
-    auto [status] = cstatus;
     auto [type] = ctype;
     auto [canShoot, base_delay, delay] = canshoot;
-    if (status != C::EntityStatusEnum::ENT_ALIVE || (canShoot == 0)) {
+    if (canShoot == 0) {
         return;
     }
     if (delay > 0) {
@@ -259,19 +261,14 @@ void MoveBackgroundSystem::_innerOperate(
 }
 
 MoveEnnemySystem::MoveEnnemySystem():
-    AMonoSystem(false)
+    AStatusMonoSystem(false, C::ENT_ALIVE)
 {
 }
 
-void MoveEnnemySystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
-    C::TypePool::Types &ctype
+void MoveEnnemySystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
 )
 {
-    auto [status] = cStatus;
-    if (status != C::EntityStatusEnum::ENT_ALIVE) {
-        return;
-    }
     auto [type] = ctype;
 
     if (type != SquareType::ENEMY) {
@@ -381,12 +378,12 @@ void ColliderSystem::_innerOperate(
 }
 
 ClockSystem::ClockSystem(AssetsLoader &assetsLoader):
-    AMonoSystem(false),
+    AStatusMonoSystem(false, C::ENT_ALIVE),
     assetsLoader(assetsLoader)
 {
 }
 
-void ClockSystem::_innerOperate(C::SpritePool::Types &csprite, C::TimerPool::Types &ctimer)
+void ClockSystem::_statusOperate(C::SpritePool::Types &csprite, C::TimerPool::Types &ctimer)
 {
     float deltaTime = GetFrameTime();
     auto [id, animated, x, y, nbr_frame, sprite_pos, animation_time] = csprite;

@@ -91,8 +91,6 @@ protected:
         auto [status] = cStatus;
         if (status == _status) {
             _statusOperate(componentPools...);
-        } else {
-            std::cout << "Skipping operation for entity with status " << int(status) << "\n";
         }
     };
 

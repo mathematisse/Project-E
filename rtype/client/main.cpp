@@ -104,6 +104,7 @@ int main()
     ECS::S::MovePlayerSystem moveSystem;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader, camera);
+    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
     ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader);
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
     ECS::S::MoveBackgroundSystem moveBackgroundSystem(camera);
@@ -122,7 +123,7 @@ int main()
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
         {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &applyVelocitySystem, &updateEnginePosition,
          &shootSystem, &colliderSystem, &drawSpriteSystem, &drawSystem, &showInfoSystem, &clockSystem,
-         &sendDecorStateSystem}
+         &sendDecorStateSystem, &destroyEntitiesSystem}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);

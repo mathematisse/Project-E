@@ -17,7 +17,7 @@
 
 namespace ECS::S {
 
-class ApplyVelocitySystem : public S::AMonoSystem<C::PositionPool, C::VelocityPool> {
+class ApplyVelocitySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool> {
 public:
     explicit ApplyVelocitySystem();
     ~ApplyVelocitySystem() override = default;
@@ -30,11 +30,12 @@ public:
     float deltaTime = 0.0f;
 
 protected:
-    void _innerOperate(typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity)
-        override;
+    void _statusOperate(
+        typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity
+    ) override;
 };
 
-class MovePlayerSystem : public S::AMonoSystem<C::EntityStatusPool, C::VelocityPool, C::TypePool> {
+class MovePlayerSystem : public S::AStatusMonoSystem<C::VelocityPool, C::TypePool> {
 public:
     explicit MovePlayerSystem();
     ~MovePlayerSystem() override = default;
@@ -45,13 +46,11 @@ public:
     MovePlayerSystem &operator=(MovePlayerSystem &&other) = default;
 
 protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::VelocityPool::Types &cvelocity,
-        typename C::TypePool::Types &ctype
-    ) override;
+    void
+    _statusOperate(typename C::VelocityPool::Types &cvelocity, typename C::TypePool::Types &ctype) override;
 };
 
-class CountEnnemyAliveSystem : public S::AMonoSystem<C::EntityStatusPool, C::TypePool> {
+class CountEnnemyAliveSystem : public S::AStatusMonoSystem<C::TypePool> {
 public:
     explicit CountEnnemyAliveSystem(size_t &ennemyCount);
     ~CountEnnemyAliveSystem() override = default;
@@ -64,10 +63,10 @@ public:
     size_t ennemyCount = 0;
 
 protected:
-    void _innerOperate(C::EntityStatusPool::Types &cStatus, C::TypePool::Types &ctype) override;
+    void _statusOperate(C::TypePool::Types &ctype) override;
 };
 
-class SpawnEnnemySystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+class SpawnEnnemySystem : public S::AStatusMonoSystem<C::PositionPool, C::TypePool> {
 public:
     explicit SpawnEnnemySystem(
         EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader,
@@ -87,17 +86,30 @@ public:
     size_t ennemyCount = 0;
 
 protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
-        typename C::TypePool::Types &ctype
-    ) override;
+    void
+    _statusOperate(typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype) override;
 
 private:
     size_t _maxEnnemyCount = 0;
 };
 
-class ShootSystem
-    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool, C::CanShootPool> {
+class DestroyEntitiesSystem : public S::AStatusMonoSystem<C::ChunkPosPool> {
+public:
+    explicit DestroyEntitiesSystem(EntityManager &entityManager);
+    ~DestroyEntitiesSystem() override = default;
+
+    DestroyEntitiesSystem(const DestroyEntitiesSystem &other) = default;
+    DestroyEntitiesSystem(DestroyEntitiesSystem &&other) = default;
+    DestroyEntitiesSystem &operator=(const DestroyEntitiesSystem &other) = default;
+    DestroyEntitiesSystem &operator=(DestroyEntitiesSystem &&other) = default;
+
+    EntityManager &entityManager;
+
+protected:
+    void _statusOperate(typename C::ChunkPosPool::Types &cchunkpos) override;
+};
+
+class ShootSystem : public S::AStatusMonoSystem<C::PositionPool, C::TypePool, C::CanShootPool> {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, AssetsLoader &assetsLoader
@@ -116,9 +128,9 @@ public:
     Vector2 playerPosition;
 
 protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
-        typename C::TypePool::Types &ctype, typename C::CanShootPool::Types &canshoot
+    void _statusOperate(
+        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype,
+        typename C::CanShootPool::Types &canshoot
     ) override;
 };
 
@@ -141,8 +153,7 @@ protected:
     ) override;
 };
 
-class MoveEnnemySystem
-    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::TypePool> {
+class MoveEnnemySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool, C::TypePool> {
 public:
     explicit MoveEnnemySystem();
     ~MoveEnnemySystem() override = default;
@@ -155,9 +166,8 @@ public:
     Vector2 playerPosition;
 
 protected:
-    void _innerOperate(
-        C::EntityStatusPool::Types &cStatus, C::PositionPool::Types &cposition,
-        C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+    void _statusOperate(
+        C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
     ) override;
 };
 
@@ -182,7 +192,7 @@ protected:
     ) override;
 };
 
-class ClockSystem : public S::AMonoSystem<C::SpritePool, C::TimerPool> {
+class ClockSystem : public S::AStatusMonoSystem<C::SpritePool, C::TimerPool> {
 public:
     explicit ClockSystem(AssetsLoader &assetsLoader);
     ~ClockSystem() override = default;
@@ -196,7 +206,8 @@ public:
     float deltaTime = 0.0f;
 
 protected:
-    void _innerOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
+    void
+    _statusOperate(typename C::SpritePool::Types &csprite, typename C::TimerPool::Types &ctimer) override;
 };
 
 class UpdateEnginePosition : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
