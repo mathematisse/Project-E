@@ -17,48 +17,6 @@
 
 namespace ECS::S {
 
-class DrawSystem : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::ColorPool, C::SizePool> {
-public:
-    explicit DrawSystem(Camera2D &camera);
-    ~DrawSystem() override = default;
-
-    DrawSystem(const DrawSystem &other) = default;
-    DrawSystem(DrawSystem &&other) = default;
-    DrawSystem &operator=(const DrawSystem &other) = default;
-    DrawSystem &operator=(DrawSystem &&other) = default;
-
-    Camera2D &camera;
-
-protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
-        typename C::ColorPool::Types &ccolor, typename C::SizePool::Types &csize
-    ) override;
-};
-
-class DrawSpriteSystem
-    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool> {
-public:
-    explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
-    ~DrawSpriteSystem() override = default;
-
-    DrawSpriteSystem(const DrawSpriteSystem &other) = default;
-    DrawSpriteSystem(DrawSpriteSystem &&other) = default;
-    DrawSpriteSystem &operator=(const DrawSpriteSystem &other) = default;
-    DrawSpriteSystem &operator=(DrawSpriteSystem &&other) = default;
-
-    AssetsLoader &assetsLoader;
-    Camera2D &camera;
-    float deltaTime = 0.0f;
-
-protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
-        typename C::SizePool::Types &csize, typename C::TypePool::Types &ctype,
-        typename C::SpritePool::Types &csprite
-    ) override;
-};
-
 class ApplyVelocitySystem : public S::AMonoSystem<C::PositionPool, C::VelocityPool> {
 public:
     explicit ApplyVelocitySystem();
@@ -224,23 +182,6 @@ protected:
     ) override;
 };
 
-class ShowInfoSystem : public S::AMonoSystem<C::TypePool, C::HealthPool> {
-public:
-    explicit ShowInfoSystem(Camera2D &camera);
-    ~ShowInfoSystem() override = default;
-
-    ShowInfoSystem(const ShowInfoSystem &other) = default;
-    ShowInfoSystem(ShowInfoSystem &&other) = default;
-    ShowInfoSystem &operator=(const ShowInfoSystem &other) = default;
-    ShowInfoSystem &operator=(ShowInfoSystem &&other) = default;
-
-    Camera2D &camera;
-    bool one_time = false;
-
-protected:
-    void _innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth) override;
-};
-
 class ClockSystem : public S::AMonoSystem<C::SpritePool, C::TimerPool> {
 public:
     explicit ClockSystem(AssetsLoader &assetsLoader);
@@ -274,49 +215,6 @@ public:
 protected:
     void _innerOperate(
         C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
-    ) override;
-};
-class SendDecorStateSystem
-    : public S::AMonoSystem<
-          C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool, C::NetworkIDPool> {
-public:
-    explicit SendDecorStateSystem();
-    ~SendDecorStateSystem() override = default;
-
-    SendDecorStateSystem(const SendDecorStateSystem &other) = default;
-    SendDecorStateSystem(SendDecorStateSystem &&other) = default;
-    SendDecorStateSystem &operator=(const SendDecorStateSystem &other) = default;
-    SendDecorStateSystem &operator=(SendDecorStateSystem &&other) = default;
-
-protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cpos,
-        typename C::SizePool::Types &csize, typename C::TypePool::Types &ctype,
-        typename C::SpritePool::Types &csprite, typename C::NetworkIDPool::Types &cnet
-    ) override;
-};
-
-class SendSquareStateSystem
-    : public S::AMonoSystem<
-          C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::ColorPool, C::SizePool, C::TypePool,
-          C::CanShootPool, C::SpritePool, C::HealthPool, C::TimerPool, C::NetworkIDPool> {
-public:
-    explicit SendSquareStateSystem();
-    ~SendSquareStateSystem() override = default;
-
-    SendSquareStateSystem(const SendSquareStateSystem &other) = default;
-    SendSquareStateSystem(SendSquareStateSystem &&other) = default;
-    SendSquareStateSystem &operator=(const SendSquareStateSystem &other) = default;
-    SendSquareStateSystem &operator=(SendSquareStateSystem &&other) = default;
-
-protected:
-    void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cpos,
-        typename C::VelocityPool::Types &cvel, typename C::ColorPool::Types &ccol,
-        typename C::SizePool::Types &csize, typename C::TypePool::Types &ctype,
-        typename C::CanShootPool::Types &cshoot, typename C::SpritePool::Types &csprite,
-        typename C::HealthPool::Types &chealth, typename C::TimerPool::Types &ctimer,
-        typename C::NetworkIDPool::Types &cnet
     ) override;
 };
 

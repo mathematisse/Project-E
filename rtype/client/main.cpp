@@ -10,6 +10,8 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "Square.hpp"
 #include "Systems.hpp"
+#include "NetSystems.hpp"
+#include "DrawSystems.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 

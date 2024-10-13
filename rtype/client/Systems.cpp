@@ -24,87 +24,6 @@ namespace ECS {
 namespace S {
 // SYSTEM
 
-DrawSystem::DrawSystem(Camera2D &camera):
-    AMonoSystem(false),
-    camera(camera)
-{
-}
-
-void DrawSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::ColorPool::Types &ccolor,
-    C::SizePool::Types &csize
-)
-{
-    auto [status] = cstatus;
-    if (status != C::EntityStatusEnum::ENT_ALIVE || !IsKeyDown(KEY_H)) {
-        return;
-    }
-    auto [x, y] = cposition;
-    auto [r, g, b, a] = ccolor;
-    auto [sizeX, sizeY, rotation] = csize;
-    BeginMode2D(camera);
-    DrawRectangle((int) x, (int) y, sizeX, sizeY, {r, g, b, a});
-}
-
-DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
-    AMonoSystem(false),
-    assetsLoader(assetsLoader),
-    camera(camera)
-{
-}
-
-void DrawSpriteSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
-    C::TypePool::Types &ctype, C::SpritePool::Types &csprite
-)
-{
-    auto [status] = cstatus;
-    if (status != C::EntityStatusEnum::ENT_ALIVE || IsKeyDown(KEY_H)) {
-        return;
-    }
-    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
-    if (id == 0) {
-        return;
-    }
-    auto [x, y] = cposition;
-    auto [sizeX, sizeY, rotation] = csize;
-    auto [type] = ctype;
-    auto texture = assetsLoader.get_asset_from_id(id);
-    float scale = texture.width / sizeX;
-    float adjustedX = x;
-    float adjustedY = y;
-    if (flag == 0) {
-        if (rotation == 90) {
-            adjustedX += sizeX;
-        }
-        if (rotation == -90) {
-            adjustedY += sizeY;
-        }
-        if (type != SquareType::BACKGROUND &&
-            (adjustedX < camera.target.x - 1200 || adjustedX > camera.target.x + 1200)) {
-            return;
-        }
-        BeginMode2D(camera);
-        DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
-        if (type == SquareType::BACKGROUND) {
-            DrawTextureEx(texture, {adjustedX - 3000, adjustedY}, rotation, 1 / scale, WHITE);
-            DrawTextureEx(texture, {adjustedX + 3000, adjustedY}, rotation, 1 / scale, WHITE);
-        }
-    } else {
-        if (rotation == 90) {
-            DrawTexturePro(
-                texture, {start_position, 0, texture.width / nbr_frame, (float) texture.height},
-                {x, y, sprite_x, sprite_y}, Vector2 {0, 0}, rotation, WHITE
-            );
-        } else if (rotation == -90 || rotation == 270) {
-            DrawTexturePro(
-                texture, {start_position, 0, texture.width / nbr_frame, (float) texture.height},
-                {x, y + sprite_y, sprite_x, sprite_y}, Vector2 {0, 0}, rotation, WHITE
-            );
-        }
-    }
-}
-
 ApplyVelocitySystem::ApplyVelocitySystem():
     AMonoSystem(false)
 {
@@ -201,8 +120,8 @@ void SpawnEnnemySystem::_innerOperate(
     for (const auto &entity : ennemies) {
         auto ref = entityManager.getEntity(entity);
 
-        auto square_ennemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-        if (!square_ennemy) {
+        auto *square_ennemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (square_ennemy == nullptr) {
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
             return;
         }
@@ -246,7 +165,7 @@ void ShootSystem::_innerOperate(
     auto [status] = cstatus;
     auto [type] = ctype;
     auto [canShoot, base_delay, delay] = canshoot;
-    if (status != C::EntityStatusEnum::ENT_ALIVE || !canShoot) {
+    if (status != C::EntityStatusEnum::ENT_ALIVE || (canShoot == 0)) {
         return;
     }
     if (delay > 0) {
@@ -266,8 +185,8 @@ void ShootSystem::_innerOperate(
         for (const auto &entity : bullets) {
             auto ref = entityManager.getEntity(entity);
 
-            auto square_bullet = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-            if (!square_bullet) {
+            auto *square_bullet = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+            if (square_bullet == nullptr) {
                 std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
                 return;
             }
@@ -365,8 +284,9 @@ void MoveEnnemySystem::_innerOperate(
     vX = 0;
     vY = 0;
 
-    if ((ennemyX - playerX) > 1000)
+    if ((ennemyX - playerX) > 1000) {
         return;
+    }
     if (playerY < ennemyY) {
         vY = -1;
     }
@@ -460,25 +380,6 @@ void ColliderSystem::_innerOperate(
     }
 }
 
-ShowInfoSystem::ShowInfoSystem(Camera2D &camera):
-    AMonoSystem(false),
-    camera(camera)
-{
-}
-
-void ShowInfoSystem::_innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth)
-{
-    auto [type] = ctype;
-
-    if (type == SquareType::PLAYER && !one_time) {
-        one_time = true;
-        auto [health] = chealth;
-        Vector2 top_left = {camera.target.x - 1920 / 2, camera.target.y - 1080 / 2};
-        DrawText("Player health: ", top_left.x + 10, top_left.y + 10, 20, RED);
-        DrawText(std::to_string(health).c_str(), top_left.x + 200, top_left.y + 10, 20, RED);
-    }
-}
-
 ClockSystem::ClockSystem(AssetsLoader &assetsLoader):
     AMonoSystem(false),
     assetsLoader(assetsLoader)
@@ -525,57 +426,6 @@ void UpdateEnginePosition::_innerOperate(
         }
         x = playerPosition.x + 80;
         y = playerPosition.y;
-    }
-}
-
-SendDecorStateSystem::SendDecorStateSystem():
-    AMonoSystem(false)
-{
-}
-
-void SendDecorStateSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
-    C::TypePool::Types &ctype, C::SpritePool::Types &csprite, C::NetworkIDPool::Types &cnetworkID
-)
-{
-    auto [status] = cstatus;
-    auto [x, y] = cposition;
-    auto [sizeX, sizeY, _] = csize;
-    auto [type] = ctype;
-    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
-    auto [netid] = cnetworkID;
-
-    if (type != SquareType::BACKGROUND && type != SquareType::WALL) {
-        return;
-    }
-}
-
-SendSquareStateSystem::SendSquareStateSystem():
-    AMonoSystem(false)
-{
-}
-
-void SendSquareStateSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
-    C::ColorPool::Types &ccolor, C::SizePool::Types &csize, C::TypePool::Types &ctype,
-    C::CanShootPool::Types &canshoot, C::SpritePool::Types &csprite, C::HealthPool::Types &chealth,
-    C::TimerPool::Types &ctimer, C::NetworkIDPool::Types &cnetworkID
-)
-{
-    auto [status] = cstatus;
-    auto [x, y] = cposition;
-    auto [vX, vY, speed] = cvelocity;
-    auto [r, g, b, a] = ccolor;
-    auto [sizeX, sizeY, rotation] = csize;
-    auto [type] = ctype;
-    auto [canShoot, base_delay, delay] = canshoot;
-    auto [id, flag, sprite_x, sprite_y, nbr_frame, start_position, animation_time] = csprite;
-    auto [health] = chealth;
-    auto [clock, end_clock] = ctimer;
-    auto [netid] = cnetworkID;
-
-    if (type == SquareType::BACKGROUND || type == SquareType::WALL) {
-        return;
     }
 }
 
