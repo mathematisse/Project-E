@@ -172,6 +172,38 @@ For this project, we chose **mdBook**, which generates a static, interactive web
 
 By using **mdBook**, we ensure that our documentation remains dynamic, collaborative, and easy to maintain. It integrates well with our development environment and provides a modern, user-friendly experience for both developers and end-users.
 
+---
+
+## 9. **Graphics Library: Raylib**
+
+### Relevance and Justification
+Choosing the right graphics library is essential for rendering game visuals efficiently and providing an intuitive development workflow. For this project, we chose **Raylib** over alternatives like **SFML** and **SDL** due to its simplicity, flexibility, and modern approach to game development, while still providing the necessary performance for real-time applications.
+
+### Why We Chose Raylib
+
+- **Simplicity and Ease of Use**: Raylib is designed to be user-friendly and easy to learn, making it ideal for rapid prototyping and game development. Its simple API allows developers to quickly get up to speed and focus on game logic rather than struggling with the complexities of rendering pipelines.
+  
+- **Cross-Platform Support**: Raylib provides seamless cross-platform development across Windows, Linux, and macOS, which aligns perfectly with our need for portability and compatibility in the game project.
+
+- **Modern C-based Library**: Raylib is written in C, making it highly efficient and lightweight. It is also easily integrable with our C++ ECS architecture. While Raylib is minimalistic, it provides powerful enough abstractions to handle essential game development tasks like rendering, input handling, and audio, without the bloat of more complex engines.
+
+- **Support for 2D and 3D**: While our game primarily uses 2D rendering, Raylib also offers strong support for 3D rendering, giving us flexibility to expand the game in the future. This versatility allows Raylib to scale with our project's needs.
+
+- **Active Development and Community**: Raylib benefits from an active community and continuous updates. Its growing popularity ensures a reliable support system and rich documentation, further easing the development process.
+
+### Comparative Study
+
+- **SFML** (Simple and Fast Multimedia Library):
+  - **Pros**: SFML is a mature library that is also known for its simplicity and ease of use, especially in 2D game development. It offers good multimedia support (audio, networking, etc.).
+  - **Cons**: While SFML is great for 2D, it lacks built-in support for 3D, making it less flexible for future scalability. Its C++-based API is more verbose compared to Raylib, which could slow down rapid prototyping.
+
+- **SDL** (Simple DirectMedia Layer):
+  - **Pros**: SDL is highly portable and extremely low-level, making it suitable for both 2D and 3D applications. It also has a large community and extensive documentation.
+  - **Cons**: SDL's API can be more cumbersome to use compared to Raylib's straightforward interface. Additionally, SDL is better suited for developers who want more control over low-level rendering, whereas Raylib provides simpler, higher-level abstractions that allow us to focus more on game logic and design.
+
+### Conclusion
+
+We chose **Raylib** because it strikes the perfect balance between simplicity, performance, and flexibility. Its user-friendly API, combined with strong cross-platform support and the ability to handle both 2D and 3D graphics, makes it the best choice for our project, especially when compared to the more complex and lower-level alternatives like **SDL** or the less flexible **SFML**.
 
 ---
 
