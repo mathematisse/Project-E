@@ -30,27 +30,19 @@ template<typename... Ts>
 struct all_derived_from_base;
 
 template<typename T>
-<<<<<<< HEAD
-struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> {
-};
-
-template<typename T, typename... Ts>
-struct all_derived_from_base<T, Ts...>
-    : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> {
-};
-=======
 struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> { };
 
 template<typename T, typename... Ts>
 struct all_derived_from_base<T, Ts...>
     : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> { };
->>>>>>> main
 
 template<typename... Ts>
 class Query : public IQuery {
 
     // Enable this class only if all types in Ts are derived from Base
-    static_assert(all_derived_from_base<Ts...>::value, "All types must be derived from IComponentPool");
+    static_assert(
+        all_derived_from_base<Ts...>::value, "All types must be derived from IComponentPool"
+    );
 
 public:
     bool tryAddEntityPool(E::IEntityPool *entityPool) override
@@ -131,8 +123,9 @@ public:
     }
 
     void
-    map(TMapLambda f, bool isParallel = false, TCMapLambda startCB = nullptr, TCMapLambda endCB = nullptr,
-        TPMapLambda pMapStartCB = nullptr, TPMapLambda pMapEndCB = nullptr)
+    map(TMapLambda f, bool isParallel = false, TCMapLambda startCB = nullptr,
+        TCMapLambda endCB = nullptr, TPMapLambda pMapStartCB = nullptr,
+        TPMapLambda pMapEndCB = nullptr)
     {
         cMap(
             [f, startCB, endCB](typename Ts::VTypes &...componentVectors) {
@@ -142,11 +135,13 @@ public:
 
                 size_t vectorSize = std::get<0>(std::get<0>(std::tie(componentVectors...))).size();
                 auto vectorTuple = std::tie(componentVectors...);
-                using OuterIndices = std::make_index_sequence<std::tuple_size<decltype(vectorTuple)>::value>;
+                using OuterIndices =
+                    std::make_index_sequence<std::tuple_size<decltype(vectorTuple)>::value>;
                 for (size_t i = 0; i < vectorSize; ++i) {
                     auto refTuple = _getReferencesAtIndex(i, vectorTuple, OuterIndices {});
                     _callInnerMapOperate(
-                        f, refTuple, std::make_index_sequence<std::tuple_size<decltype(refTuple)>::value> {}
+                        f, refTuple,
+                        std::make_index_sequence<std::tuple_size<decltype(refTuple)>::value> {}
                     );
                 }
 
@@ -158,8 +153,10 @@ public:
         );
     }
 
-    void
-    cMap(TCMapLambda f, bool isParallel = false, TPMapLambda startCB = nullptr, TPMapLambda endCB = nullptr)
+    void cMap(
+        TCMapLambda f, bool isParallel = false, TPMapLambda startCB = nullptr,
+        TPMapLambda endCB = nullptr
+    )
     {
         if (isParallel) {
             // Run the pMap function in parallel using multiple threads
@@ -171,7 +168,8 @@ public:
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply(
                             [i](auto &...pools) {
-                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i)...);
+                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i
+                                )...);
                             },
                             std::tie(componentPools...)
                         );
@@ -202,7 +200,8 @@ public:
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply(
                             [i](auto &...pools) {
-                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i)...);
+                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i
+                                )...);
                             },
                             std::tie(componentPools...)
                         );
@@ -274,7 +273,9 @@ public:
                         size_t chunkCount2 = componentPools2[0]->chunkCount();
                         for (size_t k = 0; k < chunkCount1; k++) {
                             for (size_t l = 0; l < chunkCount2; l++) {
-                                _cross<TOthers...>(f, componentPools1, componentPools2, k, l, selfCross);
+                                _cross<TOthers...>(
+                                    f, componentPools1, componentPools2, k, l, selfCross
+                                );
                             }
                         }
                     }
@@ -296,7 +297,9 @@ public:
                     size_t chunkCount2 = componentPools2[0]->chunkCount();
                     for (size_t k = 0; k < chunkCount1; k++) {
                         for (size_t l = 0; l < chunkCount2; l++) {
-                            _cross<TOthers...>(f, componentPools1, componentPools2, k, l, selfCross);
+                            _cross<TOthers...>(
+                                f, componentPools1, componentPools2, k, l, selfCross
+                            );
                         }
                     }
                 }
@@ -304,14 +307,17 @@ public:
         }
     }
 
-    void selfCross(TCrossLambda<Ts...> f, bool isParallel) { cross<Ts...>(*this, f, true, isParallel); }
+    void selfCross(TCrossLambda<Ts...> f, bool isParallel)
+    {
+        cross<Ts...>(*this, f, true, isParallel);
+    }
 
 protected:
     template<typename... TOthers>
     constexpr static void _cross(
         TCrossLambda<TOthers...> f, std::array<C::IComponentPool *, sizeof...(Ts)> &componentPools1,
-        std::array<C::IComponentPool *, sizeof...(TOthers)> &componentPools2, size_t index1, size_t index2,
-        bool selfCross = false
+        std::array<C::IComponentPool *, sizeof...(TOthers)> &componentPools2, size_t index1,
+        size_t index2, bool selfCross = false
     )
     {
         auto componentPoolsTuple1 = std::apply(
@@ -332,7 +338,9 @@ protected:
                 std::apply(
                     [selfCross, f, &componentPools1...](auto &...componentPools2) {
                         if (selfCross) {
-                            _selfCrossOperate<TOthers...>(f, componentPools1..., componentPools2...);
+                            _selfCrossOperate<TOthers...>(
+                                f, componentPools1..., componentPools2...
+                            );
                         } else {
                             _crossOperate<TOthers...>(f, componentPools1..., componentPools2...);
                         }
@@ -356,8 +364,10 @@ protected:
         auto vectorTuple1 = std::tie(componentVectors1...);
         auto vectorTuple2 = std::tie(componentVectors2...);
 
-        using OuterIndices1 = std::make_index_sequence<std::tuple_size<decltype(vectorTuple1)>::value>;
-        using OuterIndices2 = std::make_index_sequence<std::tuple_size<decltype(vectorTuple2)>::value>;
+        using OuterIndices1 =
+            std::make_index_sequence<std::tuple_size<decltype(vectorTuple1)>::value>;
+        using OuterIndices2 =
+            std::make_index_sequence<std::tuple_size<decltype(vectorTuple2)>::value>;
 
         for (size_t i = 0; i < vectorSize1; ++i) {
             for (size_t j = 0; j < vectorSize2; ++j) {
@@ -387,11 +397,14 @@ protected:
         auto vectorTuple1 = std::tie(componentVectors1...);
         auto vectorTuple2 = std::tie(componentVectors2...);
 
-        using OuterIndices1 = std::make_index_sequence<std::tuple_size<decltype(vectorTuple1)>::value>;
-        using OuterIndices2 = std::make_index_sequence<std::tuple_size<decltype(vectorTuple2)>::value>;
+        using OuterIndices1 =
+            std::make_index_sequence<std::tuple_size<decltype(vectorTuple1)>::value>;
+        using OuterIndices2 =
+            std::make_index_sequence<std::tuple_size<decltype(vectorTuple2)>::value>;
 
         for (size_t i = 0; i < vectorSize1; ++i) {
-            // note the j < i, to discard checking the same pair twice, as well as entities with themselves
+            // note the j < i, to discard checking the same pair twice, as well as entities with
+            // themselves
             for (size_t j = 0; j <= i; ++j) {
                 if (sameVecs && i == j) {
                     continue;
@@ -436,7 +449,9 @@ protected:
         f(std::get<Is>(refTuple)...);
     }
 
-    template<typename... TOthers, typename Tuple1, typename Tuple2, std::size_t... I1s, std::size_t... I2s>
+    template<
+        typename... TOthers, typename Tuple1, typename Tuple2, std::size_t... I1s,
+        std::size_t... I2s>
     constexpr static inline void _callInnerCrossOperate(
         TCrossLambda<TOthers...> f, Tuple1 &refTuple1, Tuple2 &refTuple2,
         std::index_sequence<I1s...> /*unused*/, std::index_sequence<I2s...> /*unused*/

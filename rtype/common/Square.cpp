@@ -12,9 +12,10 @@ namespace ECS::E {
 
 // ENTITY REF
 SquareRef::SquareRef(
-    C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position, C::VelocityRef *Velocity,
-    C::ColorRef *Color, C::SizeRef *Size, C::TypeRef *Type, C::CanShootRef *CanShoot, C::SpriteRef *Sprite,
-    C::HealthRef *Health, C::TimerRef *time, C::NetworkIDRef *networkID, C::IsShootingRef *isShooting
+    C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position,
+    C::VelocityRef *Velocity, C::ColorRef *Color, C::SizeRef *Size, C::TypeRef *Type,
+    C::CanShootRef *CanShoot, C::SpriteRef *Sprite, C::HealthRef *Health, C::TimerRef *time,
+    C::NetworkIDRef *networkID, C::IsShootingRef *isShooting
 ):
     AEntityRef(status, cPos),
     _position(Position),
@@ -96,7 +97,10 @@ SquarePool::SquarePool():
 {
 }
 
-std::unique_ptr<E::IEntityRef> SquarePool::getEntity(Chunks::chunkPos_t cPos) { return getRawEntity(cPos); }
+std::unique_ptr<E::IEntityRef> SquarePool::getEntity(Chunks::chunkPos_t cPos)
+{
+    return getRawEntity(cPos);
+}
 
 std::unique_ptr<E::SquareRef> SquarePool::getRawEntity(Chunks::chunkPos_t cPos)
 {

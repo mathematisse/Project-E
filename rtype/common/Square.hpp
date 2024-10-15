@@ -28,10 +28,10 @@ const size_t SquareChunkSize = 64;
 class SquareRef : public AEntityRef {
 public:
     SquareRef(
-        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity,
-        C::ColorRef *color, C::SizeRef *size, C::TypeRef *type, C::CanShootRef *canShoot,
-        C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time, C::NetworkIDRef *networkID,
-        C::IsShootingRef *isShooting
+        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position,
+        C::VelocityRef *velocity, C::ColorRef *color, C::SizeRef *size, C::TypeRef *type,
+        C::CanShootRef *canShoot, C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time,
+        C::NetworkIDRef *networkID, C::IsShootingRef *isShooting
     );
     ~SquareRef() override;
 

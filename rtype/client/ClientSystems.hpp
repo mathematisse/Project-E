@@ -33,8 +33,9 @@ public:
     size_t frame;
 
 protected:
-    void
-    _statusOperate(typename C::VelocityPool::Types &cvelocity, typename C::TypePool::Types &ctype) override;
+    void _statusOperate(
+        typename C::VelocityPool::Types &cvelocity, typename C::TypePool::Types &ctype
+    ) override;
 };
 
 class MoveOtherPlayerSystem
@@ -78,7 +79,8 @@ protected:
     ) override;
 };
 
-class UpdateEnginePosition : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+class UpdateEnginePosition
+    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
 public:
     explicit UpdateEnginePosition();
     ~UpdateEnginePosition() override = default;
@@ -93,7 +95,8 @@ public:
 
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+        C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+        C::TypePool::Types &ctype
     ) override;
 };
 

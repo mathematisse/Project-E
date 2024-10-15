@@ -52,24 +52,26 @@ public:
         );
 
         // auto duration =
-        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
-        // now); std::cout << "DualSystem " << typeid(this).name() << " took " << duration.count() << "
-        // microseconds\n";
+        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()
+        // - now); std::cout << "DualSystem " << typeid(this).name() << " took " << duration.count()
+        // << " microseconds\n";
     }
 
 protected:
     Query<T1s...> _query1;
     Query<T2s...> _query2;
 
-    virtual inline void
-    _innerOperate(typename T1s::Types &...componentPools1, typename T2s::Types &...componentPools2) = 0;
+    virtual inline void _innerOperate(
+        typename T1s::Types &...componentPools1, typename T2s::Types &...componentPools2
+    ) = 0;
 };
 
 template<typename Tuple>
 class ASelfDualSystem;
 
 template<typename... Ts>
-class ASelfDualSystem<std::tuple<Ts...>> : public ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>> {
+class ASelfDualSystem<std::tuple<Ts...>>
+    : public ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>> {
 public:
     explicit ASelfDualSystem(bool isParallel):
         ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>>(isParallel)
@@ -94,13 +96,14 @@ protected:
         );
 
         // auto duration =
-        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
-        // now); std::cout << "SelfDualSystem " << typeid(this).name() << " took " << duration.count() << "
-        // microseconds\n";
+        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()
+        // - now); std::cout << "SelfDualSystem " << typeid(this).name() << " took " <<
+        // duration.count() << " microseconds\n";
     }
 
-    virtual inline void
-    _innerOperate(typename Ts::Types &...componentPools1, typename Ts::Types &...componentPools2) = 0;
+    virtual inline void _innerOperate(
+        typename Ts::Types &...componentPools1, typename Ts::Types &...componentPools2
+    ) = 0;
 };
 
 } // namespace ECS::S

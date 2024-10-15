@@ -25,7 +25,9 @@ MoveUpSystem::MoveUpSystem():
 {
 }
 
-void MoveUpSystem::_statusOperate(C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity)
+void MoveUpSystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity
+)
 {
     auto [x, y] = cposition;
     auto [vX, vY] = cvelocity;
@@ -40,7 +42,9 @@ InitSystem::InitSystem(float velocityMin, float velocityMax):
 {
 }
 
-void InitSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity)
+void InitSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity
+)
 {
     auto [status] = cstatus;
     if (status != C::EntityStatusEnum::ENT_NEEDS_INIT) {
@@ -58,7 +62,9 @@ PrintSystem::PrintSystem():
 {
 }
 
-void PrintSystem::_innerOperate(C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition)
+void PrintSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition
+)
 {
     std::cout << RESET;
     auto [status] = cstatus;

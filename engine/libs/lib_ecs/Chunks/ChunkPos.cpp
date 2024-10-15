@@ -36,7 +36,8 @@ bool ChunkPos::operator==(const ChunkPos &rhs) const
 bool ChunkPos::operator!=(const ChunkPos &rhs) const { return !(rhs == *this); }
 bool ChunkPos::operator<(const ChunkPos &rhs) const
 {
-    return chunkIndex < rhs.chunkIndex || (chunkIndex == rhs.chunkIndex && elemIndex < rhs.elemIndex);
+    return chunkIndex < rhs.chunkIndex ||
+        (chunkIndex == rhs.chunkIndex && elemIndex < rhs.elemIndex);
 }
 bool ChunkPos::operator>(const ChunkPos &rhs) const { return rhs < *this; }
 bool ChunkPos::operator<=(const ChunkPos &rhs) const { return !(rhs < *this); }

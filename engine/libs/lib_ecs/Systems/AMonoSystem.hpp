@@ -29,15 +29,13 @@ public:
     AMonoSystem &operator=(const AMonoSystem &other) = default;
     AMonoSystem &operator=(AMonoSystem &&other) = default;
 
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override { return _query.tryAddEntityPool(entityPool); }
+    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    {
+        return _query.tryAddEntityPool(entityPool);
+    }
 
     void run() override
     {
-<<<<<<< HEAD
-        // auto now = std::chrono::high_resolution_clock::now();
-
-=======
->>>>>>> main
         _query.map(
             [this](auto &...componentPools) {
                 _innerOperate(componentPools...);
@@ -56,14 +54,6 @@ public:
                 _endCPMapCallBack(componentPools...);
             }
         );
-<<<<<<< HEAD
-
-        // auto duration =
-        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
-        // now); std::cout << "MonoSystem " << typeid(this).name() << " took " << duration.count() << "
-        // microseconds\n";
-=======
->>>>>>> main
     }
 
 protected:
@@ -93,7 +83,8 @@ public:
 
 protected:
     C::EntityStatusEnum _status;
-    void _innerOperate(C::EntityStatusPool::Types &cStatus, typename Ts::Types &...componentPools) override
+    void _innerOperate(C::EntityStatusPool::Types &cStatus, typename Ts::Types &...componentPools)
+        override
     {
         auto [status] = cStatus;
         if (status == _status) {

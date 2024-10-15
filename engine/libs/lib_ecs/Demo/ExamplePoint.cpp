@@ -13,7 +13,8 @@ namespace E {
 
 // ENTITY REF
 ExamplePointRef::ExamplePointRef(
-    C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position, C::VelocityRef *Velocity
+    C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position,
+    C::VelocityRef *Velocity
 ):
     AEntityRef(status, cPos),
     _position(Position),

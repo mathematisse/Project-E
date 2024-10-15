@@ -1,6 +1,8 @@
 #include "lib_net/Context.hpp"
 
-void net::Context::select(const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds)
+void net::Context::select(
+    const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds
+)
 {
     int maxFd = 0;
     FD_ZERO(&readFds);

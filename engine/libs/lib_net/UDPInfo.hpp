@@ -18,7 +18,8 @@ public:
 
     bool is_identic(const sockaddr_in &addr) const
     {
-        return udp_address.sin_addr.s_addr == addr.sin_addr.s_addr && udp_address.sin_port == addr.sin_port;
+        return udp_address.sin_addr.s_addr == addr.sin_addr.s_addr &&
+            udp_address.sin_port == addr.sin_port;
     }
 
     std::optional<Packet> readPacket() { return buf_reader.readPacket(); }

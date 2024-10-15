@@ -19,7 +19,9 @@
 
 namespace ECS {
 
-bool EntityManager::registerSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
+bool EntityManager::registerSystemGroup(
+    int targetGroup, int newGroup, bool addBefore, bool addInside
+)
 {
     return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
@@ -42,7 +44,9 @@ bool EntityManager::registerSystemNode(
     return _systemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }
 
-bool EntityManager::registerFixedSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
+bool EntityManager::registerFixedSystemGroup(
+    int targetGroup, int newGroup, bool addBefore, bool addInside
+)
 {
     return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
@@ -94,7 +98,8 @@ std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const Chunks::chunkPos_t
 }
 
 Chunks::cPosArr_t EntityManager::_createEntities(
-    std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> ePool, size_t count, C::EntityStatusEnum status
+    std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t> ePool, size_t count,
+    C::EntityStatusEnum status
 )
 {
     auto [entityPool, poolId] = ePool;
@@ -112,7 +117,8 @@ Chunks::cPosArr_t EntityManager::_createEntities(
     }
 
     auto nextFreePosArr = std::vector(freePos.begin(), freePos.begin() + static_cast<long>(count));
-    auto nextFreePtrPosArr = std::vector(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
+    auto nextFreePtrPosArr =
+        std::vector(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
 
     entityPool->getEntityStatusPool().setComponentAtIndexes(nextFreePosArr, status);
     entityPool->getChunkPosPool().setComponentsAtIndexes(nextFreePosArr, nextFreePtrPosArr);
@@ -127,12 +133,10 @@ Chunks::cPosArr_t EntityManager::_createEntities(
     return nextFreePtrPosArr;
 }
 
-Chunks::chunkPos_t EntityManager::createEntity(const std::string &entityName, C::EntityStatusEnum status)
+Chunks::chunkPos_t
+EntityManager::createEntity(const std::string &entityName, C::EntityStatusEnum status)
 {
-<<<<<<< HEAD
-=======
     std::cout << BLUE "Creating entity of type " RESET << entityName << "\n";
->>>>>>> main
     auto ePool = _getEntityPool(entityName);
     if (std::get<0>(ePool) == nullptr) {
         return {0, 0};
@@ -172,14 +176,16 @@ Chunks::chunkPos_t EntityManager::_createEntity(
     return {nextFreePtrPos};
 }
 
-Chunks::cPosArr_t
-EntityManager::createEntities(const std::string &entityName, size_t count, C::EntityStatusEnum status)
+Chunks::cPosArr_t EntityManager::createEntities(
+    const std::string &entityName, size_t count, C::EntityStatusEnum status
+)
 {
     size_t idx = 0;
 
     for (auto &entityPool : _entityPools) {
         if (entityPool->getEntityName() == entityName) {
-            std::cout << BLUE "Creating " << count << " entities of type " RESET << entityName << "\n";
+            std::cout << BLUE "Creating " << count << " entities of type " RESET << entityName
+                      << "\n";
             return _createEntities(std::make_tuple(entityPool, idx), count, status);
         }
         idx++;
@@ -208,7 +214,9 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
     std::cout << RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
 
     _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosArr, C::ENT_NONE);
-    _entityPtrPool.getFreePos().insert(_entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end());
+    _entityPtrPool.getFreePos().insert(
+        _entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end()
+    );
 
     Chunks::cPosArr_t deletedcPos;
     deletedcPos.resize(cPosArr.size());
@@ -227,19 +235,25 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
     }
 }
 
-void EntityManager::_destroyEntities(const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool)
+void EntityManager::_destroyEntities(
+    const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool
+)
 {
     std::cout << RED "Destroying " << cPosArr.size() << " entities" RESET "\n";
 
     _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosArr, C::ENT_NONE);
-    _entityPtrPool.getFreePos().insert(_entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end());
+    _entityPtrPool.getFreePos().insert(
+        _entityPtrPool.getFreePos().end(), cPosArr.begin(), cPosArr.end()
+    );
 
     Chunks::cPosArr_t deletedcPos;
     deletedcPos.resize(cPosArr.size());
     _entityPtrPool.getChunkPosPool().getComponentsAtIndexes(cPosArr, deletedcPos);
 
     entityPool->getEntityStatusPool().setComponentAtIndexes(deletedcPos, C::ENT_NONE);
-    entityPool->getFreePos().insert(entityPool->getFreePos().end(), deletedcPos.begin(), deletedcPos.end());
+    entityPool->getFreePos().insert(
+        entityPool->getFreePos().end(), deletedcPos.begin(), deletedcPos.end()
+    );
 }
 
 void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr, const std::string &entityName)
@@ -254,18 +268,6 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr, const std:
 
 bool EntityManager::addTime(float time)
 {
-<<<<<<< HEAD
-    _timePassed += time;
-    _timeSinceLastFixedUpdate += time;
-
-    _runSystems();
-    if (_timeSinceLastFixedUpdate >= 0.02F) {
-        _runFixedSystems();
-        _timeSinceLastFixedUpdate -= 0.02F;
-        return true;
-    }
-    _timeSinceLastFixedUpdate += _timePassed;
-=======
     // std::cout << "Adding time: " << time << "\n";
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
@@ -280,7 +282,6 @@ bool EntityManager::addTime(float time)
         // std::cout << "Time since last fixed update: " << _timeSinceLastFixedUpdate << "\n";
         return true;
     }
->>>>>>> main
     return false;
 }
 

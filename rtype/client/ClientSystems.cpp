@@ -118,7 +118,8 @@ UpdateEnginePosition::UpdateEnginePosition():
 }
 
 void UpdateEnginePosition::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::TypePool::Types &ctype
 )
 {
     auto [engine_status] = cstatus;

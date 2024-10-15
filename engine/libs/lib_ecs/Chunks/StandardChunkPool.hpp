@@ -55,6 +55,9 @@ public:
      *
      * @param elemCount The number of elements in the new chunk.
      */
-    void addChunk(size_t elemCount) override { this->_chunks.push_back(new StandardChunk<T>(elemCount)); }
+    void addChunk(size_t elemCount) override
+    {
+        this->_chunks.push_back(new StandardChunk<T>(elemCount));
+    }
 };
 } // namespace ECS::Chunks

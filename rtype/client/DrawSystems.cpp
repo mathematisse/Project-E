@@ -31,8 +31,8 @@ DrawSystem::DrawSystem(Camera2D &camera):
 }
 
 void DrawSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::ColorPool::Types &ccolor,
-    C::SizePool::Types &csize
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::ColorPool::Types &ccolor, C::SizePool::Types &csize
 )
 {
     auto [status] = cstatus;
@@ -54,8 +54,8 @@ DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera)
 }
 
 void DrawSpriteSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
-    C::TypePool::Types &ctype, C::SpritePool::Types &csprite
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::SizePool::Types &csize, C::TypePool::Types &ctype, C::SpritePool::Types &csprite
 )
 {
     auto [status] = cstatus;

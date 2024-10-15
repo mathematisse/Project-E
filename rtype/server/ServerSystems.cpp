@@ -25,8 +25,8 @@ namespace S {
 // SYSTEM
 
 SpawnEnnemySystem::SpawnEnnemySystem(
-    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId, net::RTypeServer &server,
-    size_t maxEnnemyCount
+    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
+    net::RTypeServer &server, size_t maxEnnemyCount
 ):
     AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
@@ -94,7 +94,9 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
     ennemyCount = 5;
 }
 
-DestroyEntitiesSystem::DestroyEntitiesSystem(EntityManager &entityManager, net::RTypeServer &server):
+DestroyEntitiesSystem::DestroyEntitiesSystem(
+    EntityManager &entityManager, net::RTypeServer &server
+):
     AStatusMonoSystem(false, C::ENT_NEEDS_DESTROY),
     entityManager(entityManager),
     server(server)
@@ -117,7 +119,8 @@ void DestroyEntitiesSystem::_statusOperate(
 }
 
 ShootSystem::ShootSystem(
-    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId, net::RTypeServer &server
+    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
+    net::RTypeServer &server
 ):
     AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
@@ -158,7 +161,8 @@ void ShootSystem::_statusOperate(
             for (const auto &playerPos : playersPos) {
                 float playerX = playerPos.x;
                 float playerY = playerPos.y;
-                float distance = std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
+                float distance =
+                    std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
 
                 if (distance < closestDistance) {
                     closestDistance = distance;
@@ -267,7 +271,8 @@ void SendAllDataToNewClients::_statusOperate(
     // if (type == SquareType::ENEMY) {
     //     for (auto &client : newClients) {
     //         server->send_tcp(
-    //             client, RTypePacketType::NEW_ENNEMY, net::Packet::serializeStruct(NewEnnemy {x, y, netId})
+    //             client, RTypePacketType::NEW_ENNEMY, net::Packet::serializeStruct(NewEnnemy {x,
+    //             y, netId})
     //         );
     //     }
     // } else if (type == SquareType::BULLET) {

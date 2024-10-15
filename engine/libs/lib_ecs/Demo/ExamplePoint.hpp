@@ -23,7 +23,8 @@ const size_t ExamplePointChunkSize = 3;
 class ExamplePointRef : public AEntityRef {
 public:
     ExamplePointRef(
-        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity
+        C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position,
+        C::VelocityRef *velocity
     );
     ~ExamplePointRef() override;
 

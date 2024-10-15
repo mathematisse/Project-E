@@ -64,7 +64,9 @@ char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
     return *square_player->getHealth()->get<0>();
 }
 
-void update_player_sprite(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks, AssetsLoader &assetsLoader)
+void update_player_sprite(
+    ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks, AssetsLoader &assetsLoader
+)
 {
     auto player = chunks;
     if (player.empty()) {
@@ -87,7 +89,9 @@ void update_player_sprite(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunk
     }
 }
 
-void setup_decor(ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader)
+void setup_decor(
+    ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader
+)
 {
 
     auto background = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
@@ -217,7 +221,8 @@ int main(int ac, char **av)
     ECS::S::MoveOtherPlayerSystem moveOtherPlayerSystem;
     ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
     net::RTypeClient client(
-        _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed, camera.target.x
+        _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed,
+        camera.target.x
     );
     std::uint16_t port = 0;
     if (ac != 2) {
@@ -235,62 +240,6 @@ int main(int ac, char **av)
 
     InitWindow(1920, 1080, "R-Type");
     SetTargetFPS(60);
-    srand(time(NULL));
-
-    NetworkManager networkManager;
-
-    AssetsLoader assetsLoader;
-    assetsLoader.load_assets(paths);
-
-    ECS::EntityManager _eM;
-
-    ECS::S::DrawSystem drawSystem(camera);
-    ECS::S::ShowInfoSystem showInfoSystem(camera);
-    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader, camera);
-    ECS::S::AnimationSystem animationSystem(assetsLoader);
-    ECS::S::UpdateEnginePosition updateEnginePosition;
-
-    ECS::S::MovePlayerSystem moveSystem;
-    ECS::S::ApplyVelocitySystem applyVelocitySystem;
-    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, assetsLoader.get_asset(E1FC).id);
-    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
-    ECS::S::ShootSystem shootSystem(_eM, networkManager, assetsLoader.get_asset(BASE_BULLET_PATH).id);
-    ECS::S::MoveBackgroundSystem moveBackgroundSystem;
-    ECS::S::MoveEnnemySystem moveEnnemySystem;
-    ECS::S::ColliderSystem colliderSystem;
-    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
-
-    // ECS::S::SendDecorStateSystem sendDecorStateSystem;
-    // ECS::S::SendSquareStateSystem sendSquareStateSystem;
-
-    // Entity pools
-    ECS::E::SquarePool squarePool;
-    ECS::E::DecorSquarePool decorSquarePool;
-
-    ECS::S::SystemTreeNode demoFixedNode(
-        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem, &updateEnginePosition, &applyVelocitySystem,
-         &shootSystem, &colliderSystem, &destroyEntitiesSystem}
-    );
-
-    ECS::S::SystemTreeNode demoNode(42, {&drawSpriteSystem, &drawSystem, &showInfoSystem, &animationSystem});
-
-    _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
-    _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
-
-    _eM.registerEntityPool(&decorSquarePool);
-    _eM.registerEntityPool(&squarePool);
-
-    setup_decor(_eM, networkManager, assetsLoader);
-
-    auto player = setup_player(_eM, networkManager, assetsLoader);
-
-    Vector2 playerPosition = {0, 0};
-    char playerAlive = 1;
-
-    animationSystem.deltaTime = 0.02F;
-    applyVelocitySystem.deltaTime = 0.02F;
-    shootSystem.deltaTime = 0.02F;
 
     assetsLoader.load_assets(paths);
 
@@ -321,7 +270,8 @@ int main(int ac, char **av)
 
     ECS::S::SystemTreeNode demoFixedNode(
         42,
-        {&moveBackgroundSystem, &moveEnnemySystem, &updateEnginePosition, &applyVelocitySystem, &moveSystem}
+        {&moveBackgroundSystem, &moveEnnemySystem, &updateEnginePosition, &applyVelocitySystem,
+         &moveSystem}
     );
 
     ECS::S::SystemTreeNode demoNode(
@@ -579,7 +529,8 @@ int main(int ac, char **av)
 
         // create palyer for each player states left over
         for (auto &playerState : moveOtherPlayerSystem.playerStates) {
-            std::cout << "Creating player for player state and netid: " << playerState.netId << std::endl;
+            std::cout << "Creating player for player state and netid: " << playerState.netId
+                      << std::endl;
             auto engine = _eM.createEntities("DecorSquare", 1, ECS::C::ENT_ALIVE);
             for (const auto &entity : engine) {
                 auto ref = _eM.getEntity(entity);

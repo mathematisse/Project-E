@@ -17,9 +17,9 @@
 
 namespace ECS::S {
 
-class SendDecorStateSystem
-    : public S::AMonoSystem<
-          C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::SpritePool, C::NetworkIDPool> {
+class SendDecorStateSystem : public S::AMonoSystem<
+                                 C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool,
+                                 C::SpritePool, C::NetworkIDPool> {
 public:
     explicit SendDecorStateSystem();
     ~SendDecorStateSystem() override = default;
@@ -37,10 +37,10 @@ protected:
     ) override;
 };
 
-class SendSquareStateSystem
-    : public S::AMonoSystem<
-          C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::ColorPool, C::SizePool, C::TypePool,
-          C::CanShootPool, C::SpritePool, C::HealthPool, C::TimerPool, C::NetworkIDPool> {
+class SendSquareStateSystem : public S::AMonoSystem<
+                                  C::EntityStatusPool, C::PositionPool, C::VelocityPool,
+                                  C::ColorPool, C::SizePool, C::TypePool, C::CanShootPool,
+                                  C::SpritePool, C::HealthPool, C::TimerPool, C::NetworkIDPool> {
 public:
     explicit SendSquareStateSystem();
     ~SendSquareStateSystem() override = default;

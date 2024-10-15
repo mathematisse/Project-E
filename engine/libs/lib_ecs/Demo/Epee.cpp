@@ -48,7 +48,10 @@ EpeePool::EpeePool():
 {
 }
 
-std::unique_ptr<E::IEntityRef> EpeePool::getEntity(Chunks::chunkPos_t cPos) { return getRawEntity(cPos); }
+std::unique_ptr<E::IEntityRef> EpeePool::getEntity(Chunks::chunkPos_t cPos)
+{
+    return getRawEntity(cPos);
+}
 
 std::unique_ptr<E::EpeeRef> EpeePool::getRawEntity(Chunks::chunkPos_t cPos)
 {

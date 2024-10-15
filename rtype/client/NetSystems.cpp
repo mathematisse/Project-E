@@ -30,8 +30,9 @@ SendDecorStateSystem::SendDecorStateSystem():
 }
 
 void SendDecorStateSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::SizePool::Types &csize,
-    C::TypePool::Types &ctype, C::SpritePool::Types &csprite, C::NetworkIDPool::Types &cnetworkID
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::SizePool::Types &csize, C::TypePool::Types &ctype, C::SpritePool::Types &csprite,
+    C::NetworkIDPool::Types &cnetworkID
 )
 {
     auto [status] = cstatus;
@@ -52,10 +53,10 @@ SendSquareStateSystem::SendSquareStateSystem():
 }
 
 void SendSquareStateSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
-    C::ColorPool::Types &ccolor, C::SizePool::Types &csize, C::TypePool::Types &ctype,
-    C::CanShootPool::Types &canshoot, C::SpritePool::Types &csprite, C::HealthPool::Types &chealth,
-    C::TimerPool::Types &ctimer, C::NetworkIDPool::Types &cnetworkID
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::VelocityPool::Types &cvelocity, C::ColorPool::Types &ccolor, C::SizePool::Types &csize,
+    C::TypePool::Types &ctype, C::CanShootPool::Types &canshoot, C::SpritePool::Types &csprite,
+    C::HealthPool::Types &chealth, C::TimerPool::Types &ctimer, C::NetworkIDPool::Types &cnetworkID
 )
 {
     auto [status] = cstatus;

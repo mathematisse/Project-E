@@ -27,7 +27,10 @@ Chunks::cPosArr_t &AEntityPool::getFreePos() { return _freePos; }
 
 Chunks::chunk_idx_t AEntityPool::getTotalSize() { return _entityStatusPool.elemCount(); }
 
-Chunks::chunk_idx_t AEntityPool::getUsedSize() { return _entityStatusPool.elemCount() - _freePos.size(); }
+Chunks::chunk_idx_t AEntityPool::getUsedSize()
+{
+    return _entityStatusPool.elemCount() - _freePos.size();
+}
 
 Chunks::chunk_idx_t AEntityPool::getChunkCount() const { return _entityStatusPool.chunkCount(); }
 
