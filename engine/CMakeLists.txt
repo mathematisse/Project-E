@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(Engine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 20)
 
 option(RENDER_ENABLED "Enable render module" ON)
 option(PHYSICS_ENABLED "Enable physics module" ON)
