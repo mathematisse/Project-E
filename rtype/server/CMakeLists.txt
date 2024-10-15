@@ -9,6 +9,8 @@ set(PHYSICS_ENABLED ON)
 set(ECS_ENABLED ON)
 set(NETWORK_ENABLED ON)
 
-add_executable(r-type_server main.cpp)
+file(GLOB_RECURSE SOURCES "*.cpp")
+
+add_executable(r-type_server ${SOURCES})
 
 target_link_libraries(r-type_server r-type_common lib_ecs physics network)

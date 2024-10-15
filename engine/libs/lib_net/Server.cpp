@@ -24,6 +24,23 @@ void net::Server::send_udp(client_id id, Packet::MsgType type, const std::vector
     }
 }
 
+<<<<<<< HEAD
+=======
+void net::Server::send_tcp(Packet::MsgType type, const std::vector<std::uint8_t> &data)
+{
+    for (auto &[clientId, gateway] : clients) {
+        gateway.send_tcp_queue.push_back(Packet::deserialize(type, data));
+    }
+}
+
+void net::Server::send_udp(Packet::MsgType type, const std::vector<std::uint8_t> &data)
+{
+    for (auto &[clientId, gateway] : clients) {
+        gateway.send_udp_queue.push_back(Packet::deserialize(type, data));
+    }
+}
+
+>>>>>>> main
 std::optional<std::reference_wrapper<net::Gateway>> net::Server::get_gateway(client_id id)
 {
     auto it = clients.find(id);

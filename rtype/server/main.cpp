@@ -1,30 +1,17 @@
 
-#include "network/TestServer.hpp"
+#include "RTypeServer.hpp"
 #include "DecorSquare.hpp"
 #include <cstdlib>
 #include <chrono>
+#include <vector>
 
 // ECS includes
 #include "Square.hpp"
 #include "Systems.hpp"
+#include "ServerSystems.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-
-Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
-{
-    auto player = chunks;
-    if (player.empty()) {
-        return {0, 0};
-    }
-    auto ref = _eM.getEntity(player[0]);
-    auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-    if (!square_player) {
-        std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-        return {0, 0};
-    }
-    return {*square_player->getPosition()->get<0>(), *square_player->getPosition()->get<1>()};
-}
 
 char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
 {
@@ -74,50 +61,14 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
 
 int main(int ac, char **av)
 {
-    srand(time(NULL));
-
-    float cameraX = 1920 / 2;
-
-    NetworkManager networkManager;
-
+    ECS::S::MovePlayersSystem movePlayersSystem;
     ECS::EntityManager _eM;
-
-    ECS::S::ApplyVelocitySystem applyVelocitySystem;
-    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, 0);
-    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
-    ECS::S::ShootSystem shootSystem(_eM, networkManager, 0);
-    ECS::S::MoveBackgroundSystem moveBackgroundSystem;
-    ECS::S::MoveEnnemySystem moveEnnemySystem;
-    ECS::S::ColliderSystem colliderSystem;
-    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
-
-    // Entity pools
-    ECS::E::SquarePool squarePool;
-    ECS::E::DecorSquarePool decorSquarePool;
-
-    ECS::S::SystemTreeNode demoFixedNode(
-        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &applyVelocitySystem, &shootSystem, &colliderSystem,
-         &destroyEntitiesSystem}
+    NetworkManager networkManager;
+    ECS::S::SendAllDataToNewClients sendAllDataToNewClients;
+    net::RTypeServer server(
+        _eM, networkManager, movePlayersSystem.playerStates, sendAllDataToNewClients.newClients
     );
-
-    _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
-
-    _eM.registerEntityPool(&decorSquarePool);
-    _eM.registerEntityPool(&squarePool);
-
-    auto player = setup_player(_eM, networkManager);
-
-    Vector2 playerPosition = {0, 0};
-
-    applyVelocitySystem.deltaTime = 0.02F;
-    shootSystem.deltaTime = 0.02F;
-
-    auto curr_time = std::chrono::steady_clock::now();
-
-    size_t frame = 0;
-
-    net::TestServer server;
+    sendAllDataToNewClients.server = &server;
     std::uint16_t port = 0;
 
     if (ac != 2) {
@@ -128,21 +79,375 @@ int main(int ac, char **av)
 
     server.host(port);
     std::cout << "Server started on port " << port << std::endl;
+    srand(time(NULL));
+
+    float cameraX = 1920 / 2;
+
+    ECS::S::ApplyVelocitySystem applyVelocitySystem;
+    ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, 0, server, 5);
+    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM, server);
+    ECS::S::ShootSystem shootSystem(_eM, networkManager, 0, server);
+    ECS::S::MoveBackgroundSystem moveBackgroundSystem;
+    ECS::S::MoveEnnemySystem moveEnnemySystem;
+    ECS::S::ColliderSystem colliderSystem;
+    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
+    ECS::S::GetPlayerPositionSystem getPlayerPositionSystem;
+
+    // Entity pools
+    ECS::E::SquarePool squarePool;
+    ECS::E::DecorSquarePool decorSquarePool;
+
+    ECS::S::SystemTreeNode demoFixedNode(
+        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
+        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &applyVelocitySystem, &shootSystem,
+         &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem, &sendAllDataToNewClients}
+    );
+
+    _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
+
+    _eM.registerEntityPool(&decorSquarePool);
+    _eM.registerEntityPool(&squarePool);
+
+    applyVelocitySystem.deltaTime = 0.02F;
+    shootSystem.deltaTime = 0.02F;
+
+    auto curr_time = std::chrono::steady_clock::now();
+
+    size_t frame = 0;
+    bool started = false;
+
     while (true) {
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
+        server.update();
         server.update();
         auto new_time = std::chrono::steady_clock::now();
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
 
-        cameraX += 80 * dt;
-        moveBackgroundSystem.cameraX = cameraX;
-        playerPosition = get_player_position(_eM, player);
-        moveEnnemySystem.playerPosition = playerPosition;
-        shootSystem.playerPosition = playerPosition;
+        moveEnnemySystem.playersPos = getPlayerPositionSystem.playersPos;
+        shootSystem.playersPos = getPlayerPositionSystem.playersPos;
+        getPlayerPositionSystem.playersPos.clear();
 
         countEnnemyAliveSystem.ennemyCount = 0;
-        frame += static_cast<size_t>(_eM.addTime(dt));
-        spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+        if ((server.clientCount() > 1) || started) {
+            cameraX += 80 * dt;
+            moveBackgroundSystem.cameraX = cameraX;
+            started = true;
+            if (_eM.addTime(dt)) {
+                frame++;
+                sendAllDataToNewClients.newClients.clear();
+                movePlayersSystem.playerStates.clear();
+                server.send_tcp(ECS::FRAME_ID, net::Packet::serializeStruct(ECS::FrameId {frame}));
+                spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+            }
+        }
     }
     return 0;
 }

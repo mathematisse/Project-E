@@ -30,6 +30,7 @@ template<typename... Ts>
 struct all_derived_from_base;
 
 template<typename T>
+<<<<<<< HEAD
 struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> {
 };
 
@@ -37,6 +38,13 @@ template<typename T, typename... Ts>
 struct all_derived_from_base<T, Ts...>
     : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> {
 };
+=======
+struct all_derived_from_base<T> : std::is_base_of<C::IComponentPool, T> { };
+
+template<typename T, typename... Ts>
+struct all_derived_from_base<T, Ts...>
+    : std::conjunction<std::is_base_of<C::IComponentPool, T>, all_derived_from_base<Ts...>> { };
+>>>>>>> main
 
 template<typename... Ts>
 class Query : public IQuery {

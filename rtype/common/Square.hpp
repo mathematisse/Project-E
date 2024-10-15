@@ -16,8 +16,9 @@ namespace ECS::C {
 DECLARE_COMPONENT(Velocity, float, float, float); // 3rd param is the speed
 DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned char);
 
-DECLARE_COMPONENT(CanShoot, char, float, float)
-DECLARE_COMPONENT(Health, size_t)
+DECLARE_COMPONENT(CanShoot, char, float, float);
+DECLARE_COMPONENT(Health, size_t);
+DECLARE_COMPONENT(IsShooting, char);
 }
 
 namespace ECS::E {
@@ -29,7 +30,8 @@ public:
     SquareRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position, C::VelocityRef *velocity,
         C::ColorRef *color, C::SizeRef *size, C::TypeRef *type, C::CanShootRef *canShoot,
-        C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time, C::NetworkIDRef *networkID
+        C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time, C::NetworkIDRef *networkID,
+        C::IsShootingRef *isShooting
     );
     ~SquareRef() override;
 
@@ -71,6 +73,9 @@ public:
     [[nodiscard]] C::NetworkIDRef *getNetworkID() const;
     void setNetworkID(const C::NetworkIDRef &networkID);
 
+    [[nodiscard]] C::IsShootingRef *getIsShooting() const;
+    void setIsShooting(const C::IsShootingRef &isShooting);
+
 protected:
     C::PositionRef *_position;
     C::VelocityRef *_velocity;
@@ -82,6 +87,7 @@ protected:
     C::HealthRef *_health;
     C::TimerRef *_time;
     C::NetworkIDRef *_networkID;
+    C::IsShootingRef *_isShooting;
 };
 
 // ENTITY POOL
@@ -111,5 +117,6 @@ protected:
     C::HealthPool _healthPool;
     C::TimerPool _timerPool;
     C::NetworkIDPool _networkIDPool;
+    C::IsShootingPool _isShootingPool;
 };
 }

@@ -12,6 +12,7 @@
 #include "lib_ecs/Entities/AEntityPool.hpp"
 
 enum class SquareType {
+    LPLAYER,
     PLAYER,
     ENEMY,
     BULLET,

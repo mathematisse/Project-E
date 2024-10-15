@@ -7,6 +7,7 @@
 
 #include "ClientSystems.hpp"
 #include "DecorSquare.hpp"
+#include "RTypePackets.hpp"
 #include "Square.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
@@ -24,21 +25,21 @@ namespace ECS {
 namespace S {
 // SYSTEM
 
-MovePlayerSystem::MovePlayerSystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+MovePlayerSystem::MovePlayerSystem(net::RTypeClient &client):
+    AStatusMonoSystem(false, C::ENT_ALIVE),
+    client(client)
 {
 }
 
 void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
 {
     auto [type] = ctype;
-    if (type != SquareType::PLAYER) {
+    if (type != SquareType::LPLAYER) {
         return;
     }
-    auto [vX, vY, _] = cvelocity;
 
-    vX = 0;
-    vY = 0;
+    float vX = 0;
+    float vY = 0;
     if (IsKeyDown(KEY_UP)) {
         vY -= 1;
     }
@@ -50,6 +51,64 @@ void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::Type
     }
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
+    }
+    client.send_udp(
+        ECS::RTypePacketType::PLAYER_VELOCITY,
+        net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
+    );
+}
+
+MoveOtherPlayerSystem::MoveOtherPlayerSystem():
+    AStatusMonoSystem(false, C::ENT_ALIVE)
+{
+}
+
+void MoveOtherPlayerSystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype,
+    C::HealthPool::Types &chealth, C::NetworkIDPool::Types &cnetworkid
+)
+{
+    auto [type] = ctype;
+    if ((type != SquareType::PLAYER && type != SquareType::LPLAYER) || playerStates.empty()) {
+        return;
+    }
+    auto [x, y] = cposition;
+    auto [vX, vY, _] = cvelocity;
+    auto [health] = chealth;
+    auto [netId] = cnetworkid;
+    // print size of pstates
+    for (auto it = playerStates.begin(); it != playerStates.end();) {
+        if (it->netId == netId) {
+            x = it->x;
+            y = it->y;
+            vX = it->vx;
+            vY = it->vy;
+            health = it->health;
+            it = playerStates.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
+}
+
+DestroyEntitiesSystem::DestroyEntitiesSystem(ECS::EntityManager &entityManager):
+    AStatusMonoSystem(false, C::ENT_ALIVE),
+    entityManager(entityManager)
+{
+}
+
+void DestroyEntitiesSystem::_statusOperate(
+    C::ChunkPosPool::Types &cchunkPos, C::NetworkIDPool::Types &cnetworkid
+)
+{
+    auto [netId] = cnetworkid;
+
+    for (auto &entityDestroyed : entitiesDestroyed) {
+        if (entityDestroyed.netId == netId) {
+            std::cout << RED_CLI << "Destroying entity with netId: " << netId << RESET << std::endl;
+            entityManager.destroyEntity(cchunkPos);
+        }
     }
 }
 

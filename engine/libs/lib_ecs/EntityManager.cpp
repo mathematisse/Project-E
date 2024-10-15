@@ -129,6 +129,10 @@ Chunks::cPosArr_t EntityManager::_createEntities(
 
 Chunks::chunkPos_t EntityManager::createEntity(const std::string &entityName, C::EntityStatusEnum status)
 {
+<<<<<<< HEAD
+=======
+    std::cout << BLUE "Creating entity of type " RESET << entityName << "\n";
+>>>>>>> main
     auto ePool = _getEntityPool(entityName);
     if (std::get<0>(ePool) == nullptr) {
         return {0, 0};
@@ -250,6 +254,7 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr, const std:
 
 bool EntityManager::addTime(float time)
 {
+<<<<<<< HEAD
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
 
@@ -260,6 +265,22 @@ bool EntityManager::addTime(float time)
         return true;
     }
     _timeSinceLastFixedUpdate += _timePassed;
+=======
+    // std::cout << "Adding time: " << time << "\n";
+    _timePassed += time;
+    _timeSinceLastFixedUpdate += time;
+    // std::cout << "Time passed: " << _timePassed << "\n";
+    // std::cout << "Time since last fixed update: " << _timeSinceLastFixedUpdate << "\n";
+
+    _runSystems();
+    if (_timeSinceLastFixedUpdate >= 0.02F) {
+        // std::cout << "Running fixed systems" << "\n";
+        _runFixedSystems();
+        _timeSinceLastFixedUpdate -= 0.02F;
+        // std::cout << "Time since last fixed update: " << _timeSinceLastFixedUpdate << "\n";
+        return true;
+    }
+>>>>>>> main
     return false;
 }
 

@@ -33,8 +33,11 @@ public:
 
     void run() override
     {
+<<<<<<< HEAD
         // auto now = std::chrono::high_resolution_clock::now();
 
+=======
+>>>>>>> main
         _query.map(
             [this](auto &...componentPools) {
                 _innerOperate(componentPools...);
@@ -53,11 +56,14 @@ public:
                 _endCPMapCallBack(componentPools...);
             }
         );
+<<<<<<< HEAD
 
         // auto duration =
         // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() -
         // now); std::cout << "MonoSystem " << typeid(this).name() << " took " << duration.count() << "
         // microseconds\n";
+=======
+>>>>>>> main
     }
 
 protected:
