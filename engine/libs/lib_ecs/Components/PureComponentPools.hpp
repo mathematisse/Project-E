@@ -10,10 +10,10 @@
 #include "lib_ecs/Components/AComponentPool.hpp"
 #include <iostream>
 
-#define DECLARE_COMPONENT(name, types...)                                     \
+#define DECLARE_COMPONENT(name, ...)                                     \
     inline constexpr char name##ComponentName[] = #name;                      \
-    class name##Pool : public AComponentPool<name##ComponentName, types> { }; \
-    using name##Ref = ComponentRef<types>;
+    class name##Pool : public AComponentPool<name##ComponentName, __VA_ARGS__> { }; \
+    using name##Ref = ComponentRef<__VA_ARGS__>;
 
 namespace ECS::C {
 
