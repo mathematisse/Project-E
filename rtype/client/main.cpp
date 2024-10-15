@@ -225,18 +225,18 @@ int main(int ac, char **av)
         camera.target.x
     );
     std::uint16_t port = 0;
-    if (ac != 2) {
-        std::cerr << "Usage: ./rtype_client port" << std::endl;
+    if (ac != 3) {
+        std::cerr << "Usage: ./rtype_client ip port" << std::endl;
         return 1;
     }
-    port = std::stoi(av[1]);
+    port = std::stoi(av[2]);
 
-    std::cout << "Connecting to server on port " << port << std::endl;
-    while (!client.connect_tcp("127.0.0.1", port)) {
+    std::cout << "Connecting to server on ip " << av[1] << ":" << port << std::endl;
+    while (!client.connect_tcp(av[1], port)) {
         std::cerr << "Failed to connect to server, retrying in 1 second" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    client.connect_udp("127.0.0.1", port);
+    client.connect_udp(av[1], port);
 
     InitWindow(1920, 1080, "R-Type");
     SetTargetFPS(60);
