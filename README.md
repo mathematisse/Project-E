@@ -37,11 +37,24 @@ The goal of this project is to recreate a game similar to R-Type with multiplaye
 - Linux
 
 ### Build Instructions
+#### Linux
 1. Clone the repository:
 2. Build the project using CMake:
 ```sh
-cmake -B build -S .
-cmake --build build
+./scripts/build.sh
+```
+
+#### Windows
+1. Clone the repository:
+2. Open powershell
+3. Build the project using CMake:
+```powershell
+.\scripts\build.ps1
+```
+
+If you can't run the script because of the execution policy, you can change it with the following command:
+```powershell
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ## Usage
