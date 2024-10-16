@@ -28,7 +28,6 @@ The goal of this project is to recreate a game similar to R-Type with multiplaye
 ### Dependencies/Requirements
 - C++20
 - Raylib 5.0 # fetch automatically if not found
-- Boost 1.83 # fetched automatically if not found
 - CMake 3.10 or higher
 
 ### Supported Platforms
