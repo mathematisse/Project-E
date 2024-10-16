@@ -11,32 +11,32 @@ option(NETWORK_ENABLED "Enable network module" ON)
 
 include(FetchContent)
 
-set(BOOST_VERSION 1.86.0)
+# set(BOOST_VERSION 1.86.0)
 
 
 # remove warnings temporarily to avoid warnings from raylib & boost
 set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(CMAKE_CXX_FLAGS "")
 
-set(BOOST_ENABLE_CMAKE ON)
-find_package(Boost ${BOOST_VERSION} QUIET)
-if (NOT Boost_FOUND)
-    message(STATUS "Boost ${BOOST_VERSION} not found, fetching it")
-    FetchContent_Declare(
-        boost
-        GIT_REPOSITORY https://github.com/boostorg/boost.git
-        GIT_TAG boost-${BOOST_VERSION}
-    )
-    FetchContent_GetProperties(boost)
-    if (NOT boost_POPULATED)
-        set(FETCHCONTENT_QUIET NO) # Display more information during the fetch process
-        FetchContent_MakeAvailable(boost)
-    endif()
-    include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
-else()
-    message(STATUS "Using local Boost installation=${Boost_INCLUDE_DIRS}")
-    include_directories(${Boost_INCLUDE_DIRS})
-endif()
+# set(BOOST_ENABLE_CMAKE ON)
+# find_package(Boost ${BOOST_VERSION} QUIET)
+# if (NOT Boost_FOUND)
+#     message(STATUS "Boost ${BOOST_VERSION} not found, fetching it")
+#     FetchContent_Declare(
+#         boost
+#         GIT_REPOSITORY https://github.com/boostorg/boost.git
+#         GIT_TAG boost-${BOOST_VERSION}
+#     )
+#     FetchContent_GetProperties(boost)
+#     if (NOT boost_POPULATED)
+#         set(FETCHCONTENT_QUIET NO) # Display more information during the fetch process
+#         FetchContent_MakeAvailable(boost)
+#     endif()
+#     include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
+# else()
+#     message(STATUS "Using local Boost installation=${Boost_INCLUDE_DIRS}")
+#     include_directories(${Boost_INCLUDE_DIRS})
+# endif()
 
 # From Raylib's example CMakeLists.txt
 set(RAYLIB_VERSION 5.0)
