@@ -27,19 +27,9 @@ void net::Context::select(
             maxFd = fd;
         }
     }
-<<<<<<< HEAD
     if (timeout_ms.has_value()) {
         readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, &tv);
     } else {
         readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, nullptr);
     }
-=======
-
-    // set timeout to 0 to return make select non-blocking (not a good idea)
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-
-    readyCount = ::select(maxFd + 1, &readFds, &writeFds, nullptr, &tv);
->>>>>>> eaeff115c56901c94ba580ebe70048db6fbf31ad
 }
