@@ -39,7 +39,9 @@ void net::Server::send_tcp(client_id id, Packet::MsgType type, const std::vector
     send_queue_tcp.push({id, Packet::deserialize(type, data)});
 }
 
-void net::Server::send_udp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data)
+void net::Server::send_udp(
+    client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data
+)
 {
     // if (auto opt_gateway = get_gateway(id); opt_gateway.has_value()) {
     //     Gateway &gateway = opt_gateway.value();
@@ -49,6 +51,20 @@ void net::Server::send_udp(client_id id, Packet::MsgType type, const std::vector
     // using send_queue
     std::cout << "send_udp" << std::endl;
     send_queue_udp.push({id, Packet::deserialize(type, data)});
+}
+
+void net::Server::send_tcp(Packet::MsgType type, const std::vector<std::uint8_t> &data)
+{
+    for (auto &[clientId, gateway] : clients) {
+        gateway.send_tcp_queue.push_back(Packet::deserialize(type, data));
+    }
+}
+
+void net::Server::send_udp(Packet::MsgType type, const std::vector<std::uint8_t> &data)
+{
+    for (auto &[clientId, gateway] : clients) {
+        gateway.send_udp_queue.push_back(Packet::deserialize(type, data));
+    }
 }
 
 std::optional<std::reference_wrapper<net::Gateway>> net::Server::get_gateway(client_id id)
@@ -103,7 +119,8 @@ void net::Server::processConnections()
                 write_fds.push_back(fd);
             }
         }
-        // append the udp socket to the write_fds if there is something to send in any of the clients
+        // append the udp socket to the write_fds if there is something to send in any of the
+        // clients
         if (!gateway.send_udp_queue.empty()) {
             should_add_udp = true;
         }
@@ -148,7 +165,8 @@ void net::Server::processConnections()
             context.readyCount--;
             gateway.tcp_socket.getBufWriter().appendPackets(gateway.send_tcp_queue);
             gateway.send_tcp_queue.clear();
-            ssize_t byte_sent = gateway.tcp_socket.send(gateway.tcp_socket.getBufWriter().getBuffer());
+            ssize_t byte_sent =
+                gateway.tcp_socket.send(gateway.tcp_socket.getBufWriter().getBuffer());
             if (byte_sent < 0) {
                 gateway.tcp_socket.close();
             } else {
@@ -187,19 +205,21 @@ void net::Server::processConnections()
                 buffer.resize(bytes_received);
                 gateway.udp_info.buf_reader.append(buffer);
             } else {
-                // new udp connection, deserialize packet, check if the packet has the correct number & find
-                // the client with the same generated number
+                // new udp connection, deserialize packet, check if the packet has the correct
+                // number & find the client with the same generated number
                 if (auto packet = Packet::deserialize(buffer); packet.has_value()) {
                     if (packet->header.type == Packet::SystemTypes::ASKUDP_RESPONSE &&
                         packet->data.size() == sizeof(std::uint64_t)) {
 
                         // data section of the packet is the generated number
-                        std::uint64_t number = *reinterpret_cast<std::uint64_t *>(packet->data.data());
+                        std::uint64_t number =
+                            *reinterpret_cast<std::uint64_t *>(packet->data.data());
                         if (auto it = std::find_if(
                                 clients.begin(), clients.end(),
                                 [number, addr](const auto &client) {
-                                    return Gateway::transformNumberFunction(client.second.generated_number) ==
-                                        number &&
+                                    return Gateway::transformNumberFunction(
+                                               client.second.generated_number
+                                           ) == number &&
                                         client.second.tcp_socket.is_same_address(addr);
                                 }
                             );
@@ -226,7 +246,8 @@ void net::Server::processConnections()
             gateway.udp_info.buf_writer.appendPackets(gateway.send_udp_queue);
             gateway.send_udp_queue.clear();
             ssize_t byte_sent = sendto(
-                udpFd, reinterpret_cast<const char *>(gateway.udp_info.buf_writer.getBuffer().data()),
+                udpFd,
+                reinterpret_cast<const char *>(gateway.udp_info.buf_writer.getBuffer().data()),
                 gateway.udp_info.buf_writer.getBuffer().size(), 0,
                 reinterpret_cast<struct sockaddr *>(&gateway.udp_info.udp_address),
                 sizeof(gateway.udp_info.udp_address)

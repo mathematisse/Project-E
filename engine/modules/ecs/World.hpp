@@ -37,7 +37,8 @@ private:
 private:
     void increase_capacity(size_t new_capacity)
     {
-        std::cout << "Increasing capacity " << tables_capacity << " to " << new_capacity << std::endl;
+        std::cout << "Increasing capacity " << tables_capacity << " to " << new_capacity
+                  << std::endl;
         tables_capacity = new_capacity;
         (std::get<container_t<Components>>(tables).resize(tables_capacity), ...);
         status.resize(tables_capacity);
@@ -95,7 +96,8 @@ public:
     }
 
 private:
-    // returns the first NonExisting entity index or the tables_capacity if there are no more entities
+    // returns the first NonExisting entity index or the tables_capacity if there are no more
+    // entities
     inline auto get_next_entity_id() -> size_t
     {
         size_t i = 0;
@@ -167,7 +169,8 @@ public:
         inline auto operator++() -> iterator &
         {
             idx++;
-            while (idx < world.number_of_entities && ((!world.status[idx].template isActive<Cs>()) && ...) &&
+            while (idx < world.number_of_entities &&
+                   ((!world.status[idx].template isActive<Cs>()) && ...) &&
                    !world.status[idx].template isActive<Exist>()) {
                 idx++;
             }
@@ -197,7 +200,10 @@ public:
         return iterator<Exist>(*this, idx);
     }
 
-    inline auto end() const -> iterator<Exist> { return iterator<Exist>(*this, number_of_entities); }
+    inline auto end() const -> iterator<Exist>
+    {
+        return iterator<Exist>(*this, number_of_entities);
+    }
 
     template<typename... FilterComponents>
         requires are_types_unique_v<FilterComponents...>
@@ -233,7 +239,8 @@ public:
     // {
     //     size_t idx = 0;
     //     while (idx < number_of_entities &&
-    //            (!status[idx].template isActive<Exist>() || (!status[idx].template isActive<Cs>() && ...)))
+    //            (!status[idx].template isActive<Exist>() || (!status[idx].template isActive<Cs>()
+    //            && ...)))
     //            {
     //         idx++;
     //     }

@@ -39,21 +39,13 @@ sudo pacman -S base-devel git
 sudo pacman -S alsa-lib mesa libx11 libxrandr libxi libxcursor libxinerama
 ```
 
-
-### On Windows:
-
-- [Visual Studio](https://visualstudio.microsoft.com/)
-
-!todo...
-
-## How to build
+## How to build on Linux
 
 Clone the repository and navigate to the project directory:
 ```bash
 git clone https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.git
 cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
 ```
-
 
 ### Using CMake:
 
@@ -88,10 +80,52 @@ c++ fatal error killed signal terminated program cc1plus
 ```
 You can fix this by removing the `--parallel` flag from the build command. (you can enable it again after the first build)
 
+-----
+You can also use the provided scripts to build the project:
+```bash
+./scripts/build.sh
+```
 
-#### Using Visual Studio:
+## How to build on Windows
 
-TODO...
+Open powershell
+Clone the repository and navigate to the project directory:
+```powershell
+git clone https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.git
+cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
+```
+
+### Using CMake:
+
+#### Release build:
+
+Configure the project:
+```bash
+cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release
+```
+
+Build the project:
+```bash
+cmake --build cmake-build-release --config Release
+```
+
+#### Debug build:
+
+Configure the project:
+```bash
+cmake -B cmake-build-debug -S . -DCMAKE_BUILD_TYPE=Debug
+```
+
+Build the project:
+```bash
+cmake --build cmake-build-debug --config Debug
+```
+
+-----
+You can also use the provided scripts to build the project:
+```powershell
+.\scripts\build.ps1
+```
 
 ## How to run
 

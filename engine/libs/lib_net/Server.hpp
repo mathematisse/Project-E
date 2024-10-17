@@ -20,6 +20,8 @@ public:
     void stop();
     void send_tcp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data);
     void send_udp(client_id id, Packet::MsgType type, const std::vector<std::uint8_t> &data);
+    void send_tcp(Packet::MsgType type, const std::vector<std::uint8_t> &data);
+    void send_udp(Packet::MsgType type, const std::vector<std::uint8_t> &data);
     std::optional<std::reference_wrapper<Gateway>> get_gateway(client_id id);
     void processConnections();
     void update();

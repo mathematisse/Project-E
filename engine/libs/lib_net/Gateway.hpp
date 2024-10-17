@@ -29,7 +29,8 @@ struct Gateway {
         constexpr std::uint64_t MULTIPLIER = 8;
         constexpr std::uint64_t MASK = 0xFFFFFFFFFFFFFFFF;
 
-        result = result ^ ((MAGIC_NUMBER << SHIFT_AMOUNT) + (VERSION * MULTIPLIER)) ^ (number & MASK);
+        result =
+            result ^ ((MAGIC_NUMBER << SHIFT_AMOUNT) + (VERSION * MULTIPLIER)) ^ (number & MASK);
         return result;
     }
 };

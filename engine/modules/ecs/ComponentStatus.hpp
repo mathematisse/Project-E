@@ -6,7 +6,8 @@
 #include <type_traits> // For std::conditional, std::is_same, std::is_same_v
 
 template<typename T, typename... Types>
-constexpr bool are_types_unique_v = (!std::is_same_v<T, Types> && ...) && are_types_unique_v<Types...>;
+constexpr bool are_types_unique_v =
+    (!std::is_same_v<T, Types> && ...) && are_types_unique_v<Types...>;
 
 template<typename T>
 constexpr bool are_types_unique_v<T> = true;
@@ -115,8 +116,8 @@ class CustomSizeType {
             for (size_t i = num_of_elements - 1; i >= num_of_elements_to_shift; --i) {
                 data[i] = data[i - num_of_elements_to_shift] << bits_to_shift;
                 if (i > num_of_elements_to_shift) {
-                    data[i] |=
-                        data[i - num_of_elements_to_shift - 1] >> (sizeInBits<uint64_t> - bits_to_shift);
+                    data[i] |= data[i - num_of_elements_to_shift - 1] >>
+                        (sizeInBits<uint64_t> - bits_to_shift);
                 }
             }
             std::memset(data.data(), 0, num_of_elements_to_shift * sizeof(uint64_t));
@@ -158,7 +159,8 @@ constexpr auto select_storage_type()
         return __uint256_t {};
 #endif
     } else {
-        // static_assert(N <= sizeInBits<uint64_t>, "Number of structures exceeds the maximum storage size");
+        // static_assert(N <= sizeInBits<uint64_t>, "Number of structures exceeds the maximum
+        // storage size");
         return CustomSizeType<N> {0};
     }
 }
@@ -205,8 +207,8 @@ public:
     [[nodiscard]] inline size_t index() const
     {
         // ctz stands for count trailing zeros
-        // __builtin_ctz is undefined behavior when the input is 0 but in this case it will never be 0
-        // ctz is more appropriate for small bitfields
+        // __builtin_ctz is undefined behavior when the input is 0 but in this case it will never be
+        // 0 ctz is more appropriate for small bitfields
 
         if constexpr (sizeInBits<storage_type> <= sizeInBits<uint32_t>) {
             return __builtin_ctz(bitfield & BitPosition<T, Structures...>::value);
