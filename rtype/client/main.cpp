@@ -1,9 +1,12 @@
 #include "DecorSquare.hpp"
 #include <cstdlib>
 #include <chrono>
+#include <string>
 
 #include <iostream>
 #include <raylib.h>
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 #include <thread>
 #include "AssetsPath.hpp"
 
@@ -19,10 +22,13 @@
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "RTypeClient.hpp"
 
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
+
 void init_camera(Camera2D &camera)
 {
-    camera.target = {1920 / 2, 1080 / 2};
-    camera.offset = {1920 / 2.0f, 1080 / 2.0f};
+    camera.target = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
+    camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f};
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 }
@@ -30,7 +36,7 @@ void init_camera(Camera2D &camera)
 void update_camera(Camera2D &camera, float dt)
 {
     Vector2 old = camera.target;
-    camera.target = {old.x + 80 * dt, 1080 / 2};
+    camera.target = {old.x + 80 * dt, WINDOW_HEIGHT / 2};
 }
 
 Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
@@ -106,7 +112,7 @@ void setup_decor(
         }
         square_background->getType()->set<0>(SquareType::BACKGROUND);
         square_background->getSize()->set<0>(3000);
-        square_background->getSize()->set<1>(1080);
+        square_background->getSize()->set<1>(WINDOW_HEIGHT);
         square_background->getSprite()->set<0>(assetsLoader.get_asset(BACKGROUND_PATH).id);
         square_background->getNetworkID()->set<0>(999999);
     }
@@ -126,7 +132,7 @@ void setup_decor(
         square_ground->getSize()->set<0>(80);
         square_ground->getSize()->set<1>(100);
         square_ground->getPosition()->set<0>(i * 80);
-        square_ground->getPosition()->set<1>(1080 - 100);
+        square_ground->getPosition()->set<1>(WINDOW_HEIGHT - 100);
         square_ground->getSprite()->set<0>(assetsLoader.get_asset(FLOOR).id);
         square_ground->getNetworkID()->set<0>(999999);
         i++;
@@ -169,8 +175,8 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
         square_engine->getSize()->set<0>(80);
         square_engine->getSize()->set<1>(80);
         square_engine->getSize()->set<2>(90);
-        square_engine->getPosition()->set<0>(1920 / 4);
-        square_engine->getPosition()->set<1>(1080 / 2);
+        square_engine->getPosition()->set<0>(WINDOW_WIDTH / 4);
+        square_engine->getPosition()->set<1>(WINDOW_HEIGHT / 2);
         square_engine->getSprite()->set<0>(assetsLoader.get_asset(ENGINE_1).id);
         square_engine->getSprite()->set<1>(true);
         square_engine->getSprite()->set<2>(80.0F);
@@ -192,8 +198,8 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
             return {};
         }
-        square_player->getPosition()->set<0>(1920 / 4);
-        square_player->getPosition()->set<1>(1080 / 2);
+        square_player->getPosition()->set<0>(WINDOW_WIDTH / 4);
+        square_player->getPosition()->set<1>(WINDOW_HEIGHT / 2);
         square_player->getVelocity()->set<2>(300.0F);
         square_player->getType()->set<0>(SquareType::LPLAYER);
         square_player->getColor()->set<1>(255);
@@ -210,8 +216,120 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
     return player;
 }
 
+bool is_a_valid_port(const std::string &port)
+{
+    if (port.empty()) {
+        return false;
+    }
+    for (const auto &c : port) {
+        if (!std::isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool try_to_connect(net::RTypeClient &client, const std::string &ip, std::uint16_t port)
+{
+    if (!client.connect_tcp(ip, port))
+        return false;
+    client.connect_udp(ip, port);
+    return true;
+}
+
+bool show_info_box(bool showInfoBox, bool connected, const std::string &ip, const std::string &port)
+{
+    const std::string ip_text = "on ip " + ip + ":" + port;
+    const std::string message_success = "Connecting to server ";
+    const std::string message_error = "Failed to connect to server ";
+
+    if (showInfoBox) {
+        GuiWindowBox((Rectangle){ WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 100, 600, 250 }, "Info");
+
+        if (connected)
+            GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20 }, message_success.c_str());
+        else
+            GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20 }, message_error.c_str());
+        GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2, 350, 20 }, ip_text.c_str());
+
+        if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 50, 100, 30 }, "OK")) {
+            return false;
+        }
+    }
+    return showInfoBox;
+}
+
+void get_ip_and_port(std::string &ip, std::string &port)
+{
+    static bool IPBoxEditMode = false;
+    static bool portBoxEditMode = false;
+    static char inputIP[64] = "";
+    static char inputPort[64] = "";
+
+    DrawRectangle(150, 500, 400, 200, Fade(WHITE, 0.8f));
+    GuiLabel((Rectangle){ 200, 550, 200, 30 }, "IP:");
+    GuiLabel((Rectangle){ 200, 600, 200, 30 }, "Port:");
+    GuiTextBox((Rectangle){ 300, 550, 200, 30 }, inputIP, 64, IPBoxEditMode);
+    GuiTextBox((Rectangle){ 300, 600, 200, 30 }, inputPort, 64, portBoxEditMode);
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){ 300, 550, 200, 30 })) {
+            IPBoxEditMode = !IPBoxEditMode;
+        } else {
+            IPBoxEditMode = false;
+            if (!((std::string)inputIP).empty())
+                ip = inputIP;
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){ 300, 600, 200, 30 })) {
+            portBoxEditMode = !portBoxEditMode;
+        } else {
+            portBoxEditMode = false; 
+            if (is_a_valid_port(inputPort))
+                port = inputPort;
+        }
+    }
+}
+
+bool open_main_menu(net::RTypeClient &client, AssetsLoader &assetsLoader)
+{
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 30);
+    bool connected = false;
+    bool showInfoBox = false;
+    std::string ip = "0.0.0.0";
+    std::string port = "4242";
+    Texture2D background = assetsLoader.get_asset(MENU_BACKGROUND);
+
+    while (!WindowShouldClose() && (!connected || showInfoBox))
+    {
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawTexture(background, 0, 0, WHITE);
+            DrawText("R-Type", WINDOW_WIDTH / 2 - 160, WINDOW_HEIGHT / 2 - 300, 80, RAYWHITE);
+
+            get_ip_and_port(ip, port);
+
+            if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 200, 300, 100 }, "Start")) {
+                showInfoBox = true;
+                connected = try_to_connect(client, ip, std::stoi(port));
+            }
+            showInfoBox = show_info_box(showInfoBox, connected, ip, port);
+
+        EndDrawing();
+    }
+    if (!connected) {
+        CloseWindow();
+        return (false);
+    }
+    return (true);
+}
+
 int main(int ac, char **av)
 {
+    if (ac != 1) {
+        std::cerr << "Usage: ./rtype_client" << std::endl;
+        return 1;
+    }
+
     Camera2D camera = {};
     init_camera(camera);
 
@@ -224,27 +342,17 @@ int main(int ac, char **av)
         _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed,
         camera.target.x
     );
-    std::uint16_t port = 0;
-    if (ac != 3) {
-        std::cerr << "Usage: ./rtype_client ip port" << std::endl;
-        return 1;
-    }
-    port = std::stoi(av[2]);
 
-    std::cout << "Connecting to server on ip " << av[1] << ":" << port << std::endl;
-    while (!client.connect_tcp(av[1], port)) {
-        std::cerr << "Failed to connect to server, retrying in 1 second" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    client.connect_udp(av[1], port);
-
-    InitWindow(1920, 1080, "R-Type");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "R-Type");
     SetTargetFPS(60);
 
     assetsLoader.load_assets(paths);
 
     client.ennemySpriteId = assetsLoader.get_asset(E1FC).id;
     client.bulletSpriteId = assetsLoader.get_asset(BASE_BULLET_PATH).id;
+
+    if (!open_main_menu(client, assetsLoader))
+        return 0;
 
     NetworkManager networkManager;
 

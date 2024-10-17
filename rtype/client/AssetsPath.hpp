@@ -43,6 +43,10 @@
     {                                    \
         "assets", "Space Background.png" \
     }
+#define MENU_BACKGROUND                  \
+    {                                    \
+        "assets", "menu_background.png" \
+    }
 #define FLOOR                 \
     {                         \
         "assets", "floor.png" \
@@ -58,5 +62,5 @@
 
 const std::vector<std::vector<std::string>> paths = {
     BASE_BULLET_PATH, P1F,     P1FR, P1SD, P1D, P1VD, E1F, BACKGROUND_PATH, FLOOR, CEILING, E1FC,
-    CUT_BULLET_PATH,  ENGINE_1
+    CUT_BULLET_PATH,  ENGINE_1, MENU_BACKGROUND
 };
