@@ -353,6 +353,7 @@ int main(int ac, char **av)
 
     if (!open_main_menu(client, assetsLoader))
         return 0;
+    Texture2D loading_background = assetsLoader.get_asset(LOADING_BACKGROUND);
 
     NetworkManager networkManager;
 
@@ -630,8 +631,11 @@ int main(int ac, char **av)
                 if (_eM.addTime(dt)) {
                     frame++;
                 }
+                EndMode2D();
+            } else {
+                DrawTexture(loading_background, 0, 0, WHITE);
+                DrawText("Waiting for other players...", WINDOW_WIDTH / 2 - 500, WINDOW_HEIGHT / 2, 80, WHITE);
             }
-            EndMode2D();
         }
         EndDrawing();
 
