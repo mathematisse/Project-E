@@ -1,14 +1,15 @@
 #include "DecorSquare.hpp"
+#include "MainMenu.hpp"
 #include <cstdlib>
 #include <chrono>
 #include <string>
 
 #include <iostream>
 #include <raylib.h>
-#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include <thread>
 #include "AssetsPath.hpp"
+#include "MainMenu.hpp"
 
 // ECS includes
 #include "lib_ecs/Chunks/ChunkPos.hpp"
@@ -216,113 +217,6 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
     return player;
 }
 
-bool is_a_valid_port(const std::string &port)
-{
-    if (port.empty()) {
-        return false;
-    }
-    for (const auto &c : port) {
-        if (!std::isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool try_to_connect(net::RTypeClient &client, const std::string &ip, std::uint16_t port)
-{
-    if (!client.connect_tcp(ip, port))
-        return false;
-    client.connect_udp(ip, port);
-    return true;
-}
-
-bool show_info_box(bool showInfoBox, bool connected, const std::string &ip, const std::string &port)
-{
-    const std::string ip_text = "on ip " + ip + ":" + port;
-    const std::string message_success = "Connecting to server ";
-    const std::string message_error = "Failed to connect to server ";
-
-    if (showInfoBox) {
-        GuiWindowBox((Rectangle){ WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 100, 600, 250 }, "Info");
-
-        if (connected)
-            GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20 }, message_success.c_str());
-        else
-            GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20 }, message_error.c_str());
-        GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2, 350, 20 }, ip_text.c_str());
-
-        if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 50, 100, 30 }, "OK")) {
-            return false;
-        }
-    }
-    return showInfoBox;
-}
-
-void get_ip_and_port(std::string &ip, std::string &port)
-{
-    static bool IPBoxEditMode = false;
-    static bool portBoxEditMode = false;
-    static char inputIP[64] = "";
-    static char inputPort[64] = "";
-
-    DrawRectangle(150, 500, 400, 200, Fade(WHITE, 0.8f));
-    GuiLabel((Rectangle){ 200, 550, 200, 30 }, "IP:");
-    GuiLabel((Rectangle){ 200, 600, 200, 30 }, "Port:");
-    GuiTextBox((Rectangle){ 300, 550, 200, 30 }, inputIP, 64, IPBoxEditMode);
-    GuiTextBox((Rectangle){ 300, 600, 200, 30 }, inputPort, 64, portBoxEditMode);
-
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){ 300, 550, 200, 30 })) {
-            IPBoxEditMode = !IPBoxEditMode;
-        } else {
-            IPBoxEditMode = false;
-            if (!((std::string)inputIP).empty())
-                ip = inputIP;
-        }
-        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){ 300, 600, 200, 30 })) {
-            portBoxEditMode = !portBoxEditMode;
-        } else {
-            portBoxEditMode = false; 
-            if (is_a_valid_port(inputPort))
-                port = inputPort;
-        }
-    }
-}
-
-bool open_main_menu(net::RTypeClient &client, AssetsLoader &assetsLoader)
-{
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 30);
-    bool connected = false;
-    bool showInfoBox = false;
-    std::string ip = "0.0.0.0";
-    std::string port = "4242";
-    Texture2D background = assetsLoader.get_asset(MENU_BACKGROUND);
-
-    while (!WindowShouldClose() && (!connected || showInfoBox))
-    {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawTexture(background, 0, 0, WHITE);
-            DrawText("R-Type", WINDOW_WIDTH / 2 - 160, WINDOW_HEIGHT / 2 - 300, 80, RAYWHITE);
-
-            get_ip_and_port(ip, port);
-
-            if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 200, 300, 100 }, "Start")) {
-                showInfoBox = true;
-                connected = try_to_connect(client, ip, std::stoi(port));
-            }
-            showInfoBox = show_info_box(showInfoBox, connected, ip, port);
-
-        EndDrawing();
-    }
-    if (!connected) {
-        CloseWindow();
-        return (false);
-    }
-    return (true);
-}
-
 int main(int ac, char **av)
 {
     if (ac != 1) {
@@ -351,7 +245,9 @@ int main(int ac, char **av)
     client.ennemySpriteId = assetsLoader.get_asset(E1FC).id;
     client.bulletSpriteId = assetsLoader.get_asset(BASE_BULLET_PATH).id;
 
-    if (!open_main_menu(client, assetsLoader))
+    MainMenu mainMenu(client, assetsLoader);
+
+    if (!mainMenu.open())
         return 0;
     Texture2D loading_background = assetsLoader.get_asset(LOADING_BACKGROUND);
 
