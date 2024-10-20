@@ -75,14 +75,53 @@ public:
 
     }
 
-    [[nodiscard]] IpAddr ip() const { }
+    [[nodiscard]] IpAddr ip() const
+    {
+        if (is_ipv4()) {
+            return IpAddr(std::get<SocketAddrV4>(addr_).ip);
+        } else {
+            return IpAddr(std::get<SocketAddrV6>(addr_).ip);
+        }
+    }
 
-    void set_ip(const IpAddr &new_ip) { }
+    void set_ip(const IpAddr &new_ip)
+    {
+        if (new_ip.is_ipv4()) {
+            std::get<SocketAddrV4>(addr_).ip = new_ip.to_v4();
+        } else {
+            std::get<SocketAddrV6>(addr_).ip = new_ip.to_v6();
+        }
+    }
 
-    uint16_t port() const { }
-    void set_port(uint16_t new_port) { }
-    bool is_ipv4() const { std::holds_alternative<SocketAddrV4>(addr_); }
-    bool is_ipv6() const { std::holds_alternative<SocketAddrV6>(addr_); }
+    [[nodiscard]] uint16_t port() const
+    {
+        if (is_ipv4()) {
+            return std::get<SocketAddrV4>(addr_).port;
+        } else {
+            return std::get<SocketAddrV6>(addr_).port;
+        }
+    }
+
+    void set_port(uint16_t new_port)
+    {
+        if (is_ipv4()) {
+            std::get<SocketAddrV4>(addr_).port = new_port;
+        } else {
+            std::get<SocketAddrV6>(addr_).port = new_port;
+        }
+    }
+
+    [[nodiscard]] std::string to_string() const
+    {
+        if (is_ipv4()) {
+            return std::get<SocketAddrV4>(addr_).to_string();
+        } else {
+            return std::get<SocketAddrV6>(addr_).to_string();
+        }
+    }
+
+    bool is_ipv4() const { return std::holds_alternative<SocketAddrV4>(addr_); }
+    bool is_ipv6() const { return std::holds_alternative<SocketAddrV6>(addr_); }
 
 public:
     SocketAddr() = default;
