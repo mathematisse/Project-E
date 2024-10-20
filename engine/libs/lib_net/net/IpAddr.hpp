@@ -6,6 +6,9 @@
 #include <variant>
 #include <cstdint>
 
+#include "lib_net/result/Result.hpp"
+#include "lib_net/net/AddrParseError.hpp"
+
 namespace net::net {
 
 class Ipv4Addr {
@@ -17,14 +20,21 @@ public:
     {
     }
 
-    [[nodiscard]] std::string to_string() const
+    [[nodiscard]] inline std::string to_string() const
     {
         return std::to_string(octets[0]) + "." + std::to_string(octets[1]) + "." +
             std::to_string(octets[2]) + "." + std::to_string(octets[3]);
     }
 
-    bool is_unspecified() const { return octets == std::array<uint8_t, 4> {0, 0, 0, 0}; }
-    bool is_loopback() const { return octets[0] == 127; }
+    // only parses the address part of the string
+    [[nodiscard]] static auto parse_ascii(const std::string &str
+    ) -> result::Result<Ipv4Addr, AddrParseError>;
+
+    [[nodiscard]] inline bool is_unspecified() const
+    {
+        return octets == std::array<uint8_t, 4> {0, 0, 0, 0};
+    }
+    [[nodiscard]] inline bool is_loopback() const { return octets[0] == 127; }
 };
 
 class Ipv6Addr {
@@ -44,6 +54,10 @@ public:
         }
         return result;
     }
+
+    // only parses the address part of the string
+    [[nodiscard]] static auto parse_ascii(const std::string &str
+    ) -> result::Result<Ipv6Addr, AddrParseError>;
 
     [[nodiscard]] inline bool is_unspecified() const
     {
@@ -93,12 +107,31 @@ public:
     [[nodiscard]] inline Ipv4Addr to_v4() const { return std::get<Ipv4Addr>(addr); }
     [[nodiscard]] inline Ipv6Addr to_v6() const { return std::get<Ipv6Addr>(addr); }
 
-    [[nodiscard]] std::string to_string() const
+    [[nodiscard]] inline std::string to_string() const
     {
         if (std::holds_alternative<Ipv4Addr>(addr)) {
             return std::get<Ipv4Addr>(addr).to_string();
         } else {
             return std::get<Ipv6Addr>(addr).to_string();
+        }
+    }
+
+    // checks wich type of address is in the string and calls the appropriate parse function
+    [[nodiscard]] static auto inline parse_ascii(const std::string &str
+    ) -> result::Result<IpAddr, AddrParseError>
+    {
+        if (str.empty()) {
+            return result::Result<IpAddr, AddrParseError>::Error(AddrParseError("No address"));
+        }
+
+        if (str.find(':') != std::string::npos) {
+            return Ipv6Addr::parse_ascii(str).map([](const Ipv6Addr &addr) {
+                return IpAddr(addr);
+            });
+        } else {
+            return Ipv4Addr::parse_ascii(str).map([](const Ipv4Addr &addr) {
+                return IpAddr(addr);
+            });
         }
     }
 };

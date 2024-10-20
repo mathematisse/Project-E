@@ -96,6 +96,30 @@ public:
         return Result<T, E>(T(value));
     }
 
+    // Map function to transform the value if it is a success
+    template<typename F>
+    auto map(F &&func) const -> Result<std::invoke_result_t<F, T>, E>
+    {
+        using NewT = std::invoke_result_t<F, T>;
+        if (isValue()) {
+            return Result<NewT, E>::Success(func(std::get<T>(result)));
+        } else {
+            return Result<NewT, E>::Error(std::get<E>(result));
+        }
+    }
+
+    // Map function to transform the value if it is a failure
+    template<typename F>
+    auto map_error(F &&func) const -> Result<T, std::invoke_result_t<F, E>>
+    {
+        using NewE = std::invoke_result_t<F, E>;
+        if (isError()) {
+            return Result<T, NewE>::Error(func(std::get<E>(result)));
+        } else {
+            return Result<T, NewE>::Success(std::get<T>(result));
+        }
+    }
+
 private:
     ResultType result;
 };

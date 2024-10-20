@@ -3,6 +3,18 @@
 #include <string>
 
 class AddrParseError {
+public:
+    enum class AddrParseErrorKind {
+        EmptyString,
+        InvalidIpv4Address,
+        InvalidIpv6Address,
+        MissingPort,
+        InvalidPort,
+        InvalidIp,
+    };
+
+
+
 private:
     std::string message_;
 

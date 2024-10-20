@@ -71,8 +71,35 @@ public:
         }
     }
 
-    static auto parse_ascii(const std::string &str) -> result::Result<SocketAddr, AddrParseError> {
+    static auto parse_ascii(const std::string &str) -> result::Result<SocketAddr, AddrParseError>
+    {
+        if (str.empty()) {
+            return result::Result<SocketAddr, AddrParseError>::Error(AddrParseError("Empty string")
+            );
+        }
 
+        // get last ':' character in the string (the port separator)
+        auto colon = str.find_last_of(':');
+        if (colon == std::string::npos) {
+            return result::Result<SocketAddr, AddrParseError>::Error(AddrParseError("Missing port")
+            );
+        }
+
+        // get the first part of the string (the IP address)
+        auto ip = IpAddr::parse_ascii(str.substr(0, colon));
+        if (ip.isError()) {
+            return result::Result<SocketAddr, AddrParseError>::Error(ip.error());
+        }
+
+        // get the port number
+        auto port = std::stoi(str.substr(colon + 1));
+        if (port < 0 || port > 65535) {
+            return result::Result<SocketAddr, AddrParseError>::Error(AddrParseError("Invalid port")
+            );
+        }
+        return result::Result<SocketAddr, AddrParseError>::Success(
+            SocketAddr {ip.value(), static_cast<uint16_t>(port)}
+        );
     }
 
     [[nodiscard]] IpAddr ip() const
