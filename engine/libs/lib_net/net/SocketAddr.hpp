@@ -71,41 +71,9 @@ public:
         }
     }
 
-    static auto parse_ascii(const std::string &str) -> result::Result<SocketAddr, AddrParseError>
-    {
-        if (str.empty()) {
-            return result::Result<SocketAddr, AddrParseError>::Error(
-                AddrParseError::Kind::EmptyString
-            );
-        }
+    static auto parse_ascii(const std::string &str) -> result::Result<SocketAddr, AddrParseError>;
 
-        // get last ':' character in the string (the port separator)
-        auto colon = str.find_last_of(':');
-        if (colon == std::string::npos) {
-            return result::Result<SocketAddr, AddrParseError>::Error(
-                AddrParseError::Kind::MissingPort
-            );
-        }
-
-        // get the first part of the string (the IP address)
-        auto ip = IpAddr::parse_ascii(str.substr(0, colon));
-        if (ip.isError()) {
-            return result::Result<SocketAddr, AddrParseError>::Error(ip.error());
-        }
-
-        // get the port number
-        auto port = std::stoi(str.substr(colon + 1));
-        if (port < 0 || port > 65535) {
-            return result::Result<SocketAddr, AddrParseError>::Error(
-                AddrParseError::Kind::InvalidPort
-            );
-        }
-        return result::Result<SocketAddr, AddrParseError>::Success(
-            SocketAddr {ip.value(), static_cast<uint16_t>(port)}
-        );
-    }
-
-    [[nodiscard]] IpAddr ip() const
+    [[nodiscard]] inline IpAddr ip() const
     {
         if (is_ipv4()) {
             return IpAddr(std::get<SocketAddrV4>(addr_).ip);
@@ -114,7 +82,7 @@ public:
         }
     }
 
-    void set_ip(const IpAddr &new_ip)
+    inline void set_ip(const IpAddr &new_ip)
     {
         if (new_ip.is_ipv4()) {
             std::get<SocketAddrV4>(addr_).ip = new_ip.to_v4();
@@ -123,7 +91,7 @@ public:
         }
     }
 
-    [[nodiscard]] uint16_t port() const
+    [[nodiscard]] inline uint16_t port() const
     {
         if (is_ipv4()) {
             return std::get<SocketAddrV4>(addr_).port;
@@ -132,7 +100,7 @@ public:
         }
     }
 
-    void set_port(uint16_t new_port)
+    inline void set_port(uint16_t new_port)
     {
         if (is_ipv4()) {
             std::get<SocketAddrV4>(addr_).port = new_port;
@@ -141,7 +109,7 @@ public:
         }
     }
 
-    [[nodiscard]] std::string to_string() const
+    [[nodiscard]] inline std::string to_string() const
     {
         if (is_ipv4()) {
             return std::get<SocketAddrV4>(addr_).to_string();
@@ -150,8 +118,14 @@ public:
         }
     }
 
-    bool is_ipv4() const { return std::holds_alternative<SocketAddrV4>(addr_); }
-    bool is_ipv6() const { return std::holds_alternative<SocketAddrV6>(addr_); }
+    [[nodiscard]] inline bool is_ipv4() const
+    {
+        return std::holds_alternative<SocketAddrV4>(addr_);
+    }
+    [[nodiscard]] inline bool is_ipv6() const
+    {
+        return std::holds_alternative<SocketAddrV6>(addr_);
+    }
 
 public:
     SocketAddr() = default;

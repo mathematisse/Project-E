@@ -1,17 +1,17 @@
 #pragma once
 
 #ifdef _WIN32
-    #include <winsock2.h>
+#include <winsock2.h>
 using SocketType = SOCKET;
-    #pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 #else
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-    #include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 using SocketType = int;
-    #define INVALID_SOCKET (-1)
-    #define SOCKET_ERROR (-1)
+#define INVALID_SOCKET (-1)
+#define SOCKET_ERROR (-1)
 #endif
 
 class Socket {

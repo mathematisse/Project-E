@@ -36,7 +36,8 @@ std::atomic<bool> running(true);
 int signal_pipe[2];
 
 // Function to handle sending messages to clients
-void signal_handler(int signum) {
+void signal_handler(int signum)
+{
     // Write to the signal pipe to notify the server thread
     write(signal_pipe[1], &signum, sizeof(signum));
 }
@@ -44,11 +45,15 @@ void signal_handler(int signum) {
 // Buffer class for reading data
 class ReadBuffer {
 public:
-    ReadBuffer() : read_pos(0), write_pos(0) {
+    ReadBuffer():
+        read_pos(0),
+        write_pos(0)
+    {
         buffer.fill(0);
     }
 
-    ssize_t read(int socket) {
+    ssize_t read(int socket)
+    {
         if (write_pos >= BUFFER_SIZE) {
             return 0; // Buffer is full, cannot read more
         }
@@ -60,16 +65,16 @@ public:
         return bytes_read;
     }
 
-    std::string get_data() {
-        return std::string(buffer.data(), write_pos);
-    }
+    std::string get_data() { return std::string(buffer.data(), write_pos); }
 
-    void clear() {
+    void clear()
+    {
         read_pos = 0;
         write_pos = 0;
     }
 
-    void consume(size_t bytes) {
+    void consume(size_t bytes)
+    {
         assert(bytes <= write_pos);
         read_pos += bytes;
         if (read_pos == write_pos) {
@@ -77,13 +82,9 @@ public:
         }
     }
 
-    size_t available() const {
-        return write_pos - read_pos;
-    }
+    size_t available() const { return write_pos - read_pos; }
 
-    const char* current() const {
-        return buffer.data() + read_pos;
-    }
+    const char *current() const { return buffer.data() + read_pos; }
 
 private:
     std::array<char, BUFFER_SIZE> buffer; // Fixed-size buffer
@@ -94,11 +95,14 @@ private:
 // Buffer class for writing data
 class WriteBuffer {
 public:
-    WriteBuffer() : write_pos(0) {
+    WriteBuffer():
+        write_pos(0)
+    {
         buffer.fill(0);
     }
 
-    void write(const std::string& data) {
+    void write(const std::string &data)
+    {
         size_t data_size = data.size();
         if (write_pos + data_size > BUFFER_SIZE) {
             flush(); // Flush if not enough space
@@ -107,7 +111,8 @@ public:
         write_pos += data_size;
     }
 
-    void flush(int socket) {
+    void flush(int socket)
+    {
         if (write_pos > 0) {
             ::send(socket, buffer.data(), write_pos, 0);
             write_pos = 0; // Reset position after flushing
@@ -122,7 +127,8 @@ private:
 // TCP and UDP server engine
 class ServerEngine {
 public:
-    ServerEngine() {
+    ServerEngine()
+    {
         // Set up signal handling
         signal(SIGUSR1, signal_handler);
 
@@ -151,11 +157,11 @@ public:
         setsockopt(tcp_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
         // Bind TCP socket
-        sockaddr_in tcp_addr{};
+        sockaddr_in tcp_addr {};
         tcp_addr.sin_family = AF_INET;
         tcp_addr.sin_addr.s_addr = INADDR_ANY;
         tcp_addr.sin_port = htons(PORT);
-        if (bind(tcp_fd, (struct sockaddr*)&tcp_addr, sizeof(tcp_addr)) == -1) {
+        if (bind(tcp_fd, (struct sockaddr *) &tcp_addr, sizeof(tcp_addr)) == -1) {
             perror("bind");
             exit(EXIT_FAILURE);
         }
@@ -177,11 +183,11 @@ public:
         }
 
         // Bind UDP socket
-        sockaddr_in udp_addr{};
+        sockaddr_in udp_addr {};
         udp_addr.sin_family = AF_INET;
         udp_addr.sin_addr.s_addr = INADDR_ANY;
         udp_addr.sin_port = htons(PORT);
-        if (bind(udp_fd, (struct sockaddr*)&udp_addr, sizeof(udp_addr)) == -1) {
+        if (bind(udp_fd, (struct sockaddr *) &udp_addr, sizeof(udp_addr)) == -1) {
             perror("bind");
             exit(EXIT_FAILURE);
         }
@@ -193,7 +199,8 @@ public:
         add_fd_to_epoll(signal_pipe[0]);
     }
 
-    ~ServerEngine() {
+    ~ServerEngine()
+    {
         running = false;
         close(tcp_fd);
         close(udp_fd);
@@ -202,7 +209,8 @@ public:
         close(epoll_fd);
     }
 
-    void run() {
+    void run()
+    {
         while (running) {
             struct epoll_event events[MAX_EVENTS];
             int num_events = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
@@ -228,8 +236,9 @@ private:
     std::vector<ReadBuffer> read_buffers;
     std::vector<WriteBuffer> write_buffers;
 
-    void add_fd_to_epoll(int fd) {
-        epoll_event event{};
+    void add_fd_to_epoll(int fd)
+    {
+        epoll_event event {};
         event.events = EPOLLIN;
         event.data.fd = fd;
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) == -1) {
@@ -238,49 +247,58 @@ private:
         }
     }
 
-    void handle_new_tcp_connection() {
-        sockaddr_in client_addr{};
+    void handle_new_tcp_connection()
+    {
+        sockaddr_in client_addr {};
         socklen_t addr_len = sizeof(client_addr);
-        int client_fd = accept(tcp_fd, (struct sockaddr*)&client_addr, &addr_len);
+        int client_fd = accept(tcp_fd, (struct sockaddr *) &client_addr, &addr_len);
         if (client_fd >= 0) {
             std::cout << "New TCP connection from " << inet_ntoa(client_addr.sin_addr) << std::endl;
             add_fd_to_epoll(client_fd);
-            read_buffers.emplace_back();  // Create a ReadBuffer for the new client
+            read_buffers.emplace_back(); // Create a ReadBuffer for the new client
             write_buffers.emplace_back(); // Create a WriteBuffer for the new client
         } else {
             perror("accept");
         }
     }
 
-    void handle_udp_message() {
+    void handle_udp_message()
+    {
         char buffer[BUFFER_SIZE];
-        sockaddr_in client_addr{};
+        sockaddr_in client_addr {};
         socklen_t addr_len = sizeof(client_addr);
-        int len = recvfrom(udp_fd, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_addr, &addr_len);
+        int len = recvfrom(
+            udp_fd, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_addr, &addr_len
+        );
         if (len >= 0) {
             buffer[len] = '\0';
-            std::cout << "Received UDP message: " << buffer << " from " << inet_ntoa(client_addr.sin_addr) << std::endl;
+            std::cout << "Received UDP message: " << buffer << " from "
+                      << inet_ntoa(client_addr.sin_addr) << std::endl;
 
             // Echo the message back to the sender
-            sendto(udp_fd, buffer, len, 0, (struct sockaddr*)&client_addr, addr_len);
+            sendto(udp_fd, buffer, len, 0, (struct sockaddr *) &client_addr, addr_len);
         } else {
             perror("recvfrom");
         }
     }
 
-    void handle_signal_event() {
+    void handle_signal_event()
+    {
         int signum;
         read(signal_pipe[0], &signum, sizeof(signum)); // Read signal from the pipe
-        std::cout << "Signal received: " << signum << ". Sending message to all clients." << std::endl;
-        
+        std::cout << "Signal received: " << signum << ". Sending message to all clients."
+                  << std::endl;
+
         // Here you could implement logic to send messages to all connected clients
         for (size_t i = 0; i < write_buffers.size(); ++i) {
             write_buffers[i].write("Hello from server!");
-            write_buffers[i].flush(i);  // Here, you would need to provide the correct socket descriptor
+            write_buffers[i].flush(i
+            ); // Here, you would need to provide the correct socket descriptor
         }
     }
 
-    void handle_client_message(int client_fd) {
+    void handle_client_message(int client_fd)
+    {
         ssize_t len = read_buffers[get_client_index(client_fd)].read(client_fd);
         if (len > 0) {
             std::string data = read_buffers[get_client_index(client_fd)].get_data();
@@ -298,7 +316,8 @@ private:
         }
     }
 
-    int get_client_index(int client_fd) {
+    int get_client_index(int client_fd)
+    {
         // Find the index of the client based on the file descriptor
         for (size_t i = 0; i < read_buffers.size(); ++i) {
             if (read_buffers[i].current() == client_fd) {
@@ -310,14 +329,17 @@ private:
 };
 
 // Function to simulate sending messages to clients
-void message_sender() {
+void message_sender()
+{
     while (running) {
-        std::this_thread::sleep_for(std::chrono::seconds(5)); // Wait for some time before sending the message
+        std::this_thread::sleep_for(std::chrono::seconds(5)
+        ); // Wait for some time before sending the message
         kill(getpid(), SIGUSR1); // Send signal to server engine to trigger sending a message
     }
 }
 
-int main() {
+int main()
+{
 #ifdef _WIN32
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);

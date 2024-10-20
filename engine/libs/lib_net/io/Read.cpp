@@ -50,7 +50,9 @@ Result<std::size_t> Read::read_to_string(std::string &buf, size_t &bytesRead)
     if (result.isError()) {
         return io::Result<std::size_t>::Error(result.error());
     }
-    buf.append(static_cast<const char *>(static_cast<const void *>(tempBuf.data())), tempBuf.size());
+    buf.append(
+        static_cast<const char *>(static_cast<const void *>(tempBuf.data())), tempBuf.size()
+    );
     return io::Result<std::size_t>::Success(bytesRead);
 }
 
