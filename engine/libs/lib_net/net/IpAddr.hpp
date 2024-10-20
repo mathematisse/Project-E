@@ -121,7 +121,7 @@ public:
     ) -> result::Result<IpAddr, AddrParseError>
     {
         if (str.empty()) {
-            return result::Result<IpAddr, AddrParseError>::Error(AddrParseError("No address"));
+            return result::Result<IpAddr, AddrParseError>::Error(AddrParseError::Kind::EmptyString);
         }
 
         if (str.find(':') != std::string::npos) {

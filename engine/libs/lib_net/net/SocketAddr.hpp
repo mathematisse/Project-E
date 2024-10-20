@@ -74,14 +74,16 @@ public:
     static auto parse_ascii(const std::string &str) -> result::Result<SocketAddr, AddrParseError>
     {
         if (str.empty()) {
-            return result::Result<SocketAddr, AddrParseError>::Error(AddrParseError("Empty string")
+            return result::Result<SocketAddr, AddrParseError>::Error(
+                AddrParseError::Kind::EmptyString
             );
         }
 
         // get last ':' character in the string (the port separator)
         auto colon = str.find_last_of(':');
         if (colon == std::string::npos) {
-            return result::Result<SocketAddr, AddrParseError>::Error(AddrParseError("Missing port")
+            return result::Result<SocketAddr, AddrParseError>::Error(
+                AddrParseError::Kind::MissingPort
             );
         }
 
@@ -94,7 +96,8 @@ public:
         // get the port number
         auto port = std::stoi(str.substr(colon + 1));
         if (port < 0 || port > 65535) {
-            return result::Result<SocketAddr, AddrParseError>::Error(AddrParseError("Invalid port")
+            return result::Result<SocketAddr, AddrParseError>::Error(
+                AddrParseError::Kind::InvalidPort
             );
         }
         return result::Result<SocketAddr, AddrParseError>::Success(
