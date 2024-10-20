@@ -12,8 +12,7 @@ struct Void : std::monostate {
 
 // T and E can't be the same type
 template<typename T, typename E>
-    requires std::is_default_constructible_v<T> && std::is_default_constructible_v<E> &&
-    (!std::is_same_v<T, E>)
+    requires(!std::is_same_v<T, E>)
 class Result {
 public:
     using ResultType = std::variant<T, E>;
@@ -73,17 +72,29 @@ public:
 
     // Simple constructor to easely create Error results without having to specify the type
     template<typename U>
-    static Result<T, E> Error(U &&error) { return Result<T, E>(E(std::forward<U>(error))); }
+    static Result<T, E> Error(U &&error)
+    {
+        return Result<T, E>(E(std::forward<U>(error)));
+    }
 
     template<typename U>
-    static Result<T, E> Success(U &&value) { return Result<T, E>(T(std::forward<U>(value))); }
+    static Result<T, E> Success(U &&value)
+    {
+        return Result<T, E>(T(std::forward<U>(value)));
+    }
 
     // Simple constructor to easely create Error results without having to specify the type
     template<typename U>
-    static Result<T, E> Error(const U &error) { return Result<T, E>(E(error)); }
+    static Result<T, E> Error(const U &error)
+    {
+        return Result<T, E>(E(error));
+    }
 
     template<typename U>
-    static Result<T, E> Success(const U &value) { return Result<T, E>(T(value)); }
+    static Result<T, E> Success(const U &value)
+    {
+        return Result<T, E>(T(value));
+    }
 
 private:
     ResultType result;
