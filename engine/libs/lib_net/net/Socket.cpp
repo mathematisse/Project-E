@@ -113,7 +113,7 @@ auto Socket::accept() const -> io::Result<Socket>
     return io::Result<Socket>::Success(Socket(new_sockfd));
 }
 
-auto Socket::read(std::span<std::byte> buf) const -> io::Result<std::size_t>
+auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
 {
     auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), 0);
     if (nread == SOCKET_ERROR) {
@@ -122,7 +122,7 @@ auto Socket::read(std::span<std::byte> buf) const -> io::Result<std::size_t>
     return io::Result<std::size_t>::Success(nread);
 }
 
-auto Socket::recv_from(std::span<std::byte> buf
+auto Socket::recv_from(const std::span<std::byte> &buf
 ) const -> io::Result<std::pair<std::size_t, SocketAddr>>
 {
     struct sockaddr_storage address;
@@ -138,7 +138,7 @@ auto Socket::recv_from(std::span<std::byte> buf
     return io::Result<std::pair<std::size_t, SocketAddr>>::Success({nread, addr});
 }
 
-auto Socket::write(std::span<std::byte> buf) const -> io::Result<std::size_t>
+auto Socket::write(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
 {
     auto nwritten = ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), 0);
     if (nwritten == SOCKET_ERROR) {
@@ -167,6 +167,28 @@ auto Socket::shutdown() const -> io::Result<result::Void>
         return io::Result<result::Void>::Error(errno);
     }
     return io::Result<result::Void>::Success({});
+}
+
+auto Socket::peer_addr() const -> io::Result<SocketAddr>
+{
+    struct sockaddr_storage address;
+    socklen_t address_len = sizeof(address);
+    if (::getpeername(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len) ==
+        SOCKET_ERROR) {
+        return io::Result<SocketAddr>::Error(errno);
+    }
+    return io::Result<SocketAddr>::Success(address_from_sockaddr(address));
+}
+
+auto Socket::local_addr() const -> io::Result<SocketAddr>
+{
+    struct sockaddr_storage address;
+    socklen_t address_len = sizeof(address);
+    if (::getsockname(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len) ==
+        SOCKET_ERROR) {
+        return io::Result<SocketAddr>::Error(errno);
+    }
+    return io::Result<SocketAddr>::Success(address_from_sockaddr(address));
 }
 
 } // namespace net::net
