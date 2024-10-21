@@ -5,6 +5,7 @@
 #include <string>
 #include <variant>
 #include <cstdint>
+#include <numeric>
 
 #include "lib_net/result/Result.hpp"
 #include "lib_net/net/AddrParseError.hpp"
@@ -35,6 +36,14 @@ public:
         return octets == std::array<uint8_t, 4> {0, 0, 0, 0};
     }
     [[nodiscard]] inline bool is_loopback() const { return octets[0] == 127; }
+
+    [[nodiscard]] inline uint32_t to_uint32_t() const
+    {
+        constexpr uint32_t SHIFT_BITS = sizeof(uint8_t) * 8;
+        return std::accumulate(octets.begin(), octets.end(), 0U, [](uint32_t acc, uint8_t octet) {
+            return (acc << SHIFT_BITS) | octet;
+        });
+    }
 };
 
 class Ipv6Addr {
@@ -135,6 +144,5 @@ public:
         }
     }
 };
-
 }
 // namespace net::net

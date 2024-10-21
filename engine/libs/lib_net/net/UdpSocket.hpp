@@ -18,7 +18,7 @@ class UdpSocket {
 public:
     static auto bind(const SocketAddr &addr) -> io::Result<UdpSocket>;
 
-    auto recv_from(std::span<std::byte> &buf) const -> io::Result<std::pair<size_t, std::string>>;
+    auto recv_from(std::span<std::byte> &buf) const -> io::Result<std::pair<size_t, SocketAddr>>;
 
     [[nodiscard]] auto
     send_to(const std::span<std::byte> &buf, const SocketAddr &addr) const -> io::Result<size_t>;
