@@ -166,13 +166,20 @@ bool MainMenu::open(void)
 
         get_ip_and_port();
 
-        if (GuiButton((Rectangle) {WINDOW_WIDTH - 170, 20, 150, 50}, "Settings")) {
+        if (GuiButton(
+                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings"
+            )) {
             _showSettings = true;
         }
 
         if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 200, 300, 100}, "Start"
-            ) &&
+                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit"
+            )) {
+            EndDrawing();
+            break;
+        }
+
+        if (GuiButton((Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2, 300, 100}, "Start") &&
             !_showSettings && !_showInfoBox) {
             try_to_connect();
             if (!_connected) {
