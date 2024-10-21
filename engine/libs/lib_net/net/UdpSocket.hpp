@@ -4,6 +4,7 @@
 #include <span>
 
 #include "lib_net/io/Result.hpp"
+#include "lib_net/net/Socket.hpp"
 #include "lib_net/result/Result.hpp"
 #include "lib_net/net/SocketAddr.hpp"
 
@@ -11,7 +12,7 @@ namespace net::net {
 
 class UdpSocket {
 private:
-    int sockfd_;
+    Socket _sock;
 
 public:
     ~UdpSocket();
@@ -31,7 +32,10 @@ public:
     auto recv(std::span<std::byte> &buf) const -> io::Result<size_t>;
 
 private:
-    explicit UdpSocket(int sockfd);
+    explicit UdpSocket(Socket sockfd):
+        _sock(sockfd)
+    {
+    }
 };
 
 } // namespace net::io

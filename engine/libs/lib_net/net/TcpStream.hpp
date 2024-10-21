@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <string>
 #include <span>
-#include <cstdint>
 
 #include "lib_net/io/Read.hpp"
 #include "lib_net/io/Result.hpp"
@@ -21,7 +19,7 @@ private:
     Socket _sock;
 
 public:
-    ~TcpStream();
+    ~TcpStream() override = default;
 
     [[nodiscard]]
     static auto connect(const SocketAddr &addr) -> io::Result<TcpStream>;
@@ -42,11 +40,14 @@ public:
         return io::Result<result::Void>::Success(result::Void {});
     }
 
-private:
+protected:
     explicit TcpStream(Socket sock):
         _sock(sock)
     {
     }
+
+    // TcpListener needs to be able to create TcpStream when accepting connections
+    friend class TcpListener;
 };
 
 } // namespace net::io

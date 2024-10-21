@@ -102,15 +102,17 @@ auto Socket::close() const -> io::Result<result::Void>
     return io::Result<result::Void>::Success({});
 }
 
-auto Socket::accept() const -> io::Result<Socket>
+auto Socket::accept() const -> io::Result<std::pair<Socket, SocketAddr>>
 {
-    struct sockaddr_storage address;
+    struct sockaddr_storage address { };
     socklen_t address_len = sizeof(address);
     auto new_sockfd = ::accept(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len);
     if (new_sockfd == INVALID_SOCKET) {
-        return io::Result<Socket>::Error(errno);
+        return io::Result<std::pair<Socket, SocketAddr>>::Error(errno);
     }
-    return io::Result<Socket>::Success(Socket(new_sockfd));
+    return io::Result<std::pair<Socket, SocketAddr>>::Success(
+        {Socket(new_sockfd), address_from_sockaddr(address)}
+    );
 }
 
 auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
@@ -125,7 +127,7 @@ auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size
 auto Socket::recv_from(const std::span<std::byte> &buf
 ) const -> io::Result<std::pair<std::size_t, SocketAddr>>
 {
-    struct sockaddr_storage address;
+    struct sockaddr_storage address { };
     socklen_t address_len = sizeof(address);
     auto nread = ::recvfrom(
         sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), 0,
@@ -171,7 +173,7 @@ auto Socket::shutdown() const -> io::Result<result::Void>
 
 auto Socket::peer_addr() const -> io::Result<SocketAddr>
 {
-    struct sockaddr_storage address;
+    struct sockaddr_storage address { };
     socklen_t address_len = sizeof(address);
     if (::getpeername(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len) ==
         SOCKET_ERROR) {
@@ -182,13 +184,19 @@ auto Socket::peer_addr() const -> io::Result<SocketAddr>
 
 auto Socket::local_addr() const -> io::Result<SocketAddr>
 {
-    struct sockaddr_storage address;
+    struct sockaddr_storage address { };
     socklen_t address_len = sizeof(address);
     if (::getsockname(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len) ==
         SOCKET_ERROR) {
         return io::Result<SocketAddr>::Error(errno);
     }
     return io::Result<SocketAddr>::Success(address_from_sockaddr(address));
+}
+
+auto Socket::set_reuse_addr(bool enable) -> io::Result<result::Void>
+{
+    int optval = enable ? 1 : 0;
+    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 }
 
 } // namespace net::net
