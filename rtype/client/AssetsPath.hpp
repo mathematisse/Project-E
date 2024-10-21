@@ -43,12 +43,12 @@
     {                                    \
         "assets", "Space Background.png" \
     }
-#define MENU_BACKGROUND                  \
-    {                                    \
+#define MENU_BACKGROUND                 \
+    {                                   \
         "assets", "menu_background.png" \
     }
-#define LOADING_BACKGROUND                  \
-    {                                    \
+#define LOADING_BACKGROUND                 \
+    {                                      \
         "assets", "loading_background.png" \
     }
 #define FLOOR                 \
@@ -64,13 +64,45 @@
         "assets", "Main Ship", "Main Ship - Engine Effects", "Aseprite", "Engine1.png" \
     }
 
-#define MENU_MUSIC { "assets", "musics", "Retro-Sax-Guy.ogg"}
+#define MENU_MUSIC                              \
+    {                                           \
+        "assets", "musics", "Retro-Sax-Guy.ogg" \
+    }
 
-#define LOADING_MUSIC { "assets", "musics", "Waiting-Music.ogg"}
+#define LOADING_MUSIC                           \
+    {                                           \
+        "assets", "musics", "Waiting-Music.ogg" \
+    }
 
-#define GAME_MUSIC { "assets", "musics", "Shovel_Knight_OST.ogg"}
+#define GAME_MUSIC                                  \
+    {                                               \
+        "assets", "musics", "Shovel_Knight_OST.ogg" \
+    }
+
+#define VISIBILITY_SHADER                \
+    {                                    \
+        "assets", "high_visibility.frag" \
+    }
+
+#define COLORBLIND_SHADER           \
+    {                               \
+        "assets", "colorblind.frag" \
+    }
 
 const std::vector<std::vector<std::string>> paths = {
-    BASE_BULLET_PATH, P1F,     P1FR, P1SD, P1D, P1VD, E1F, BACKGROUND_PATH, FLOOR, CEILING, E1FC,
-    CUT_BULLET_PATH,  ENGINE_1, MENU_BACKGROUND, LOADING_BACKGROUND
+    BASE_BULLET_PATH,
+    P1F,
+    P1FR,
+    P1SD,
+    P1D,
+    P1VD,
+    E1F,
+    BACKGROUND_PATH,
+    FLOOR,
+    CEILING,
+    E1FC,
+    CUT_BULLET_PATH,
+    ENGINE_1,
+    MENU_BACKGROUND,
+    LOADING_BACKGROUND
 };

@@ -511,6 +511,14 @@ int main(int ac, char **av)
         curr_time = new_time;
         animationSystem.deltaTime = dt;
 
+        if (mainMenu.settings.color_blind) {
+            BeginShaderMode(mainMenu.colorblindnessShader);
+        }
+
+        if (mainMenu.settings.color_blind_simulation) {
+            BeginShaderMode(mainMenu.colorblindSimShader);
+        }
+
         if (client.started)
             update_camera(camera, dt);
         moveBackgroundSystem.cameraX = camera.target.x;
@@ -545,8 +553,14 @@ int main(int ac, char **av)
                 EndMode2D();
             } else {
                 DrawTexture(loading_background, 0, 0, WHITE);
-                DrawText("Waiting for other players...", WINDOW_WIDTH / 2 - 500, WINDOW_HEIGHT / 2, 80, WHITE);
+                DrawText(
+                    "Waiting for other players...", WINDOW_WIDTH / 2 - 500, WINDOW_HEIGHT / 2, 80,
+                    WHITE
+                );
             }
+        }
+        if (mainMenu.settings.color_blind) {
+            EndShaderMode();
         }
         EndDrawing();
 

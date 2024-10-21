@@ -14,14 +14,18 @@ class MainMenu {
     struct Settings {
         bool auto_shoot = false;
         bool color_blind = false;
+        bool color_blind_simulation = false;
         float volume = 50;
     };
+
 public:
     MainMenu(net::RTypeClient &client, AssetsLoader &assetsLoader);
     ~MainMenu();
 
     bool open(void);
     Settings settings;
+    Shader colorblindnessShader;
+    Shader colorblindSimShader;
 
 private:
     void get_ip_and_port(void);
