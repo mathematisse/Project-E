@@ -19,6 +19,10 @@
     {                                                                                  \
         "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "MainShipFResized.png" \
     }
+#define P2                                                                        \
+    {                                                                             \
+        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "OtherPlayer.png" \
+    }
 #define P1SD                                                               \
     {                                                                      \
         "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1SD.png" \
@@ -43,6 +47,14 @@
     {                                    \
         "assets", "Space Background.png" \
     }
+#define MENU_BACKGROUND                 \
+    {                                   \
+        "assets", "menu_background.png" \
+    }
+#define LOADING_BACKGROUND                 \
+    {                                      \
+        "assets", "loading_background.png" \
+    }
 #define FLOOR                 \
     {                         \
         "assets", "floor.png" \
@@ -56,7 +68,46 @@
         "assets", "Main Ship", "Main Ship - Engine Effects", "Aseprite", "Engine1.png" \
     }
 
+#define MENU_MUSIC                              \
+    {                                           \
+        "assets", "musics", "Retro-Sax-Guy.ogg" \
+    }
+
+#define LOADING_MUSIC                           \
+    {                                           \
+        "assets", "musics", "Waiting-Music.ogg" \
+    }
+
+#define GAME_MUSIC                                  \
+    {                                               \
+        "assets", "musics", "Shovel_Knight_OST.ogg" \
+    }
+
+#define VISIBILITY_SHADER                          \
+    {                                              \
+        "assets", "shader", "high_visibility.frag" \
+    }
+
+#define COLORBLIND_SHADER                     \
+    {                                         \
+        "assets", "shader", "colorblind.frag" \
+    }
+
 const std::vector<std::vector<std::string>> paths = {
-    BASE_BULLET_PATH, P1F,     P1FR, P1SD, P1D, P1VD, E1F, BACKGROUND_PATH, FLOOR, CEILING, E1FC,
-    CUT_BULLET_PATH,  ENGINE_1
+    BASE_BULLET_PATH,
+    P1F,
+    P1FR,
+    P1SD,
+    P1D,
+    P1VD,
+    E1F,
+    BACKGROUND_PATH,
+    FLOOR,
+    CEILING,
+    E1FC,
+    CUT_BULLET_PATH,
+    ENGINE_1,
+    MENU_BACKGROUND,
+    LOADING_BACKGROUND,
+    P2
 };
