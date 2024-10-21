@@ -23,9 +23,6 @@
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "RTypeClient.hpp"
 
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
-
 void init_camera(Camera2D &camera)
 {
     camera.target = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
@@ -238,6 +235,7 @@ int main(int ac, char **av)
     );
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "R-Type");
+    InitAudioDevice();
     SetTargetFPS(60);
 
     assetsLoader.load_assets(paths);
@@ -250,6 +248,13 @@ int main(int ac, char **av)
     if (!mainMenu.open())
         return 0;
     Texture2D loading_background = assetsLoader.get_asset(LOADING_BACKGROUND);
+    Music loading_music = LoadMusicStream(assetsLoader.get_real_path(LOADING_MUSIC).c_str());
+    Music game_music = LoadMusicStream(assetsLoader.get_real_path(GAME_MUSIC).c_str());
+
+    PlayMusicStream(loading_music);
+    SetMusicVolume(loading_music, mainMenu.settings.volume / 100.0f);
+    SetMusicVolume(game_music, mainMenu.settings.volume / 100.0f);
+    bool change_music = false;
 
     NetworkManager networkManager;
 
@@ -520,6 +525,16 @@ int main(int ac, char **av)
         updateEnginePosition.playerAlive = playerAlive;
 
         showInfoSystem.one_time = false;
+        if (client.started && !change_music) {
+            StopMusicStream(loading_music);
+            PlayMusicStream(game_music);
+            change_music = true;
+        }
+        if (!change_music) {
+            UpdateMusicStream(loading_music);
+        } else {
+            UpdateMusicStream(game_music);
+        }
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
@@ -594,6 +609,9 @@ int main(int ac, char **av)
         moveOtherPlayerSystem.playerStates.clear();
         destroyEntitiesSystem.entitiesDestroyed.clear();
     }
+    UnloadMusicStream(loading_music);
+    UnloadMusicStream(game_music);
     CloseWindow();
+    CloseAudioDevice();
     return 0;
 }

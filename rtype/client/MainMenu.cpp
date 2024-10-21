@@ -1,9 +1,8 @@
 #include "MainMenu.hpp"
 #include "AssetsPath.hpp"
+#include <chrono>
+#include "raylib.h"
 #include "raygui.h"
-
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
 
 bool MainMenu::is_a_valid_port(const std::string &port)
 {
@@ -76,17 +75,49 @@ void MainMenu::get_ip_and_port(void)
     }
 }
 
+void MainMenu::show_settings(void)
+{
+    static int old_volume = 50;
+
+    if (_showSettings) {
+        GuiWindowBox((Rectangle){ WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500 }, "Settings");
+        GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2, 350, 20 }, "Auto Shoot:");
+        GuiCheckBox((Rectangle){ WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 20, 20 }, "", &settings.auto_shoot);
+        GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20 }, "Color Blind:");
+        GuiCheckBox((Rectangle){ WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 50, 20, 20 }, "", &settings.color_blind);
+        GuiLabel((Rectangle){ WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20 }, "Volume:");
+        GuiSlider((Rectangle){ WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2 + 100, 350, 20 }, "0", "100", &settings.volume, 0, 100);
+        if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 200, 100, 30 }, "Back")) {
+            _showSettings = false;
+        }
+
+        if ((int)settings.volume != old_volume) {
+            old_volume = (int)settings.volume;
+            SetMusicVolume(_music, settings.volume / 100.0f);
+        }
+    }
+}
+
 MainMenu::MainMenu(net::RTypeClient &client, AssetsLoader &assetsLoader) : _client(client)
 {
     _background = assetsLoader.get_asset(MENU_BACKGROUND);
+    _music = LoadMusicStream(assetsLoader.get_real_path(MENU_MUSIC).c_str());
+    PlayMusicStream(_music);
+    SetMusicVolume(_music, 50.0f / 100.0f);
+}
+
+MainMenu::~MainMenu()
+{
+    UnloadMusicStream(_music);
 }
 
 bool MainMenu::open(void)
 {
     GuiSetStyle(DEFAULT, TEXT_SIZE, 30);
 
-    while (!WindowShouldClose() && (!_connected || _showInfoBox))
+    while (!WindowShouldClose() && (!_connected || _showInfoBox || _showSettings))
     {
+        UpdateMusicStream(_music);
         BeginDrawing();
             ClearBackground(RAYWHITE);
             DrawTexture(_background, 0, 0, WHITE);
@@ -94,18 +125,25 @@ bool MainMenu::open(void)
 
             get_ip_and_port();
 
-            if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 200, 300, 100 }, "Start")) {
+            if (GuiButton((Rectangle){ WINDOW_WIDTH - 170, 20, 150, 50 }, "Settings")) {
+                _showSettings = true;
+            }
+
+            if (GuiButton((Rectangle){ WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 200, 300, 100 }, "Start") && !_showSettings && !_showInfoBox) {
                 try_to_connect();
                 if (!_connected) {
                     _showInfoBox = true;
                 }
             }
             show_info_box();
+            show_settings();
 
         EndDrawing();
     }
+    StopMusicStream(_music);
     if (!_connected) {
         CloseWindow();
+        CloseAudioDevice();
         return (false);
     }
     return (true);
