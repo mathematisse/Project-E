@@ -616,7 +616,7 @@ int main(int ac, char **av)
                 square_player->getSize()->set<0>(80);
                 square_player->getSize()->set<1>(80);
                 square_player->getSize()->set<2>(90);
-                square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
+                square_player->getSprite()->set<0>(assetsLoader.get_asset(P2).id);
                 square_player->getHealth()->set<0>(4);
                 square_player->getNetworkID()->set<0>(playerState.netId);
             }

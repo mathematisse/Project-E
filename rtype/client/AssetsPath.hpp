@@ -19,6 +19,10 @@
     {                                                                                  \
         "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "MainShipFResized.png" \
     }
+#define P2                                                                        \
+    {                                                                             \
+        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "OtherPlayer.png" \
+    }
 #define P1SD                                                               \
     {                                                                      \
         "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1SD.png" \
@@ -104,5 +108,6 @@ const std::vector<std::vector<std::string>> paths = {
     CUT_BULLET_PATH,
     ENGINE_1,
     MENU_BACKGROUND,
-    LOADING_BACKGROUND
+    LOADING_BACKGROUND,
+    P2
 };
