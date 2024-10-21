@@ -265,6 +265,7 @@ int main(int ac, char **av)
     ECS::S::UpdateEnginePosition updateEnginePosition;
 
     ECS::S::MovePlayerSystem moveSystem(client);
+    moveSystem.auto_shoot = mainMenu.settings.auto_shoot;
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::MoveBackgroundSystem moveBackgroundSystem;
     ECS::S::MoveEnnemySystem moveEnnemySystem;
