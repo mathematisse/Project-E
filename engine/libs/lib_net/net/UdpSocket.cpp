@@ -66,6 +66,8 @@ auto address_from_sockaddr(const struct sockaddr_storage &address) -> SocketAddr
     }
 }
 
+UdpSocket::~UdpSocket() { close_socket(sockfd_); }
+
 auto UdpSocket::bind(const SocketAddr &addr) -> io::Result<UdpSocket>
 {
     auto sockfd = create_socket(addr.is_ipv4() ? AF_INET : AF_INET6);

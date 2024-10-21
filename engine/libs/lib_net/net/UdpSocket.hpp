@@ -18,6 +18,9 @@ private:
     int sockfd_;
 
 public:
+    ~UdpSocket();
+
+    [[nodiscard]]
     static auto bind(const SocketAddr &addr) -> io::Result<UdpSocket>;
 
     auto recv_from(std::span<std::byte> &buf) const -> io::Result<std::pair<size_t, SocketAddr>>;
