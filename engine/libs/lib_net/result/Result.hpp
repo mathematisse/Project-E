@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <variant>
+#include <initializer_list>
 
 namespace net::result {
 
@@ -24,6 +25,19 @@ public:
     explicit Result(const E &error):
         result(error)
     {
+    }
+
+    // Constructor to support brace-enclosed initializer list
+    Result(std::initializer_list<T> valueList):
+        result(*valueList.begin())
+    {
+        static_assert(valueList.size() == 1, "Initializer list must contain exactly one element");
+    }
+
+    Result(std::initializer_list<E> errorList):
+        result(*errorList.begin())
+    {
+        static_assert(errorList.size() == 1, "Initializer list must contain exactly one element");
     }
 
     static Result<T, E> Success(const T &value) { return Result<T, E>(value); }
@@ -70,7 +84,7 @@ public:
     explicit operator E() const { return error(); }
     explicit operator T() const { return value(); }
 
-    // Simple constructor to easely create Error results without having to specify the type
+    // Simple constructor to easily create Error results without having to specify the type
     template<typename U>
     static Result<T, E> Error(U &&error)
     {
@@ -83,7 +97,7 @@ public:
         return Result<T, E>(T(std::forward<U>(value)));
     }
 
-    // Simple constructor to easely create Error results without having to specify the type
+    // Simple constructor to easily create Error results without having to specify the type
     template<typename U>
     static Result<T, E> Error(const U &error)
     {
