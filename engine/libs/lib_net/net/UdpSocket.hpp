@@ -14,6 +14,8 @@
 namespace net::net {
 
 class UdpSocket {
+private:
+    int sockfd_;
 
 public:
     static auto bind(const SocketAddr &addr) -> io::Result<UdpSocket>;
@@ -29,11 +31,8 @@ public:
 
     auto recv(std::span<std::byte> &buf) const -> io::Result<size_t>;
 
-    [[nodiscard]] auto set_nonblocking(bool nonblocking) const -> io::Result<result::Void>;
-
 private:
     explicit UdpSocket(int sockfd);
-    int sockfd_;
 };
 
 } // namespace net::io

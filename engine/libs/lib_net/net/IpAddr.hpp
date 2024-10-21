@@ -20,6 +20,13 @@ public:
         octets(addr)
     {
     }
+    explicit Ipv4Addr(uint32_t addr):
+        octets(
+            {static_cast<uint8_t>((addr >> 24) & 0xFF), static_cast<uint8_t>((addr >> 16) & 0xFF),
+             static_cast<uint8_t>((addr >> 8) & 0xFF), static_cast<uint8_t>(addr & 0xFF)}
+        )
+    {
+    }
 
     [[nodiscard]] inline std::string to_string() const
     {
@@ -52,6 +59,10 @@ public:
 
     explicit Ipv6Addr(const std::array<uint16_t, 8> &addr):
         segments(addr)
+    {
+    }
+    explicit Ipv6Addr(const uint16_t addr[8]):
+        segments({addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], addr[6], addr[7]})
     {
     }
 

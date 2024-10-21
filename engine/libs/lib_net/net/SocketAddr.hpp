@@ -61,6 +61,15 @@ private:
     }
 
 public:
+    SocketAddr(const Ipv4Addr &ip, uint16_t port):
+        addr_(SocketAddrV4 {ip, port})
+    {
+    }
+    SocketAddr(const Ipv6Addr &ip, uint16_t port, std::uint32_t flowinfo, std::uint32_t scope_id):
+        addr_(SocketAddrV6 {ip, port, flowinfo, scope_id})
+    {
+    }
+
     SocketAddr(const IpAddr &ip, uint16_t port)
     {
         if (ip.is_ipv4()) {
