@@ -79,14 +79,14 @@
         "assets", "musics", "Shovel_Knight_OST.ogg" \
     }
 
-#define VISIBILITY_SHADER                \
-    {                                    \
-        "assets", "high_visibility.frag" \
+#define VISIBILITY_SHADER                          \
+    {                                              \
+        "assets", "shader", "high_visibility.frag" \
     }
 
-#define COLORBLIND_SHADER           \
-    {                               \
-        "assets", "colorblind.frag" \
+#define COLORBLIND_SHADER                     \
+    {                                         \
+        "assets", "shader", "colorblind.frag" \
     }
 
 const std::vector<std::vector<std::string>> paths = {

@@ -21,7 +21,7 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-include_directories(${GIT_ROOT}/submodules/raygui/src)
+include_directories(${GIT_ROOT}/.submodules/raygui/src)
 
 target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network)
 
