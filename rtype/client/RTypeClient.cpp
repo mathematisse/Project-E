@@ -56,7 +56,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
         }
         square_ennemy->getVelocity()->set<0>(0.0F);
         square_ennemy->getVelocity()->set<1>(0.0F);
-        square_ennemy->getVelocity()->set<2>(150.0F);
+        square_ennemy->getVelocity()->set<2>(100.0F);
         square_ennemy->getType()->set<0>(SquareType::ENEMY);
         square_ennemy->getColor()->set<0>(255);
         square_ennemy->getColor()->set<1>(0);
@@ -98,7 +98,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
         }
         square_bullet->getPosition()->set<0>(bulletShot.x);
         square_bullet->getVelocity()->set<1>(0.0F);
-        square_bullet->getVelocity()->set<2>(500.0F);
+        square_bullet->getVelocity()->set<2>(300.0F);
         square_bullet->getColor()->set<0>(255);
         square_bullet->getColor()->set<1>(255);
         square_bullet->getColor()->set<2>(0);

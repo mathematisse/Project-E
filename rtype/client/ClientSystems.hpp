@@ -30,6 +30,7 @@ public:
     MovePlayerSystem &operator=(MovePlayerSystem &&other) = default;
 
     net::RTypeClient &client;
+    bool auto_shoot = false;
     size_t frame;
 
 protected:
