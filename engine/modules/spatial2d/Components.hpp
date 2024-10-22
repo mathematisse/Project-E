@@ -11,21 +11,20 @@ DECLARE_COMPONENT(
 );
 
 DECLARE_COMPONENT(
-    Scale,
+    Size,
     float, // x
     float // y
 );
 
 DECLARE_COMPONENT(
-    Rostation,
+    Rotation,
     float // degres
 );
 
 DECLARE_COMPONENT(
     Velocity,
     float, // x
-    float, // y
-    float // speed
+    float // y
 );
 
 DECLARE_COMPONENT(

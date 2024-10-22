@@ -19,6 +19,7 @@ Checks: "*,
         -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
         -hicpp-no-array-decay,
         -unused-includes,
+        -bugprone-easily-swappable-parameters,
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
