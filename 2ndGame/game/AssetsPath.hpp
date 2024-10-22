@@ -16,6 +16,11 @@
         "assets", "other_game", "musics", "fantasy_life_ost.mp3" \
     }
 
+#define GAME_MUSIC                                               \
+    {                                                            \
+        "assets", "other_game", "musics", "kingdom_rush_ost.mp3" \
+    }
+
 #define VISIBILITY_SHADER                                        \
     {                                                            \
         "assets", "other_game", "shader", "high_visibility.frag" \

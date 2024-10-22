@@ -5,10 +5,13 @@
 ** Demo lib ecs
 */
 
-#include "DrawSystems.hpp"
+#include "Systems.hpp"
 #include "Decor.hpp"
+#include "Tower.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
+#include <vector>
+#include <string>
 #include <iostream>
 #include "AssetsPath.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
@@ -56,6 +59,39 @@ void DrawSpriteSystem::_innerOperate(
         adjustedY += sizeY;
     }
     DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
+}
+
+TowerClickSystem::TowerClickSystem():
+    AMonoSystem(false)
+{
+}
+
+void TowerClickSystem::_innerOperate(
+    C::PositionPool::Types &cposition, C::SizePool::Types &csize, C::TypePool::Types &ctype,
+    C::LevelPool::Types &clevel, C::IDPool::Types &cid
+)
+{
+    auto [x, y] = cposition;
+    auto [sizeX, sizeY] = csize;
+    auto [temp_id] = cid;
+    auto [level] = clevel;
+    auto [type] = ctype;
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        auto mousePos = GetMousePosition();
+        if (mousePos.x >= x && mousePos.x <= x + sizeX && mousePos.y >= y &&
+            mousePos.y <= y + sizeY) {
+            open = true;
+            pos.x = x;
+            pos.y = y;
+            selectedTower.id = temp_id;
+            selectedTower.level = level;
+            selectedTower.type = type;
+        }
+    }
+
+    if (open && selectedTower.id == temp_id) {
+        level = selectedTower.level;
+    }
 }
 
 } // namespace S
