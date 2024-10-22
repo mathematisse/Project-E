@@ -5,7 +5,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
 option(BUILD_RTYPE "Build R-Type" ON)
-option(BUILD_MAP_EDITOR "Build MapEditor" OFF) # cmake -S . -B build/ -DBUILD_MAP_EDITOR=ON
 
 enable_testing()
 
@@ -56,8 +55,4 @@ add_subdirectory(engine)
 
 if(BUILD_RTYPE)
     add_subdirectory(rtype)
-endif()
-
-if(BUILD_MAP_EDITOR)
-    add_subdirectory(map_editor)
 endif()
