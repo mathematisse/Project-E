@@ -268,18 +268,13 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr, const std:
 
 bool EntityManager::addTime(float time)
 {
-    // std::cout << "Adding time: " << time << "\n";
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
-    // std::cout << "Time passed: " << _timePassed << "\n";
-    // std::cout << "Time since last fixed update: " << _timeSinceLastFixedUpdate << "\n";
-
+    _systemTree.deltaTime = time;
     _runSystems();
     if (_timeSinceLastFixedUpdate >= 0.02F) {
-        // std::cout << "Running fixed systems" << "\n";
         _runFixedSystems();
         _timeSinceLastFixedUpdate -= 0.02F;
-        // std::cout << "Time since last fixed update: " << _timeSinceLastFixedUpdate << "\n";
         return true;
     }
     return false;
