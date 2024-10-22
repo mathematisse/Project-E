@@ -20,6 +20,8 @@ Checks: "*,
         -hicpp-no-array-decay,
         -unused-includes,
         -bugprone-easily-swappable-parameters,
+        -cppcoreguidelines-avoid-magic-numbers,
+        -readability-magic-numbers,
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
