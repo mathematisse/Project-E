@@ -81,6 +81,13 @@ auto Socket::create(const SocketAddr &addr, int type) -> io::Result<Socket>
     if (sockfd == INVALID_SOCKET) {
         return io::Result<Socket>::Error(std::error_code(errno, std::system_category()));
     }
+    // bind to address
+    auto [address, address_len] = initialize_address(addr);
+    if (::bind(sockfd, reinterpret_cast<struct sockaddr *>(&address), address_len) ==
+        SOCKET_ERROR) {
+        close_socket(sockfd);
+        return io::Result<Socket>::Error(std::error_code(errno, std::system_category()));
+    }
     return io::Result<Socket>::Success(Socket(sockfd));
 }
 

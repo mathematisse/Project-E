@@ -7,13 +7,24 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(lib_net STATIC "")
 
 file(GLOB_RECURSE LIB_NET_SOURCES "*.cpp")
-target_sources(lib_net PRIVATE ${LIB_NET_SOURCES})
+file(GLOB_RECURSE EXAMPLE_SOURCES "examples/*.cpp")
 
-# target_link_libraries(lib_net ${boostincludedir})
+list(REMOVE_ITEM LIB_NET_SOURCES ${EXAMPLE_SOURCES})
+
+target_sources(lib_net PRIVATE ${LIB_NET_SOURCES})
 
 if(MINGW)
   target_link_libraries(lib_net ws2_32 wsock32)
 endif()
+
+project(lib_net_example)
+
+add_executable(lib_net_example)
+
+target_sources(lib_net_example PRIVATE ${EXAMPLE_SOURCES})
+
+target_link_libraries(lib_net_example lib_net)
+
 
 # Required for testing
 # enable_testing()

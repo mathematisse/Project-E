@@ -9,10 +9,9 @@ namespace net {
 struct Gateway {
 
     Gateway() { generateNumber(); }
-    ~Gateway() { tcp_socket.close(); }
 
     TCPSocket tcp_socket;
-    UDPInfo udp_info;
+    UDPInfo udp_info {};
     std::uint64_t generated_number = 0;
     std::vector<Packet> send_tcp_queue;
     std::vector<Packet> send_udp_queue;

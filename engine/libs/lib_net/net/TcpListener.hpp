@@ -13,7 +13,7 @@ public:
 public:
     static constexpr auto DEFAULT_MAX_LISTENERS = 128;
 
-    ~TcpListener();
+    ~TcpListener() = default;
 
     [[nodiscard]]
     static auto bind(const SocketAddr &addr) -> io::Result<TcpListener>;
@@ -23,6 +23,12 @@ public:
 
     [[nodiscard]]
     auto local_addr() const -> io::Result<SocketAddr>;
+
+    [[nodiscard]]
+    inline auto get_fd() const -> int
+    {
+        return _sock.sockfd;
+    }
 
 private:
     explicit TcpListener(Socket sock):

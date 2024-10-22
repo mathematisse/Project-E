@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstdint>
 #include <map>
-#include <optional>
 
 #include "lib_net/net.hpp"
 #include "Gateway.hpp"
@@ -14,12 +12,8 @@ struct Context {
     fd_set readFds;
     fd_set writeFds;
     ssize_t readyCount;
-    timeval tv {};
 
-    void select(
-        const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds,
-        std::optional<uint64_t> timeout
-    );
+    void select(const std::vector<socket_t> &read_fds, const std::vector<socket_t> &write_fds);
     [[nodiscard]] inline bool is_readable(socket_t fd) const
     {
         return (fd != INVALID_SOCKET && FD_ISSET(fd, &readFds));

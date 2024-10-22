@@ -16,6 +16,7 @@ auto TcpListener::bind(const SocketAddr &addr) -> io::Result<TcpListener>
     if (!sock) {
         return io::Result<TcpListener>::Error(sock.error());
     }
+
 #ifndef _WIN32
     sock.value().set_reuse_addr(true);
 #endif

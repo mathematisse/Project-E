@@ -118,8 +118,6 @@ int main(int ac, char **av)
     bool started = false;
 
     while (true) {
-        // sleep 1 second
-        std::this_thread::sleep_for(std::chrono::seconds(1));
         server.update();
         server.update();
         server.update();

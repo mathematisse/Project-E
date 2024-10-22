@@ -14,7 +14,7 @@ namespace net {
 class Client {
 public:
     bool connect_tcp(const std::string &ip, uint16_t port);
-    bool establish_udp_connection(const std::string &ip, uint16_t port);
+    bool connect_udp(const std::string &ip, uint16_t port);
     bool is_connected() const { return gateway.tcp_socket.is_connected(); }
     void send_tcp(Packet::MsgType type, const std::vector<std::uint8_t> &data);
     void send_udp(Packet::MsgType type, const std::vector<std::uint8_t> &data);

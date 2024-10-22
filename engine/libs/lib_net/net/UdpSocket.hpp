@@ -31,6 +31,13 @@ public:
 
     auto recv(std::span<std::byte> &buf) const -> io::Result<size_t>;
 
+    [[nodiscard]] inline auto local_addr() const -> io::Result<SocketAddr>
+    {
+        return _sock.local_addr();
+    }
+
+    [[nodiscard]] inline auto get_fd() const -> int { return _sock.sockfd; }
+
 private:
     explicit UdpSocket(Socket sockfd):
         _sock(sockfd)

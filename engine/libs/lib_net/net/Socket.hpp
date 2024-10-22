@@ -34,7 +34,10 @@ public:
     auto set_reuse_addr(bool enable) -> io::Result<result::Void>;
 
 private:
-    explicit Socket(int sockfd);
+    explicit Socket(int sockfd):
+        sockfd(sockfd)
+    {
+    }
 };
 
 } // namespace lnet::net

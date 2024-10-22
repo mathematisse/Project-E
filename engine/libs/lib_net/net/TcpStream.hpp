@@ -52,6 +52,12 @@ public:
         return io::Result<result::Void>::Success(result::Void {});
     }
 
+    [[nodiscard]]
+    inline auto get_fd() const -> int
+    {
+        return _sock.sockfd;
+    }
+
 protected:
     explicit TcpStream(Socket sock):
         _sock(sock)
