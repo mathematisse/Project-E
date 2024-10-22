@@ -14,3 +14,7 @@ endif()
 if(NETWORK_ENABLED AND NOT TARGET network)
     add_subdirectory(network)
 endif()
+
+if(spatial2d AND NOT TARGET spatial2d)
+    add_subdirectory(spatial2d)
+endif()
