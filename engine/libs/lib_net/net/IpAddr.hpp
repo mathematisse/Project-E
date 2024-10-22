@@ -10,7 +10,7 @@
 #include "lib_net/result/Result.hpp"
 #include "lib_net/net/AddrParseError.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 class Ipv4Addr {
 public:
@@ -156,4 +156,4 @@ public:
     }
 };
 }
-// namespace net::net
+// namespace lnet::net

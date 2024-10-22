@@ -8,7 +8,7 @@
 
 #include "Poll.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 auto Poll::add_read(const TcpStream &stream) -> io::Result<result::Void>
 {

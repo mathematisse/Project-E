@@ -3,7 +3,7 @@
 #include "lib_net/net/Socket.hpp"
 #include "lib_net/net/TcpStream.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 auto TcpStream::connect(const SocketAddr &addr) -> io::Result<TcpStream>
 {
@@ -22,4 +22,4 @@ auto TcpStream::connect(const SocketAddr &addr) -> io::Result<TcpStream>
     return io::Result<TcpStream>::Error(sock.error());
 }
 
-} // namespace net::io
+} // namespace lnet::io

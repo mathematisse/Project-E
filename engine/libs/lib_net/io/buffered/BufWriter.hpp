@@ -8,7 +8,7 @@
 #include "lib_net/io/buffered/Buffer.hpp"
 #include "lib_net/io/Result.hpp"
 
-namespace net::io {
+namespace lnet::io {
 
 class BufWriter {
 private:
@@ -164,4 +164,4 @@ private:
     }
 };
 
-} // namespace net::io
+} // namespace lnet::io

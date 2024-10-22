@@ -7,7 +7,7 @@
 
 #include "lib_net/io/Result.hpp"
 
-namespace net::io {
+namespace lnet::io {
 
 class Read {
 public:

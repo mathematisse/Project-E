@@ -12,7 +12,7 @@
 
 #pragma region WorkInProgress
 
-namespace net::net {
+namespace lnet::net {
 
 class TcpStream : public io::Write, public io::Read {
 public:
@@ -62,4 +62,4 @@ protected:
     friend class TcpListener;
 };
 
-} // namespace net::io
+} // namespace lnet::io

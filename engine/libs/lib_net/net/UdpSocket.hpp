@@ -8,7 +8,7 @@
 #include "lib_net/result/Result.hpp"
 #include "lib_net/net/SocketAddr.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 class UdpSocket {
 public:
@@ -38,4 +38,4 @@ private:
     }
 };
 
-} // namespace net::io
+} // namespace lnet::io

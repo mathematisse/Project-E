@@ -4,7 +4,7 @@
 #include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/net/TcpStream.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 class TcpListener {
 public:
@@ -31,4 +31,4 @@ private:
     }
 };
 
-} // namespace net::net
+} // namespace lnet::net

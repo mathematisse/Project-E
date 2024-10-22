@@ -5,7 +5,7 @@
 #include <variant>
 #include <initializer_list>
 
-namespace net::result {
+namespace lnet::result {
 
 struct Void : std::monostate {
     using std::monostate::monostate;
@@ -159,4 +159,4 @@ private:
     ResultType result;
 };
 
-} // namespace net::result
+} // namespace lnet::result

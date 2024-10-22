@@ -2,7 +2,7 @@
 #include "lib_net/net/IpAddr.hpp"
 #include "lib_net/net/AddrParseError.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 auto Ipv4Addr::parse_ascii(const std::string &str) -> result::Result<Ipv4Addr, AddrParseError>
 {
@@ -66,4 +66,4 @@ auto Ipv6Addr::parse_ascii(const std::string &str) -> result::Result<Ipv6Addr, A
     return result::Result<Ipv6Addr, AddrParseError>::Success(Ipv6Addr(addr));
 }
 
-} // namespace net::net
+} // namespace lnet::net

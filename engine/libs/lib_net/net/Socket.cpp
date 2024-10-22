@@ -6,7 +6,7 @@
 #include "lib_net/result/Result.hpp"
 #include <cstring>
 
-namespace net::net {
+namespace lnet::net {
 
 auto create_socket(int domain) -> io::Result<int>
 {
@@ -199,4 +199,4 @@ auto Socket::set_reuse_addr(bool enable) -> io::Result<result::Void>
     return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 }
 
-} // namespace net::net
+} // namespace lnet::net

@@ -10,7 +10,7 @@
 #include "lib_net/net/UdpSocket.hpp"
 #include "lib_net/net/TcpListener.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 class PollEvent {
 public:

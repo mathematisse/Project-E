@@ -8,7 +8,7 @@
 #include "lib_net/net/_base.hpp"
 #include "lib_net/result/Result.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 UdpSocket::~UdpSocket() { _sock.close(); }
 

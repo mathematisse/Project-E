@@ -9,7 +9,7 @@
 #include "lib_net/net/IpAddr.hpp"
 #include "lib_net/net/AddrParseError.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 class SocketAddrV4 {
 public:
@@ -141,4 +141,4 @@ public:
 private:
     std::variant<SocketAddrV4, SocketAddrV6> addr_ = SocketAddrV4 {Ipv4Addr {{0, 0, 0, 0}}, 0};
 };
-} // namespace net::net
+} // namespace lnet::net

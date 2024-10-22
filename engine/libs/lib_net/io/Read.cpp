@@ -3,7 +3,7 @@
 
 #include "Read.hpp"
 
-namespace net::io {
+namespace lnet::io {
 
 // Like `read`, except that it reads into a slice of buffers.
 Result<std::size_t> Read::read_vectored(std::span<std::span<std::byte>> bufs, size_t &bytesRead)

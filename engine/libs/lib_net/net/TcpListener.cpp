@@ -6,7 +6,7 @@
 #include "lib_net/net/TcpStream.hpp"
 #include "lib_net/net/_base.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 auto TcpListener::bind(const SocketAddr &addr) -> io::Result<TcpListener>
 {
@@ -39,4 +39,4 @@ auto TcpListener::accept() const -> io::Result<std::pair<TcpStream, SocketAddr>>
 
 auto TcpListener::local_addr() const -> io::Result<SocketAddr> { return _sock.local_addr(); }
 
-} // namespace net::net
+} // namespace lnet::net

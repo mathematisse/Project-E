@@ -23,7 +23,7 @@
 #include <unistd.h> /* Needed for close() */
 #endif
 
-namespace net {
+namespace lnet {
 
 constexpr size_t MAX_BUFFER_SIZE = 8192;
 constexpr size_t MAX_LISTEN_BACKLOG = 5;

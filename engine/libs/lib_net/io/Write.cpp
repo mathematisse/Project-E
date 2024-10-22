@@ -10,7 +10,7 @@
 #include "lib_net/result/Result.hpp"
 #include "lib_net/io/Write.hpp"
 
-namespace net::io {
+namespace lnet::io {
 
 Result<size_t> Write::write_vectored(const std::span<std::span<std::byte>> &bufs)
 {
@@ -59,4 +59,4 @@ Result<result::Void> Write::write_str(const std::string &str)
     return write_all(byte_buf);
 }
 
-} // namespace net::io
+} // namespace lnet::io

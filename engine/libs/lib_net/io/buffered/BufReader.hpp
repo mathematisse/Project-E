@@ -8,7 +8,7 @@
 #include <span>
 #include <variant>
 
-namespace net::io {
+namespace lnet::io {
 
 template<typename R>
 class BufReader {
@@ -130,4 +130,4 @@ public:
     }
 };
 
-} // namespace net::io
+} // namespace lnet::io

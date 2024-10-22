@@ -5,7 +5,7 @@
 #include "lib_net/io/Result.hpp"
 #include <span>
 
-namespace net::net {
+namespace lnet::net {
 
 /// Provides a convenient interface for working with sockets.
 /// This class is a wrapper around windows & posix socket APIs.
@@ -37,4 +37,4 @@ private:
     explicit Socket(int sockfd);
 };
 
-} // namespace net::net
+} // namespace lnet::net

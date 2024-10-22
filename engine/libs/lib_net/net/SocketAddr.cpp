@@ -1,7 +1,7 @@
 
 #include "lib_net/net/SocketAddr.hpp"
 
-namespace net::net {
+namespace lnet::net {
 
 auto SocketAddr::parse_ascii(const std::string &str) -> result::Result<SocketAddr, AddrParseError>
 {
@@ -31,4 +31,4 @@ auto SocketAddr::parse_ascii(const std::string &str) -> result::Result<SocketAdd
     );
 }
 
-} // namespace net::net
+} // namespace lnet::net

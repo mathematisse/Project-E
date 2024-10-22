@@ -8,7 +8,7 @@
 #include "lib_net/io/Read.hpp"
 #include "lib_net/io/Result.hpp"
 
-namespace net::io {
+namespace lnet::io {
 
 constexpr size_t DEFAULT_BUF_SIZE = 8192;
 // Buffer class with fixed-size buffer and manual allocation

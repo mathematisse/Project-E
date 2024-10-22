@@ -7,7 +7,7 @@
 #include "lib_net/io/Result.hpp"
 #include "lib_net/result/Result.hpp"
 
-namespace net::io {
+namespace lnet::io {
 
 class Write {
 public:
@@ -44,4 +44,4 @@ concept Writable = requires(T t, const std::span<std::byte> &buf) {
     { t.flush() } -> std::same_as<Result<result::Void>>;
 };
 
-} // namespace net::io
+} // namespace lnet::io
