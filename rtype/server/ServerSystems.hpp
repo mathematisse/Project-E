@@ -69,8 +69,9 @@ protected:
     ) override;
 };
 
-class ShootSystem : public S::AStatusMonoSystem<
-                        C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool> {
+class ShootSystem
+    : public S::AStatusMonoSystem<
+          C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool, C::WeaponPool> {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
@@ -94,7 +95,8 @@ protected:
     size_t _spriteId = 0;
     void _statusOperate(
         typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype,
-        typename C::CanShootPool::Types &canshoot, typename C::IsShootingPool::Types &cIsShooting
+        typename C::CanShootPool::Types &canshoot, typename C::IsShootingPool::Types &cIsShooting,
+        typename C::WeaponPool::Types &cweapon
     ) override;
 };
 

@@ -9,6 +9,10 @@
     {                                                                   \
         "assets", "Main ship weapons", "Aseprite", "Cannon_bulletC.png" \
     }
+#define BIG_SHOT_PATH                                             \
+    {                                                             \
+        "assets", "Main ship weapons", "Aseprite", "big_shot.png" \
+    }
 
 #define P1F                                                     \
     {                                                           \
@@ -67,6 +71,10 @@
     {                                                                                  \
         "assets", "Main Ship", "Main Ship - Engine Effects", "Aseprite", "Engine1.png" \
     }
+#define FRIGATE_1                                                \
+    {                                                            \
+        "assets", "Kla'ed", "Weapons", "Aseprite", "frigate.png" \
+    }
 
 #define MENU_MUSIC                              \
     {                                           \
@@ -107,6 +115,8 @@ const std::vector<std::vector<std::string>> paths = {
     E1FC,
     CUT_BULLET_PATH,
     ENGINE_1,
+    BIG_SHOT_PATH,
+    FRIGATE_1,
     MENU_BACKGROUND,
     LOADING_BACKGROUND,
     P2
