@@ -8,9 +8,6 @@ void IncrementTimerSystem::_statusOperate(typename C::TimerPool::Types &ctimer)
     time += deltaTime;
 }
 
-void IncrementTimerSystem::getRunStepData(SystemTree &sysTree)
-{
-    deltaTime = sysTree.deltaTime;
-}
+void IncrementTimerSystem::getRunStepData(SystemTree &sysTree) { deltaTime = sysTree.deltaTime; }
 
 }
