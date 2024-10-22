@@ -12,11 +12,8 @@ namespace net::net {
 /// Calling thoses functions directly is not recommended, use UdpSocket or TcpStream/Listener
 /// instead.
 class Socket {
-protected:
+public:
     int sockfd;
-
-    // Allow TcpListener to access sockfd to use listen() function
-    friend class TcpListener;
 
 public:
     static auto create(const SocketAddr &addr, int type) -> io::Result<Socket>;

@@ -22,22 +22,4 @@ auto TcpStream::connect(const SocketAddr &addr) -> io::Result<TcpStream>
     return io::Result<TcpStream>::Error(sock.error());
 }
 
-auto TcpStream::peer_addr() const -> io::Result<SocketAddr>
-{
-    auto addr = _sock.peer_addr();
-    if (addr) {
-        return io::Result<SocketAddr>::Success(addr.value());
-    }
-    return io::Result<SocketAddr>::Error(addr.error());
-}
-
-auto TcpStream::local_addr() const -> io::Result<SocketAddr>
-{
-    auto addr = _sock.local_addr();
-    if (addr) {
-        return io::Result<SocketAddr>::Success(addr.value());
-    }
-    return io::Result<SocketAddr>::Error(addr.error());
-}
-
 } // namespace net::io

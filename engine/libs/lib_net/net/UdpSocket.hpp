@@ -11,7 +11,7 @@
 namespace net::net {
 
 class UdpSocket {
-private:
+public:
     Socket _sock;
 
 public:

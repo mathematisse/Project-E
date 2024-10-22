@@ -7,7 +7,7 @@
 namespace net::net {
 
 class TcpListener {
-private:
+public:
     Socket _sock;
 
 public:

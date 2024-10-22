@@ -15,7 +15,7 @@
 namespace net::net {
 
 class TcpStream : public io::Write, public io::Read {
-private:
+public:
     Socket _sock;
 
 public:
@@ -23,9 +23,21 @@ public:
 
     [[nodiscard]]
     static auto connect(const SocketAddr &addr) -> io::Result<TcpStream>;
-    [[nodiscard]] auto peer_addr() const -> io::Result<SocketAddr>;
-    [[nodiscard]] auto local_addr() const -> io::Result<SocketAddr>;
-    [[nodiscard]] auto shutdown() const -> io::Result<result::Void>;
+    [[nodiscard]]
+    inline auto peer_addr() const -> io::Result<SocketAddr>
+    {
+        return _sock.peer_addr();
+    }
+    [[nodiscard]]
+    inline auto local_addr() const -> io::Result<SocketAddr>
+    {
+        return _sock.local_addr();
+    }
+    [[nodiscard]]
+    inline auto shutdown() const -> io::Result<result::Void>
+    {
+        return _sock.shutdown();
+    }
 
     inline auto read(const std::span<std::byte> &buf) -> io::Result<std::size_t> override
     {

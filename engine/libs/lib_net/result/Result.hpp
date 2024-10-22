@@ -17,6 +17,27 @@ template<typename T, typename E>
 class Result {
 public:
     using ResultType = std::variant<T, E>;
+    enum class ResultTypeIndex {
+        Value,
+        Error
+    };
+
+    // Helper type for the visitor
+    template<class... Ts>
+    struct overloaded : Ts... {
+        using Ts::operator()...;
+    };
+
+    template<typename Val, typename Err>
+        requires(std::invocable<Val, const T &> && std::invocable<Err, const E &>)
+    auto visit(Val &&valVisitor, Err &&errVisitor) const
+        -> std::common_type_t<
+            std::invoke_result_t<Val, const T &>, std::invoke_result_t<Err, const E &>>
+    {
+        return std::visit(
+            overloaded {std::forward<Val>(valVisitor), std::forward<Err>(errVisitor)}, result
+        );
+    }
 
     explicit Result(const T &value):
         result(value)
