@@ -5,6 +5,7 @@
 #include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/net/TcpStream.hpp"
 #include "lib_net/net/_base.hpp"
+#include <system_error>
 
 namespace lnet::net {
 
@@ -20,7 +21,7 @@ auto TcpListener::bind(const SocketAddr &addr) -> io::Result<TcpListener>
 #endif
     auto listen_result = ::listen(sock.value().sockfd, DEFAULT_MAX_LISTENERS);
     if (listen_result == SOCKET_ERROR) {
-        return io::Result<TcpListener>::Error(errno);
+        return io::Result<TcpListener>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<TcpListener>::Success(TcpListener(sock.value()));
 }

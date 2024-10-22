@@ -78,7 +78,6 @@ int main(int ac, char **av)
     port = std::stoi(av[1]);
 
     server.host(port);
-    server.start();
     std::cout << "Server started on port " << port << std::endl;
     srand(time(NULL));
 

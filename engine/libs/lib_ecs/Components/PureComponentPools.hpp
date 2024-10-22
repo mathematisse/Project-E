@@ -10,8 +10,8 @@
 #include "lib_ecs/Components/AComponentPool.hpp"
 #include <iostream>
 
-#define DECLARE_COMPONENT(name, ...)                                     \
-    inline constexpr char name##ComponentName[] = #name;                      \
+#define DECLARE_COMPONENT(name, ...)                                                \
+    inline constexpr char name##ComponentName[] = #name;                            \
     class name##Pool : public AComponentPool<name##ComponentName, __VA_ARGS__> { }; \
     using name##Ref = ComponentRef<__VA_ARGS__>;
 

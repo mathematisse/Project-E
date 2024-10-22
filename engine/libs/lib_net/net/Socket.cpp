@@ -12,7 +12,7 @@ auto create_socket(int domain) -> io::Result<int>
 {
     auto sockfd = socket(domain, SOCK_DGRAM, 0);
     if (sockfd == INVALID_SOCKET) {
-        return io::Result<int>::Error(errno);
+        return io::Result<int>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<int>::Success(sockfd);
 }
@@ -23,7 +23,7 @@ auto setsockopt(int sockfd, int level, int optname, const void *optval, socklen_
     if (::setsockopt(sockfd, level, optname, static_cast<const char *>(optval), optlen) ==
         SOCKET_ERROR) {
         close_socket(sockfd);
-        return io::Result<result::Void>::Error(errno);
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<result::Void>::Success({});
 }
@@ -33,7 +33,7 @@ auto bind_socket(int sockfd, const struct sockaddr *address, socklen_t address_l
 {
     if (::bind(sockfd, address, address_len) == SOCKET_ERROR) {
         close_socket(sockfd);
-        return io::Result<result::Void>::Error(errno);
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<result::Void>::Success({});
 }
@@ -79,7 +79,7 @@ auto Socket::create(const SocketAddr &addr, int type) -> io::Result<Socket>
 {
     auto sockfd = socket(addr.is_ipv4() ? AF_INET : AF_INET6, type, 0);
     if (sockfd == INVALID_SOCKET) {
-        return io::Result<Socket>::Error(errno);
+        return io::Result<Socket>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<Socket>::Success(Socket(sockfd));
 }
@@ -89,7 +89,7 @@ auto Socket::connect(const SocketAddr &addr) const -> io::Result<result::Void>
     auto [address, address_len] = initialize_address(addr);
     if (::connect(sockfd, reinterpret_cast<struct sockaddr *>(&address), address_len) ==
         SOCKET_ERROR) {
-        return io::Result<result::Void>::Error(errno);
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<result::Void>::Success({});
 }
@@ -97,7 +97,7 @@ auto Socket::connect(const SocketAddr &addr) const -> io::Result<result::Void>
 auto Socket::close() const -> io::Result<result::Void>
 {
     if (close_socket(sockfd) == SOCKET_ERROR) {
-        return io::Result<result::Void>::Error(errno);
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<result::Void>::Success({});
 }
@@ -108,7 +108,9 @@ auto Socket::accept() const -> io::Result<std::pair<Socket, SocketAddr>>
     socklen_t address_len = sizeof(address);
     auto new_sockfd = ::accept(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len);
     if (new_sockfd == INVALID_SOCKET) {
-        return io::Result<std::pair<Socket, SocketAddr>>::Error(errno);
+        return io::Result<std::pair<Socket, SocketAddr>>::Error(
+            std::error_code(errno, std::system_category())
+        );
     }
     return io::Result<std::pair<Socket, SocketAddr>>::Success(
         {Socket(new_sockfd), address_from_sockaddr(address)}
@@ -119,7 +121,7 @@ auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size
 {
     auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), 0);
     if (nread == SOCKET_ERROR) {
-        return io::Result<std::size_t>::Error(errno);
+        return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<std::size_t>::Success(nread);
 }
@@ -134,7 +136,9 @@ auto Socket::recv_from(const std::span<std::byte> &buf
         reinterpret_cast<struct sockaddr *>(&address), &address_len
     );
     if (nread == SOCKET_ERROR) {
-        return io::Result<std::pair<std::size_t, SocketAddr>>::Error(errno);
+        return io::Result<std::pair<std::size_t, SocketAddr>>::Error(
+            std::error_code(errno, std::system_category())
+        );
     }
     auto addr = address_from_sockaddr(address);
     return io::Result<std::pair<std::size_t, SocketAddr>>::Success({nread, addr});
@@ -144,7 +148,7 @@ auto Socket::write(const std::span<std::byte> &buf) const -> io::Result<std::siz
 {
     auto nwritten = ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), 0);
     if (nwritten == SOCKET_ERROR) {
-        return io::Result<std::size_t>::Error(errno);
+        return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<std::size_t>::Success(nwritten);
 }
@@ -158,7 +162,7 @@ auto Socket::send_to(const std::span<std::byte> &buf, const SocketAddr &addr) co
         reinterpret_cast<struct sockaddr *>(&address), address_len
     );
     if (nwritten == SOCKET_ERROR) {
-        return io::Result<std::size_t>::Error(errno);
+        return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<std::size_t>::Success(nwritten);
 }
@@ -166,7 +170,7 @@ auto Socket::send_to(const std::span<std::byte> &buf, const SocketAddr &addr) co
 auto Socket::shutdown() const -> io::Result<result::Void>
 {
     if (::shutdown(sockfd, SHUT_RDWR) == SOCKET_ERROR) {
-        return io::Result<result::Void>::Error(errno);
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<result::Void>::Success({});
 }
@@ -177,7 +181,7 @@ auto Socket::peer_addr() const -> io::Result<SocketAddr>
     socklen_t address_len = sizeof(address);
     if (::getpeername(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len) ==
         SOCKET_ERROR) {
-        return io::Result<SocketAddr>::Error(errno);
+        return io::Result<SocketAddr>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<SocketAddr>::Success(address_from_sockaddr(address));
 }
@@ -188,7 +192,7 @@ auto Socket::local_addr() const -> io::Result<SocketAddr>
     socklen_t address_len = sizeof(address);
     if (::getsockname(sockfd, reinterpret_cast<struct sockaddr *>(&address), &address_len) ==
         SOCKET_ERROR) {
-        return io::Result<SocketAddr>::Error(errno);
+        return io::Result<SocketAddr>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<SocketAddr>::Success(address_from_sockaddr(address));
 }
