@@ -129,15 +129,17 @@ void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
     }
 }
 
-void SystemTreeNode::runNode()
+void SystemTreeNode::runNode(SystemTree &tree)
 {
     for (auto &startSystem : _startSystems) {
+        startSystem->getRunStepData(tree);
         startSystem->run();
     }
     for (auto &child : _children) {
-        child.runNode();
+        child.runNode(tree);
     }
     for (auto &endSystem : _endSystems) {
+        endSystem->getRunStepData(tree);
         endSystem->run();
     }
 }
@@ -176,6 +178,6 @@ void SystemTree::registerEntityPool(E::IEntityPool *entityPool)
     _root.registerEntityPool(entityPool);
 }
 
-void SystemTree::runTree() { _root.runNode(); }
+void SystemTree::runTree() { _root.runNode(*this); }
 } // namespace S
 } // namespace ECS

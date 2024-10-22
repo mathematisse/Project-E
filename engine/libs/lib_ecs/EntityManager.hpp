@@ -50,6 +50,9 @@ public:
 
     bool addTime(float time);
 
+    S::SystemTree &getSystemTree() { return _systemTree; };
+    S::SystemTree &getFixedSystemTree() { return _fixedSystemTree; };
+
 private:
     void _runSystems();
     void _runFixedSystems();

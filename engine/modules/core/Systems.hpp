@@ -14,7 +14,7 @@ public:
     IncrementTimerSystem &operator=(const IncrementTimerSystem &other) = default;
     IncrementTimerSystem &operator=(IncrementTimerSystem &&other) = default;
 
-    float deltaTime = 0.1F;
+    void getRunStepData(SystemTree &sysTree) override;
 
 protected:
     void _statusOperate(typename C::TimerPool::Types &ctimer) override;

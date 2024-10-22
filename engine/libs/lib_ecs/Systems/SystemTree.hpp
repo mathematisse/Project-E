@@ -16,6 +16,8 @@ enum PureSystemGroups {
     SYNCSYSGROUP = 2,
 };
 
+class SystemTree;
+
 class SystemTreeNode {
 public:
     explicit SystemTreeNode(
@@ -32,7 +34,7 @@ public:
     bool addSystem(ISystem *system, int group, bool atStart);
     bool addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside);
     void registerEntityPool(E::IEntityPool *entityPool);
-    void runNode();
+    void runNode(SystemTree &tree);
     [[nodiscard]] int getGroup() const;
 
 private:
@@ -56,6 +58,8 @@ public:
     bool addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside);
     void registerEntityPool(E::IEntityPool *entityPool);
     void runTree();
+
+    float deltaTime;
 
 private:
     SystemTreeNode _root;
