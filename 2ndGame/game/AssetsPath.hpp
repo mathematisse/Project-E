@@ -26,7 +26,13 @@
         "assets", "other_game", "shader", "colorblind.frag" \
     }
 
+#define EMPTY_TOWER                               \
+    {                                             \
+        "assets", "other_game", "empty_tower.png" \
+    }
+
 const std::vector<std::vector<std::string>> paths = {
     MENU_BACKGROUND,
     GAME_BACKGROUND,
+    EMPTY_TOWER,
 };

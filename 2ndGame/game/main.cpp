@@ -61,6 +61,30 @@ int main(int ac, char *av[])
         square_background->getSprite()->set<0>(assetsLoader.get_asset(GAME_BACKGROUND).id);
     }
 
+    auto towers = _eM.createEntities("Decor", 9, ECS::C::ENT_ALIVE);
+
+    std::vector<Vector2> towers_positions = {{1287, 224}, {1452, 889}, {616, 266},
+                                             {531, 559},  {901, 462},  {1139, 741},
+                                             {1012, 271}, {205, 280},  {682, 841}};
+
+    int i = 0;
+
+    for (const auto &entity : towers) {
+        auto ref = _eM.getEntity(entity);
+
+        auto square_background = dynamic_cast<ECS::E::DecorRef *>(ref.get());
+        if (!square_background) {
+            std::cerr << "Failed to cast IEntityRef to DecorRef" << std::endl;
+            return 0;
+        }
+        square_background->getPosition()->set<0>(towers_positions[i].x);
+        square_background->getPosition()->set<1>(towers_positions[i].y);
+        square_background->getSize()->set<0>(75);
+        square_background->getSize()->set<1>(75);
+        square_background->getSprite()->set<0>(assetsLoader.get_asset(EMPTY_TOWER).id);
+        i++;
+    }
+
     auto curr_time = std::chrono::steady_clock::now();
 
     while (!WindowShouldClose()) {
