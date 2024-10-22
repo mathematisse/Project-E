@@ -62,6 +62,18 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
             return;
         }
+        int rand = std::rand() % 5;
+        if (rand == 2) {
+            square_ennemy->getHealth()->set<0>(5);
+            square_ennemy->getWeapon()->set<0>(WeaponType::BIG_SHOT);
+            square_ennemy->getSize()->set<0>(180);
+            square_ennemy->getSize()->set<1>(120);
+        } else {
+            square_ennemy->getHealth()->set<0>(2);
+            square_ennemy->getWeapon()->set<0>(WeaponType::BULLET);
+            square_ennemy->getSize()->set<0>(80);
+            square_ennemy->getSize()->set<1>(80);
+        }
         square_ennemy->getVelocity()->set<0>(0.0F);
         square_ennemy->getVelocity()->set<1>(0.0F);
         square_ennemy->getVelocity()->set<2>(150.0F);
@@ -70,24 +82,27 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
         square_ennemy->getColor()->set<1>(0);
         square_ennemy->getColor()->set<2>(0);
         square_ennemy->getColor()->set<3>(255);
-        square_ennemy->getSize()->set<0>(80);
-        square_ennemy->getSize()->set<1>(80);
         square_ennemy->getSize()->set<2>(90);
 
-        float _x = x + 500 + rand() % (int) (x + 1000);
-        float _y = 100 + rand() % 800;
+        float _x = x + 500 + std::rand() % (int) (x + 1000);
+        float _y = 100 + std::rand() % 800;
         square_ennemy->getPosition()->set<0>(_x);
         square_ennemy->getPosition()->set<1>(_y);
         square_ennemy->getCanShoot()->set<0>(true);
-        square_ennemy->getCanShoot()->set<1>(1.5F);
+        if (*square_ennemy->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+            square_ennemy->getCanShoot()->set<1>(3.0F);
+        } else {
+            square_ennemy->getCanShoot()->set<1>(1.5F);
+        }
         square_ennemy->getSprite()->set<0>(_spriteId);
-        square_ennemy->getHealth()->set<0>(2);
+
         auto _netId = networkManager.getnewNetID();
 
         square_ennemy->getNetworkID()->set<0>(_netId);
 
         server.send_tcp(
-            RTypePacketType::NEW_ENNEMY, net::Packet::serializeStruct(NewEnnemy {_x, _y, _netId})
+            RTypePacketType::NEW_ENNEMY,
+            net::Packet::serializeStruct(NewEnnemy {_x, _y, _netId, rand})
         );
     }
 
@@ -132,7 +147,7 @@ ShootSystem::ShootSystem(
 
 void ShootSystem::_statusOperate(
     C::PositionPool::Types &cposition, C::TypePool::Types &ctype, C::CanShootPool::Types &canshoot,
-    C::IsShootingPool::Types &cIsShooting
+    C::IsShootingPool::Types &cIsShooting, C::WeaponPool::Types &cweapon
 )
 {
     auto [type] = ctype;
@@ -145,6 +160,7 @@ void ShootSystem::_statusOperate(
         delay -= deltaTime;
         return;
     }
+    auto [weapon] = cweapon;
     if (((isShooting != 0) && type == SquareType::PLAYER) || type == SquareType::ENEMY) {
         auto [x, y] = cposition;
         Vector2 playerPosition = {x, y};
@@ -207,30 +223,65 @@ void ShootSystem::_statusOperate(
             square_bullet->getColor()->set<3>(255);
             square_bullet->getPosition()->set<1>(y + 25);
             square_bullet->getCanShoot()->set<0>(false);
-            square_bullet->getSize()->set<0>(30);
-            square_bullet->getSize()->set<1>(30);
-            square_bullet->getSprite()->set<0>(_spriteId);
+            if (weapon == WeaponType::BULLET) {
+                square_bullet->getSprite()->set<0>(_spriteId);
+                square_bullet->getSprite()->set<2>(30.0F);
+                square_bullet->getSprite()->set<3>(30.0F);
+                square_bullet->getSprite()->set<4>(4.0F);
+                square_bullet->getHealth()->set<0>(1);
+                square_bullet->getSize()->set<0>(30);
+                square_bullet->getSize()->set<1>(30);
+            }
+            if (weapon == WeaponType::BIG_SHOT) {
+                square_bullet->getSprite()->set<0>(_spriteId);
+                square_bullet->getSprite()->set<2>(70.0F);
+                square_bullet->getSprite()->set<3>(70.0F);
+                square_bullet->getSprite()->set<4>(10.0F);
+                square_bullet->getHealth()->set<0>(5);
+                square_bullet->getSize()->set<0>(70);
+                square_bullet->getSize()->set<1>(70);
+            }
             square_bullet->getSprite()->set<1>(true);
-            square_bullet->getSprite()->set<2>(30.0F);
-            square_bullet->getSprite()->set<3>(30.0F);
-            square_bullet->getSprite()->set<4>(4.0F);
             square_bullet->getSprite()->set<5>(0);
-            square_bullet->getHealth()->set<0>(1);
             square_bullet->getTimer()->set<0>(0.0F);
             square_bullet->getTimer()->set<1>(8.0F);
 
             auto _netId = networkManager.getnewNetID();
             square_bullet->getNetworkID()->set<0>(_netId);
             if (type == SquareType::PLAYER) {
-                server.send_tcp(
-                    RTypePacketType::BULLET_SHOT,
-                    net::Packet::serializeStruct(BulletShot {x + 80 + 35, y + 25, true, _netId})
-                );
+                if (weapon == WeaponType::BULLET) {
+                    server.send_tcp(
+                        RTypePacketType::BULLET_SHOT,
+                        net::Packet::serializeStruct(
+                            BulletShot {x + 80 + 35, y + 25, true, _netId, false}
+                        )
+                    );
+                }
+                if (weapon == WeaponType::BIG_SHOT) {
+                    server.send_tcp(
+                        RTypePacketType::BULLET_SHOT,
+                        net::Packet::serializeStruct(
+                            BulletShot {x + 80 + 35, y + 25, true, _netId, true}
+                        )
+                    );
+                }
             } else {
-                server.send_tcp(
-                    RTypePacketType::BULLET_SHOT,
-                    net::Packet::serializeStruct(BulletShot {x - 35, y + 25, false, _netId})
-                );
+                if (weapon == WeaponType::BULLET) {
+                    server.send_tcp(
+                        RTypePacketType::BULLET_SHOT,
+                        net::Packet::serializeStruct(
+                            BulletShot {x - 35, y + 25, false, _netId, false}
+                        )
+                    );
+                }
+                if (weapon == WeaponType::BIG_SHOT) {
+                    server.send_tcp(
+                        RTypePacketType::BULLET_SHOT,
+                        net::Packet::serializeStruct(
+                            BulletShot {x - 35, y + 25, false, _netId, true}
+                        )
+                    );
+                }
             }
         }
     }

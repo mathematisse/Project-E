@@ -3,6 +3,7 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_net/Packet.hpp"
 #include "RTypePackets.hpp"
+#include <cstdlib>
 
 net::RTypeClient::RTypeClient(
     ECS::EntityManager &entityManager, std::vector<ECS::PlayerState> &playerStates,
@@ -54,6 +55,30 @@ void net::RTypeClient::on_packet(const Packet &packet)
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
             return;
         }
+        if (newEnnemy.rand == 2) {
+            square_ennemy->getHealth()->set<0>(5);
+            square_ennemy->getWeapon()->set<0>(WeaponType::BIG_SHOT);
+            square_ennemy->getSize()->set<0>(180);
+            square_ennemy->getSize()->set<1>(120);
+            square_ennemy->getSprite()->set<0>(frigateSpriteId);
+            square_ennemy->getSprite()->set<1>(true);
+            square_ennemy->getSprite()->set<2>(120.0F);
+            square_ennemy->getSprite()->set<3>(180.0F);
+            square_ennemy->getSprite()->set<4>(6.0F);
+            square_ennemy->getSize()->set<2>(270);
+
+        } else {
+            square_ennemy->getHealth()->set<0>(2);
+            square_ennemy->getWeapon()->set<0>(WeaponType::BULLET);
+            square_ennemy->getSize()->set<0>(80);
+            square_ennemy->getSize()->set<1>(80);
+            square_ennemy->getSprite()->set<0>(ennemySpriteId);
+            square_ennemy->getSprite()->set<1>(false);
+            square_ennemy->getSprite()->set<2>(80.0F);
+            square_ennemy->getSprite()->set<3>(80.0F);
+            square_ennemy->getSprite()->set<4>(6.0F);
+            square_ennemy->getSize()->set<2>(90);
+        }
         square_ennemy->getVelocity()->set<0>(0.0F);
         square_ennemy->getVelocity()->set<1>(0.0F);
         square_ennemy->getVelocity()->set<2>(150.0F);
@@ -62,9 +87,6 @@ void net::RTypeClient::on_packet(const Packet &packet)
         square_ennemy->getColor()->set<1>(0);
         square_ennemy->getColor()->set<2>(0);
         square_ennemy->getColor()->set<3>(255);
-        square_ennemy->getSize()->set<0>(80);
-        square_ennemy->getSize()->set<1>(80);
-        square_ennemy->getSize()->set<2>(90);
 
         float _x = newEnnemy.x;
         float _y = newEnnemy.y;
@@ -72,8 +94,6 @@ void net::RTypeClient::on_packet(const Packet &packet)
         square_ennemy->getPosition()->set<1>(_y);
         square_ennemy->getCanShoot()->set<0>(true);
         square_ennemy->getCanShoot()->set<1>(1.5F);
-        square_ennemy->getSprite()->set<0>(ennemySpriteId);
-        square_ennemy->getHealth()->set<0>(2);
         square_ennemy->getNetworkID()->set<0>(newEnnemy.netId);
         break;
     }
@@ -96,6 +116,23 @@ void net::RTypeClient::on_packet(const Packet &packet)
             square_bullet->getSize()->set<2>(-90);
             square_bullet->getType()->set<0>(SquareType::BULLET_ENNEMY);
         }
+        if (bulletShot.isBigShot) {
+            square_bullet->getSprite()->set<0>(bigShotSpriteId);
+            square_bullet->getSprite()->set<2>(70.0F);
+            square_bullet->getSprite()->set<3>(70.0F);
+            square_bullet->getSprite()->set<4>(10.0F);
+            square_bullet->getHealth()->set<0>(5);
+            square_bullet->getSize()->set<0>(70);
+            square_bullet->getSize()->set<1>(70);
+        } else {
+            square_bullet->getSprite()->set<0>(bulletSpriteId);
+            square_bullet->getSprite()->set<2>(30.0F);
+            square_bullet->getSprite()->set<3>(30.0F);
+            square_bullet->getSprite()->set<4>(4.0F);
+            square_bullet->getHealth()->set<0>(1);
+            square_bullet->getSize()->set<0>(30);
+            square_bullet->getSize()->set<1>(30);
+        }
         square_bullet->getPosition()->set<0>(bulletShot.x);
         square_bullet->getVelocity()->set<1>(0.0F);
         square_bullet->getVelocity()->set<2>(500.0F);
@@ -105,15 +142,8 @@ void net::RTypeClient::on_packet(const Packet &packet)
         square_bullet->getColor()->set<3>(255);
         square_bullet->getPosition()->set<1>(bulletShot.y);
         square_bullet->getCanShoot()->set<0>(false);
-        square_bullet->getSize()->set<0>(30);
-        square_bullet->getSize()->set<1>(30);
-        square_bullet->getSprite()->set<0>(bulletSpriteId);
         square_bullet->getSprite()->set<1>(true);
-        square_bullet->getSprite()->set<2>(30.0F);
-        square_bullet->getSprite()->set<3>(30.0F);
-        square_bullet->getSprite()->set<4>(4.0F);
         square_bullet->getSprite()->set<5>(0);
-        square_bullet->getHealth()->set<0>(1);
         square_bullet->getTimer()->set<0>(0.0F);
         square_bullet->getTimer()->set<1>(8.0F);
         square_bullet->getNetworkID()->set<0>(bulletShot.netId);

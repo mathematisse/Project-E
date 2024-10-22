@@ -48,6 +48,25 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chu
     return {*square_player->getPosition()->get<0>(), *square_player->getPosition()->get<1>()};
 }
 
+// std::vector<Vector2> get_enemies_position(ECS::EntityManager &_eM)
+// {
+//     std::vector<Vector2> enemiesPos;
+//     auto enemies = _eM.getEntities(ECS::C::ENT_ALIVE, ECS::C::ENT_ENEMY);
+//     for (const auto &entity : enemies) {
+//         auto ref = _eM.getEntity(entity);
+//         auto square_enemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+//         if (!square_enemy) {
+//             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+//             return {};
+//         }
+//         enemiesPos.push_back(
+//             {static_cast<float>(*square_enemy->getPosition()->get<0>()),
+//              static_cast<float>(*square_enemy->getPosition()->get<1>())}
+//         );
+//     }
+//     return enemiesPos;
+// }
+
 char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
 {
     auto player = chunks;
@@ -244,7 +263,9 @@ int main(int ac, char **av)
     assetsLoader.load_assets(paths);
 
     client.ennemySpriteId = assetsLoader.get_asset(E1FC).id;
+    client.frigateSpriteId = assetsLoader.get_asset(FRIGATE_1).id;
     client.bulletSpriteId = assetsLoader.get_asset(BASE_BULLET_PATH).id;
+    client.bigShotSpriteId = assetsLoader.get_asset(BIG_SHOT_PATH).id;
 
     NetworkManager networkManager;
 
@@ -573,8 +594,13 @@ int main(int ac, char **av)
                 square_player->getType()->set<0>(SquareType::PLAYER);
                 square_player->getColor()->set<1>(255);
                 square_player->getColor()->set<3>(255);
+                square_player->getWeapon()->set<0>(WeaponType::BIG_SHOT);
                 square_player->getCanShoot()->set<0>(true);
-                square_player->getCanShoot()->set<1>(0.3F);
+                if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+                    square_player->getCanShoot()->set<1>(1.5F);
+                } else {
+                    square_player->getCanShoot()->set<1>(0.3F);
+                }
                 square_player->getSize()->set<0>(80);
                 square_player->getSize()->set<1>(80);
                 square_player->getSize()->set<2>(90);
