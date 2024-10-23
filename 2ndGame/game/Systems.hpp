@@ -7,6 +7,7 @@
 
 #include "Decor.hpp"
 #include "Tower.hpp"
+#include "Enemy.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
@@ -33,6 +34,24 @@ protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
         typename C::SizePool::Types &csize, typename C::SpritePool::Types &csprite
+    ) override;
+};
+
+class ApplyVelocitySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool> {
+public:
+    explicit ApplyVelocitySystem();
+    ~ApplyVelocitySystem() override = default;
+
+    ApplyVelocitySystem(const ApplyVelocitySystem &other) = default;
+    ApplyVelocitySystem(ApplyVelocitySystem &&other) = default;
+    ApplyVelocitySystem &operator=(const ApplyVelocitySystem &other) = default;
+    ApplyVelocitySystem &operator=(ApplyVelocitySystem &&other) = default;
+
+    float deltaTime = 0.0f;
+
+protected:
+    void _statusOperate(
+        typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity
     ) override;
 };
 

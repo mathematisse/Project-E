@@ -16,6 +16,7 @@
 #include "lib_ecs/Systems/SystemTree.hpp"
 
 #include "Decor.hpp"
+#include "Enemy.hpp"
 #include "Systems.hpp"
 
 static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
@@ -121,18 +122,21 @@ int main(int ac, char *av[])
 
     ECS::E::DecorPool decorPool;
     ECS::E::TowerPool towerPool;
+    ECS::E::EnemyPool enemyPool;
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
     ECS::S::TowerClickSystem towerClickSystem;
     ECS::S::ChangeTowerSprite changeTowerSprite(assetsLoader);
+    ECS::S::ApplyVelocitySystem applyVelocitySystem;
 
     ECS::S::SystemTreeNode demoNode(
-        42, {&towerClickSystem, &changeTowerSprite, &drawSpriteSystem}, {}
+        42, {&towerClickSystem, &changeTowerSprite, &applyVelocitySystem, &drawSpriteSystem}, {}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
 
     _eM.registerEntityPool(&decorPool);
     _eM.registerEntityPool(&towerPool);
+    _eM.registerEntityPool(&enemyPool);
 
     auto background = _eM.createEntities("Decor", 1, ECS::C::ENT_ALIVE);
 
@@ -174,6 +178,25 @@ int main(int ac, char *av[])
         i++;
     }
 
+    auto enemies = _eM.createEntities("Enemy", 1, ECS::C::ENT_ALIVE);
+
+    for (const auto &entity : enemies) {
+        auto ref = _eM.getEntity(entity);
+
+        auto square_enemy = dynamic_cast<ECS::E::EnemyRef *>(ref.get());
+        if (!square_enemy) {
+            std::cerr << "Failed to cast IEntityRef to EnemyRef" << std::endl;
+            return 0;
+        }
+        square_enemy->getPosition()->set<0>(500);
+        square_enemy->getPosition()->set<1>(375);
+        square_enemy->getSize()->set<0>(50);
+        square_enemy->getSize()->set<1>(50);
+        square_enemy->getSprite()->set<0>(assetsLoader.get_asset(GOBLIN).id);
+        square_enemy->getVelocity()->set<0>(0);
+        square_enemy->getVelocity()->set<1>(0);
+    }
+
     auto curr_time = std::chrono::steady_clock::now();
     PlayMusicStream(music);
 
@@ -194,6 +217,8 @@ int main(int ac, char *av[])
         } else if (mainMenu.settings.color_blind_simulation) {
             BeginShaderMode(mainMenu.colorblindSimShader);
         }
+
+        applyVelocitySystem.deltaTime = dt;
 
         _eM.addTime(dt);
 

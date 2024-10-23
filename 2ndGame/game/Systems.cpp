@@ -8,6 +8,7 @@
 #include "Systems.hpp"
 #include "Decor.hpp"
 #include "Tower.hpp"
+#include "Enemy.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
 #include <vector>
@@ -58,7 +59,25 @@ void DrawSpriteSystem::_innerOperate(
     if (rotation == -90) {
         adjustedY += sizeY;
     }
+    if (scale <= 0) {
+        scale = 1;
+    }
     DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
+}
+
+ApplyVelocitySystem::ApplyVelocitySystem():
+    AStatusMonoSystem(true, C::ENT_ALIVE)
+{
+}
+
+void ApplyVelocitySystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity
+)
+{
+    auto [x, y] = cposition;
+    auto [vX, vY] = cvelocity;
+    x += vX * deltaTime * 50;
+    y += vY * deltaTime * 50;
 }
 
 TowerClickSystem::TowerClickSystem():
