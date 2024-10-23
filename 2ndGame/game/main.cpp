@@ -20,7 +20,7 @@
 
 static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
 
-void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem)
+void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem, size_t &money)
 {
     Vector2 pos = {towerClickSystem.pos.x + 100, towerClickSystem.pos.y};
 
@@ -36,9 +36,10 @@ void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem)
         (Rectangle) {pos.x + 100, pos.y + 65, 100, 20},
         std::to_string(towerClickSystem.selectedTower.level).c_str()
     );
-    if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
+    if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade") && money >= 50) {
         towerClickSystem.selectedTower.level++;
         towerClickSystem.selectedTower.type = ECS::C::ARCHER;
+        money -= 50;
     }
     if (GuiButton((Rectangle) {pos.x + 50, pos.y + 150, 100, 30}, "Quit")) {
         towerClickSystem.open = false;
@@ -127,6 +128,8 @@ int main(int ac, char *av[])
     auto curr_time = std::chrono::steady_clock::now();
     PlayMusicStream(music);
 
+    size_t money = 200;
+
     while (!WindowShouldClose()) {
         auto new_time = std::chrono::steady_clock::now();
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
@@ -144,10 +147,15 @@ int main(int ac, char *av[])
         }
 
         _eM.addTime(dt);
+
+        DrawRectangle(5, 5, 200, 50, {255, 255, 255, 100});
+        DrawText("Money: ", 10, 10, 35, BLACK);
+        DrawText(std::to_string(money).c_str(), 130, 13, 35, BLACK);
+
         EndShaderMode();
 
         if (towerClickSystem.open) {
-            open_tower_menu(towerClickSystem);
+            open_tower_menu(towerClickSystem, money);
         }
 
         EndDrawing();
