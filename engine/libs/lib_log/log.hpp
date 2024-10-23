@@ -50,6 +50,7 @@ std::string logLevelToStr(Level level);
 class Logger {
 public:
     using PrefixCreator = std::function<std::string(Level)>;
+    constexpr static std::size_t DEFAULT_MAX_LOG_SIZE = 104857600; // 100 MB
 
     Logger();
     ~Logger();
@@ -73,9 +74,11 @@ public:
     void resetLogPrefix();
     static std::string createDefaultPrefix(Level level);
 
-    bool openLogFile(const std::filesystem::path &filePath);
+    void openLogFile(const std::filesystem::path &filePath);
     void closeLogFile();
     [[nodiscard]] bool logFileIsOpen() const;
+    void setMaxLogSize(std::size_t size);
+    [[nodiscard]] std::size_t getMaxLogSize() const;
 
 private:
     Level log_level;
@@ -83,6 +86,7 @@ private:
     std::ostream *log_stream;
     std::filesystem::path log_file_path;
     std::ofstream log_file;
+    std::size_t max_log_size;
 };
 
 static Logger global_logger;

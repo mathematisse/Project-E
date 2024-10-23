@@ -25,7 +25,8 @@ std::string logLevelToStr(Level level)
 Logger::Logger():
     log_level(Level::INFO),
     prefix_creator(createDefaultPrefix),
-    log_stream(getDefaultLogStream())
+    log_stream(getDefaultLogStream()),
+    max_log_size(DEFAULT_MAX_LOG_SIZE)
 {
 }
 
@@ -41,6 +42,10 @@ void Logger::log(Level level, const std::string &message)
         *log_stream << log_line;
     }
     if (logFileIsOpen()) {
+        if (log_file.tellp() > max_log_size) {
+            log_file.close();
+            log_file.open(log_file_path, std::ios::out | std::ios::ate);
+        }
         log_file << log_line;
         log_file.flush();
     }
@@ -69,16 +74,16 @@ void Logger::resetLogPrefix() { prefix_creator = createDefaultPrefix; }
 
 std::string Logger::createDefaultPrefix(Level level) { return "[" + logLevelToStr(level) + "] "; }
 
-bool Logger::openLogFile(const std::filesystem::path &filePath)
+void Logger::openLogFile(const std::filesystem::path &filePath)
 {
     if (logFileIsOpen()) {
         if (log_file_path == filePath) {
-            return true;
+            return;
         }
         closeLogFile();
     }
-    log_file.open(filePath, std::ios::out | std::ios::app);
-    return log_file.is_open();
+    log_file.open(filePath, std::ios::out | std::ios::app | std::ios::ate);
+    log_file_path = filePath;
 }
 
 void Logger::closeLogFile()
@@ -89,5 +94,9 @@ void Logger::closeLogFile()
 }
 
 bool Logger::logFileIsOpen() const { return log_file.is_open(); }
+
+void Logger::setMaxLogSize(std::size_t size) { max_log_size = size; }
+
+std::size_t Logger::getMaxLogSize() const { return max_log_size; }
 
 }
