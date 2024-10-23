@@ -23,7 +23,7 @@ execute_process(
 
 include_directories(${GIT_ROOT}/.submodules/raygui/src)
 
-target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network)
+target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network lib_log)
 
 if(UNIX)
     target_link_libraries(r-type_client ncurses)
