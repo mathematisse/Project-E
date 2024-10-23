@@ -93,6 +93,10 @@ void TowerClickSystem::_innerOperate(
         level = selectedTower.level;
         type = selectedTower.type;
     }
+    if (type == ECS::C::WIZARD && sizeX == 75) {
+        sizeX = 100;
+        sizeY = 100;
+    }
 }
 
 ChangeTowerSprite::ChangeTowerSprite(AssetsLoader &assetsLoader):
@@ -115,14 +119,26 @@ void ChangeTowerSprite::_innerOperate(
             auto texture = assetsLoader.get_asset(ARCHER1_TOWER);
             sprite = texture.id;
         }
+        if (type == ECS::C::WIZARD) {
+            auto texture = assetsLoader.get_asset(WIZARD1_TOWER);
+            sprite = texture.id;
+        }
     } else if (level == 2) {
         if (type == ECS::C::ARCHER) {
             auto texture = assetsLoader.get_asset(ARCHER2_TOWER);
             sprite = texture.id;
         }
+        if (type == ECS::C::WIZARD) {
+            auto texture = assetsLoader.get_asset(WIZARD2_TOWER);
+            sprite = texture.id;
+        }
     } else if (level == 3) {
         if (type == ECS::C::ARCHER) {
             auto texture = assetsLoader.get_asset(ARCHER3_TOWER);
+            sprite = texture.id;
+        }
+        if (type == ECS::C::WIZARD) {
+            auto texture = assetsLoader.get_asset(WIZARD3_TOWER);
             sprite = texture.id;
         }
     }

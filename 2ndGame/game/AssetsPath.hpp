@@ -49,6 +49,20 @@
         "assets", "other_game", "archer_tower3.png" \
     }
 
+#define WIZARD1_TOWER                               \
+    {                                               \
+        "assets", "other_game", "wizard_tower1.png" \
+    }
+#define WIZARD2_TOWER                               \
+    {                                               \
+        "assets", "other_game", "wizard_tower2.png" \
+    }
+#define WIZARD3_TOWER                               \
+    {                                               \
+        "assets", "other_game", "wizard_tower3.png" \
+    }
+
 const std::vector<std::vector<std::string>> paths = {
-    MENU_BACKGROUND, GAME_BACKGROUND, EMPTY_TOWER, ARCHER1_TOWER, ARCHER2_TOWER, ARCHER3_TOWER,
+    MENU_BACKGROUND, GAME_BACKGROUND, EMPTY_TOWER,   ARCHER1_TOWER, ARCHER2_TOWER,
+    ARCHER3_TOWER,   WIZARD1_TOWER,   WIZARD2_TOWER, WIZARD3_TOWER
 };

@@ -177,7 +177,7 @@ int main(int ac, char *av[])
     auto curr_time = std::chrono::steady_clock::now();
     PlayMusicStream(music);
 
-    size_t money = 200;
+    size_t money = 500;
 
     while (!WindowShouldClose()) {
         auto new_time = std::chrono::steady_clock::now();
