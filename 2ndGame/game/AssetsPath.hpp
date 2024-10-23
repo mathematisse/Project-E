@@ -61,7 +61,10 @@
     {                                               \
         "assets", "other_game", "wizard_tower3.png" \
     }
-#define GOBLIN {"assets", "other_game", "goblin.png"}
+#define GOBLIN                               \
+    {                                        \
+        "assets", "other_game", "goblin.png" \
+    }
 
 const std::vector<std::vector<std::string>> paths = {
     MENU_BACKGROUND, GAME_BACKGROUND, EMPTY_TOWER,   ARCHER1_TOWER, ARCHER2_TOWER,
