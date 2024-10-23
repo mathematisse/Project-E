@@ -54,8 +54,8 @@ public:
 
         size_t i = 0;
 
-        for (auto &componentPool : componentPools) {
-            for (auto &componentName : componentNames) {
+        for (auto &componentName : componentNames) {
+            for (auto &componentPool : componentPools) {
                 if (componentPool->getComponentName() == componentName) {
                     if (i == sizeof...(Ts)) {
                         return false;
