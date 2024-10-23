@@ -13,11 +13,10 @@ int main()
 {
     try {
         using namespace lnet;
-        lnet::net::Poll poll;
+        net::Poll poll;
 
         // Create and configure TcpListener
-        auto tcp_listener =
-            lnet::net::TcpListener::bind(lnet::net::SocketAddr(net::Ipv4Addr(0), 8080));
+        auto tcp_listener = net::TcpListener::bind(net::SocketAddr(net::Ipv4Addr(0), 8080));
         if (!tcp_listener) {
             std::cerr << "TcpListener bind error: " << tcp_listener.error().message() << std::endl;
             return 1;
@@ -36,7 +35,7 @@ int main()
         }
 
         // Create and configure UdpSocket
-        auto udp_socket = lnet::net::UdpSocket::bind(lnet::net::SocketAddr(net::Ipv4Addr(0), 8081));
+        auto udp_socket = net::UdpSocket::bind(net::SocketAddr(net::Ipv4Addr(0), 8081));
 
         if (!udp_socket) {
             std::cerr << "UdpSocket bind error: " << udp_socket.error().message() << std::endl;
@@ -52,7 +51,7 @@ int main()
             return 1;
         }
 
-        std::vector<lnet::net::TcpStream> tcp_connections;
+        std::vector<net::TcpStream> tcp_connections;
 
         while (true) {
             auto result = poll.wait(std::nullopt);
@@ -62,7 +61,7 @@ int main()
             }
 
             for (const auto &event : result.value()) {
-                if (event.type == lnet::net::PollEvent::Type::Read) {
+                if (event.type == net::PollEvent::Type::Read) {
                     if (event.fd == listen_result.get_fd()) {
                         // Handle new TCP connection
                         auto new_connection = listen_result.accept();
@@ -94,7 +93,7 @@ int main()
                         // Handle TCP data
                         auto it = std::find_if(
                             tcp_connections.begin(), tcp_connections.end(),
-                            [&event](const lnet::net::TcpStream &stream) {
+                            [&event](const net::TcpStream &stream) {
                                 return stream.get_fd() == event.fd;
                             }
                         );
@@ -122,7 +121,7 @@ int main()
                             }
                         }
                     }
-                } else if (event.type == lnet::net::PollEvent::Type::Error) {
+                } else if (event.type == net::PollEvent::Type::Error) {
                     std::cerr << "Poll error on fd: " << event.fd << std::endl;
                 }
             }
