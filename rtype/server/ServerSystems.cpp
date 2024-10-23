@@ -76,8 +76,7 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
         }
         square_ennemy->getVelocity()->set<0>(0.0F);
         square_ennemy->getVelocity()->set<1>(0.0F);
-        square_ennemy->getVelocity()->set<2>(100.0F);
-        square_ennemy->getType()->set<0>(SquareType::ENEMY);
+        square_ennemy->getType()->set<0>(GameEntityType::ENEMY);
         square_ennemy->getColor()->set<0>(255);
         square_ennemy->getColor()->set<1>(0);
         square_ennemy->getColor()->set<2>(0);
@@ -205,18 +204,17 @@ void ShootSystem::_statusOperate(
                 return;
             }
             if (type == GameEntityType::PLAYER) {
-                square_bullet->getVelocity()->set<0>(500.0F);
+                square_bullet->getVelocity()->set<0>(300.0F);
                 square_bullet->getPosition()->set<0>(x + 80 + 35);
                 square_bullet->getRotation()->set<0>(90);
                 square_bullet->getType()->set<0>(GameEntityType::BULLET);
             } else {
-                square_bullet->getVelocity()->set<0>(-500.0F);
+                square_bullet->getVelocity()->set<0>(-300.0F);
                 square_bullet->getPosition()->set<0>(x - 35);
                 square_bullet->getRotation()->set<0>(-90);
                 square_bullet->getType()->set<0>(GameEntityType::BULLET_ENNEMY);
             }
             square_bullet->getVelocity()->set<1>(0.0F);
-            square_bullet->getVelocity()->set<2>(300.0F);
             square_bullet->getColor()->set<0>(255);
             square_bullet->getColor()->set<1>(255);
             square_bullet->getColor()->set<2>(0);
@@ -224,25 +222,20 @@ void ShootSystem::_statusOperate(
             square_bullet->getPosition()->set<1>(y + 25);
             square_bullet->getCanShoot()->set<0>(false);
             if (weapon == WeaponType::BULLET) {
-                square_bullet->getSprite()->set<0>(_spriteId);
-                square_bullet->getSprite()->set<2>(30.0F);
-                square_bullet->getSprite()->set<3>(30.0F);
-                square_bullet->getSprite()->set<4>(4.0F);
+                square_bullet->getAnimatedSprite()->set<0>(_spriteId);
+                square_bullet->getAnimatedSprite()->set<1>(4.0F);
                 square_bullet->getHealth()->set<0>(1);
                 square_bullet->getSize()->set<0>(30);
                 square_bullet->getSize()->set<1>(30);
             }
             if (weapon == WeaponType::BIG_SHOT) {
-                square_bullet->getSprite()->set<0>(_spriteId);
-                square_bullet->getSprite()->set<2>(70.0F);
-                square_bullet->getSprite()->set<3>(70.0F);
-                square_bullet->getSprite()->set<4>(10.0F);
+                square_bullet->getAnimatedSprite()->set<0>(_spriteId);
+                square_bullet->getAnimatedSprite()->set<1>(10.0F);
                 square_bullet->getHealth()->set<0>(5);
                 square_bullet->getSize()->set<0>(70);
                 square_bullet->getSize()->set<1>(70);
             }
-            square_bullet->getSprite()->set<1>(true);
-            square_bullet->getSprite()->set<5>(0);
+            square_bullet->getAnimatedSprite()->set<2>(0);
             square_bullet->getTimer()->set<0>(0.0F);
 
             auto _netId = networkManager.getnewNetID();

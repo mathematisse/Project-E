@@ -50,8 +50,7 @@ void net::RTypeServer::on_udp_connect(client_id id)
         }
         square_player->getPosition()->set<0>(1920 / 4);
         square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getVelocity()->set<2>(200.0F);
-        square_player->getType()->set<0>(SquareType::PLAYER);
+        square_player->getType()->set<0>(GameEntityType::PLAYER);
         unsigned char r = rand() % 255;
         unsigned char g = rand() % 255;
         unsigned char b = rand() % 255;

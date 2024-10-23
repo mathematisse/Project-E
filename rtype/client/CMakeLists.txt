@@ -12,7 +12,6 @@ file(GLOB_RECURSE SOURCES "*.cpp")
 
 add_executable(r-type_client ${SOURCES})
 
-target_link_libraries(r-type_client r-type_common render lib_ecs lib_net raylib core spatial2d)
 # Get the root of the Git repository
 execute_process(
     COMMAND git rev-parse --show-toplevel
@@ -23,7 +22,7 @@ execute_process(
 
 include_directories(${GIT_ROOT}/.submodules/raygui/src)
 
-target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network lib_log)
+target_link_libraries(r-type_client r-type_common render lib_ecs lib_net raylib core spatial2d lib_log)
 
 if(UNIX)
     target_link_libraries(r-type_client ncurses)

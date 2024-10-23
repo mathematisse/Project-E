@@ -212,8 +212,7 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
         }
         square_player->getPosition()->set<0>(WINDOW_WIDTH / 4);
         square_player->getPosition()->set<1>(WINDOW_HEIGHT / 2);
-        square_player->getVelocity()->set<2>(200.0F);
-        square_player->getType()->set<0>(SquareType::LPLAYER);
+        square_player->getType()->set<0>(GameEntityType::LPLAYER);
         square_player->getColor()->set<1>(255);
         square_player->getColor()->set<3>(255);
         square_player->getCanShoot()->set<0>(0);

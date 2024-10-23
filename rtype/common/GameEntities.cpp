@@ -15,7 +15,7 @@ namespace ECS::E {
 GameEntityRef::GameEntityRef(
     const ADynamicEntityRef &dynEnt, const ASpriteEntityRef &spriteEnt, C::ColorRef *color,
     C::TypeRef *type, C::NetworkIDRef *networkID, C::CanShootRef *canShoot,
-    C::IsShootingRef *isShooting, C::HealthRef *health
+    C::IsShootingRef *isShooting, C::HealthRef *health, C::WeaponRef *weapon
 ):
     AEntityRef(dynEnt),
     EntityWithPositionRef(dynEnt),
@@ -32,7 +32,8 @@ GameEntityRef::GameEntityRef(
     EntityWithNetworkIDRef(networkID),
     EntityWithCanShootRef(canShoot),
     EntityWithIsShootingRef(isShooting),
-    EntityWithHealthRef(health)
+    EntityWithHealthRef(health),
+    EntityWithWeaponRef(weapon)
 {
 }
 
@@ -54,7 +55,8 @@ std::unique_ptr<E::GameEntityRef> GameEntityPool::getRawEntity(Chunks::chunkPos_
         EntityWithColorPool::getComponentRef(cPos), EntityWithTypePool::getComponentRef(cPos),
         EntityWithNetworkIDPool::getComponentRef(cPos),
         EntityWithCanShootPool::getComponentRef(cPos),
-        EntityWithIsShootingPool::getComponentRef(cPos), EntityWithHealthPool::getComponentRef(cPos)
+        EntityWithIsShootingPool::getComponentRef(cPos),
+        EntityWithHealthPool::getComponentRef(cPos), EntityWithWeaponPool::getComponentRef(cPos)
     );
     return ptr;
 }
@@ -67,9 +69,11 @@ std::vector<C::IComponentPool *> GameEntityPool::getComponentPools()
     std::vector<C::IComponentPool *> local = {
         &EntityWithColorPool::getComponentPool(),      &EntityWithTypePool::getComponentPool(),
         &EntityWithNetworkIDPool::getComponentPool(),  &EntityWithCanShootPool::getComponentPool(),
-        &EntityWithIsShootingPool::getComponentPool(), &EntityWithHealthPool::getComponentPool()
+        &EntityWithIsShootingPool::getComponentPool(), &EntityWithHealthPool::getComponentPool(),
+        &EntityWithWeaponPool::getComponentPool()
     };
-    auto sum = std::vector<C::IComponentPool *>(stat.size() + dyn.size() + sprite.size() + 6);
+    auto sum =
+        std::vector<C::IComponentPool *>(stat.size() + dyn.size() + sprite.size() + local.size());
     std::copy(stat.begin(), stat.end(), sum.begin());
     std::copy(dyn.begin(), dyn.end(), sum.begin() + (long) stat.size());
     std::copy(sprite.begin(), sprite.end(), sum.begin() + (long) stat.size() + (long) dyn.size());
@@ -86,7 +90,7 @@ std::vector<C::IComponentPool *> GameEntityPool::getComponentPools()
 GameAnimatedEntityRef::GameAnimatedEntityRef(
     const ADynamicEntityRef &dynEnt, const AAnimatedEntityRef &spriteEnt, C::ColorRef *color,
     C::TypeRef *type, C::NetworkIDRef *networkID, C::CanShootRef *canShoot,
-    C::IsShootingRef *isShooting, C::HealthRef *health
+    C::IsShootingRef *isShooting, C::HealthRef *health, C::WeaponRef *weapon
 ):
     AEntityRef(dynEnt),
     EntityWithPositionRef(dynEnt),
@@ -104,7 +108,8 @@ GameAnimatedEntityRef::GameAnimatedEntityRef(
     EntityWithNetworkIDRef(networkID),
     EntityWithCanShootRef(canShoot),
     EntityWithIsShootingRef(isShooting),
-    EntityWithHealthRef(health)
+    EntityWithHealthRef(health),
+    EntityWithWeaponRef(weapon)
 {
 }
 
@@ -127,7 +132,8 @@ GameAnimatedEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
         EntityWithColorPool::getComponentRef(cPos), EntityWithTypePool::getComponentRef(cPos),
         EntityWithNetworkIDPool::getComponentRef(cPos),
         EntityWithCanShootPool::getComponentRef(cPos),
-        EntityWithIsShootingPool::getComponentRef(cPos), EntityWithHealthPool::getComponentRef(cPos)
+        EntityWithIsShootingPool::getComponentRef(cPos),
+        EntityWithHealthPool::getComponentRef(cPos), EntityWithWeaponPool::getComponentRef(cPos)
     );
     return ptr;
 }
@@ -140,7 +146,8 @@ std::vector<C::IComponentPool *> GameAnimatedEntityPool::getComponentPools()
     std::vector<C::IComponentPool *> local = {
         &EntityWithColorPool::getComponentPool(),      &EntityWithTypePool::getComponentPool(),
         &EntityWithNetworkIDPool::getComponentPool(),  &EntityWithCanShootPool::getComponentPool(),
-        &EntityWithIsShootingPool::getComponentPool(), &EntityWithHealthPool::getComponentPool()
+        &EntityWithIsShootingPool::getComponentPool(), &EntityWithHealthPool::getComponentPool(),
+        &EntityWithWeaponPool::getComponentPool()
     };
     auto sum = std::vector<C::IComponentPool *>(stat.size() + dyn.size() + sprite.size() + 6);
     std::copy(stat.begin(), stat.end(), sum.begin());

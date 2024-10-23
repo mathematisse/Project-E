@@ -14,9 +14,15 @@
 #include "render/ASpriteEntity.hpp"
 #include "spatial2d/ADynamicEntity.hpp"
 
+enum class WeaponType {
+    BULLET,
+    BIG_SHOT,
+};
+
 DECLARE_COMPONENT(CanShoot, char, float, float);
 DECLARE_COMPONENT(Health, size_t);
 DECLARE_COMPONENT(IsShooting, char);
+DECLARE_COMPONENT(Weapon, WeaponType);
 
 namespace ECS::E {
 const size_t EntityChunkSize = 64;
@@ -29,12 +35,13 @@ class GameEntityRef : public ADynamicEntityRef,
                       public EntityWithNetworkIDRef,
                       public EntityWithCanShootRef,
                       public EntityWithIsShootingRef,
-                      public EntityWithHealthRef {
+                      public EntityWithHealthRef,
+                      public EntityWithWeaponRef {
 public:
     GameEntityRef(
         const ADynamicEntityRef &dynEnt, const ASpriteEntityRef &spriteEnt, C::ColorRef *color,
         C::TypeRef *type, C::NetworkIDRef *networkID, C::CanShootRef *canShoot,
-        C::IsShootingRef *isShooting, C::HealthRef *health
+        C::IsShootingRef *isShooting, C::HealthRef *health, C::WeaponRef *weapon
     );
 };
 
@@ -46,7 +53,8 @@ class GameEntityPool : public ADynamicEntityPool,
                        public EntityWithNetworkIDPool,
                        public EntityWithCanShootPool,
                        public EntityWithIsShootingPool,
-                       public EntityWithHealthPool {
+                       public EntityWithHealthPool,
+                       public EntityWithWeaponPool {
 public:
     GameEntityPool();
 
@@ -63,12 +71,13 @@ class GameAnimatedEntityRef : public ADynamicEntityRef,
                               public EntityWithNetworkIDRef,
                               public EntityWithCanShootRef,
                               public EntityWithIsShootingRef,
-                              public EntityWithHealthRef {
+                              public EntityWithHealthRef,
+                              public EntityWithWeaponRef {
 public:
     GameAnimatedEntityRef(
         const ADynamicEntityRef &dynEnt, const AAnimatedEntityRef &spriteEnt, C::ColorRef *color,
         C::TypeRef *type, C::NetworkIDRef *networkID, C::CanShootRef *canShoot,
-        C::IsShootingRef *isShooting, C::HealthRef *health
+        C::IsShootingRef *isShooting, C::HealthRef *health, C::WeaponRef *weapon
     );
 };
 
@@ -80,7 +89,8 @@ class GameAnimatedEntityPool : public ADynamicEntityPool,
                                public EntityWithNetworkIDPool,
                                public EntityWithCanShootPool,
                                public EntityWithIsShootingPool,
-                               public EntityWithHealthPool {
+                               public EntityWithHealthPool,
+                               public EntityWithWeaponPool {
 public:
     GameAnimatedEntityPool();
 
