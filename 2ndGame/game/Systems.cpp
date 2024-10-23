@@ -79,7 +79,7 @@ void TowerClickSystem::_innerOperate(
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         auto mousePos = GetMousePosition();
         if (mousePos.x >= x && mousePos.x <= x + sizeX && mousePos.y >= y &&
-            mousePos.y <= y + sizeY) {
+            mousePos.y <= y + (sizeY * 1.5)) {
             open = true;
             pos.x = x;
             pos.y = y;
@@ -91,6 +91,40 @@ void TowerClickSystem::_innerOperate(
 
     if (open && selectedTower.id == temp_id) {
         level = selectedTower.level;
+        type = selectedTower.type;
+    }
+}
+
+ChangeTowerSprite::ChangeTowerSprite(AssetsLoader &assetsLoader):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader)
+{
+}
+
+void ChangeTowerSprite::_innerOperate(
+    C::SpritePool::Types &csprite, C::TypePool::Types &ctype, C::LevelPool::Types &clevel,
+    C::IDPool::Types &cid
+)
+{
+    auto [type] = ctype;
+    auto [level] = clevel;
+    auto [sprite] = csprite;
+
+    if (level == 1) {
+        if (type == ECS::C::ARCHER) {
+            auto texture = assetsLoader.get_asset(ARCHER1_TOWER);
+            sprite = texture.id;
+        }
+    } else if (level == 2) {
+        if (type == ECS::C::ARCHER) {
+            auto texture = assetsLoader.get_asset(ARCHER2_TOWER);
+            sprite = texture.id;
+        }
+    } else if (level == 3) {
+        if (type == ECS::C::ARCHER) {
+            auto texture = assetsLoader.get_asset(ARCHER3_TOWER);
+            sprite = texture.id;
+        }
     }
 }
 

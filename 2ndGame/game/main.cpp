@@ -22,30 +22,25 @@ static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wi
 
 void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem)
 {
-    GuiWindowBox((Rectangle) {towerClickSystem.pos.x, towerClickSystem.pos.y, 200, 200}, "Tower");
+    Vector2 pos = {towerClickSystem.pos.x + 100, towerClickSystem.pos.y};
+
+    DrawCircleLines(towerClickSystem.pos.x + 45, towerClickSystem.pos.y + 25, 300, WHITE);
+    GuiWindowBox((Rectangle) {pos.x, pos.y, 200, 200}, "Tower");
+    GuiLabel((Rectangle) {pos.x + 10, pos.y + 35, 100, 20}, "Type:");
     GuiLabel(
-        (Rectangle) {towerClickSystem.pos.x + 10, towerClickSystem.pos.y + 35, 100, 20}, "Type:"
-    );
-    GuiLabel(
-        (Rectangle) {towerClickSystem.pos.x + 100, towerClickSystem.pos.y + 35, 100, 20},
+        (Rectangle) {pos.x + 100, pos.y + 35, 100, 20},
         tower_names[towerClickSystem.selectedTower.type].c_str()
     );
+    GuiLabel((Rectangle) {pos.x + 10, pos.y + 65, 100, 20}, "Level:");
     GuiLabel(
-        (Rectangle) {towerClickSystem.pos.x + 10, towerClickSystem.pos.y + 65, 100, 20}, "Level:"
-    );
-    GuiLabel(
-        (Rectangle) {towerClickSystem.pos.x + 100, towerClickSystem.pos.y + 65, 100, 20},
+        (Rectangle) {pos.x + 100, pos.y + 65, 100, 20},
         std::to_string(towerClickSystem.selectedTower.level).c_str()
     );
-    if (GuiButton(
-            (Rectangle) {towerClickSystem.pos.x + 25, towerClickSystem.pos.y + 100, 150, 30},
-            "Upgrade"
-        )) {
+    if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
         towerClickSystem.selectedTower.level++;
+        towerClickSystem.selectedTower.type = ECS::C::ARCHER;
     }
-    if (GuiButton(
-            (Rectangle) {towerClickSystem.pos.x + 50, towerClickSystem.pos.y + 150, 100, 30}, "Quit"
-        )) {
+    if (GuiButton((Rectangle) {pos.x + 50, pos.y + 150, 100, 30}, "Quit")) {
         towerClickSystem.open = false;
     }
 }
@@ -78,8 +73,11 @@ int main(int ac, char *av[])
     ECS::E::TowerPool towerPool;
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
     ECS::S::TowerClickSystem towerClickSystem;
+    ECS::S::ChangeTowerSprite changeTowerSprite(assetsLoader);
 
-    ECS::S::SystemTreeNode demoNode(42, {&towerClickSystem, &drawSpriteSystem}, {});
+    ECS::S::SystemTreeNode demoNode(
+        42, {&towerClickSystem, &changeTowerSprite, &drawSpriteSystem}, {}
+    );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
 
@@ -103,9 +101,9 @@ int main(int ac, char *av[])
 
     auto towers = _eM.createEntities("Tower", 9, ECS::C::ENT_ALIVE);
 
-    std::vector<Vector2> towers_positions = {{1287, 224}, {1452, 889}, {616, 266},
-                                             {531, 559},  {901, 462},  {1139, 741},
-                                             {1012, 271}, {205, 280},  {682, 841}};
+    const std::vector<Vector2> towers_positions = {{1287, 224}, {1452, 889}, {616, 266},
+                                                   {531, 559},  {901, 462},  {1139, 741},
+                                                   {1012, 271}, {205, 280},  {682, 841}};
 
     int i = 0;
 
@@ -118,7 +116,7 @@ int main(int ac, char *av[])
             return 0;
         }
         square_tower->getPosition()->set<0>(towers_positions[i].x);
-        square_tower->getPosition()->set<1>(towers_positions[i].y);
+        square_tower->getPosition()->set<1>(towers_positions[i].y - 50);
         square_tower->getSize()->set<0>(75);
         square_tower->getSize()->set<1>(75);
         square_tower->getSprite()->set<0>(assetsLoader.get_asset(EMPTY_TOWER).id);

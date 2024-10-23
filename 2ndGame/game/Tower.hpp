@@ -14,10 +14,10 @@
 
 namespace ECS::C {
 enum towerType {
-    None,
-    Bomb,
-    Archer,
-    Wizard,
+    NONE,
+    BOMB,
+    ARCHER,
+    WIZARD,
 };
 
 DECLARE_COMPONENT(Type, towerType);

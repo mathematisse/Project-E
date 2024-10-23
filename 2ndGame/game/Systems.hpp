@@ -39,7 +39,7 @@ protected:
 struct tower {
     size_t id;
     size_t level;
-    size_t type;
+    ECS::C::towerType type;
 };
 
 class TowerClickSystem
@@ -55,13 +55,33 @@ public:
 
     bool open = false;
     Vector2 pos = {0, 0};
-    tower selectedTower = {0, 0, 0};
+    tower selectedTower = {0, 0, ECS::C::NONE};
 
 protected:
     void _innerOperate(
         typename C::PositionPool::Types &cposition, typename C::SizePool::Types &csize,
         typename C::TypePool::Types &ctype, typename C::LevelPool::Types &clevel,
         typename C::IDPool::Types &cid
+    ) override;
+};
+
+class ChangeTowerSprite
+    : public S::AMonoSystem<C::SpritePool, C::TypePool, C::LevelPool, C::IDPool> {
+public:
+    explicit ChangeTowerSprite(AssetsLoader &assetsLoader);
+    ~ChangeTowerSprite() override = default;
+
+    ChangeTowerSprite(const ChangeTowerSprite &other) = default;
+    ChangeTowerSprite(ChangeTowerSprite &&other) = default;
+    ChangeTowerSprite &operator=(const ChangeTowerSprite &other) = default;
+    ChangeTowerSprite &operator=(ChangeTowerSprite &&other) = default;
+
+    AssetsLoader &assetsLoader;
+
+protected:
+    void _innerOperate(
+        typename C::SpritePool::Types &csprite, typename C::TypePool::Types &ctype,
+        typename C::LevelPool::Types &clevel, typename C::IDPool::Types &cid
     ) override;
 };
 
