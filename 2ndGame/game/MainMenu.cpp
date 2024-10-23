@@ -22,7 +22,7 @@ void MainMenu::show_settings(void)
         );
         GuiLabel(
             (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20},
-            "Color Blind Simulation:"
+            "Color Blind:"
         );
         GuiCheckBox(
             (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
