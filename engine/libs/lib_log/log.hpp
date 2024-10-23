@@ -19,7 +19,7 @@ namespace log {
 #define LOG_CRITICAL(message) LOG(log::Level::CRITICAL, message)
 #define LOG_SET_FILE(file_path) (log::global_logger.openLogFile(file_path))
 #define LOG_SET_LEVEL(level) (log::global_logger.setLogLevel(level))
-#define LOG_SET_STREAM(stream) (log::global_logger.setLogStream(&stream))
+#define LOG_SET_STREAM(stream) (log::global_logger.setLogStream(&(stream)))
 #define LOG_SET_PREFIX(prefix_creator) (log::global_logger.setLogPrefix(prefix_creator))
 
 #else
