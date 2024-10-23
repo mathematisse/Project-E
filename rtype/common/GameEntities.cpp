@@ -149,7 +149,8 @@ std::vector<C::IComponentPool *> GameAnimatedEntityPool::getComponentPools()
         &EntityWithIsShootingPool::getComponentPool(), &EntityWithHealthPool::getComponentPool(),
         &EntityWithWeaponPool::getComponentPool()
     };
-    auto sum = std::vector<C::IComponentPool *>(stat.size() + dyn.size() + sprite.size() + 6);
+    auto sum =
+        std::vector<C::IComponentPool *>(stat.size() + dyn.size() + sprite.size() + local.size());
     std::copy(stat.begin(), stat.end(), sum.begin());
     std::copy(dyn.begin(), dyn.end(), sum.begin() + (long) stat.size());
     std::copy(sprite.begin(), sprite.end(), sum.begin() + (long) stat.size() + (long) dyn.size());
