@@ -1,5 +1,6 @@
 # Build the project
 echo "Building the project..."
+git submodule update --init --recursive
 mkdir -p .\build
 cmake -B .\build -S . -DCMAKE_BUILD_TYPE=Debug
 cmake --build .\build

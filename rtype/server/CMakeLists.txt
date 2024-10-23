@@ -13,4 +13,4 @@ file(GLOB_RECURSE SOURCES "*.cpp")
 
 add_executable(r-type_server ${SOURCES})
 
-target_link_libraries(r-type_server r-type_common lib_ecs network core spatial2d render)
+target_link_libraries(r-type_server r-type_common lib_ecs network core spatial2d render lib_log)

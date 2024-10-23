@@ -10,10 +10,10 @@
 #include "lib_ecs/Components/AComponentPool.hpp"
 #include <iostream>
 
-#define DECLARE_RAW_COMPONENT(name, types...)                                 \
-    inline constexpr char name##ComponentName[] = #name;                      \
-    class name##Pool : public AComponentPool<name##ComponentName, types> { }; \
-    using name##Ref = ComponentRef<types>;
+#define DECLARE_RAW_COMPONENT(name, ...)                                            \
+    inline constexpr char name##ComponentName[] = #name;                            \
+    class name##Pool : public AComponentPool<name##ComponentName, __VA_ARGS__> { }; \
+    using name##Ref = ComponentRef<__VA_ARGS__>;
 
 #define DECLARE_ENTITY_POOL_WITH_COMPONENT(name)                                          \
     class EntityWith##name##Pool {                                                        \

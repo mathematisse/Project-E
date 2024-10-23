@@ -45,11 +45,17 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
         }
         square_player->getPosition()->set<0>(1920 / 4);
         square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getType()->set<0>(GameEntityType::PLAYER);
+        square_player->getVelocity()->set<2>(200.0F);
+        square_player->getType()->set<0>(SquareType::PLAYER);
         square_player->getColor()->set<1>(255);
         square_player->getColor()->set<3>(255);
+        square_player->getWeapon()->set<0>(WeaponType::BULLET);
         square_player->getCanShoot()->set<0>(true);
-        square_player->getCanShoot()->set<1>(0.3F);
+        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+            square_player->getCanShoot()->set<1>(1.5F);
+        } else {
+            square_player->getCanShoot()->set<1>(0.3F);
+        }
         square_player->getSize()->set<0>(80);
         square_player->getSize()->set<1>(80);
         square_player->getRotation()->set<0>(90);

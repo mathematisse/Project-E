@@ -22,6 +22,7 @@ public:
     ~MovePlayerSystem() override = default;
 
     net::RTypeClient &client;
+    bool auto_shoot = false;
     size_t frame;
 
 protected:

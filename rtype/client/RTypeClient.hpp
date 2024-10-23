@@ -4,6 +4,7 @@
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_net/Client.hpp"
 #include "RTypePackets.hpp"
+#include <cstddef>
 
 namespace net {
 class RTypeClient : public Client {
@@ -15,6 +16,8 @@ public:
     void on_packet(const Packet &packet) override;
     size_t ennemySpriteId = 0;
     size_t bulletSpriteId = 0;
+    size_t bigShotSpriteId = 0;
+    size_t frigateSpriteId = 0;
     ECS::Chunks::chunkPos_t playerPos;
 
     float &cameraX;

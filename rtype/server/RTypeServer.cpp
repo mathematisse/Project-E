@@ -50,15 +50,21 @@ void net::RTypeServer::on_udp_connect(client_id id)
         }
         square_player->getPosition()->set<0>(1920 / 4);
         square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getType()->set<0>(GameEntityType::PLAYER);
+        square_player->getVelocity()->set<2>(200.0F);
+        square_player->getType()->set<0>(SquareType::PLAYER);
         unsigned char r = rand() % 255;
         unsigned char g = rand() % 255;
         unsigned char b = rand() % 255;
         square_player->getColor()->set<0>(r);
         square_player->getColor()->set<1>(g);
         square_player->getColor()->set<2>(b);
+        square_player->getWeapon()->set<0>(WeaponType::BULLET);
         square_player->getCanShoot()->set<0>(true);
-        square_player->getCanShoot()->set<1>(0.3F);
+        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+            square_player->getCanShoot()->set<1>(1.5F);
+        } else {
+            square_player->getCanShoot()->set<1>(0.3F);
+        }
         square_player->getSize()->set<0>(80);
         square_player->getSize()->set<1>(80);
         square_player->getRotation()->set<0>(90);

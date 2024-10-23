@@ -50,10 +50,17 @@ void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::Type
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
     }
-    client.send_udp(
-        ECS::RTypePacketType::PLAYER_VELOCITY,
-        net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
-    );
+    if (!auto_shoot) {
+        client.send_udp(
+            ECS::RTypePacketType::PLAYER_VELOCITY,
+            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
+        );
+    } else {
+        client.send_udp(
+            ECS::RTypePacketType::PLAYER_VELOCITY,
+            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, true})
+        );
+    }
 }
 
 MoveOtherPlayerSystem::MoveOtherPlayerSystem():

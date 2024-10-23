@@ -1,11 +1,15 @@
 #include "DecorEntities.hpp"
+#include "MainMenu.hpp"
 #include <cstdlib>
 #include <chrono>
+#include <string>
 
 #include <iostream>
 #include <raylib.h>
+#include "raygui.h"
 #include <thread>
 #include "AssetsPath.hpp"
+#include "MainMenu.hpp"
 
 // ECS includes
 #include "lib_ecs/Chunks/ChunkPos.hpp"
@@ -22,8 +26,8 @@
 
 void init_camera(Camera2D &camera)
 {
-    camera.target = {1920 / 2, 1080 / 2};
-    camera.offset = {1920 / 2.0f, 1080 / 2.0f};
+    camera.target = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
+    camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f};
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 }
@@ -31,7 +35,7 @@ void init_camera(Camera2D &camera)
 void update_camera(Camera2D &camera, float dt)
 {
     Vector2 old = camera.target;
-    camera.target = {old.x + 80 * dt, 1080 / 2};
+    camera.target = {old.x + 80 * dt, WINDOW_HEIGHT / 2};
 }
 
 Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
@@ -48,6 +52,25 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chu
     }
     return {*square_player->getPosition()->get<0>(), *square_player->getPosition()->get<1>()};
 }
+
+// std::vector<Vector2> get_enemies_position(ECS::EntityManager &_eM)
+// {
+//     std::vector<Vector2> enemiesPos;
+//     auto enemies = _eM.getEntities(ECS::C::ENT_ALIVE, ECS::C::ENT_ENEMY);
+//     for (const auto &entity : enemies) {
+//         auto ref = _eM.getEntity(entity);
+//         auto square_enemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+//         if (!square_enemy) {
+//             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+//             return {};
+//         }
+//         enemiesPos.push_back(
+//             {static_cast<float>(*square_enemy->getPosition()->get<0>()),
+//              static_cast<float>(*square_enemy->getPosition()->get<1>())}
+//         );
+//     }
+//     return enemiesPos;
+// }
 
 char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
 {
@@ -107,7 +130,7 @@ void setup_decor(
         }
         square_background->getType()->set<0>(GameEntityType::BACKGROUND);
         square_background->getSize()->set<0>(3000);
-        square_background->getSize()->set<1>(1080);
+        square_background->getSize()->set<1>(WINDOW_HEIGHT);
         square_background->getSprite()->set<0>(assetsLoader.get_asset(BACKGROUND_PATH).id);
     }
 
@@ -126,7 +149,7 @@ void setup_decor(
         square_ground->getSize()->set<0>(80);
         square_ground->getSize()->set<1>(100);
         square_ground->getPosition()->set<0>(i * 80);
-        square_ground->getPosition()->set<1>(1080 - 100);
+        square_ground->getPosition()->set<1>(WINDOW_HEIGHT - 100);
         square_ground->getSprite()->set<0>(assetsLoader.get_asset(FLOOR).id);
         i++;
     }
@@ -167,8 +190,8 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
         square_engine->getSize()->set<0>(80);
         square_engine->getSize()->set<1>(80);
         square_engine->getRotation()->set<0>(90);
-        square_engine->getPosition()->set<0>(1920 / 4);
-        square_engine->getPosition()->set<1>(1080 / 2);
+        square_engine->getPosition()->set<0>(WINDOW_WIDTH / 4);
+        square_engine->getPosition()->set<1>(WINDOW_HEIGHT / 2);
         square_engine->getAnimatedSprite()->set<0>(assetsLoader.get_asset(ENGINE_1).id);
         square_engine->getAnimatedSprite()->set<1>(4.0F);
         square_engine->getAnimatedSprite()->set<2>(0);
@@ -187,9 +210,10 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
             std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
             return {};
         }
-        square_player->getPosition()->set<0>(1920 / 4);
-        square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getType()->set<0>(GameEntityType::LPLAYER);
+        square_player->getPosition()->set<0>(WINDOW_WIDTH / 4);
+        square_player->getPosition()->set<1>(WINDOW_HEIGHT / 2);
+        square_player->getVelocity()->set<2>(200.0F);
+        square_player->getType()->set<0>(SquareType::LPLAYER);
         square_player->getColor()->set<1>(255);
         square_player->getColor()->set<3>(255);
         square_player->getCanShoot()->set<0>(0);
@@ -206,6 +230,11 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
 
 int main(int ac, char **av)
 {
+    if (ac != 1) {
+        std::cerr << "Usage: ./rtype_client" << std::endl;
+        return 1;
+    }
+
     Camera2D camera = {};
     init_camera(camera);
 
@@ -218,27 +247,30 @@ int main(int ac, char **av)
         _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed,
         camera.target.x
     );
-    std::uint16_t port = 0;
-    if (ac != 3) {
-        std::cerr << "Usage: ./rtype_client ip port" << std::endl;
-        return 1;
-    }
-    port = std::stoi(av[2]);
 
-    std::cout << "Connecting to server on ip " << av[1] << ":" << port << std::endl;
-    while (!client.connect_tcp(av[1], port)) {
-        std::cerr << "Failed to connect to server, retrying in 1 second" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    client.connect_udp(av[1], port);
-
-    InitWindow(1920, 1080, "R-Type");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "R-Type");
+    InitAudioDevice();
     SetTargetFPS(60);
 
     assetsLoader.load_assets(paths);
 
     client.ennemySpriteId = assetsLoader.get_asset(E1FC).id;
+    client.frigateSpriteId = assetsLoader.get_asset(FRIGATE_1).id;
     client.bulletSpriteId = assetsLoader.get_asset(BASE_BULLET_PATH).id;
+    client.bigShotSpriteId = assetsLoader.get_asset(BIG_SHOT_PATH).id;
+
+    MainMenu mainMenu(client, assetsLoader);
+
+    if (!mainMenu.open())
+        return 0;
+    Texture2D loading_background = assetsLoader.get_asset(LOADING_BACKGROUND);
+    Music loading_music = LoadMusicStream(assetsLoader.get_real_path(LOADING_MUSIC).c_str());
+    Music game_music = LoadMusicStream(assetsLoader.get_real_path(GAME_MUSIC).c_str());
+
+    PlayMusicStream(loading_music);
+    SetMusicVolume(loading_music, mainMenu.settings.volume / 100.0f);
+    SetMusicVolume(game_music, mainMenu.settings.volume / 100.0f);
+    bool change_music = false;
 
     NetworkManager networkManager;
 
@@ -252,6 +284,7 @@ int main(int ac, char **av)
     ECS::S::ShowInfoSystem showInfoSystem(camera);
     ECS::S::UpdateEnginePosition updateEnginePosition;
     ECS::S::MovePlayerSystem moveSystem(client);
+    moveSystem.auto_shoot = mainMenu.settings.auto_shoot;
     ECS::S::MoveBackgroundSystem moveBackgroundSystem;
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::GetPlayerPositionSystem getPlayerPositionSystem;
@@ -490,6 +523,14 @@ int main(int ac, char **av)
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
 
+        if (mainMenu.settings.color_blind) {
+            BeginShaderMode(mainMenu.colorblindnessShader);
+        }
+
+        if (mainMenu.settings.color_blind_simulation) {
+            BeginShaderMode(mainMenu.colorblindSimShader);
+        }
+
         if (client.started)
             update_camera(camera, dt);
         moveBackgroundSystem.cameraX = camera.target.x;
@@ -504,6 +545,16 @@ int main(int ac, char **av)
         updateEnginePosition.playerAlive = playerAlive;
 
         showInfoSystem.one_time = false;
+        if (client.started && !change_music) {
+            StopMusicStream(loading_music);
+            PlayMusicStream(game_music);
+            change_music = true;
+        }
+        if (!change_music) {
+            UpdateMusicStream(loading_music);
+        } else {
+            UpdateMusicStream(game_music);
+        }
         BeginDrawing();
         {
             ClearBackground(RAYWHITE);
@@ -511,8 +562,17 @@ int main(int ac, char **av)
                 if (_eM.addTime(dt)) {
                     frame++;
                 }
+                EndMode2D();
+            } else {
+                DrawTexture(loading_background, 0, 0, WHITE);
+                DrawText(
+                    "Waiting for other players...", WINDOW_WIDTH / 2 - 500, WINDOW_HEIGHT / 2, 80,
+                    WHITE
+                );
             }
-            EndMode2D();
+        }
+        if (mainMenu.settings.color_blind) {
+            EndShaderMode();
         }
         EndDrawing();
 
@@ -554,16 +614,21 @@ int main(int ac, char **av)
                 square_player->getPosition()->set<0>(playerState.x * 300.0F);
                 square_player->getPosition()->set<1>(playerState.y * 300.0F);
                 square_player->getVelocity()->set<0>(playerState.vx * 300.0F);
-                square_player->getVelocity()->set<1>(playerState.vy * 300.0F);
+                square_player->getVelocity()->set<1>(playerState.vy * 200.0F);
                 square_player->getType()->set<0>(GameEntityType::PLAYER);
                 square_player->getColor()->set<1>(255);
                 square_player->getColor()->set<3>(255);
+                square_player->getWeapon()->set<0>(WeaponType::BIG_SHOT);
                 square_player->getCanShoot()->set<0>(true);
-                square_player->getCanShoot()->set<1>(0.3F);
+                if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+                    square_player->getCanShoot()->set<1>(1.5F);
+                } else {
+                    square_player->getCanShoot()->set<1>(0.3F);
+                }
                 square_player->getSize()->set<0>(80);
                 square_player->getSize()->set<1>(80);
                 square_player->getRotation()->set<0>(90);
-                square_player->getSprite()->set<0>(assetsLoader.get_asset(P1FR).id);
+                square_player->getSprite()->set<0>(assetsLoader.get_asset(P2).id);
                 square_player->getHealth()->set<0>(4);
                 square_player->getNetworkID()->set<0>(playerState.netId);
             }
@@ -571,6 +636,9 @@ int main(int ac, char **av)
         moveOtherPlayerSystem.playerStates.clear();
         destroyEntitiesSystem.entitiesDestroyed.clear();
     }
+    UnloadMusicStream(loading_music);
+    UnloadMusicStream(game_music);
     CloseWindow();
+    CloseAudioDevice();
     return 0;
 }
