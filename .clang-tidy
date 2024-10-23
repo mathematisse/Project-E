@@ -22,6 +22,11 @@ Checks: "*,
         -bugprone-easily-swappable-parameters,
         -cppcoreguidelines-avoid-magic-numbers,
         -readability-magic-numbers,
+        -cppcoreguidelines-special-member-functions,
+        -hicpp-special-member-functions,
+        -readability-identifier-length,
+        -cppcoreguidelines-pro-type-reinterpret-cast,
+        -misc-no-recursion,
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''

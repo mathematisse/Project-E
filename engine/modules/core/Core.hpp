@@ -12,7 +12,7 @@ class Core : public IModule {
 public:
     void load(ECS::EntityManager &entityManager) override
     {
-        entityManager.registerSystem(incrementTimerSystem, ECS::S::ROOTSYSGROUP, false);
+        entityManager.registerSystem(incrementTimerSystem, ROOT_SYS_GROUP);
     }
 };
 

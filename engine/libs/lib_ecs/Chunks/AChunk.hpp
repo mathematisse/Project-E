@@ -37,10 +37,6 @@ public:
      */
     virtual ~AChunk() = default;
 
-    AChunk(const AChunk &other) = default;
-    AChunk(AChunk &&other) = default;
-    AChunk &operator=(const AChunk &other) = default;
-    AChunk &operator=(AChunk &&other) = default;
 
     /**
      * @brief Get the count of elements.

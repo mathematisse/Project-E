@@ -19,14 +19,16 @@
 
 namespace ECS {
 
+EntityManager::EntityManager(float fixedUpdateTime) : _fixedUpdateTime(fixedUpdateTime) {}
+
 bool EntityManager::registerSystemGroup(
-    int targetGroup, int newGroup, bool addBefore, bool addInside
+    const std::string & targetGroup, const std::string & newGroup, bool addBefore, bool addInside
 )
 {
     return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
-bool EntityManager::registerSystem(S::ISystem &system, int group, bool atStart)
+bool EntityManager::registerSystem(S::ISystem &system, const std::string & group, bool atStart)
 {
     for (auto &entityPool : _entityPools) {
         system.tryAddEntityPool(entityPool);
@@ -35,7 +37,7 @@ bool EntityManager::registerSystem(S::ISystem &system, int group, bool atStart)
 }
 
 bool EntityManager::registerSystemNode(
-    S::SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside
+    S::SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside
 )
 {
     for (auto &entityPool : _entityPools) {
@@ -45,13 +47,13 @@ bool EntityManager::registerSystemNode(
 }
 
 bool EntityManager::registerFixedSystemGroup(
-    int targetGroup, int newGroup, bool addBefore, bool addInside
+    const std::string & targetGroup, const std::string & newGroup, bool addBefore, bool addInside
 )
 {
     return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
-bool EntityManager::registerFixedSystem(S::ISystem &system, int group, bool atStart)
+bool EntityManager::registerFixedSystem(S::ISystem &system, const std::string & group, bool atStart)
 {
     for (auto &entityPool : _entityPools) {
         system.tryAddEntityPool(entityPool);
@@ -60,7 +62,7 @@ bool EntityManager::registerFixedSystem(S::ISystem &system, int group, bool atSt
 }
 
 bool EntityManager::registerFixedSystemNode(
-    S::SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside
+    S::SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside
 )
 {
     for (auto &entityPool : _entityPools) {
@@ -88,13 +90,13 @@ S::IQuery &EntityManager::initializeQuery(S::IQuery &query)
 
 std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const E::EntityPtrRef &entityPtr)
 {
-    return (*(_entityPools[entityPtr.getPoolId()])).getEntity(entityPtr.getChunkPos());
+    return (*(_entityPools[entityPtr.getPoolIdVal()])).getEntity(entityPtr.getChunkPosVal());
 }
 
 std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const Chunks::chunkPos_t &cPos)
 {
     auto entityPtr = _entityPtrPool.getRawEntity(cPos);
-    return (*(_entityPools[entityPtr->getPoolId()])).getEntity(entityPtr->getChunkPos());
+    return (*(_entityPools[entityPtr->getPoolIdVal()])).getEntity(entityPtr->getChunkPosVal());
 }
 
 Chunks::cPosArr_t EntityManager::_createEntities(
@@ -162,13 +164,13 @@ Chunks::chunkPos_t EntityManager::_createEntity(
     auto nextFreePtrPos = freePtrPos.front();
 
     auto entity = entityPool->getEntity(Chunks::chunkPos_t(nextFreePos));
-    entity->setStatus(status);
-    entity->setChunkPos(Chunks::chunkPos_t(nextFreePtrPos));
+    entity->setStatusVal(status);
+    entity->setChunkPosVal(Chunks::chunkPos_t(nextFreePtrPos));
 
     auto entityPtr = _entityPtrPool.getRawEntity(Chunks::chunkPos_t(nextFreePtrPos));
-    entityPtr->setStatus(C::ENT_ALIVE);
-    entityPtr->setChunkPos(Chunks::chunkPos_t(nextFreePos));
-    entityPtr->setPoolId(poolId);
+    entityPtr->setStatusVal(C::ENT_ALIVE);
+    entityPtr->setChunkPosVal(Chunks::chunkPos_t(nextFreePos));
+    entityPtr->setPoolIdVal(poolId);
 
     freePtrPos.erase(freePtrPos.begin());
     freePos.erase(freePos.begin());
@@ -198,14 +200,14 @@ void EntityManager::destroyEntity(const Chunks::chunkPos_t &cPos)
     std::cout << RED "Destroying entity" RESET "\n";
     auto entityPtr = std::unique_ptr<E::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
 
-    auto poolId = entityPtr->getPoolId();
-    auto entCPos = entityPtr->getChunkPos();
+    auto poolId = entityPtr->getPoolIdVal();
+    auto entCPos = entityPtr->getChunkPosVal();
     auto entity = _entityPools[poolId]->getEntity(entCPos);
 
-    entityPtr->setStatus(C::ENT_NONE);
+    entityPtr->setStatusVal(C::ENT_NONE);
     _entityPtrPool.getFreePos().push_back(cPos);
 
-    entity->setStatus(C::ENT_NONE);
+    entity->setStatusVal(C::ENT_NONE);
     _entityPools[poolId]->getFreePos().push_back(entCPos);
 }
 
@@ -230,7 +232,7 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
         auto [poolId] = poolIds[i];
         auto entCPos = deletedcPos[i];
         auto entity = _entityPools[poolId]->getEntity(entCPos);
-        entity->setStatus(C::ENT_NONE);
+        entity->setStatusVal(C::ENT_NONE);
         _entityPools[poolId]->getFreePos().push_back(entCPos);
     }
 }
@@ -272,9 +274,9 @@ bool EntityManager::addTime(float time)
     _timeSinceLastFixedUpdate += time;
     _systemTree.deltaTime = time;
     _runSystems();
-    if (_timeSinceLastFixedUpdate >= 0.02F) {
+    if (_timeSinceLastFixedUpdate >= _fixedUpdateTime) {
         _runFixedSystems();
-        _timeSinceLastFixedUpdate -= 0.02F;
+        _timeSinceLastFixedUpdate -= _fixedUpdateTime;
         return true;
     }
     return false;

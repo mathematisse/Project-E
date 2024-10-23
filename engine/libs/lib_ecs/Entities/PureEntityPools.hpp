@@ -11,10 +11,12 @@
 #include "lib_ecs/Entities/AEntityPool.hpp"
 #include "lib_ecs/Entities/PureEntities.hpp"
 
+
+
 namespace ECS::E {
 const size_t EntityPtrPoolChunkSize = 256;
 
-class EntityPtrPool : public AEntityPool {
+class EntityPtrPool : public AEntityPool, public EntityWithEntityPoolIdPool {
 public:
     EntityPtrPool();
     std::unique_ptr<IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
@@ -23,8 +25,6 @@ public:
 
     C::EntityPoolIdPool &getEntityPoolIdPool();
 
-protected:
-    C::EntityPoolIdPool _entityPoolIdPool;
 };
 
 } // namespace ECS::E

@@ -5,34 +5,15 @@
 ** Demo lib ecs
 */
 
-#include "DecorSquare.hpp"
+#include "DecorEntities.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include "Square.hpp"
-#include "lib_ecs/EntityManager.hpp"
+#include "GameEntities.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
-#include "NetworkManager.hpp"
 #include "raylib.h"
 
 namespace ECS::S {
 
-class ApplyVelocitySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool> {
-public:
-    explicit ApplyVelocitySystem();
-    ~ApplyVelocitySystem() override = default;
-
-    ApplyVelocitySystem(const ApplyVelocitySystem &other) = default;
-    ApplyVelocitySystem(ApplyVelocitySystem &&other) = default;
-    ApplyVelocitySystem &operator=(const ApplyVelocitySystem &other) = default;
-    ApplyVelocitySystem &operator=(ApplyVelocitySystem &&other) = default;
-
-    float deltaTime = 0.0f;
-
-protected:
-    void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity
-    ) override;
-};
 
 class MoveBackgroundSystem
     : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
@@ -40,12 +21,8 @@ public:
     explicit MoveBackgroundSystem();
     ~MoveBackgroundSystem() override = default;
 
-    MoveBackgroundSystem(const MoveBackgroundSystem &other) = default;
-    MoveBackgroundSystem(MoveBackgroundSystem &&other) = default;
-    MoveBackgroundSystem &operator=(const MoveBackgroundSystem &other) = default;
-    MoveBackgroundSystem &operator=(MoveBackgroundSystem &&other) = default;
 
-    float cameraX;
+    float cameraX = 0;
 
 protected:
     void _innerOperate(
@@ -60,10 +37,6 @@ public:
     explicit MoveEnnemySystem();
     ~MoveEnnemySystem() override = default;
 
-    MoveEnnemySystem(const MoveEnnemySystem &other) = default;
-    MoveEnnemySystem(MoveEnnemySystem &&other) = default;
-    MoveEnnemySystem &operator=(const MoveEnnemySystem &other) = default;
-    MoveEnnemySystem &operator=(MoveEnnemySystem &&other) = default;
 
     std::vector<Vector2> playersPos;
 
@@ -81,10 +54,6 @@ public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
 
-    ColliderSystem(const ColliderSystem &other) = default;
-    ColliderSystem(ColliderSystem &&other) = default;
-    ColliderSystem &operator=(const ColliderSystem &other) = default;
-    ColliderSystem &operator=(ColliderSystem &&other) = default;
 
 protected:
     void _innerOperate(
@@ -101,10 +70,6 @@ public:
     explicit GetPlayerPositionSystem();
     ~GetPlayerPositionSystem() override = default;
 
-    GetPlayerPositionSystem(const GetPlayerPositionSystem &other) = default;
-    GetPlayerPositionSystem(GetPlayerPositionSystem &&other) = default;
-    GetPlayerPositionSystem &operator=(const GetPlayerPositionSystem &other) = default;
-    GetPlayerPositionSystem &operator=(GetPlayerPositionSystem &&other) = default;
 
     std::vector<Vector2> playersPos;
 

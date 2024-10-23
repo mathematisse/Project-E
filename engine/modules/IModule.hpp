@@ -7,6 +7,7 @@ namespace module {
 
 class IModule {
 public:
+    IModule() = default;
     virtual ~IModule() = default;
     IModule(const IModule &) = default;
     IModule &operator=(const IModule &) = default;

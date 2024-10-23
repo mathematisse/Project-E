@@ -3,8 +3,12 @@ project(r-type_common)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
+set(SPATIAL2D_ENABLED ON)
+set(CORE_ENABLED ON)
+set(RENDER_ENABLED ON)
+
 file(GLOB_RECURSE SOURCES "*.cpp")
 
 add_library(r-type_common STATIC ${SOURCES})
 
-target_link_libraries(r-type_common raylib)
+target_link_libraries(r-type_common core raylib spatial2d render core)

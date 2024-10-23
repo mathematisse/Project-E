@@ -1,8 +1,7 @@
 #include "RTypeServer.hpp"
-#include "DecorSquare.hpp"
-#include "NetworkManager.hpp"
+#include "DecorEntities.hpp"
 #include "RTypePackets.hpp"
-#include "Square.hpp"
+#include "GameEntities.hpp"
 #include "lib_net/Packet.hpp"
 #include <iostream>
 
@@ -40,19 +39,18 @@ void net::RTypeServer::on_udp_connect(client_id id)
 {
     std::cout << "UDP client connected: " << id << std::endl;
 
-    auto newP = _entityManager.createEntities("Square", 1, ECS::C::ENT_ALIVE);
+    auto newP = _entityManager.createEntities("GameEntity", 1, ECS::C::ENT_ALIVE);
     for (const auto &entity : newP) {
         auto ref = _entityManager.getEntity(entity);
 
-        auto *square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
         if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
             return;
         }
         square_player->getPosition()->set<0>(1920 / 4);
         square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getVelocity()->set<2>(300.0F);
-        square_player->getType()->set<0>(SquareType::PLAYER);
+        square_player->getType()->set<0>(GameEntityType::PLAYER);
         unsigned char r = rand() % 255;
         unsigned char g = rand() % 255;
         unsigned char b = rand() % 255;
@@ -63,7 +61,7 @@ void net::RTypeServer::on_udp_connect(client_id id)
         square_player->getCanShoot()->set<1>(0.3F);
         square_player->getSize()->set<0>(80);
         square_player->getSize()->set<1>(80);
-        square_player->getSize()->set<2>(90);
+        square_player->getRotation()->set<0>(90);
         square_player->getSprite()->set<0>(0);
         square_player->getHealth()->set<0>(4);
         auto netId = networkManager.getnewNetID();

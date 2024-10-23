@@ -40,12 +40,6 @@ namespace ECS::E
         );
         ~{entity_name}Ref() override;
 
-        // Default rule of five
-        {entity_name}Ref(const {entity_name}Ref &other) = default;
-        {entity_name}Ref &operator=(const {entity_name}Ref &other) = default;
-        {entity_name}Ref({entity_name}Ref &&other) = default;
-        {entity_name}Ref &operator=({entity_name}Ref &&other) = default;
-
         // Accessors
         {accessors}
 
@@ -59,12 +53,6 @@ namespace ECS::E
     public:
         {entity_name}Pool();
         ~{entity_name}Pool() override = default;
-
-        // default rule of five
-        {entity_name}Pool(const {entity_name}Pool &other) = default;
-        {entity_name}Pool &operator=(const {entity_name}Pool &other) = default;
-        {entity_name}Pool({entity_name}Pool &&other) = default;
-        {entity_name}Pool &operator=({entity_name}Pool &&other) = default;
 
         std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
         std::unique_ptr<E::{entity_name}Ref> getRawEntity(Chunks::chunkPos_t cPos);

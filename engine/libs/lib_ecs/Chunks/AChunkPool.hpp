@@ -32,10 +32,6 @@ public:
      */
     virtual ~AChunkPool() = default;
 
-    AChunkPool(const AChunkPool &other) = default;
-    AChunkPool(AChunkPool &&other) = default;
-    AChunkPool &operator=(const AChunkPool &other) = default;
-    AChunkPool &operator=(AChunkPool &&other) = default;
 
     /**
      * @brief Access an element by its position.

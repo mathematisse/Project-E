@@ -7,6 +7,8 @@
 
 #include "lib_ecs/Entities/PureEntityPools.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_ecs/Entities/AEntityPool.hpp"
+#include "lib_ecs/Entities/AEntityRef.hpp"
 #include "lib_ecs/Entities/PureEntities.hpp"
 
 namespace ECS {
@@ -25,20 +27,24 @@ std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::chunkPos_t cPos)
 std::unique_ptr<E::EntityPtrRef> EntityPtrPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::EntityPtrRef>(
-        dynamic_cast<C::EntityStatusRef *>(_entityStatusPool.getComponentRef(cPos)),
-        dynamic_cast<C::ChunkPosRef *>(_chunkPosPool.getComponentRef(cPos)),
-        dynamic_cast<C::EntityPoolIdRef *>(_entityPoolIdPool.getComponentRef(cPos))
+        *AEntityPool::getRawEntity(cPos),
+        EntityWithEntityPoolIdPool::getComponentRef(cPos)
     );
-
     return ptr;
 }
 
 std::vector<C::IComponentPool *> EntityPtrPool::getComponentPools()
 {
-    return {&_entityStatusPool, &_chunkPosPool, &_entityPoolIdPool};
+    auto res = AEntityPool::getComponentPools();
+    res.push_back(&_EntityPoolIdPool);
+    return res;
 }
 
-C::EntityPoolIdPool &EntityPtrPool::getEntityPoolIdPool() { return _entityPoolIdPool; }
+
+C::EntityPoolIdPool &EntityPtrPool::getEntityPoolIdPool()
+{
+    return _EntityPoolIdPool;
+}
 
 } // namespace E
 } // namespace ECS

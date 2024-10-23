@@ -24,10 +24,6 @@ public:
     }
     ~AMonoSystem() override = default;
 
-    AMonoSystem(const AMonoSystem &other) = default;
-    AMonoSystem(AMonoSystem &&other) = default;
-    AMonoSystem &operator=(const AMonoSystem &other) = default;
-    AMonoSystem &operator=(AMonoSystem &&other) = default;
 
     bool tryAddEntityPool(E::IEntityPool *entityPool) override
     {
@@ -69,17 +65,13 @@ protected:
 template<typename... Ts>
 class AStatusMonoSystem : public AMonoSystem<C::EntityStatusPool, Ts...> {
 public:
-    explicit AStatusMonoSystem(bool isParallel, C::EntityStatusEnum status):
+    explicit AStatusMonoSystem(bool isParallel = false, C::EntityStatusEnum status = C::ENT_ALIVE):
         AMonoSystem<C::EntityStatusPool, Ts...>(isParallel),
         _status(status)
     {
     }
     ~AStatusMonoSystem() override = default;
 
-    AStatusMonoSystem(const AStatusMonoSystem &other) = default;
-    AStatusMonoSystem(AStatusMonoSystem &&other) = default;
-    AStatusMonoSystem &operator=(const AStatusMonoSystem &other) = default;
-    AStatusMonoSystem &operator=(AStatusMonoSystem &&other) = default;
 
 protected:
     C::EntityStatusEnum _status;

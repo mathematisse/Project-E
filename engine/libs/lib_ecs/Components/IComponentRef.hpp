@@ -29,9 +29,5 @@ public:
      */
     virtual ~IComponentRef() = default;
 
-    IComponentRef(const IComponentRef &other) = default;
-    IComponentRef(IComponentRef &&other) = default;
-    IComponentRef &operator=(const IComponentRef &other) = default;
-    IComponentRef &operator=(IComponentRef &&other) = default;
 };
 } // namespace ECS::C

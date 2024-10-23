@@ -6,37 +6,16 @@
 */
 
 #include "Systems.hpp"
-#include "DecorSquare.hpp"
-#include "Square.hpp"
+#include "DecorEntities.hpp"
+#include "GameEntities.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include <iostream>
 #include <cmath>
 #include <limits>
 #include "lib_ecs/Systems/ADualSystem.hpp"
 
-#define RED_CLI "\033[31m"
-#define GREEN_CLI "\033[32m"
-#define YELLOW_CLI "\033[33m"
-#define RESET "\033[0m"
-
 namespace ECS {
 namespace S {
 // SYSTEM
-
-ApplyVelocitySystem::ApplyVelocitySystem():
-    AStatusMonoSystem(true, C::ENT_ALIVE)
-{
-}
-
-void ApplyVelocitySystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity
-)
-{
-    auto [x, y] = cposition;
-    auto [vX, vY, speed] = cvelocity;
-    x += vX * deltaTime * speed;
-    y += vY * deltaTime * speed;
-}
 
 MoveBackgroundSystem::MoveBackgroundSystem():
     AMonoSystem(false)
@@ -51,18 +30,18 @@ void MoveBackgroundSystem::_innerOperate(
     auto [status] = cstatus;
     auto [type] = ctype;
 
-    if (status == C::EntityStatusEnum::ENT_ALIVE && type != SquareType::BACKGROUND &&
-        type != SquareType::WALL) {
+    if (status == C::EntityStatusEnum::ENT_ALIVE && type != GameEntityType::BACKGROUND &&
+        type != GameEntityType::WALL) {
         auto [x, y] = cposition;
         if (x < cameraX - 1000) {
             status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         }
-        if (type == SquareType::BULLET && x > cameraX + 1000) {
+        if (type == GameEntityType::BULLET && x > cameraX + 1000) {
             status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         }
     }
 
-    if (status != C::EntityStatusEnum::ENT_ALIVE || type != SquareType::BACKGROUND) {
+    if (status != C::EntityStatusEnum::ENT_ALIVE || type != GameEntityType::BACKGROUND) {
         return;
     }
     auto [x, y] = cposition;
@@ -82,7 +61,7 @@ void MoveEnnemySystem::_statusOperate(
 {
     auto [type] = ctype;
 
-    if (type != SquareType::ENEMY) {
+    if (type != GameEntityType::ENEMY) {
         return;
     }
     if (playersPos.empty()) {
@@ -90,7 +69,7 @@ void MoveEnnemySystem::_statusOperate(
     }
 
     auto [ennemyX, ennemyY] = cposition;
-    auto [vX, vY, speed] = cvelocity;
+    auto [vX, vY] = cvelocity;
     vX = 0;
     vY = 0;
 
@@ -101,7 +80,7 @@ void MoveEnnemySystem::_statusOperate(
     for (const auto &playerPos : playersPos) {
         float playerX = playerPos.x;
         float playerY = playerPos.y;
-        float distance = std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
+        auto distance = (float) std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
 
         if (distance < closestDistance) {
             closestDistance = distance;
@@ -114,10 +93,10 @@ void MoveEnnemySystem::_statusOperate(
         return;
     }
     if (closestPlayerY < ennemyY) {
-        vY = -1;
+        vY = -150;
     }
     if (closestPlayerY > ennemyY) {
-        vY = 1;
+        vY = 150;
     }
     if (closestPlayerY < ennemyY && closestPlayerY + 50 > ennemyY) {
         vY = 0;
@@ -143,11 +122,11 @@ void ColliderSystem::_innerOperate(
         return;
     }
     auto [xA, yA] = cpositionA;
-    auto [sizeXA, sizeYA, _] = csizeA;
+    auto [sizeXA, sizeYA] = csizeA;
     auto [typeA] = ctypeA;
 
     auto [xB, yB] = cpositionB;
-    auto [sizeXB, sizeYB, _2] = csizeB;
+    auto [sizeXB, sizeYB] = csizeB;
     auto [typeB] = ctypeB;
     auto [healthA] = chealthA;
     auto [healthB] = chealthB;
@@ -163,15 +142,15 @@ void ColliderSystem::_innerOperate(
     }
 
     // "Allies" can't collide
-    if ((typeA == SquareType::BULLET || typeA == SquareType::PLAYER) &&
-        (typeB == SquareType::BULLET || typeB == SquareType::PLAYER)) {
+    if ((typeA == GameEntityType::BULLET || typeA == GameEntityType::PLAYER) &&
+        (typeB == GameEntityType::BULLET || typeB == GameEntityType::PLAYER)) {
         return;
     }
-    if ((typeA == SquareType::BULLET_ENNEMY || typeA == SquareType::ENEMY) &&
-        (typeB == SquareType::BULLET_ENNEMY || typeB == SquareType::ENEMY)) {
+    if ((typeA == GameEntityType::BULLET_ENNEMY || typeA == GameEntityType::ENEMY) &&
+        (typeB == GameEntityType::BULLET_ENNEMY || typeB == GameEntityType::ENEMY)) {
         return;
     }
-    if ((typeA == SquareType::WALL && typeB == SquareType::WALL)) {
+    if ((typeA == GameEntityType::WALL && typeB == GameEntityType::WALL)) {
         return;
     }
 
@@ -186,10 +165,10 @@ void ColliderSystem::_innerOperate(
     }
 
     // Set flags to destroy entities
-    if (healthA <= 0 && typeA != SquareType::WALL) {
+    if (healthA <= 0 && typeA != GameEntityType::WALL) {
         statusA = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
     }
-    if (healthB <= 0 && typeB != SquareType::WALL) {
+    if (healthB <= 0 && typeB != GameEntityType::WALL) {
         statusB = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
     }
 }
@@ -206,7 +185,7 @@ void GetPlayerPositionSystem::_statusOperate(
 {
     auto [entityStatus] = centitystatus;
     auto [type] = ctype;
-    if ((type != SquareType::LPLAYER && type != SquareType::PLAYER) ||
+    if ((type != GameEntityType::LPLAYER && type != GameEntityType::PLAYER) ||
         entityStatus != C::ENT_ALIVE) {
         return;
     }
