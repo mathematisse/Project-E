@@ -26,14 +26,20 @@ const std::string &AEntityPool::getEntityName() const { return _entityName; }
 
 Chunks::cPosArr_t &AEntityPool::getFreePos() { return _freePos; }
 
-Chunks::chunk_idx_t AEntityPool::getTotalSize() { return EntityWithEntityStatusPool::getComponentPool().elemCount(); }
+Chunks::chunk_idx_t AEntityPool::getTotalSize()
+{
+    return EntityWithEntityStatusPool::getComponentPool().elemCount();
+}
 
 Chunks::chunk_idx_t AEntityPool::getUsedSize()
 {
     return EntityWithEntityStatusPool::getComponentPool().elemCount() - _freePos.size();
 }
 
-Chunks::chunk_idx_t AEntityPool::getChunkCount() const { return EntityWithEntityStatusPool::getComponentPool().chunkCount(); }
+Chunks::chunk_idx_t AEntityPool::getChunkCount() const
+{
+    return EntityWithEntityStatusPool::getComponentPool().chunkCount();
+}
 
 C::IComponentPool *AEntityPool::getComponentPool(const std::string &name)
 {
@@ -75,20 +81,14 @@ std::unique_ptr<AEntityRef> AEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 
 std::vector<C::IComponentPool *> AEntityPool::getComponentPools()
 {
-    return {&EntityWithEntityStatusPool::getComponentPool(), &EntityWithChunkPosPool::getComponentPool()};
+    return {
+        &EntityWithEntityStatusPool::getComponentPool(), &EntityWithChunkPosPool::getComponentPool()
+    };
 }
 
+C::EntityStatusPool &AEntityPool::getEntityStatusPool() { return _EntityStatusPool; }
 
-C::EntityStatusPool &AEntityPool::getEntityStatusPool()
-{
-    return _EntityStatusPool;
-}
-
-C::ChunkPosPool &AEntityPool::getChunkPosPool()
-{
-    return _ChunkPosPool;
-}
-
+C::ChunkPosPool &AEntityPool::getChunkPosPool() { return _ChunkPosPool; }
 
 } // namespace E
 } // namespace ECS

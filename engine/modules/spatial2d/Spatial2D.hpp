@@ -16,7 +16,6 @@ class Spatial2D : public IModule {
     ECS::S::SystemTreeNode spatial2DNode;
 
 public:
-
     Spatial2D():
         spatial2DNode(SPATIAL2D_SYS_GROUP, {&applyAccelerationSystem, &applyVelocitySystem})
     {

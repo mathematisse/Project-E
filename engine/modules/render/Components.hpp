@@ -9,7 +9,6 @@
 
 #include "lib_ecs/Components/PureComponentPools.hpp"
 
-
 DECLARE_COMPONENT(
     Sprite,
     size_t // textureId

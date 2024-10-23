@@ -21,8 +21,7 @@ DebugDrawSystem::DebugDrawSystem(Camera2D &camera):
 }
 
 void DebugDrawSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::ColorPool::Types &ccolor,
-    C::SizePool::Types &csize
+    C::PositionPool::Types &cposition, C::ColorPool::Types &ccolor, C::SizePool::Types &csize
 )
 {
     auto [x, y] = cposition;
@@ -40,7 +39,8 @@ DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera)
 }
 
 void DrawSpriteSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::SizePool::Types &csize, C::RotationPool::Types &crotation, C::SpritePool::Types &csprite
+    C::PositionPool::Types &cposition, C::SizePool::Types &csize, C::RotationPool::Types &crotation,
+    C::SpritePool::Types &csprite
 )
 {
     auto [id] = csprite;
@@ -53,14 +53,8 @@ void DrawSpriteSystem::_statusOperate(
     auto texture = assetsLoader.get_asset_from_id(id);
     BeginMode2D(camera);
     DrawTextureEx(
-        texture,
-        {
-            rotation == 90 ? x + sizeX : x,
-            rotation == -90 ? y + sizeY : y
-        },
-        rotation,
-        sizeX / (float) texture.width,
-        WHITE
+        texture, {rotation == 90 ? x + sizeX : x, rotation == -90 ? y + sizeY : y}, rotation,
+        sizeX / (float) texture.width, WHITE
     );
 }
 
@@ -86,22 +80,8 @@ void DrawAnimatedSpriteSystem::_statusOperate(
     auto texture = assetsLoader.get_asset_from_id(id);
     BeginMode2D(camera);
     DrawTexturePro(
-        texture,
-        {
-            start_position,
-            0,
-            (float) texture.width / nbr_frame,
-            (float) texture.height
-        },
-        {
-            x,
-            rotation == 90 ? y : y + sizeY,
-            sizeX,
-            sizeY
-        },
-        Vector2 {0, 0},
-        rotation,
-        WHITE
+        texture, {start_position, 0, (float) texture.width / nbr_frame, (float) texture.height},
+        {x, rotation == 90 ? y : y + sizeY, sizeX, sizeY}, Vector2 {0, 0}, rotation, WHITE
     );
 }
 
@@ -111,7 +91,9 @@ SpriteAnimationSystem::SpriteAnimationSystem(AssetsLoader &assetsLoader):
 {
 }
 
-void SpriteAnimationSystem::_statusOperate(C::AnimatedSpritePool::Types &csprite, C::TimerPool::Types &ctimer)
+void SpriteAnimationSystem::_statusOperate(
+    C::AnimatedSpritePool::Types &csprite, C::TimerPool::Types &ctimer
+)
 {
     auto [id, nbr_frame, sprite_pos, animation_time] = csprite;
     auto [clock] = ctimer;

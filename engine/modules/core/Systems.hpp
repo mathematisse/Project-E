@@ -9,7 +9,6 @@ class IncrementTimerSystem : public S::AStatusMonoSystem<C::TimerPool> {
 public:
     ~IncrementTimerSystem() override = default;
 
-
     void getRunStepData(SystemTree &sysTree) override;
     float deltaTime = 0.0F;
 

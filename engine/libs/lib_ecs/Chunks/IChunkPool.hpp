@@ -30,7 +30,6 @@ public:
      */
     virtual ~IChunkPool() = default;
 
-
     /**
      * @brief Get a chunk by index.
      *

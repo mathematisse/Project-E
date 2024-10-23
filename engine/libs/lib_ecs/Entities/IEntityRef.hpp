@@ -19,7 +19,6 @@ namespace ECS::E {
  */
 class IEntityRef {
 public:
-
     /**
      * @brief Default constructor.
      */

@@ -2,7 +2,6 @@
 
 #include "lib_ecs/Components/PureComponentPools.hpp"
 
-
 DECLARE_COMPONENT(
     Timer,
     float // ellapsed_seconds
@@ -13,5 +12,5 @@ DECLARE_COMPONENT(
     unsigned char, // r
     unsigned char, // g
     unsigned char, // b
-    unsigned char  // a
+    unsigned char // a
 )

@@ -31,9 +31,7 @@ const size_t DecorEntityChunkSize = 64;
 // ENTITY REF
 class DecorEntityRef : public ASpriteEntityRef, public EntityWithTypeRef {
 public:
-    DecorEntityRef(
-        const ASpriteEntityRef &ent, C::TypeRef *type
-    );
+    DecorEntityRef(const ASpriteEntityRef &ent, C::TypeRef *type);
     ~DecorEntityRef() override = default;
 };
 
@@ -51,9 +49,7 @@ public:
 // ENTITY REF
 class DecorAnimatedEntityRef : public AAnimatedEntityRef, public EntityWithTypeRef {
 public:
-    DecorAnimatedEntityRef(
-        const AAnimatedEntityRef &ent, C::TypeRef *type
-    );
+    DecorAnimatedEntityRef(const AAnimatedEntityRef &ent, C::TypeRef *type);
     ~DecorAnimatedEntityRef() override = default;
 };
 

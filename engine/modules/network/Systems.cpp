@@ -13,6 +13,5 @@ namespace ECS {
 namespace S {
 // SYSTEM
 
-
 } // namespace S
 } // namespace ECS

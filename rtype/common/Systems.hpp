@@ -14,13 +14,11 @@
 
 namespace ECS::S {
 
-
 class MoveBackgroundSystem
     : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
 public:
     explicit MoveBackgroundSystem();
     ~MoveBackgroundSystem() override = default;
-
 
     float cameraX = 0;
 
@@ -36,7 +34,6 @@ class MoveEnnemySystem
 public:
     explicit MoveEnnemySystem();
     ~MoveEnnemySystem() override = default;
-
 
     std::vector<Vector2> playersPos;
 
@@ -54,7 +51,6 @@ public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
 
-
 protected:
     void _innerOperate(
         C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
@@ -69,7 +65,6 @@ class GetPlayerPositionSystem
 public:
     explicit GetPlayerPositionSystem();
     ~GetPlayerPositionSystem() override = default;
-
 
     std::vector<Vector2> playersPos;
 

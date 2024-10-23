@@ -25,7 +25,6 @@ ADynamicEntityRef::ADynamicEntityRef(
 {
 }
 
-
 // ENTITY POOL
 ADynamicEntityPool::ADynamicEntityPool():
     AEntityPool("", 0)
@@ -40,8 +39,7 @@ std::unique_ptr<E::IEntityRef> ADynamicEntityPool::getEntity(Chunks::chunkPos_t 
 std::unique_ptr<E::ADynamicEntityRef> ADynamicEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::ADynamicEntityRef>(
-        *AStaticEntityPool::getRawEntity(cPos),
-        EntityWithVelocityPool::getComponentRef(cPos),
+        *AStaticEntityPool::getRawEntity(cPos), EntityWithVelocityPool::getComponentRef(cPos),
         EntityWithAccelerationPool::getComponentRef(cPos)
     );
     return ptr;
@@ -49,6 +47,8 @@ std::unique_ptr<E::ADynamicEntityRef> ADynamicEntityPool::getRawEntity(Chunks::c
 
 std::vector<C::IComponentPool *> ADynamicEntityPool::getComponentPools()
 {
-    return {&EntityWithVelocityPool::getComponentPool(), &EntityWithAccelerationPool::getComponentPool()};
+    return {
+        &EntityWithVelocityPool::getComponentPool(), &EntityWithAccelerationPool::getComponentPool()
+    };
 }
 }

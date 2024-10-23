@@ -7,13 +7,13 @@
 
 #include "AAnimatedEntity.hpp"
 
-
 // ENTITY
 namespace ECS::E {
 
 // ENTITY REF
 AAnimatedEntityRef::AAnimatedEntityRef(
-    const AStaticEntityRef &ent, C::AnimatedSpriteRef *animatedSprite, C::TimerRef *timer, C::SizeRef *size
+    const AStaticEntityRef &ent, C::AnimatedSpriteRef *animatedSprite, C::TimerRef *timer,
+    C::SizeRef *size
 
 ):
     AEntityRef(ent),
@@ -27,7 +27,7 @@ AAnimatedEntityRef::AAnimatedEntityRef(
 }
 
 // ENTITY POOL
-AAnimatedEntityPool::AAnimatedEntityPool() :
+AAnimatedEntityPool::AAnimatedEntityPool():
     AEntityPool("", 0)
 {
 }
@@ -40,16 +40,16 @@ std::unique_ptr<E::IEntityRef> AAnimatedEntityPool::getEntity(Chunks::chunkPos_t
 std::unique_ptr<E::AAnimatedEntityRef> AAnimatedEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::AAnimatedEntityRef>(
-        *AStaticEntityPool::getRawEntity(cPos),
-        EntityWithAnimatedSpritePool::getComponentRef(cPos),
-        EntityWithTimerPool::getComponentRef(cPos),
-        EntityWithSizePool::getComponentRef(cPos)
+        *AStaticEntityPool::getRawEntity(cPos), EntityWithAnimatedSpritePool::getComponentRef(cPos),
+        EntityWithTimerPool::getComponentRef(cPos), EntityWithSizePool::getComponentRef(cPos)
     );
     return ptr;
 }
 
 std::vector<C::IComponentPool *> AAnimatedEntityPool::getComponentPools()
 {
-    return {&EntityWithAnimatedSpritePool::getComponentPool(), &EntityWithTimerPool::getComponentPool()};
+    return {
+        &EntityWithAnimatedSpritePool::getComponentPool(), &EntityWithTimerPool::getComponentPool()
+    };
 }
 }

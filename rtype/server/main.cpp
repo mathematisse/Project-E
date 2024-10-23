@@ -84,7 +84,6 @@ int main(int ac, char **av)
 
     float cameraX = 1920 / 2;
 
-
     // Engine modules
     engine::module::Spatial2D mSpatial2D;
     mSpatial2D.load(_eM);
@@ -106,13 +105,11 @@ int main(int ac, char **av)
 
     ECS::S::SystemTreeNode rTypeFixedNode(
         "RTypeFixedNode", {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem,
-         &shootSystem, &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
+        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &shootSystem,
+         &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
          &sendAllDataToNewClients}
     );
     _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP, false, true);
-
-
 
     shootSystem.deltaTime = 0.02F;
 

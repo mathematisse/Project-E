@@ -27,8 +27,7 @@ std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::chunkPos_t cPos)
 std::unique_ptr<E::EntityPtrRef> EntityPtrPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::EntityPtrRef>(
-        *AEntityPool::getRawEntity(cPos),
-        EntityWithEntityPoolIdPool::getComponentRef(cPos)
+        *AEntityPool::getRawEntity(cPos), EntityWithEntityPoolIdPool::getComponentRef(cPos)
     );
     return ptr;
 }
@@ -40,11 +39,7 @@ std::vector<C::IComponentPool *> EntityPtrPool::getComponentPools()
     return res;
 }
 
-
-C::EntityPoolIdPool &EntityPtrPool::getEntityPoolIdPool()
-{
-    return _EntityPoolIdPool;
-}
+C::EntityPoolIdPool &EntityPtrPool::getEntityPoolIdPool() { return _EntityPoolIdPool; }
 
 } // namespace E
 } // namespace ECS

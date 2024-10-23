@@ -37,7 +37,6 @@ public:
      */
     virtual ~AChunk() = default;
 
-
     /**
      * @brief Get the count of elements.
      *

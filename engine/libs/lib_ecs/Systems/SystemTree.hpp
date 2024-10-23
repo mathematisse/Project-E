@@ -12,7 +12,6 @@
 #define ROOT_SYS_GROUP "ROOT"
 #define SYNC_SYS_GROUP "SYNC"
 
-
 namespace ECS::S {
 class SystemTree;
 
@@ -24,9 +23,13 @@ public:
         std::vector<SystemTreeNode> children = std::vector<SystemTreeNode>()
     );
     ~SystemTreeNode() = default;
-    bool addSystemGroup(const std::string & targetGroup, const std::string & newGroup, bool addBefore, bool addInside);
-    bool addSystem(ISystem *system, const std::string & group, bool atStart);
-    bool addSystemTreeNode(SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside);
+    bool addSystemGroup(
+        const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    );
+    bool addSystem(ISystem *system, const std::string &group, bool atStart);
+    bool addSystemTreeNode(
+        SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+    );
     void registerEntityPool(E::IEntityPool *entityPool);
     void runNode(SystemTree &tree);
     [[nodiscard]] const std::string &getGroup() const;
@@ -43,9 +46,13 @@ class SystemTree {
 public:
     SystemTree();
     ~SystemTree();
-    bool addSystemGroup(const std::string & targetGroup, const std::string &newGroup, bool addBefore, bool addInside);
-    bool addSystem(ISystem *system, const std::string & group, bool atStart);
-    bool addSystemTreeNode(SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside);
+    bool addSystemGroup(
+        const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    );
+    bool addSystem(ISystem *system, const std::string &group, bool atStart);
+    bool addSystemTreeNode(
+        SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+    );
     void registerEntityPool(E::IEntityPool *entityPool);
     void runTree();
 

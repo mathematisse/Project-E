@@ -28,6 +28,5 @@ public:
      * Ensures that derived components are properly destroyed.
      */
     virtual ~IComponentRef() = default;
-
 };
 } // namespace ECS::C

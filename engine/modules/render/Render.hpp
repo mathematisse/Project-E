@@ -20,13 +20,14 @@ class Render : public IModule {
     ECS::S::SystemTreeNode debugRenderNode;
 
 public:
-
     Render(Camera2D &camera, AssetsLoader &assetsLoader):
         debugDrawSystem(camera),
         drawSpriteSystem(assetsLoader, camera),
         drawAnimatedSpriteSystem(assetsLoader, camera),
         spriteAnimationSystem(assetsLoader),
-        renderNode(RENDER_SYS_GROUP, {&drawSpriteSystem, &drawAnimatedSpriteSystem, &spriteAnimationSystem}),
+        renderNode(
+            RENDER_SYS_GROUP, {&drawSpriteSystem, &drawAnimatedSpriteSystem, &spriteAnimationSystem}
+        ),
         debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
     {
     }

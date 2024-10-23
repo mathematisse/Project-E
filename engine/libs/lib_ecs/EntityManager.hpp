@@ -21,23 +21,26 @@
 namespace ECS {
 class EntityManager {
 public:
-
     explicit EntityManager(float fixedUpdateTime);
 
     bool registerSystemGroup(
-        const std::string & targetGroup, const std::string & newGroup, bool addBefore = false, bool addInside = false
+        const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
+        bool addInside = false
     );
     bool registerSystemNode(
-        S::SystemTreeNode &node, const std::string & targetGroup, bool addBefore = false, bool addInside = false
+        S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        bool addInside = false
     );
-    bool registerSystem(S::ISystem &system, const std::string & group, bool atStart = false);
+    bool registerSystem(S::ISystem &system, const std::string &group, bool atStart = false);
     bool registerFixedSystemGroup(
-        const std::string & targetGroup, const std::string & newGroup, bool addBefore = false, bool addInside = false
+        const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
+        bool addInside = false
     );
     bool registerFixedSystemNode(
-        S::SystemTreeNode &node, const std::string & targetGroup, bool addBefore = false, bool addInside = false
+        S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        bool addInside = false
     );
-    bool registerFixedSystem(S::ISystem &system, const std::string & group, bool atStart = false);
+    bool registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart = false);
     bool registerEntityPool(ECS::E::IEntityPool *entityPool);
     S::IQuery &initializeQuery(S::IQuery &query);
     std::unique_ptr<ECS::E::IEntityRef> getEntity(const ECS::E::EntityPtrRef &entityPtr);

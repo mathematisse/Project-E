@@ -11,5 +11,4 @@
 
 namespace ECS::C {
 
-
 }

@@ -21,7 +21,6 @@ class Network : public IModule {
     ECS::S::SystemTreeNode networkNode;
 
 public:
-
     Network():
         networkNode(NETWORK_SYS_GROUP, {})
     {

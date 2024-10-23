@@ -19,16 +19,19 @@
 
 namespace ECS {
 
-EntityManager::EntityManager(float fixedUpdateTime) : _fixedUpdateTime(fixedUpdateTime) {}
+EntityManager::EntityManager(float fixedUpdateTime):
+    _fixedUpdateTime(fixedUpdateTime)
+{
+}
 
 bool EntityManager::registerSystemGroup(
-    const std::string & targetGroup, const std::string & newGroup, bool addBefore, bool addInside
+    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
 )
 {
     return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
-bool EntityManager::registerSystem(S::ISystem &system, const std::string & group, bool atStart)
+bool EntityManager::registerSystem(S::ISystem &system, const std::string &group, bool atStart)
 {
     for (auto &entityPool : _entityPools) {
         system.tryAddEntityPool(entityPool);
@@ -37,7 +40,7 @@ bool EntityManager::registerSystem(S::ISystem &system, const std::string & group
 }
 
 bool EntityManager::registerSystemNode(
-    S::SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside
+    S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     for (auto &entityPool : _entityPools) {
@@ -47,13 +50,13 @@ bool EntityManager::registerSystemNode(
 }
 
 bool EntityManager::registerFixedSystemGroup(
-    const std::string & targetGroup, const std::string & newGroup, bool addBefore, bool addInside
+    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
 )
 {
     return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
-bool EntityManager::registerFixedSystem(S::ISystem &system, const std::string & group, bool atStart)
+bool EntityManager::registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart)
 {
     for (auto &entityPool : _entityPools) {
         system.tryAddEntityPool(entityPool);
@@ -62,7 +65,7 @@ bool EntityManager::registerFixedSystem(S::ISystem &system, const std::string & 
 }
 
 bool EntityManager::registerFixedSystemNode(
-    S::SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside
+    S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     for (auto &entityPool : _entityPools) {

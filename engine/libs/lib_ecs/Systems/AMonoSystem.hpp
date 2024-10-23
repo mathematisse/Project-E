@@ -24,7 +24,6 @@ public:
     }
     ~AMonoSystem() override = default;
 
-
     bool tryAddEntityPool(E::IEntityPool *entityPool) override
     {
         return _query.tryAddEntityPool(entityPool);
@@ -71,7 +70,6 @@ public:
     {
     }
     ~AStatusMonoSystem() override = default;
-
 
 protected:
     C::EntityStatusEnum _status;

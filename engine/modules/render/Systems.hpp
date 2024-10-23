@@ -14,38 +14,33 @@
 
 namespace ECS::S {
 
-class DebugDrawSystem
-    : public S::AStatusMonoSystem<C::PositionPool, C::ColorPool, C::SizePool> {
+class DebugDrawSystem : public S::AStatusMonoSystem<C::PositionPool, C::ColorPool, C::SizePool> {
 public:
     explicit DebugDrawSystem(Camera2D &camera);
     ~DebugDrawSystem() override = default;
-
 
     Camera2D &camera;
 
 protected:
     void _statusOperate(
-        typename C::PositionPool::Types &cposition,
-        typename C::ColorPool::Types &ccolor, typename C::SizePool::Types &csize
+        typename C::PositionPool::Types &cposition, typename C::ColorPool::Types &ccolor,
+        typename C::SizePool::Types &csize
     ) override;
 };
 
 class DrawSpriteSystem
-    : public S::AStatusMonoSystem<
-          C::PositionPool, C::SizePool, C::RotationPool, C::SpritePool> {
+    : public S::AStatusMonoSystem<C::PositionPool, C::SizePool, C::RotationPool, C::SpritePool> {
 public:
     explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
     ~DrawSpriteSystem() override = default;
-
 
     AssetsLoader &assetsLoader;
     Camera2D &camera;
 
 protected:
     void _statusOperate(
-        typename C::PositionPool::Types &cposition,
-        typename C::SizePool::Types &csize, typename C::RotationPool::Types &crotation,
-        typename C::SpritePool::Types &csprite
+        typename C::PositionPool::Types &cposition, typename C::SizePool::Types &csize,
+        typename C::RotationPool::Types &crotation, typename C::SpritePool::Types &csprite
     ) override;
 };
 
@@ -56,15 +51,13 @@ public:
     DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
     ~DrawAnimatedSpriteSystem() override = default;
 
-
     AssetsLoader &assetsLoader;
     Camera2D &camera;
 
 protected:
     void _statusOperate(
-        typename C::PositionPool::Types &cposition,
-        typename C::SizePool::Types &csize, typename C::RotationPool::Types &crotation,
-        typename C::AnimatedSpritePool::Types &csprite
+        typename C::PositionPool::Types &cposition, typename C::SizePool::Types &csize,
+        typename C::RotationPool::Types &crotation, typename C::AnimatedSpritePool::Types &csprite
     ) override;
 };
 
@@ -72,7 +65,6 @@ class SpriteAnimationSystem : public S::AStatusMonoSystem<C::AnimatedSpritePool,
 public:
     explicit SpriteAnimationSystem(AssetsLoader &assetsLoader);
     ~SpriteAnimationSystem() override = default;
-
 
     AssetsLoader &assetsLoader;
 

@@ -18,7 +18,10 @@ AEntityRef::AEntityRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos):
 
 C::entity_status_t AEntityRef::getStatusVal() const { return *_EntityStatus->get<0>(); }
 
-Chunks::chunkPos_t AEntityRef::getChunkPosVal() const { return {*_ChunkPos->get<0>(), *_ChunkPos->get<1>()}; }
+Chunks::chunkPos_t AEntityRef::getChunkPosVal() const
+{
+    return {*_ChunkPos->get<0>(), *_ChunkPos->get<1>()};
+}
 
 void AEntityRef::setStatusVal(C::entity_status_t status) { *_EntityStatus->get<0>() = status; }
 

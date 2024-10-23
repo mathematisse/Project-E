@@ -80,7 +80,8 @@ void MoveEnnemySystem::_statusOperate(
     for (const auto &playerPos : playersPos) {
         float playerX = playerPos.x;
         float playerY = playerPos.y;
-        auto distance = (float) std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
+        auto distance =
+            (float) std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
 
         if (distance < closestDistance) {
             closestDistance = distance;

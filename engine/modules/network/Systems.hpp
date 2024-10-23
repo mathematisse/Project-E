@@ -12,5 +12,4 @@
 
 namespace ECS::S {
 
-
 } // namespace ECS::S

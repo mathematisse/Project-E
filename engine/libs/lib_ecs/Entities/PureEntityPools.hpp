@@ -11,8 +11,6 @@
 #include "lib_ecs/Entities/AEntityPool.hpp"
 #include "lib_ecs/Entities/PureEntities.hpp"
 
-
-
 namespace ECS::E {
 const size_t EntityPtrPoolChunkSize = 256;
 
@@ -24,7 +22,6 @@ public:
     std::vector<C::IComponentPool *> getComponentPools() override;
 
     C::EntityPoolIdPool &getEntityPoolIdPool();
-
 };
 
 } // namespace ECS::E

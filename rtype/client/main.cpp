@@ -20,7 +20,6 @@
 #include "render/Render.hpp"
 #include "spatial2d/Spatial2D.hpp"
 
-
 void init_camera(Camera2D &camera)
 {
     camera.target = {1920 / 2, 1080 / 2};
@@ -279,8 +278,6 @@ int main(int ac, char **av)
     ECS::E::DecorEntityPool decorEntityPool;
     _eM.registerEntityPool(&decorEntityPool);
 
-
-
     setup_decor(_eM, networkManager, assetsLoader);
 
     auto player = setup_player(_eM, assetsLoader);
@@ -288,7 +285,6 @@ int main(int ac, char **av)
 
     Vector2 playerPosition = {0, 0};
     char playerAlive = 1;
-
 
     auto curr_time = std::chrono::steady_clock::now();
 
@@ -493,7 +489,6 @@ int main(int ac, char **av)
         auto new_time = std::chrono::steady_clock::now();
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
-
 
         if (client.started)
             update_camera(camera, dt);

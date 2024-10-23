@@ -21,7 +21,6 @@ public:
     explicit MovePlayerSystem(net::RTypeClient &client);
     ~MovePlayerSystem() override = default;
 
-
     net::RTypeClient &client;
     size_t frame;
 
@@ -38,7 +37,6 @@ public:
     explicit MoveOtherPlayerSystem();
     ~MoveOtherPlayerSystem() override = default;
 
-
     std::vector<ECS::PlayerState> playerStates;
 
 protected:
@@ -54,7 +52,6 @@ public:
     explicit DestroyEntitiesSystem(ECS::EntityManager &entityManager);
     ~DestroyEntitiesSystem() override = default;
 
-
     std::vector<ECS::EntityDestroyed> entitiesDestroyed;
 
 protected:
@@ -69,7 +66,6 @@ class UpdateEnginePosition
 public:
     explicit UpdateEnginePosition();
     ~UpdateEnginePosition() override = default;
-
 
     Vector2 playerPosition;
     char playerAlive;

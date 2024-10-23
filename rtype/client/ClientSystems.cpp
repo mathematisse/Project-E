@@ -67,7 +67,8 @@ void MoveOtherPlayerSystem::_statusOperate(
 )
 {
     auto [type] = ctype;
-    if ((type != GameEntityType::PLAYER && type != GameEntityType::LPLAYER) || playerStates.empty()) {
+    if ((type != GameEntityType::PLAYER && type != GameEntityType::LPLAYER) ||
+        playerStates.empty()) {
         return;
     }
     auto [x, y] = cposition;

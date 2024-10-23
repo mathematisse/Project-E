@@ -40,7 +40,6 @@ public:
      */
     ~StandardChunk() = default;
 
-
     /**
      * @brief Retrieves a pointer to the element at the specified index.
      *

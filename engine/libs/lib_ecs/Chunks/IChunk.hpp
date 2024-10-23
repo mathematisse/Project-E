@@ -32,7 +32,6 @@ public:
      */
     virtual ~IChunk() = default;
 
-
     /**
      * @brief Get the element at the specified index.
      *

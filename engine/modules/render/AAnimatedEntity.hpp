@@ -14,16 +14,23 @@
 namespace ECS::E {
 
 // ENTITY REF
-class AAnimatedEntityRef : virtual public AStaticEntityRef, virtual public EntityWithAnimatedSpriteRef, virtual public EntityWithTimerRef, virtual public EntityWithSizeRef {
+class AAnimatedEntityRef : virtual public AStaticEntityRef,
+                           virtual public EntityWithAnimatedSpriteRef,
+                           virtual public EntityWithTimerRef,
+                           virtual public EntityWithSizeRef {
 public:
     AAnimatedEntityRef(
-        const AStaticEntityRef &ent, C::AnimatedSpriteRef *animatedSprite, C::TimerRef *timer, C::SizeRef *size
+        const AStaticEntityRef &ent, C::AnimatedSpriteRef *animatedSprite, C::TimerRef *timer,
+        C::SizeRef *size
     );
     ~AAnimatedEntityRef() override = default;
 };
 
 // ENTITY POOL
-class AAnimatedEntityPool : virtual public AStaticEntityPool, virtual public EntityWithAnimatedSpritePool, virtual public EntityWithTimerPool, virtual public EntityWithSizePool {
+class AAnimatedEntityPool : virtual public AStaticEntityPool,
+                            virtual public EntityWithAnimatedSpritePool,
+                            virtual public EntityWithTimerPool,
+                            virtual public EntityWithSizePool {
 public:
     AAnimatedEntityPool();
     ~AAnimatedEntityPool() override = default;

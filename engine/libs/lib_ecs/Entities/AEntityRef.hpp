@@ -18,7 +18,9 @@ namespace ECS::E {
  * The AEntity class provides a common interface for all entities, including methods for
  * getting and setting the status and chunk position of the entity.
  */
-class AEntityRef : public IEntityRef, public EntityWithEntityStatusRef, public EntityWithChunkPosRef {
+class AEntityRef : public IEntityRef,
+                   public EntityWithEntityStatusRef,
+                   public EntityWithChunkPosRef {
 public:
     /**
      * @brief Constructs an AEntity object.
@@ -32,7 +34,6 @@ public:
      * @brief Destroys the AEntity object.
      */
     ~AEntityRef() override = default;
-
 
     /**
      * @brief Gets the status of the entity.
@@ -61,6 +62,5 @@ public:
      * @param cPos The new chunk position of the entity as a Chunks::chunkPos_t.
      */
     void setChunkPosVal(Chunks::chunkPos_t cPos) override;
-
 };
 } // namespace ECS::E

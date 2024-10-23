@@ -13,7 +13,9 @@
 
 namespace ECS::E {
 
-class AEntityPool : public IEntityPool, public EntityWithEntityStatusPool, public EntityWithChunkPosPool {
+class AEntityPool : public IEntityPool,
+                    public EntityWithEntityStatusPool,
+                    public EntityWithChunkPosPool {
 public:
     AEntityPool(std::string entityName, size_t chunkSize);
     ~AEntityPool() override;
@@ -32,6 +34,7 @@ public:
 
     C::EntityStatusPool &getEntityStatusPool() override;
     C::ChunkPosPool &getChunkPosPool() override;
+
 protected:
     std::string _entityName;
     size_t _chunkSize;

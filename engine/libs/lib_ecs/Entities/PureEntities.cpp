@@ -9,10 +9,9 @@
 
 namespace ECS {
 namespace E {
-EntityPtrRef::EntityPtrRef(
-    const AEntityRef &aEnt, C::EntityPoolIdRef *poolId
-):
-    AEntityRef(aEnt), EntityWithEntityPoolIdRef(poolId)
+EntityPtrRef::EntityPtrRef(const AEntityRef &aEnt, C::EntityPoolIdRef *poolId):
+    AEntityRef(aEnt),
+    EntityWithEntityPoolIdRef(poolId)
 {
 }
 

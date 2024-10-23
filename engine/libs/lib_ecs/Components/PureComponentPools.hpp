@@ -10,56 +10,56 @@
 #include "lib_ecs/Components/AComponentPool.hpp"
 #include <iostream>
 
-#define DECLARE_RAW_COMPONENT(name, types...)                                              \
-    inline constexpr char name##ComponentName[] = #name;                                   \
-    class name##Pool : public AComponentPool<name##ComponentName, types> { };              \
+#define DECLARE_RAW_COMPONENT(name, types...)                                 \
+    inline constexpr char name##ComponentName[] = #name;                      \
+    class name##Pool : public AComponentPool<name##ComponentName, types> { }; \
     using name##Ref = ComponentRef<types>;
 
-#define DECLARE_ENTITY_POOL_WITH_COMPONENT(name)                                           \
-    class EntityWith##name##Pool {                                                         \
-    public:                                                                                \
-        C::name##Ref *getComponentRef(Chunks::chunkPos_t cPos) {                           \
-            return reinterpret_cast<C::name##Ref *>(_##name##Pool.getComponentRef(cPos));  \
-        }                                                                                  \
-        C::name##Pool &getComponentPool() {                                                \
-            return _##name##Pool;                                                          \
-        }                                                                                  \
-        const C::name##Pool &getComponentPool() const {                                    \
-            return _##name##Pool;                                                          \
-        }                                                                                  \
-    protected:                                                                             \
-        C::name##Pool _##name##Pool;                                                       \
+#define DECLARE_ENTITY_POOL_WITH_COMPONENT(name)                                          \
+    class EntityWith##name##Pool {                                                        \
+    public:                                                                               \
+        C::name##Ref *getComponentRef(Chunks::chunkPos_t cPos)                            \
+        {                                                                                 \
+            return reinterpret_cast<C::name##Ref *>(_##name##Pool.getComponentRef(cPos)); \
+        }                                                                                 \
+        C::name##Pool &getComponentPool() { return _##name##Pool; }                       \
+        const C::name##Pool &getComponentPool() const { return _##name##Pool; }           \
+                                                                                          \
+    protected:                                                                            \
+        C::name##Pool _##name##Pool;                                                      \
     };
 
-#define DECLARE_ENTITY_REF_WITH_COMPONENT(name)                                            \
-    class EntityWith##name##Ref {                                                          \
-    public:                                                                                \
-        explicit EntityWith##name##Ref(C::name##Ref *c) : _##name(c) {}                    \
-        ~EntityWith##name##Ref() {delete _##name;}                                         \
-        [[nodiscard]] C::name##Ref *get##name() const { return _##name; }                  \
-        void set##name(C::name##Ref *c) { _##name = c; }                                   \
-    protected:                                                                             \
-        C::name##Ref *_##name;                                                             \
+#define DECLARE_ENTITY_REF_WITH_COMPONENT(name)                           \
+    class EntityWith##name##Ref {                                         \
+    public:                                                               \
+        explicit EntityWith##name##Ref(C::name##Ref *c):                  \
+            _##name(c)                                                    \
+        {                                                                 \
+        }                                                                 \
+        ~EntityWith##name##Ref() { delete _##name; }                      \
+        [[nodiscard]] C::name##Ref *get##name() const { return _##name; } \
+        void set##name(C::name##Ref *c) { _##name = c; }                  \
+                                                                          \
+    protected:                                                            \
+        C::name##Ref *_##name;                                            \
     };
 
-#define DECLARE_COMPONENT(name, types...)                                                  \
-namespace ECS {                                                                            \
-namespace C {                                                                              \
-    DECLARE_RAW_COMPONENT(name, types);                                                    \
-}                                                                                          \
-namespace E {                                                                              \
-    DECLARE_ENTITY_REF_WITH_COMPONENT(name);                                               \
-    DECLARE_ENTITY_POOL_WITH_COMPONENT(name);                                              \
-}                                                                                          \
-}
-
+#define DECLARE_COMPONENT(name, types...)     \
+    namespace ECS {                           \
+    namespace C {                             \
+    DECLARE_RAW_COMPONENT(name, types);       \
+    }                                         \
+    namespace E {                             \
+    DECLARE_ENTITY_REF_WITH_COMPONENT(name);  \
+    DECLARE_ENTITY_POOL_WITH_COMPONENT(name); \
+    }                                         \
+    }
 
 namespace ECS::C {
 
 using entity_pool_id_t = uint8_t;
 
 using entity_status_t = int8_t;
-
 
 enum EntityStatusEnum : entity_status_t {
     ENT_ERROR = -1,

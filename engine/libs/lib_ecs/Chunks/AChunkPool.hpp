@@ -32,7 +32,6 @@ public:
      */
     virtual ~AChunkPool() = default;
 
-
     /**
      * @brief Access an element by its position.
      *

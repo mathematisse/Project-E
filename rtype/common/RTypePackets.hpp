@@ -8,7 +8,6 @@
 #pragma once
 #include "lib_net/Packet.hpp"
 
-
 #define FIXED_TIMESTEP 0.02F
 
 namespace ECS {

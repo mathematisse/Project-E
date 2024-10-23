@@ -14,16 +14,18 @@
 namespace ECS::E {
 
 // ENTITY REF
-class AStaticEntityRef : virtual public AEntityRef, virtual public EntityWithPositionRef, virtual public EntityWithRotationRef{
+class AStaticEntityRef : virtual public AEntityRef,
+                         virtual public EntityWithPositionRef,
+                         virtual public EntityWithRotationRef {
 public:
-    AStaticEntityRef(
-        const AEntityRef &ent, C::PositionRef *position, C::RotationRef *rotation
-    );
+    AStaticEntityRef(const AEntityRef &ent, C::PositionRef *position, C::RotationRef *rotation);
     ~AStaticEntityRef() override = default;
 };
 
 // ENTITY POOL
-class AStaticEntityPool : virtual public AEntityPool, virtual public EntityWithPositionPool, virtual public EntityWithRotationPool {
+class AStaticEntityPool : virtual public AEntityPool,
+                          virtual public EntityWithPositionPool,
+                          virtual public EntityWithRotationPool {
 public:
     AStaticEntityPool();
     ~AStaticEntityPool() override = default;

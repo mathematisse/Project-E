@@ -43,7 +43,6 @@ public:
         }
     }
 
-
     /**
      * @brief Add a new chunk to the pool.
      *

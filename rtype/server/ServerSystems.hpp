@@ -27,7 +27,6 @@ public:
     );
     ~SpawnEnnemySystem() override = default;
 
-
     EntityManager &entityManager;
     NetworkManager &networkManager;
     size_t ennemyCount = 0;
@@ -49,7 +48,6 @@ public:
     explicit DestroyEntitiesSystem(EntityManager &entityManager, net::RTypeServer &server);
     ~DestroyEntitiesSystem() override = default;
 
-
     EntityManager &entityManager;
 
     net::RTypeServer &server;
@@ -68,7 +66,6 @@ public:
         net::RTypeServer &server
     );
     ~ShootSystem() override = default;
-
 
     EntityManager &entityManager;
     NetworkManager &networkManager;
@@ -92,7 +89,6 @@ public:
     explicit SendAllDataToNewClients();
     ~SendAllDataToNewClients() override = default;
 
-
     std::vector<net::client_id> newClients;
     net::RTypeServer *server = nullptr;
 
@@ -109,7 +105,6 @@ public:
     explicit CountEnnemyAliveSystem(size_t &ennemyCount);
     ~CountEnnemyAliveSystem() override = default;
 
-
     size_t ennemyCount = 0;
 
 protected:
@@ -122,7 +117,6 @@ class MovePlayersSystem
 public:
     explicit MovePlayersSystem();
     ~MovePlayersSystem() override = default;
-
 
     std::vector<std::tuple<ECS::PlayerVelocityInput, size_t>> playerStates;
 

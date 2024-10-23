@@ -13,16 +13,21 @@
 namespace ECS::E {
 
 // ENTITY REF
-class ADynamicEntityRef : virtual public AStaticEntityRef, virtual public EntityWithVelocityRef, virtual public EntityWithAccelerationRef {
+class ADynamicEntityRef : virtual public AStaticEntityRef,
+                          virtual public EntityWithVelocityRef,
+                          virtual public EntityWithAccelerationRef {
 public:
     ADynamicEntityRef(
-        const AStaticEntityRef &staticEnt, C::VelocityRef *velocity, C::AccelerationRef *acceleration
+        const AStaticEntityRef &staticEnt, C::VelocityRef *velocity,
+        C::AccelerationRef *acceleration
     );
     ~ADynamicEntityRef() override = default;
 };
 
 // ENTITY POOL
-class ADynamicEntityPool : virtual public AStaticEntityPool, virtual public EntityWithVelocityPool, virtual public EntityWithAccelerationPool {
+class ADynamicEntityPool : virtual public AStaticEntityPool,
+                           virtual public EntityWithVelocityPool,
+                           virtual public EntityWithAccelerationPool {
 public:
     ADynamicEntityPool();
     ~ADynamicEntityPool() override = default;

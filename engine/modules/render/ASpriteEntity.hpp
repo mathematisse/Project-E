@@ -13,16 +13,18 @@
 namespace ECS::E {
 
 // ENTITY REF
-class ASpriteEntityRef : virtual public AStaticEntityRef, virtual public EntityWithSpriteRef, virtual public EntityWithSizeRef {
+class ASpriteEntityRef : virtual public AStaticEntityRef,
+                         virtual public EntityWithSpriteRef,
+                         virtual public EntityWithSizeRef {
 public:
-    ASpriteEntityRef(
-        const AStaticEntityRef &ent, C::SpriteRef *sprite, C::SizeRef *size
-    );
+    ASpriteEntityRef(const AStaticEntityRef &ent, C::SpriteRef *sprite, C::SizeRef *size);
     ~ASpriteEntityRef() override = default;
 };
 
 // ENTITY POOL
-class ASpriteEntityPool : virtual public AStaticEntityPool, virtual public EntityWithSpritePool, virtual public EntityWithSizePool {
+class ASpriteEntityPool : virtual public AStaticEntityPool,
+                          virtual public EntityWithSpritePool,
+                          virtual public EntityWithSizePool {
 public:
     ASpriteEntityPool();
     ~ASpriteEntityPool() override = default;

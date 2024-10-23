@@ -10,7 +10,6 @@ public:
     ApplyVelocitySystem() = default;
     ~ApplyVelocitySystem() override = default;
 
-
     float deltaTime = 0.0F;
 
 protected:

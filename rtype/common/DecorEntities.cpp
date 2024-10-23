@@ -41,8 +41,7 @@ std::unique_ptr<E::IEntityRef> DecorEntityPool::getEntity(Chunks::chunkPos_t cPo
 std::unique_ptr<E::DecorEntityRef> DecorEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::DecorEntityRef>(
-        *ASpriteEntityPool::getRawEntity(cPos),
-        EntityWithTypePool::getComponentRef(cPos)
+        *ASpriteEntityPool::getRawEntity(cPos), EntityWithTypePool::getComponentRef(cPos)
     );
     return ptr;
 }
@@ -86,11 +85,11 @@ std::unique_ptr<E::IEntityRef> DecorAnimatedEntityPool::getEntity(Chunks::chunkP
     return getRawEntity(cPos);
 }
 
-std::unique_ptr<E::DecorAnimatedEntityRef> DecorAnimatedEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+std::unique_ptr<E::DecorAnimatedEntityRef>
+DecorAnimatedEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::DecorAnimatedEntityRef>(
-        *AAnimatedEntityPool::getRawEntity(cPos),
-        EntityWithTypePool::getComponentRef(cPos)
+        *AAnimatedEntityPool::getRawEntity(cPos), EntityWithTypePool::getComponentRef(cPos)
     );
     return ptr;
 }

@@ -28,7 +28,6 @@ public:
     }
     ~ADualSystem() override = default;
 
-
     bool tryAddEntityPool(E::IEntityPool *entityPool) override
     {
         auto q1 = _query1.tryAddEntityPool(entityPool);
@@ -74,7 +73,6 @@ public:
     {
     }
     ~ASelfDualSystem() override = default;
-
 
 protected:
     void run() override

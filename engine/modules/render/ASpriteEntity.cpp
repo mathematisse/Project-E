@@ -8,7 +8,6 @@
 #include "ASpriteEntity.hpp"
 #include "spatial2d/Components.hpp"
 
-
 // ENTITY
 namespace ECS::E {
 
@@ -27,7 +26,7 @@ ASpriteEntityRef::ASpriteEntityRef(
 }
 
 // ENTITY POOL
-ASpriteEntityPool::ASpriteEntityPool() :
+ASpriteEntityPool::ASpriteEntityPool():
     AEntityPool("", 0)
 {
 }
@@ -40,8 +39,7 @@ std::unique_ptr<E::IEntityRef> ASpriteEntityPool::getEntity(Chunks::chunkPos_t c
 std::unique_ptr<E::ASpriteEntityRef> ASpriteEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
     auto ptr = std::make_unique<E::ASpriteEntityRef>(
-        *AStaticEntityPool::getRawEntity(cPos),
-        EntityWithSpritePool::getComponentRef(cPos),
+        *AStaticEntityPool::getRawEntity(cPos), EntityWithSpritePool::getComponentRef(cPos),
         EntityWithSizePool::getComponentRef(cPos)
     );
     return ptr;

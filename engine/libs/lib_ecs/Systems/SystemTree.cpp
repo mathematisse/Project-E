@@ -22,7 +22,9 @@ SystemTreeNode::SystemTreeNode(
 {
 }
 
-bool SystemTreeNode::addSystemGroup(const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside)
+bool SystemTreeNode::addSystemGroup(
+    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+)
 {
     // First check if are in a match case (will add in children)
     if (targetGroup == _group && addInside) {
@@ -58,7 +60,7 @@ bool SystemTreeNode::addSystemGroup(const std::string &targetGroup, const std::s
     return false;
 }
 
-bool SystemTreeNode::addSystem(ISystem *system, const std::string & group, bool atStart)
+bool SystemTreeNode::addSystem(ISystem *system, const std::string &group, bool atStart)
 {
     if (group == _group) {
         if (atStart) {
@@ -77,7 +79,7 @@ bool SystemTreeNode::addSystem(ISystem *system, const std::string & group, bool 
 }
 
 bool SystemTreeNode::addSystemTreeNode(
-    SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside
+    SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     if (targetGroup == _group && addInside) {
@@ -139,7 +141,7 @@ void SystemTreeNode::runNode(SystemTree &tree)
     }
 }
 
-const std::string & SystemTreeNode::getGroup() const { return _group; }
+const std::string &SystemTreeNode::getGroup() const { return _group; }
 
 SystemTree::SystemTree():
     _root(
@@ -151,18 +153,20 @@ SystemTree::SystemTree():
 
 SystemTree::~SystemTree() = default;
 
-bool SystemTree::addSystemGroup(const std::string & targetGroup, const std::string & newGroup, bool addBefore, bool addInside)
+bool SystemTree::addSystemGroup(
+    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+)
 {
     return _root.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
-bool SystemTree::addSystem(ISystem *system, const std::string & group, bool atStart)
+bool SystemTree::addSystem(ISystem *system, const std::string &group, bool atStart)
 {
     return _root.addSystem(system, group, atStart);
 }
 
 bool SystemTree::addSystemTreeNode(
-    SystemTreeNode &node, const std::string & targetGroup, bool addBefore, bool addInside
+    SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     return _root.addSystemTreeNode(node, targetGroup, addBefore, addInside);
