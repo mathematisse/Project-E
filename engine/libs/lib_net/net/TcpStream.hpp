@@ -18,7 +18,6 @@ class TcpStream : public io::Write, public io::Read {
 public:
     Socket _sock;
 
-public:
     ~TcpStream() override = default;
 
     [[nodiscard]]

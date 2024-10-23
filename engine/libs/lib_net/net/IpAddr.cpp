@@ -1,6 +1,7 @@
 
 #include "lib_net/net/IpAddr.hpp"
 #include "lib_net/net/AddrParseError.hpp"
+#include "lib_net/net/_base.hpp"
 
 namespace lnet::net {
 
@@ -10,29 +11,23 @@ auto Ipv4Addr::parse_ascii(const std::string &str) -> result::Result<Ipv4Addr, A
         return result::Result<Ipv4Addr, AddrParseError>::Error(AddrParseError::Kind::EmptyString);
     }
 
-    std::array<uint8_t, 4> addr;
-    size_t i = 0;
-    size_t j = 0;
-    while (i < str.size() && j < 4) {
-        size_t start = i;
-        while (i < str.size() && str[i] != '.') {
-            i++;
-        }
-        if (i - start > 3) {
-            return result::Result<Ipv4Addr, AddrParseError>::Error(
-                AddrParseError::Kind::InvalidIpv4Address
-            );
-        }
-        addr[j] = std::stoi(str.substr(start, i - start));
-        i++;
-        j++;
-    }
-    if (j != 4) {
+    addrinfo hints {};
+    hints.ai_family = AF_INET;
+    // we put 0 to get all the possible results
+    hints.ai_socktype = 0;
+    hints.ai_protocol = 0;
+    hints.ai_flags = 0;
+
+    addrinfo *result = nullptr;
+    if (::getaddrinfo(str.c_str(), nullptr, &hints, &result) != 0) {
         return result::Result<Ipv4Addr, AddrParseError>::Error(
             AddrParseError::Kind::InvalidIpv4Address
         );
     }
-    return result::Result<Ipv4Addr, AddrParseError>::Success(Ipv4Addr(addr));
+
+    auto *ipv4 = reinterpret_cast<sockaddr_in *>(result->ai_addr);
+    auto addr = Ipv4Addr(ipv4->sin_addr.s_addr);
+    return result::Result<Ipv4Addr, AddrParseError>::Success(addr);
 }
 
 auto Ipv6Addr::parse_ascii(const std::string &str) -> result::Result<Ipv6Addr, AddrParseError>

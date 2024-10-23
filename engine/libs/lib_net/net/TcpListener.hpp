@@ -10,7 +10,6 @@ class TcpListener {
 public:
     Socket _sock;
 
-public:
     static constexpr auto DEFAULT_MAX_LISTENERS = 128;
 
     ~TcpListener() = default;

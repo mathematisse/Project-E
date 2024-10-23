@@ -51,11 +51,11 @@ public:
 
 class SocketAddr {
 private:
-    SocketAddr(SocketAddrV4 addr):
+    explicit SocketAddr(SocketAddrV4 addr):
         addr_(addr)
     {
     }
-    SocketAddr(SocketAddrV6 addr):
+    explicit SocketAddr(SocketAddrV6 addr):
         addr_(addr)
     {
     }

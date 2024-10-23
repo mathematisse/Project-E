@@ -105,6 +105,7 @@ auto Poll::remove_write(const UdpSocket &socket) -> io::Result<result::Void>
     return io::Result<result::Void>::Success(result::Void {});
 }
 
+// timeout is in milliseconds
 auto Poll::wait(std::optional<std::size_t> timeout) -> io::Result<std::vector<PollEvent>>
 {
     std::vector<epoll_event> events(Poll::MAX_EVENTS);

@@ -123,7 +123,7 @@ private:
 
     template<typename G>
         requires std::is_same_v<G, std::mt19937> || std::is_same_v<G, std::mt19937_64>
-    friend class UUIDGenerator;
+    friend class UuidGenerator;
 };
 
 }

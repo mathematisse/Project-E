@@ -9,7 +9,8 @@
 #define _WIN32_WINNT 0x0501 /* Windows XP. */
 #endif
 #include <winsock2.h>
-#include <Ws2tcpip.h>
+// #include <Ws2tcpip.h>
+#include <ws2tcpip.h>
 
 #include <mswsock.h>
 #include <windows.h>

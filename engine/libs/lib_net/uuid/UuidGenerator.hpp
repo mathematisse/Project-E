@@ -12,21 +12,21 @@ namespace lnet::uuid {
 // Make use of std::mt19937_64 to be the generator
 template<typename G = std::mt19937_64>
     requires std::is_same_v<G, std::mt19937> || std::is_same_v<G, std::mt19937_64>
-class UUIDGenerator {
+class UuidGenerator {
 public:
-    UUIDGenerator():
+    UuidGenerator():
         generator(new G(std::random_device()())),
         distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
     {
     }
 
-    UUIDGenerator(uint64_t seed):
+    explicit UuidGenerator(uint64_t seed):
         generator(new G(seed)),
         distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
     {
     }
 
-    UUIDGenerator(G &gen):
+    explicit UuidGenerator(G &gen):
         generator(gen),
         distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
     {
@@ -34,7 +34,7 @@ public:
 
     Uuid new_uuid()
     {
-        uint64_t uuid;
+        uint64_t uuid = 0;
         do {
             uuid = distribution(*generator);
         } while (generatedUUIDs.find(uuid) != generatedUUIDs.end());
@@ -45,7 +45,7 @@ public:
 
     void reset() { generatedUUIDs.clear(); }
 
-    void remove_uuid(const Uuid &uuid) { generatedUUIDs.erase(uuid.data); }
+    void delete_uuid(const Uuid &uuid) { generatedUUIDs.erase(uuid.data); }
 
 private:
     std::shared_ptr<G> generator;

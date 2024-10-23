@@ -14,7 +14,6 @@ class UdpSocket {
 public:
     Socket _sock;
 
-public:
     ~UdpSocket();
 
     [[nodiscard]]

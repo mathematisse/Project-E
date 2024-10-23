@@ -11,7 +11,6 @@ namespace lnet::net {
 
 auto TcpListener::bind(const SocketAddr &addr) -> io::Result<TcpListener>
 {
-
     auto sock = Socket::create(addr, SOCK_STREAM);
     if (!sock) {
         return io::Result<TcpListener>::Error(sock.error());
