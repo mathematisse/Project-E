@@ -20,29 +20,78 @@
 
 static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
 
+static const std::vector<std::vector<size_t>> tower_range {
+    {0, 0, 0}, {300, 300, 300}, {300, 350, 400}, {250, 300, 350}
+};
+
 void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem, size_t &money)
 {
     Vector2 pos = {towerClickSystem.pos.x + 100, towerClickSystem.pos.y};
+    static bool error_box = false;
 
-    DrawCircleLines(towerClickSystem.pos.x + 45, towerClickSystem.pos.y + 25, 300, WHITE);
-    GuiWindowBox((Rectangle) {pos.x, pos.y, 200, 200}, "Tower");
-    GuiLabel((Rectangle) {pos.x + 10, pos.y + 35, 100, 20}, "Type:");
-    GuiLabel(
-        (Rectangle) {pos.x + 100, pos.y + 35, 100, 20},
-        tower_names[towerClickSystem.selectedTower.type].c_str()
-    );
-    GuiLabel((Rectangle) {pos.x + 10, pos.y + 65, 100, 20}, "Level:");
-    GuiLabel(
-        (Rectangle) {pos.x + 100, pos.y + 65, 100, 20},
-        std::to_string(towerClickSystem.selectedTower.level).c_str()
-    );
-    if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade") && money >= 50) {
-        towerClickSystem.selectedTower.level++;
-        towerClickSystem.selectedTower.type = ECS::C::ARCHER;
-        money -= 50;
+    if (towerClickSystem.selectedTower.type != ECS::C::NONE) {
+        GuiWindowBox(
+            (Rectangle) {pos.x, pos.y, 200, 200},
+            tower_names[towerClickSystem.selectedTower.type].c_str()
+        );
+        DrawCircleLines(
+            towerClickSystem.pos.x + 45, towerClickSystem.pos.y + 25,
+            tower_range[towerClickSystem.selectedTower.type]
+                       [towerClickSystem.selectedTower.level - 1],
+            WHITE
+        );
+        GuiLabel((Rectangle) {pos.x + 10, pos.y + 40, 100, 20}, "Level:");
+        GuiLabel(
+            (Rectangle) {pos.x + 100, pos.y + 40, 100, 20},
+            std::to_string(towerClickSystem.selectedTower.level).c_str()
+        );
+        if (towerClickSystem.selectedTower.level < 3) {
+            GuiLabel((Rectangle) {pos.x + 10, pos.y + 65, 100, 20}, "Price:");
+            GuiLabel(
+                (Rectangle) {pos.x + 100, pos.y + 65, 100, 20},
+                std::to_string((towerClickSystem.selectedTower.level * 50)).c_str()
+            );
+            if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
+                if (money >= towerClickSystem.selectedTower.level * 50) {
+                    money -= towerClickSystem.selectedTower.level * 50;
+                    towerClickSystem.selectedTower.level++;
+                }
+            }
+        } else {
+            GuiLabel((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Max level");
+        }
+    } else {
+        GuiWindowBox((Rectangle) {pos.x, pos.y, 300, 200}, "Tower");
+        GuiLabel((Rectangle) {pos.x + 20, pos.y + 55, 100, 20}, "50");
+        if (GuiButton((Rectangle) {pos.x + 75, pos.y + 50, 150, 30}, "Archer")) {
+            if (money >= 50) {
+                towerClickSystem.selectedTower.type = ECS::C::ARCHER;
+                towerClickSystem.selectedTower.level = 1;
+                money -= 50;
+            } else {
+                error_box = true;
+            }
+        }
+        GuiLabel((Rectangle) {pos.x + 20, pos.y + 105, 100, 20}, "80");
+        if (GuiButton((Rectangle) {pos.x + 75, pos.y + 100, 150, 30}, "Wizard")) {
+            if (money >= 80) {
+                towerClickSystem.selectedTower.type = ECS::C::WIZARD;
+                towerClickSystem.selectedTower.level = 1;
+                money -= 80;
+            } else {
+                error_box = true;
+            }
+        }
     }
     if (GuiButton((Rectangle) {pos.x + 50, pos.y + 150, 100, 30}, "Quit")) {
         towerClickSystem.open = false;
+        error_box = false;
+    }
+    if (error_box) {
+        GuiWindowBox((Rectangle) {pos.x, pos.y - 150, 300, 100}, "Not enough money");
+        if (GuiButton((Rectangle) {pos.x + 50, pos.y - 120, 150, 50}, "OK")) {
+            error_box = false;
+        }
     }
 }
 

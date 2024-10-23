@@ -78,7 +78,7 @@ void TowerClickSystem::_innerOperate(
     auto [type] = ctype;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         auto mousePos = GetMousePosition();
-        if (mousePos.x >= x && mousePos.x <= x + sizeX && mousePos.y >= y &&
+        if (mousePos.x >= x && mousePos.x <= x + (sizeX * 1.5) && mousePos.y >= y &&
             mousePos.y <= y + (sizeY * 1.5)) {
             open = true;
             pos.x = x;
