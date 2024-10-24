@@ -8,6 +8,7 @@
 #pragma once
 
 #include "lib_ecs/Components/PureComponentPools.hpp"
+#include <cstdint>
 
 DECLARE_COMPONENT(
     Sprite,
@@ -17,7 +18,7 @@ DECLARE_COMPONENT(
 DECLARE_COMPONENT(
     AnimatedSprite,
     size_t, // textureId
-    float, // nbFrames
-    float, // startPosition
+    std::uint8_t, // nbFrames
+    std::uint8_t, // startPosition
     float // animationSpeed
 );
