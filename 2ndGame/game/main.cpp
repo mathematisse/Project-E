@@ -222,6 +222,14 @@ int main(int ac, char *av[])
             BeginShaderMode(mainMenu.colorblindSimShader);
         }
 
+        if (player_health <= 0) {
+            ClearBackground(BLACK);
+            DrawText("Game Over", 1920 / 2 - 250, 1080 / 2 - 200, 100, WHITE);
+            EndShaderMode();
+            EndDrawing();
+            continue;
+        }
+
         applyVelocitySystem.deltaTime = dt;
         spawnEnemy.delay += dt;
 
