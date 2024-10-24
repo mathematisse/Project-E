@@ -129,8 +129,8 @@ struct PlayerConnectionSuccess {
 
 ## Visual Representation
 
-![First Connection](./first_connection.svg)
+![First Connection](first_connection.svg)
 
-![Set Up UDP](./set_up_UDP.svg)
+![Set Up UDP](set_up_UDP.svg)
 
 This protocol ensures a structured and extensible communication mechanism between the server and clients, allowing for future enhancements and additional message types.
