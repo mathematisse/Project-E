@@ -7,11 +7,10 @@
 
 #include "RTypePackets.hpp"
 #include "RTypeServer.hpp"
-#include "DecorSquare.hpp"
+#include "DecorEntities.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include "Square.hpp"
+#include "GameEntities.hpp"
 #include "lib_ecs/EntityManager.hpp"
-#include "lib_ecs/Systems/ADualSystem.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "NetworkManager.hpp"
 #include "lib_net/Context.hpp"
@@ -27,11 +26,6 @@ public:
         net::RTypeServer &server, size_t maxEnnemyCount = 5
     );
     ~SpawnEnnemySystem() override = default;
-
-    SpawnEnnemySystem(const SpawnEnnemySystem &other) = default;
-    SpawnEnnemySystem(SpawnEnnemySystem &&other) = default;
-    SpawnEnnemySystem &operator=(const SpawnEnnemySystem &other) = default;
-    SpawnEnnemySystem &operator=(SpawnEnnemySystem &&other) = default;
 
     EntityManager &entityManager;
     NetworkManager &networkManager;
@@ -54,11 +48,6 @@ public:
     explicit DestroyEntitiesSystem(EntityManager &entityManager, net::RTypeServer &server);
     ~DestroyEntitiesSystem() override = default;
 
-    DestroyEntitiesSystem(const DestroyEntitiesSystem &other) = default;
-    DestroyEntitiesSystem(DestroyEntitiesSystem &&other) = default;
-    DestroyEntitiesSystem &operator=(const DestroyEntitiesSystem &other) = default;
-    DestroyEntitiesSystem &operator=(DestroyEntitiesSystem &&other) = default;
-
     EntityManager &entityManager;
 
     net::RTypeServer &server;
@@ -69,19 +58,15 @@ protected:
     ) override;
 };
 
-class ShootSystem : public S::AStatusMonoSystem<
-                        C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool> {
+class ShootSystem
+    : public S::AStatusMonoSystem<
+          C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool, C::WeaponPool> {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
         net::RTypeServer &server
     );
     ~ShootSystem() override = default;
-
-    ShootSystem(const ShootSystem &other) = default;
-    ShootSystem(ShootSystem &&other) = default;
-    ShootSystem &operator=(const ShootSystem &other) = default;
-    ShootSystem &operator=(ShootSystem &&other) = default;
 
     EntityManager &entityManager;
     NetworkManager &networkManager;
@@ -94,7 +79,8 @@ protected:
     size_t _spriteId = 0;
     void _statusOperate(
         typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype,
-        typename C::CanShootPool::Types &canshoot, typename C::IsShootingPool::Types &cIsShooting
+        typename C::CanShootPool::Types &canshoot, typename C::IsShootingPool::Types &cIsShooting,
+        typename C::WeaponPool::Types &cweapon
     ) override;
 };
 
@@ -104,11 +90,6 @@ class SendAllDataToNewClients
 public:
     explicit SendAllDataToNewClients();
     ~SendAllDataToNewClients() override = default;
-
-    SendAllDataToNewClients(const SendAllDataToNewClients &other) = default;
-    SendAllDataToNewClients(SendAllDataToNewClients &&other) = default;
-    SendAllDataToNewClients &operator=(const SendAllDataToNewClients &other) = default;
-    SendAllDataToNewClients &operator=(SendAllDataToNewClients &&other) = default;
 
     std::vector<net::client_id> newClients;
     net::RTypeServer *server = nullptr;
@@ -126,11 +107,6 @@ public:
     explicit CountEnnemyAliveSystem(size_t &ennemyCount);
     ~CountEnnemyAliveSystem() override = default;
 
-    CountEnnemyAliveSystem(const CountEnnemyAliveSystem &other) = default;
-    CountEnnemyAliveSystem(CountEnnemyAliveSystem &&other) = default;
-    CountEnnemyAliveSystem &operator=(const CountEnnemyAliveSystem &other) = default;
-    CountEnnemyAliveSystem &operator=(CountEnnemyAliveSystem &&other) = default;
-
     size_t ennemyCount = 0;
 
 protected:
@@ -143,11 +119,6 @@ class MovePlayersSystem
 public:
     explicit MovePlayersSystem();
     ~MovePlayersSystem() override = default;
-
-    MovePlayersSystem(const MovePlayersSystem &other) = default;
-    MovePlayersSystem(MovePlayersSystem &&other) = default;
-    MovePlayersSystem &operator=(const MovePlayersSystem &other) = default;
-    MovePlayersSystem &operator=(MovePlayersSystem &&other) = default;
 
     std::vector<std::tuple<ECS::PlayerVelocityInput, size_t>> playerStates;
 

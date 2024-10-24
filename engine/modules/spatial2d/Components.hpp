@@ -2,8 +2,6 @@
 
 #include "lib_ecs/Components/PureComponentPools.hpp"
 
-namespace ECS::C {
-
 DECLARE_COMPONENT(
     Position,
     float, // x
@@ -32,5 +30,3 @@ DECLARE_COMPONENT(
     float, // x
     float // y
 );
-
-}

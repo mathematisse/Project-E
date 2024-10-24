@@ -8,6 +8,8 @@
 #pragma once
 #include "lib_net/Packet.hpp"
 
+#define FIXED_TIMESTEP 0.02F
+
 namespace ECS {
 
 enum RTypePacketType : net::Packet::MsgType {
@@ -42,6 +44,7 @@ struct NewEnnemy {
     float x;
     float y;
     size_t netId;
+    int rand;
 };
 
 struct BulletShot {
@@ -49,6 +52,7 @@ struct BulletShot {
     float y;
     bool isPlayer;
     size_t netId;
+    bool isBigShot;
 };
 
 struct EntityDestroyed {

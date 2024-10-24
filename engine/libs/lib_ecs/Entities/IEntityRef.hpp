@@ -29,37 +29,32 @@ public:
      */
     virtual ~IEntityRef() = default;
 
-    IEntityRef(const IEntityRef &other) = default;
-    IEntityRef(IEntityRef &&other) = default;
-    IEntityRef &operator=(const IEntityRef &other) = default;
-    IEntityRef &operator=(IEntityRef &&other) = default;
-
     /**
      * @brief Get the status of the entity.
      *
      * @return entity_status_t The status of the entity.
      */
-    [[nodiscard]] virtual C::entity_status_t getStatus() const = 0;
+    [[nodiscard]] virtual C::entity_status_t getStatusVal() const = 0;
 
     /**
      * @brief Get the chunk position of the entity.
      *
      * @return Chunks::chunkPos_t The chunk position of the entity.
      */
-    [[nodiscard]] virtual Chunks::chunkPos_t getChunkPos() const = 0;
+    [[nodiscard]] virtual Chunks::chunkPos_t getChunkPosVal() const = 0;
 
     /**
      * @brief Set the status of the entity.
      *
      * @param status The new status of the entity.
      */
-    virtual void setStatus(C::entity_status_t status) = 0;
+    virtual void setStatusVal(C::entity_status_t status) = 0;
 
     /**
      * @brief Set the chunk position of the entity.
      *
      * @param cPos The new chunk position of the entity.
      */
-    virtual void setChunkPos(Chunks::chunkPos_t cPos) = 0;
+    virtual void setChunkPosVal(Chunks::chunkPos_t cPos) = 0;
 };
 } // namespace ECS::E

@@ -5,15 +5,12 @@
 ** Demo lib ecs
 */
 
-#include "DecorSquare.hpp"
+#include "DecorEntities.hpp"
 #include "RTypePackets.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include "Square.hpp"
+#include "GameEntities.hpp"
 #include "lib_ecs/EntityManager.hpp"
-#include "lib_ecs/Systems/ADualSystem.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
-#include "AssetsLoader.hpp"
-#include "NetworkManager.hpp"
 #include "raylib.h"
 #include "RTypeClient.hpp"
 
@@ -24,12 +21,8 @@ public:
     explicit MovePlayerSystem(net::RTypeClient &client);
     ~MovePlayerSystem() override = default;
 
-    MovePlayerSystem(const MovePlayerSystem &other) = default;
-    MovePlayerSystem(MovePlayerSystem &&other) = default;
-    MovePlayerSystem &operator=(const MovePlayerSystem &other) = default;
-    MovePlayerSystem &operator=(MovePlayerSystem &&other) = default;
-
     net::RTypeClient &client;
+    bool auto_shoot = false;
     size_t frame;
 
 protected:
@@ -44,11 +37,6 @@ class MoveOtherPlayerSystem
 public:
     explicit MoveOtherPlayerSystem();
     ~MoveOtherPlayerSystem() override = default;
-
-    MoveOtherPlayerSystem(const MoveOtherPlayerSystem &other) = default;
-    MoveOtherPlayerSystem(MoveOtherPlayerSystem &&other) = default;
-    MoveOtherPlayerSystem &operator=(const MoveOtherPlayerSystem &other) = default;
-    MoveOtherPlayerSystem &operator=(MoveOtherPlayerSystem &&other) = default;
 
     std::vector<ECS::PlayerState> playerStates;
 
@@ -65,11 +53,6 @@ public:
     explicit DestroyEntitiesSystem(ECS::EntityManager &entityManager);
     ~DestroyEntitiesSystem() override = default;
 
-    DestroyEntitiesSystem(const DestroyEntitiesSystem &other) = default;
-    DestroyEntitiesSystem(DestroyEntitiesSystem &&other) = default;
-    DestroyEntitiesSystem &operator=(const DestroyEntitiesSystem &other) = default;
-    DestroyEntitiesSystem &operator=(DestroyEntitiesSystem &&other) = default;
-
     std::vector<ECS::EntityDestroyed> entitiesDestroyed;
 
 protected:
@@ -84,11 +67,6 @@ class UpdateEnginePosition
 public:
     explicit UpdateEnginePosition();
     ~UpdateEnginePosition() override = default;
-
-    UpdateEnginePosition(const UpdateEnginePosition &other) = default;
-    UpdateEnginePosition(UpdateEnginePosition &&other) = default;
-    UpdateEnginePosition &operator=(const UpdateEnginePosition &other) = default;
-    UpdateEnginePosition &operator=(UpdateEnginePosition &&other) = default;
 
     Vector2 playerPosition;
     char playerAlive;

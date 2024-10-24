@@ -32,11 +32,6 @@ public:
      */
     virtual ~IChunk() = default;
 
-    IChunk(const IChunk &other) = default;
-    IChunk(IChunk &&other) = default;
-    IChunk &operator=(const IChunk &other) = default;
-    IChunk &operator=(IChunk &&other) = default;
-
     /**
      * @brief Get the element at the specified index.
      *

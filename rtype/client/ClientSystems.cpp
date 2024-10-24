@@ -6,14 +6,12 @@
 */
 
 #include "ClientSystems.hpp"
-#include "DecorSquare.hpp"
+#include "DecorEntities.hpp"
 #include "RTypePackets.hpp"
-#include "Square.hpp"
+#include "GameEntities.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
-#include <iomanip>
 #include <iostream>
 #include "AssetsPath.hpp"
-#include "lib_ecs/Systems/ADualSystem.hpp"
 #include <raylib.h>
 
 #define RED_CLI "\033[31m"
@@ -34,7 +32,7 @@ MovePlayerSystem::MovePlayerSystem(net::RTypeClient &client):
 void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
 {
     auto [type] = ctype;
-    if (type != SquareType::LPLAYER) {
+    if (type != GameEntityType::LPLAYER) {
         return;
     }
 
@@ -52,10 +50,17 @@ void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::Type
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
     }
-    client.send_udp(
-        ECS::RTypePacketType::PLAYER_VELOCITY,
-        net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
-    );
+    if (!auto_shoot) {
+        client.send_udp(
+            ECS::RTypePacketType::PLAYER_VELOCITY,
+            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
+        );
+    } else {
+        client.send_udp(
+            ECS::RTypePacketType::PLAYER_VELOCITY,
+            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, true})
+        );
+    }
 }
 
 MoveOtherPlayerSystem::MoveOtherPlayerSystem():
@@ -69,11 +74,12 @@ void MoveOtherPlayerSystem::_statusOperate(
 )
 {
     auto [type] = ctype;
-    if ((type != SquareType::PLAYER && type != SquareType::LPLAYER) || playerStates.empty()) {
+    if ((type != GameEntityType::PLAYER && type != GameEntityType::LPLAYER) ||
+        playerStates.empty()) {
         return;
     }
     auto [x, y] = cposition;
-    auto [vX, vY, _] = cvelocity;
+    auto [vX, vY] = cvelocity;
     auto [health] = chealth;
     auto [netId] = cnetworkid;
     // print size of pstates
@@ -125,7 +131,7 @@ void UpdateEnginePosition::_innerOperate(
     auto [engine_status] = cstatus;
     auto [x, y] = cposition;
     auto [type] = ctype;
-    if (type == SquareType::ENGINE) {
+    if (type == GameEntityType::ENGINE) {
         if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
             return;
         }

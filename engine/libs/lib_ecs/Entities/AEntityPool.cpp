@@ -8,6 +8,7 @@
 #include "lib_ecs/Entities/AEntityPool.hpp"
 
 #include "lib_ecs/Chunks/ChunkPos.hpp"
+#include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iostream>
 #include <utility>
 
@@ -25,14 +26,20 @@ const std::string &AEntityPool::getEntityName() const { return _entityName; }
 
 Chunks::cPosArr_t &AEntityPool::getFreePos() { return _freePos; }
 
-Chunks::chunk_idx_t AEntityPool::getTotalSize() { return _entityStatusPool.elemCount(); }
+Chunks::chunk_idx_t AEntityPool::getTotalSize()
+{
+    return EntityWithEntityStatusPool::getComponentPool().elemCount();
+}
 
 Chunks::chunk_idx_t AEntityPool::getUsedSize()
 {
-    return _entityStatusPool.elemCount() - _freePos.size();
+    return EntityWithEntityStatusPool::getComponentPool().elemCount() - _freePos.size();
 }
 
-Chunks::chunk_idx_t AEntityPool::getChunkCount() const { return _entityStatusPool.chunkCount(); }
+Chunks::chunk_idx_t AEntityPool::getChunkCount() const
+{
+    return EntityWithEntityStatusPool::getComponentPool().chunkCount();
+}
 
 C::IComponentPool *AEntityPool::getComponentPool(const std::string &name)
 {
@@ -58,7 +65,30 @@ void AEntityPool::addChunk()
     }
 }
 
-C::EntityStatusPool &AEntityPool::getEntityStatusPool() { return _entityStatusPool; }
-C::ChunkPosPool &AEntityPool::getChunkPosPool() { return _chunkPosPool; }
+std::unique_ptr<IEntityRef> AEntityPool::getEntity(Chunks::chunkPos_t cPos)
+{
+    return getRawEntity(cPos);
+}
+
+std::unique_ptr<AEntityRef> AEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+{
+    auto ptr = std::make_unique<E::AEntityRef>(
+        EntityWithEntityStatusPool::getComponentRef(cPos),
+        EntityWithChunkPosPool::getComponentRef(cPos)
+    );
+    return ptr;
+}
+
+std::vector<C::IComponentPool *> AEntityPool::getComponentPools()
+{
+    return {
+        &EntityWithEntityStatusPool::getComponentPool(), &EntityWithChunkPosPool::getComponentPool()
+    };
+}
+
+C::EntityStatusPool &AEntityPool::getEntityStatusPool() { return _EntityStatusPool; }
+
+C::ChunkPosPool &AEntityPool::getChunkPosPool() { return _ChunkPosPool; }
+
 } // namespace E
 } // namespace ECS

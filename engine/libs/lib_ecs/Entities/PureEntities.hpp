@@ -11,18 +11,11 @@
 #include "lib_ecs/Entities/AEntityRef.hpp"
 
 namespace ECS::E {
-class EntityPtrRef : public AEntityRef {
+class EntityPtrRef : public AEntityRef, public EntityWithEntityPoolIdRef {
 public:
-    EntityPtrRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::EntityPoolIdRef *poolId);
-    ~EntityPtrRef() override;
-    EntityPtrRef(const EntityPtrRef &other) = default;
-    EntityPtrRef(EntityPtrRef &&other) = default;
-    EntityPtrRef &operator=(const EntityPtrRef &other) = default;
-    EntityPtrRef &operator=(EntityPtrRef &&other) = default;
-    [[nodiscard]] C::entity_pool_id_t getPoolId() const;
-    void setPoolId(C::entity_pool_id_t poolId);
-
-protected:
-    C::EntityPoolIdRef *_poolId;
+    EntityPtrRef(const AEntityRef &aEnt, C::EntityPoolIdRef *poolId);
+    ~EntityPtrRef() override = default;
+    [[nodiscard]] C::entity_pool_id_t getPoolIdVal() const;
+    void setPoolIdVal(C::entity_pool_id_t poolId);
 };
 } // namespace ECS::E

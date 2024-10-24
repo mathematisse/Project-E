@@ -43,11 +43,6 @@ public:
         }
     }
 
-    StandardChunkPool(const StandardChunkPool &other) = default;
-    StandardChunkPool(StandardChunkPool &&other) = default;
-    StandardChunkPool &operator=(const StandardChunkPool &other) = default;
-    StandardChunkPool &operator=(StandardChunkPool &&other) = default;
-
     /**
      * @brief Add a new chunk to the pool.
      *

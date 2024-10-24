@@ -9,18 +9,14 @@
 
 namespace ECS {
 namespace E {
-EntityPtrRef::EntityPtrRef(
-    C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::EntityPoolIdRef *poolId
-):
-    AEntityRef(status, cPos),
-    _poolId(poolId)
+EntityPtrRef::EntityPtrRef(const AEntityRef &aEnt, C::EntityPoolIdRef *poolId):
+    AEntityRef(aEnt),
+    EntityWithEntityPoolIdRef(poolId)
 {
 }
 
-EntityPtrRef::~EntityPtrRef() { delete _poolId; }
+C::entity_pool_id_t EntityPtrRef::getPoolIdVal() const { return *_EntityPoolId->get<0>(); }
 
-C::entity_pool_id_t EntityPtrRef::getPoolId() const { return *_poolId->get<0>(); }
-
-void EntityPtrRef::setPoolId(C::entity_pool_id_t poolId) { *_poolId->get<0>() = poolId; }
+void EntityPtrRef::setPoolIdVal(C::entity_pool_id_t poolId) { *_EntityPoolId->get<0>() = poolId; }
 } // namespace E
 } // namespace ECS

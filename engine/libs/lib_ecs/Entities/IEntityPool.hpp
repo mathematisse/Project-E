@@ -18,10 +18,6 @@ class IEntityPool {
 public:
     IEntityPool() = default;
     virtual ~IEntityPool() = default;
-    IEntityPool(const IEntityPool &other) = default;
-    IEntityPool(IEntityPool &&other) = default;
-    IEntityPool &operator=(const IEntityPool &other) = default;
-    IEntityPool &operator=(IEntityPool &&other) = default;
     [[nodiscard]] virtual const std::string &getEntityName() const = 0;
     virtual std::unique_ptr<IEntityRef> getEntity(Chunks::chunkPos_t cPos) = 0;
     virtual Chunks::cPosArr_t &getFreePos() = 0;

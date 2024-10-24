@@ -30,11 +30,6 @@ public:
      */
     virtual ~IChunkPool() = default;
 
-    IChunkPool(const IChunkPool &other) = default;
-    IChunkPool(IChunkPool &&other) = default;
-    IChunkPool &operator=(const IChunkPool &other) = default;
-    IChunkPool &operator=(IChunkPool &&other) = default;
-
     /**
      * @brief Get a chunk by index.
      *

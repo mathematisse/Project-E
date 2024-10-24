@@ -40,11 +40,6 @@ public:
      */
     ~StandardChunk() = default;
 
-    StandardChunk(const StandardChunk &other) = default;
-    StandardChunk(StandardChunk &&other) = default;
-    StandardChunk &operator=(const StandardChunk &other) = default;
-    StandardChunk &operator=(StandardChunk &&other) = default;
-
     /**
      * @brief Retrieves a pointer to the element at the specified index.
      *

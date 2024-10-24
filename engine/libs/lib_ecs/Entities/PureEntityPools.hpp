@@ -14,7 +14,7 @@
 namespace ECS::E {
 const size_t EntityPtrPoolChunkSize = 256;
 
-class EntityPtrPool : public AEntityPool {
+class EntityPtrPool : public AEntityPool, public EntityWithEntityPoolIdPool {
 public:
     EntityPtrPool();
     std::unique_ptr<IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
@@ -22,9 +22,6 @@ public:
     std::vector<C::IComponentPool *> getComponentPools() override;
 
     C::EntityPoolIdPool &getEntityPoolIdPool();
-
-protected:
-    C::EntityPoolIdPool _entityPoolIdPool;
 };
 
 } // namespace ECS::E

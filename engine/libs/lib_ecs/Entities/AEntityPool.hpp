@@ -9,17 +9,16 @@
 
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Entities/AEntityRef.hpp"
 
 namespace ECS::E {
 
-class AEntityPool : public IEntityPool {
+class AEntityPool : public IEntityPool,
+                    public EntityWithEntityStatusPool,
+                    public EntityWithChunkPosPool {
 public:
     AEntityPool(std::string entityName, size_t chunkSize);
     ~AEntityPool() override;
-    AEntityPool(const AEntityPool &other) = default;
-    AEntityPool(AEntityPool &&other) = default;
-    AEntityPool &operator=(const AEntityPool &other) = default;
-    AEntityPool &operator=(AEntityPool &&other) = default;
 
     [[nodiscard]] const std::string &getEntityName() const override;
     Chunks::cPosArr_t &getFreePos() override;
@@ -29,6 +28,10 @@ public:
     C::IComponentPool *getComponentPool(const std::string &name) override;
     void addChunk() override;
 
+    std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
+    std::unique_ptr<E::AEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    std::vector<C::IComponentPool *> getComponentPools() override;
+
     C::EntityStatusPool &getEntityStatusPool() override;
     C::ChunkPosPool &getChunkPosPool() override;
 
@@ -37,7 +40,5 @@ protected:
     size_t _chunkSize;
 
     Chunks::cPosArr_t _freePos;
-    C::EntityStatusPool _entityStatusPool;
-    C::ChunkPosPool _chunkPosPool;
 };
 } // namespace ECS::E

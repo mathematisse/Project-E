@@ -11,27 +11,24 @@
 namespace ECS {
 namespace E {
 AEntityRef::AEntityRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos):
-    _status(status),
-    _cPos(cPos)
+    EntityWithEntityStatusRef(status),
+    EntityWithChunkPosRef(cPos)
 {
 }
 
-AEntityRef::~AEntityRef()
+C::entity_status_t AEntityRef::getStatusVal() const { return *_EntityStatus->get<0>(); }
+
+Chunks::chunkPos_t AEntityRef::getChunkPosVal() const
 {
-    delete _status;
-    delete _cPos;
+    return {*_ChunkPos->get<0>(), *_ChunkPos->get<1>()};
 }
 
-C::entity_status_t AEntityRef::getStatus() const { return *_status->get<0>(); }
+void AEntityRef::setStatusVal(C::entity_status_t status) { *_EntityStatus->get<0>() = status; }
 
-Chunks::chunkPos_t AEntityRef::getChunkPos() const { return {*_cPos->get<0>(), *_cPos->get<1>()}; }
-
-void AEntityRef::setStatus(C::entity_status_t status) { *_status->get<0>() = status; }
-
-void AEntityRef::setChunkPos(Chunks::chunkPos_t cPos)
+void AEntityRef::setChunkPosVal(Chunks::chunkPos_t cPos)
 {
-    _cPos->set<1>(std::get<1>(cPos));
-    _cPos->set<0>(std::get<0>(cPos));
+    _ChunkPos->set<1>(std::get<1>(cPos));
+    _ChunkPos->set<0>(std::get<0>(cPos));
 }
 } // namespace E
 } // namespace ECS

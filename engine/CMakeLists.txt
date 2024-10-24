@@ -4,9 +4,9 @@ project(Engine)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
+option(CORE_ENABLED "Enable core module" ON)
 option(RENDER_ENABLED "Enable render module" ON)
-option(PHYSICS_ENABLED "Enable physics module" ON)
-option(ECS_ENABLED "Enable ecs module" ON)
+option(SPATIAL2D_ENABLED "Enable spatial2D module" ON)
 option(NETWORK_ENABLED "Enable network module" ON)
 
 include(FetchContent)
