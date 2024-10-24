@@ -7,18 +7,34 @@
 
 #pragma once
 
+#include <raylib.h>
 #include "Decor.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/Entities/AEntityRef.hpp"
 #include "lib_ecs/Entities/AEntityPool.hpp"
 
-namespace ECS::C {
+static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
+
+static const std::vector<std::vector<size_t>> tower_range {
+    {0, 0, 0}, {300, 300, 300}, {300, 350, 400}, {250, 300, 350}
+};
+
 enum towerType {
     NONE,
     BOMB,
     ARCHER,
     WIZARD,
 };
+
+struct tower_info {
+    size_t id;
+    size_t level;
+    towerType type;
+    Vector2 pos;
+    float delay;
+};
+
+namespace ECS::C {
 
 DECLARE_COMPONENT(Type, towerType);
 DECLARE_COMPONENT(Level, size_t);

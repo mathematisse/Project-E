@@ -116,7 +116,7 @@ void TowerClickSystem::_innerOperate(
         level = selectedTower.level;
         type = selectedTower.type;
     }
-    if (type == ECS::C::WIZARD && sizeX == 75) {
+    if (type == WIZARD && sizeX == 75) {
         sizeX = 100;
         sizeY = 100;
     }
@@ -138,29 +138,29 @@ void ChangeTowerSprite::_innerOperate(
     auto [sprite] = csprite;
 
     if (level == 1) {
-        if (type == ECS::C::ARCHER) {
+        if (type == ARCHER) {
             auto texture = assetsLoader.get_asset(ARCHER1_TOWER);
             sprite = texture.id;
         }
-        if (type == ECS::C::WIZARD) {
+        if (type == WIZARD) {
             auto texture = assetsLoader.get_asset(WIZARD1_TOWER);
             sprite = texture.id;
         }
     } else if (level == 2) {
-        if (type == ECS::C::ARCHER) {
+        if (type == ARCHER) {
             auto texture = assetsLoader.get_asset(ARCHER2_TOWER);
             sprite = texture.id;
         }
-        if (type == ECS::C::WIZARD) {
+        if (type == WIZARD) {
             auto texture = assetsLoader.get_asset(WIZARD2_TOWER);
             sprite = texture.id;
         }
     } else if (level == 3) {
-        if (type == ECS::C::ARCHER) {
+        if (type == ARCHER) {
             auto texture = assetsLoader.get_asset(ARCHER3_TOWER);
             sprite = texture.id;
         }
-        if (type == ECS::C::WIZARD) {
+        if (type == WIZARD) {
             auto texture = assetsLoader.get_asset(WIZARD3_TOWER);
             sprite = texture.id;
         }
@@ -206,6 +206,7 @@ void SpawnEnemy::_innerOperate(C::EntityStatusPool::Types &cstatus, C::ScorePool
         square_enemy->getHealth()->set<0>(100);
         square_enemy->getVelocity()->set<0>(0);
         square_enemy->getVelocity()->set<1>(0);
+        square_enemy->getHealth()->set<0>(20);
     }
 }
 
@@ -267,6 +268,55 @@ void MoveEnemy::_innerOperate(
     Vector2 dir = go_to_pos(path[i], {x, y});
     vX = dir.x;
     vY = dir.y;
+}
+
+DamageEnemy::DamageEnemy():
+    AMonoSystem(false)
+{
+}
+
+void DamageEnemy::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::SizePool::Types &csize, C::HealthPool::Types &chealth
+)
+{
+    auto [x, y] = cposition;
+    auto [sizeX, sizeY] = csize;
+    auto [health] = chealth;
+    auto [status] = cstatus;
+
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+
+    if (health <= 0) {
+        status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+    }
+
+    for (auto &tower : towers) {
+        if (tower.type == NONE) {
+            continue;
+        }
+        float dx = tower.pos.x - x;
+        float dy = tower.pos.y - y;
+        float distance = sqrt(dx * dx + dy * dy);
+
+        std::cout << "Distance: " << distance << std::endl;
+        if (distance <= tower_range[tower.type][tower.level - 1]) {
+            if (tower.type == ARCHER) {
+                if (tower.delay > 1) {
+                    health -= 5;
+                    tower.delay = 0;
+                }
+            } else if (tower.type == WIZARD) {
+                if (tower.delay > 2.5) {
+                    DrawCircle(tower.pos.x, tower.pos.y, 10, RED);
+                    health -= 15;
+                    tower.delay = 0;
+                }
+            }
+        }
+    }
 }
 
 } // namespace S

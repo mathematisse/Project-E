@@ -15,6 +15,7 @@
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "AssetsLoader.hpp"
 #include "raylib.h"
+#include <tuple>
 
 namespace ECS::S {
 
@@ -59,7 +60,7 @@ protected:
 struct tower {
     size_t id;
     size_t level;
-    ECS::C::towerType type;
+    towerType type;
 };
 
 class TowerClickSystem
@@ -75,7 +76,7 @@ public:
 
     bool open = false;
     Vector2 pos = {0, 0};
-    tower selectedTower = {0, 0, ECS::C::NONE};
+    tower selectedTower = {0, 0, NONE};
 
 protected:
     void _innerOperate(
@@ -141,6 +142,26 @@ protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
         typename C::VelocityPool::Types &cvelocity
+    ) override;
+};
+
+class DamageEnemy
+    : public AMonoSystem<C::EntityStatusPool, C::PositionPool, C::SizePool, C::HealthPool> {
+public:
+    explicit DamageEnemy();
+    ~DamageEnemy() override = default;
+
+    DamageEnemy(const DamageEnemy &other) = default;
+    DamageEnemy(DamageEnemy &&other) = default;
+    DamageEnemy &operator=(const DamageEnemy &other) = default;
+    DamageEnemy &operator=(DamageEnemy &&other) = default;
+
+    std::vector<tower_info> towers;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
+        typename C::SizePool::Types &csize, typename C::HealthPool::Types &chealth
     ) override;
 };
 

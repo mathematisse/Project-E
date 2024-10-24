@@ -18,26 +18,23 @@
 #include "Decor.hpp"
 #include "Enemy.hpp"
 #include "Player.hpp"
+#include "Tower.hpp"
 #include "Systems.hpp"
 
-static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
-
-static const std::vector<std::vector<size_t>> tower_range {
-    {0, 0, 0}, {300, 300, 300}, {300, 350, 400}, {250, 300, 350}
-};
-
-void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem, size_t &money)
+void open_tower_menu(
+    ECS::S::TowerClickSystem &towerClickSystem, size_t &money, std::vector<tower_info> &towers_info
+)
 {
     Vector2 pos = {towerClickSystem.pos.x + 100, towerClickSystem.pos.y};
     static bool error_box = false;
 
-    if (towerClickSystem.selectedTower.type != ECS::C::NONE) {
+    if (towerClickSystem.selectedTower.type != NONE) {
         GuiWindowBox(
             (Rectangle) {pos.x, pos.y, 200, 200},
             tower_names[towerClickSystem.selectedTower.type].c_str()
         );
         DrawCircleLines(
-            towerClickSystem.pos.x + 45, towerClickSystem.pos.y + 25,
+            towerClickSystem.pos.x + 50, towerClickSystem.pos.y + 50,
             tower_range[towerClickSystem.selectedTower.type]
                        [towerClickSystem.selectedTower.level - 1],
             WHITE
@@ -67,7 +64,7 @@ void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem, size_t &money)
         GuiLabel((Rectangle) {pos.x + 20, pos.y + 55, 100, 20}, "50");
         if (GuiButton((Rectangle) {pos.x + 75, pos.y + 50, 150, 30}, "Archer")) {
             if (money >= 50) {
-                towerClickSystem.selectedTower.type = ECS::C::ARCHER;
+                towerClickSystem.selectedTower.type = ARCHER;
                 towerClickSystem.selectedTower.level = 1;
                 money -= 50;
             } else {
@@ -77,7 +74,7 @@ void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem, size_t &money)
         GuiLabel((Rectangle) {pos.x + 20, pos.y + 105, 100, 20}, "80");
         if (GuiButton((Rectangle) {pos.x + 75, pos.y + 100, 150, 30}, "Wizard")) {
             if (money >= 80) {
-                towerClickSystem.selectedTower.type = ECS::C::WIZARD;
+                towerClickSystem.selectedTower.type = WIZARD;
                 towerClickSystem.selectedTower.level = 1;
                 money -= 80;
             } else {
@@ -93,6 +90,12 @@ void open_tower_menu(ECS::S::TowerClickSystem &towerClickSystem, size_t &money)
         GuiWindowBox((Rectangle) {pos.x, pos.y - 150, 300, 100}, "Not enough money");
         if (GuiButton((Rectangle) {pos.x + 50, pos.y - 120, 150, 50}, "OK")) {
             error_box = false;
+        }
+    }
+    for (auto &tower : towers_info) {
+        if (tower.id == towerClickSystem.selectedTower.id) {
+            tower.level = towerClickSystem.selectedTower.level;
+            tower.type = towerClickSystem.selectedTower.type;
         }
     }
 }
@@ -131,11 +134,12 @@ int main(int ac, char *av[])
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::SpawnEnemy spawnEnemy(assetsLoader, _eM);
     ECS::S::MoveEnemy moveEnemy;
+    ECS::S::DamageEnemy damageEnemy;
 
     ECS::S::SystemTreeNode demoNode(
         42,
         {&towerClickSystem, &changeTowerSprite, &spawnEnemy, &moveEnemy, &applyVelocitySystem,
-         &drawSpriteSystem},
+         &damageEnemy, &drawSpriteSystem},
         {}
     );
 
@@ -169,6 +173,8 @@ int main(int ac, char *av[])
 
     int i = 0;
 
+    std::vector<tower_info> towers_info;
+
     for (const auto &entity : towers) {
         auto ref = _eM.getEntity(entity);
 
@@ -183,6 +189,12 @@ int main(int ac, char *av[])
         square_tower->getSize()->set<1>(75);
         square_tower->getSprite()->set<0>(assetsLoader.get_asset(EMPTY_TOWER).id);
         square_tower->getID()->set<0>(i);
+        tower_info tower;
+        tower.id = i;
+        tower.level = 0;
+        tower.type = NONE;
+        tower.pos = {towers_positions[i].x, towers_positions[i].y - 50};
+        towers_info.push_back(tower);
         i++;
     }
 
@@ -202,6 +214,7 @@ int main(int ac, char *av[])
     int player_health = 10;
 
     moveEnemy.player_health = player_health;
+    damageEnemy.towers = towers_info;
 
     auto curr_time = std::chrono::steady_clock::now();
     PlayMusicStream(music);
@@ -246,10 +259,13 @@ int main(int ac, char *av[])
         EndShaderMode();
 
         if (towerClickSystem.open) {
-            open_tower_menu(towerClickSystem, money);
+            open_tower_menu(towerClickSystem, money, damageEnemy.towers);
         }
 
         EndDrawing();
+        for (auto &tower : damageEnemy.towers) {
+            tower.delay += dt;
+        }
     }
     UnloadMusicStream(music);
     CloseAudioDevice();
