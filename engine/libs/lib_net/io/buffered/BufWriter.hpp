@@ -1,7 +1,7 @@
 
 #pragma once
+
 #include <cstddef>
-#include <variant>
 #include <vector>
 
 #include "lib_net/io/Write.hpp"

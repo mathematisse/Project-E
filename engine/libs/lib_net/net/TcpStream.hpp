@@ -50,6 +50,7 @@ public:
     {
         return io::Result<result::Void>::Success(result::Void {});
     }
+    [[nodiscard]] inline auto close() const -> io::Result<result::Void> { return _sock.close(); }
 
     [[nodiscard]]
     inline auto get_fd() const -> int
