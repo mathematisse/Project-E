@@ -9,6 +9,7 @@
 #include "Tower.hpp"
 #include "Enemy.hpp"
 #include "Player.hpp"
+#include "Projectile.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
@@ -119,6 +120,7 @@ public:
     AssetsLoader &assetsLoader;
     EntityManager &_eM;
     float delay = 0;
+    size_t kills = 0;
 
 protected:
     void _innerOperate(
@@ -126,7 +128,8 @@ protected:
     ) override;
 };
 
-class MoveEnemy : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool> {
+class MoveEnemy
+    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::HealthPool> {
 public:
     explicit MoveEnemy();
     ~MoveEnemy() override = default;
@@ -141,14 +144,14 @@ public:
 protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
-        typename C::VelocityPool::Types &cvelocity
+        typename C::VelocityPool::Types &cvelocity, typename C::HealthPool::Types &chealth
     ) override;
 };
 
 class DamageEnemy
     : public AMonoSystem<C::EntityStatusPool, C::PositionPool, C::SizePool, C::HealthPool> {
 public:
-    explicit DamageEnemy();
+    explicit DamageEnemy(AssetsLoader &assetsLoader, EntityManager &_eM);
     ~DamageEnemy() override = default;
 
     DamageEnemy(const DamageEnemy &other) = default;
@@ -157,11 +160,34 @@ public:
     DamageEnemy &operator=(DamageEnemy &&other) = default;
 
     std::vector<tower_info> towers;
+    size_t money = 0;
+    AssetsLoader &assetsLoader;
+    EntityManager &_eM;
+    size_t kills = 0;
 
 protected:
     void _innerOperate(
         typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
         typename C::SizePool::Types &csize, typename C::HealthPool::Types &chealth
+    ) override;
+};
+
+class KillProjectile : public AMonoSystem<C::EntityStatusPool, C::VelocityPool, C::LifetimePool> {
+public:
+    explicit KillProjectile();
+    ~KillProjectile() override = default;
+
+    KillProjectile(const KillProjectile &other) = default;
+    KillProjectile(KillProjectile &&other) = default;
+    KillProjectile &operator=(const KillProjectile &other) = default;
+    KillProjectile &operator=(KillProjectile &&other) = default;
+
+    float deltaTime = 0.0f;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::VelocityPool::Types &cvelocity,
+        typename C::LifetimePool::Types &clifetime
     ) override;
 };
 

@@ -19,6 +19,7 @@
 #include "Enemy.hpp"
 #include "Player.hpp"
 #include "Tower.hpp"
+#include "Projectile.hpp"
 #include "Systems.hpp"
 
 void open_tower_menu(
@@ -27,6 +28,7 @@ void open_tower_menu(
 {
     Vector2 pos = {towerClickSystem.pos.x + 100, towerClickSystem.pos.y};
     static bool error_box = false;
+    short cost = 0;
 
     if (towerClickSystem.selectedTower.type != NONE) {
         GuiWindowBox(
@@ -51,8 +53,13 @@ void open_tower_menu(
                 std::to_string((towerClickSystem.selectedTower.level * 50)).c_str()
             );
             if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
-                if (money >= towerClickSystem.selectedTower.level * 50) {
-                    money -= towerClickSystem.selectedTower.level * 50;
+                if (towerClickSystem.selectedTower.type == ARCHER) {
+                    cost = 50;
+                } else if (towerClickSystem.selectedTower.type == WIZARD) {
+                    cost = 80;
+                }
+                if (money >= towerClickSystem.selectedTower.level * cost) {
+                    money -= towerClickSystem.selectedTower.level * cost;
                     towerClickSystem.selectedTower.level++;
                 }
             }
@@ -103,7 +110,7 @@ void open_tower_menu(
 int main(int ac, char *av[])
 {
     if (ac != 1) {
-        std::cerr << "Usage: ./game" << std::endl;
+        std::cerr << "Usage: ./tower_defense" << std::endl;
         return 1;
     }
 
@@ -111,7 +118,7 @@ int main(int ac, char *av[])
     AssetsLoader assetsLoader;
     ECS::EntityManager _eM;
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Game");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tower Defense");
     InitAudioDevice();
     SetTargetFPS(60);
 
@@ -128,18 +135,20 @@ int main(int ac, char *av[])
     ECS::E::TowerPool towerPool;
     ECS::E::EnemyPool enemyPool;
     ECS::E::PlayerPool playerPool;
+    ECS::E::ProjectilePool projectilePool;
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
     ECS::S::TowerClickSystem towerClickSystem;
     ECS::S::ChangeTowerSprite changeTowerSprite(assetsLoader);
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::SpawnEnemy spawnEnemy(assetsLoader, _eM);
     ECS::S::MoveEnemy moveEnemy;
-    ECS::S::DamageEnemy damageEnemy;
+    ECS::S::DamageEnemy damageEnemy(assetsLoader, _eM);
+    ECS::S::KillProjectile killProjectile;
 
     ECS::S::SystemTreeNode demoNode(
         42,
-        {&towerClickSystem, &changeTowerSprite, &spawnEnemy, &moveEnemy, &applyVelocitySystem,
-         &damageEnemy, &drawSpriteSystem},
+        {&killProjectile, &towerClickSystem, &changeTowerSprite, &spawnEnemy, &moveEnemy,
+         &applyVelocitySystem, &damageEnemy, &drawSpriteSystem},
         {}
     );
 
@@ -149,6 +158,7 @@ int main(int ac, char *av[])
     _eM.registerEntityPool(&towerPool);
     _eM.registerEntityPool(&enemyPool);
     _eM.registerEntityPool(&playerPool);
+    _eM.registerEntityPool(&projectilePool);
 
     auto background = _eM.createEntities("Decor", 1, ECS::C::ENT_ALIVE);
 
@@ -210,8 +220,9 @@ int main(int ac, char *av[])
 
     square_player->getScore()->set<0>(0);
 
-    size_t money = 500;
+    size_t money = 100;
     int player_health = 10;
+    size_t score = 0;
 
     moveEnemy.player_health = player_health;
     damageEnemy.towers = towers_info;
@@ -238,6 +249,8 @@ int main(int ac, char *av[])
         if (player_health <= 0) {
             ClearBackground(BLACK);
             DrawText("Game Over", 1920 / 2 - 250, 1080 / 2 - 200, 100, WHITE);
+            DrawText("Score:", 1920 / 2 - 100, 1080 / 2, 50, WHITE);
+            DrawText(std::to_string(score).c_str(), 1920 / 2 + 100, 1080 / 2, 50, WHITE);
             EndShaderMode();
             EndDrawing();
             continue;
@@ -245,8 +258,15 @@ int main(int ac, char *av[])
 
         applyVelocitySystem.deltaTime = dt;
         spawnEnemy.delay += dt;
+        spawnEnemy.kills = damageEnemy.kills;
+        score += damageEnemy.kills;
+        damageEnemy.kills = 0;
+        damageEnemy.money = 0;
+        killProjectile.deltaTime = dt;
 
         _eM.addTime(dt);
+
+        money += damageEnemy.money;
 
         player_health = moveEnemy.player_health;
 
@@ -255,6 +275,10 @@ int main(int ac, char *av[])
         DrawText(std::to_string(money).c_str(), 130, 13, 35, YELLOW);
         DrawText("Health: ", 10, 50, 35, RED);
         DrawText(std::to_string(player_health).c_str(), 130, 53, 35, RED);
+
+        DrawRectangle(1700, 5, 200, 50, {255, 255, 255, 200});
+        DrawText("Score: ", 1705, 10, 35, BLACK);
+        DrawText(std::to_string(score).c_str(), 1830, 13, 35, BLACK);
 
         EndShaderMode();
 

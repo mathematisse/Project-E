@@ -94,7 +94,7 @@ void MainMenu::show_settings(void)
         );
         GuiLabel(
             (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
-            "High Visibility:"
+            "High Saturation:"
         );
         GuiCheckBox(
             (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",

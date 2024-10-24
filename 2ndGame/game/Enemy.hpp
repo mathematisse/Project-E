@@ -14,7 +14,7 @@
 
 namespace ECS::C {
 DECLARE_COMPONENT(Velocity, float, float);
-DECLARE_COMPONENT(Health, size_t);
+DECLARE_COMPONENT(Health, int);
 }
 
 namespace ECS::E {

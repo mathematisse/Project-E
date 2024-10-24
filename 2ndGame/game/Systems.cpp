@@ -10,6 +10,7 @@
 #include "Tower.hpp"
 #include "Enemy.hpp"
 #include "Player.hpp"
+#include "Projectile.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
 #include <vector>
@@ -177,11 +178,18 @@ SpawnEnemy::SpawnEnemy(AssetsLoader &assetsLoader, EntityManager &_eM):
 void SpawnEnemy::_innerOperate(C::EntityStatusPool::Types &cstatus, C::ScorePool::Types &cscore)
 {
     auto [status] = cstatus;
-    auto [score] = cscore;
     if (status != C::EntityStatusEnum::ENT_ALIVE) {
         return;
     }
-    if (delay < 3) {
+    auto [score] = cscore;
+    score += kills;
+
+    float spawn_rate = (5.0f - (score / 10.0f));
+
+    if (spawn_rate < 0.5) {
+        spawn_rate = 0.5;
+    }
+    if (delay < spawn_rate) {
         return;
     }
     delay = 0;
@@ -232,7 +240,7 @@ MoveEnemy::MoveEnemy():
 
 void MoveEnemy::_innerOperate(
     C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
-    C::VelocityPool::Types &cvelocity
+    C::VelocityPool::Types &cvelocity, C::HealthPool::Types &chealth
 )
 {
     auto [x, y] = cposition;
@@ -266,12 +274,43 @@ void MoveEnemy::_innerOperate(
         }
     }
     Vector2 dir = go_to_pos(path[i], {x, y});
-    vX = dir.x;
-    vY = dir.y;
+    vX = dir.x / 1.5;
+    vY = dir.y / 1.5;
 }
 
-DamageEnemy::DamageEnemy():
-    AMonoSystem(false)
+void shoot_projectile(
+    AssetsLoader &assetsLoader, EntityManager &_eM, tower_info &tower, Vector2 dest
+)
+{
+    auto projectiles = _eM.createEntities("Projectile", 1, ECS::C::ENT_ALIVE);
+
+    for (const auto &entity : projectiles) {
+        auto projectileRef = _eM.getEntity(entity);
+
+        auto square_projectile = dynamic_cast<ECS::E::ProjectileRef *>(projectileRef.get());
+        if (!square_projectile) {
+            std::cerr << "Failed to cast IEntityRef to ProjectileRef" << std::endl;
+            return;
+        }
+        square_projectile->getPosition()->set<0>(tower.pos.x + 50);
+        square_projectile->getPosition()->set<1>(tower.pos.y + 50);
+        square_projectile->getSize()->set<0>(40);
+        square_projectile->getSize()->set<1>(40);
+        if (tower.type == ARCHER) {
+            square_projectile->getSprite()->set<0>(assetsLoader.get_asset(ARROW).id);
+        } else if (tower.type == WIZARD) {
+            square_projectile->getSprite()->set<0>(assetsLoader.get_asset(FIREBALL).id);
+        }
+        Vector2 vel = go_to_pos(dest, {tower.pos.x + 50, tower.pos.y + 50});
+        square_projectile->getVelocity()->set<0>(vel.x * 5);
+        square_projectile->getVelocity()->set<1>(vel.y * 5);
+    }
+}
+
+DamageEnemy::DamageEnemy(AssetsLoader &assetsLoader, EntityManager &_eM):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader),
+    _eM(_eM)
 {
 }
 
@@ -281,7 +320,6 @@ void DamageEnemy::_innerOperate(
 )
 {
     auto [x, y] = cposition;
-    auto [sizeX, sizeY] = csize;
     auto [health] = chealth;
     auto [status] = cstatus;
 
@@ -291,6 +329,9 @@ void DamageEnemy::_innerOperate(
 
     if (health <= 0) {
         status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        kills++;
+        money += 20;
+        return;
     }
 
     for (auto &tower : towers) {
@@ -301,22 +342,47 @@ void DamageEnemy::_innerOperate(
         float dy = tower.pos.y - y;
         float distance = sqrt(dx * dx + dy * dy);
 
-        std::cout << "Distance: " << distance << std::endl;
         if (distance <= tower_range[tower.type][tower.level - 1]) {
             if (tower.type == ARCHER) {
                 if (tower.delay > 1) {
+                    shoot_projectile(assetsLoader, _eM, tower, {x - 50, y});
                     health -= 5;
                     tower.delay = 0;
                 }
             } else if (tower.type == WIZARD) {
                 if (tower.delay > 2.5) {
-                    DrawCircle(tower.pos.x, tower.pos.y, 10, RED);
+                    shoot_projectile(assetsLoader, _eM, tower, {x - 50, y});
                     health -= 15;
                     tower.delay = 0;
                 }
             }
         }
     }
+}
+
+KillProjectile::KillProjectile():
+    AMonoSystem(false)
+{
+}
+
+void KillProjectile::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity,
+    C::LifetimePool::Types &clifetime
+)
+{
+    auto [status] = cstatus;
+
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+
+    auto [lifetime] = clifetime;
+
+    if (lifetime > 0.5) {
+        status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+    }
+
+    lifetime += deltaTime;
 }
 
 } // namespace S

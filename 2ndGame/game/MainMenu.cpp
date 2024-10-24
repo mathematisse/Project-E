@@ -14,7 +14,7 @@ void MainMenu::show_settings(void)
         );
         GuiLabel(
             (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
-            "High Visibility:"
+            "High Saturation:"
         );
         GuiCheckBox(
             (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",
@@ -77,7 +77,7 @@ bool MainMenu::open(void)
             BeginShaderMode(colorblindSimShader);
         }
         DrawTexture(_background, 0, 0, WHITE);
-        DrawText("Game", WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 300, 80, RAYWHITE);
+        DrawText("Tower Defense", WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 300, 80, BLACK);
         if (settings.color_blind || settings.color_blind_simulation) {
             EndShaderMode();
         }

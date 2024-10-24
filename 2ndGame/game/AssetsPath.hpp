@@ -66,7 +66,17 @@
         "assets", "other_game", "goblin.png" \
     }
 
+#define ARROW                               \
+    {                                       \
+        "assets", "other_game", "arrow.png" \
+    }
+
+#define FIREBALL                               \
+    {                                          \
+        "assets", "other_game", "fireball.png" \
+    }
+
 const std::vector<std::vector<std::string>> paths = {
-    MENU_BACKGROUND, GAME_BACKGROUND, EMPTY_TOWER,   ARCHER1_TOWER, ARCHER2_TOWER,
-    ARCHER3_TOWER,   WIZARD1_TOWER,   WIZARD2_TOWER, WIZARD3_TOWER, GOBLIN
+    MENU_BACKGROUND, GAME_BACKGROUND, EMPTY_TOWER,   ARCHER1_TOWER, ARCHER2_TOWER, ARCHER3_TOWER,
+    WIZARD1_TOWER,   WIZARD2_TOWER,   WIZARD3_TOWER, GOBLIN,        ARROW,         FIREBALL
 };
