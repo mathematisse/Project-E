@@ -53,7 +53,7 @@ bool EntityManager::registerFixedSystemGroup(
     const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
 )
 {
-    return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
+    return _fixedSystemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
 bool EntityManager::registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart)
@@ -61,7 +61,7 @@ bool EntityManager::registerFixedSystem(S::ISystem &system, const std::string &g
     for (auto &entityPool : _entityPools) {
         system.tryAddEntityPool(entityPool);
     }
-    return _systemTree.addSystem(&system, group, atStart);
+    return _fixedSystemTree.addSystem(&system, group, atStart);
 }
 
 bool EntityManager::registerFixedSystemNode(
@@ -71,7 +71,7 @@ bool EntityManager::registerFixedSystemNode(
     for (auto &entityPool : _entityPools) {
         node.registerEntityPool(entityPool);
     }
-    return _systemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
+    return _fixedSystemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }
 
 bool EntityManager::registerEntityPool(E::IEntityPool *entityPool)
@@ -93,13 +93,13 @@ S::IQuery &EntityManager::initializeQuery(S::IQuery &query)
 
 std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const E::EntityPtrRef &entityPtr)
 {
-    return (*(_entityPools[entityPtr.getPoolIdVal()])).getEntity(entityPtr.getChunkPosVal());
+    return (*(_entityPools[entityPtr.getPoolIdElem()])).getEntity(entityPtr.getChunkPosElem());
 }
 
 std::unique_ptr<E::IEntityRef> EntityManager::getEntity(const Chunks::chunkPos_t &cPos)
 {
     auto entityPtr = _entityPtrPool.getRawEntity(cPos);
-    return (*(_entityPools[entityPtr->getPoolIdVal()])).getEntity(entityPtr->getChunkPosVal());
+    return (*(_entityPools[entityPtr.getPoolIdElem()])).getEntity(entityPtr.getChunkPosElem());
 }
 
 Chunks::cPosArr_t EntityManager::_createEntities(
@@ -167,13 +167,13 @@ Chunks::chunkPos_t EntityManager::_createEntity(
     auto nextFreePtrPos = freePtrPos.front();
 
     auto entity = entityPool->getEntity(Chunks::chunkPos_t(nextFreePos));
-    entity->setStatusVal(status);
-    entity->setChunkPosVal(Chunks::chunkPos_t(nextFreePtrPos));
+    entity->setStatusElem(status);
+    entity->setChunkPosElem(Chunks::chunkPos_t(nextFreePtrPos));
 
     auto entityPtr = _entityPtrPool.getRawEntity(Chunks::chunkPos_t(nextFreePtrPos));
-    entityPtr->setStatusVal(C::ENT_ALIVE);
-    entityPtr->setChunkPosVal(Chunks::chunkPos_t(nextFreePos));
-    entityPtr->setPoolIdVal(poolId);
+    entityPtr.setStatusElem(C::ENT_ALIVE);
+    entityPtr.setChunkPosElem(Chunks::chunkPos_t(nextFreePos));
+    entityPtr.setPoolIdElem(poolId);
 
     freePtrPos.erase(freePtrPos.begin());
     freePos.erase(freePos.begin());
@@ -201,16 +201,16 @@ Chunks::cPosArr_t EntityManager::createEntities(
 void EntityManager::destroyEntity(const Chunks::chunkPos_t &cPos)
 {
     std::cout << RED "Destroying entity" RESET "\n";
-    auto entityPtr = std::unique_ptr<E::EntityPtrRef>(_entityPtrPool.getRawEntity(cPos));
+    auto entityPtr = _entityPtrPool.getRawEntity(cPos);
 
-    auto poolId = entityPtr->getPoolIdVal();
-    auto entCPos = entityPtr->getChunkPosVal();
+    auto poolId = entityPtr.getPoolIdElem();
+    auto entCPos = entityPtr.getChunkPosElem();
     auto entity = _entityPools[poolId]->getEntity(entCPos);
 
-    entityPtr->setStatusVal(C::ENT_NONE);
+    entityPtr.setStatusElem(C::ENT_NONE);
     _entityPtrPool.getFreePos().push_back(cPos);
 
-    entity->setStatusVal(C::ENT_NONE);
+    entity->setStatusElem(C::ENT_NONE);
     _entityPools[poolId]->getFreePos().push_back(entCPos);
 }
 
@@ -235,7 +235,7 @@ void EntityManager::destroyEntities(const Chunks::cPosArr_t &cPosArr)
         auto [poolId] = poolIds[i];
         auto entCPos = deletedcPos[i];
         auto entity = _entityPools[poolId]->getEntity(entCPos);
-        entity->setStatusVal(C::ENT_NONE);
+        entity->setStatusElem(C::ENT_NONE);
         _entityPools[poolId]->getFreePos().push_back(entCPos);
     }
 }

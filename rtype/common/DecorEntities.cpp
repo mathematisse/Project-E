@@ -13,7 +13,7 @@ namespace ECS::E {
 
 // ENTITY REF
 DecorEntityRef::DecorEntityRef(
-    const ASpriteEntityRef &ent, C::TypeRef *type
+    const ASpriteEntityRef &ent, C::TypeRef type
 
 ):
     AEntityRef(ent),
@@ -35,31 +35,30 @@ DecorEntityPool::DecorEntityPool():
 
 std::unique_ptr<E::IEntityRef> DecorEntityPool::getEntity(Chunks::chunkPos_t cPos)
 {
-    return getRawEntity(cPos);
+    return std::make_unique<E::DecorEntityRef>(getRawEntity(cPos));
 }
 
-std::unique_ptr<E::DecorEntityRef> DecorEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+E::DecorEntityRef DecorEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
-    auto ptr = std::make_unique<E::DecorEntityRef>(
-        *ASpriteEntityPool::getRawEntity(cPos), EntityWithTypePool::getComponentRef(cPos)
-    );
-    return ptr;
+    return {ASpriteEntityPool::getRawEntity(cPos), EntityWithTypePool::getComponentRef(cPos)};
 }
 
 std::vector<C::IComponentPool *> DecorEntityPool::getComponentPools()
 {
+    auto base = AEntityPool::getComponentPools();
     auto stat = AStaticEntityPool::getComponentPools();
     auto sprite = ASpriteEntityPool::getComponentPools();
-    auto sum = std::vector<C::IComponentPool *>(stat.size() + sprite.size() + 1);
-    std::copy(stat.begin(), stat.end(), sum.begin());
-    std::copy(sprite.begin(), sprite.end(), sum.begin() + (long) stat.size());
-    sum[stat.size() + sprite.size()] = &EntityWithTypePool::getComponentPool();
+    auto sum = std::vector<C::IComponentPool *>(base.size() + stat.size() + sprite.size() + 1);
+    std::copy(base.begin(), base.end(), sum.begin());
+    std::copy(stat.begin(), stat.end(), sum.begin() + (long) base.size());
+    std::copy(sprite.begin(), sprite.end(), sum.begin() + (long) base.size() + (long) stat.size());
+    sum[base.size() + stat.size() + sprite.size()] = &EntityWithTypePool::getComponentPool();
     return sum;
 }
 /////////////////////////////////////////////////////////////////////////
 // ENTITY REF
 DecorAnimatedEntityRef::DecorAnimatedEntityRef(
-    const AAnimatedEntityRef &ent, C::TypeRef *type
+    const AAnimatedEntityRef &ent, C::TypeRef type
 
 ):
     AEntityRef(ent),
@@ -82,26 +81,24 @@ DecorAnimatedEntityPool::DecorAnimatedEntityPool():
 
 std::unique_ptr<E::IEntityRef> DecorAnimatedEntityPool::getEntity(Chunks::chunkPos_t cPos)
 {
-    return getRawEntity(cPos);
+    return std::make_unique<E::DecorAnimatedEntityRef>(getRawEntity(cPos));
 }
 
-std::unique_ptr<E::DecorAnimatedEntityRef>
-DecorAnimatedEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+E::DecorAnimatedEntityRef DecorAnimatedEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
-    auto ptr = std::make_unique<E::DecorAnimatedEntityRef>(
-        *AAnimatedEntityPool::getRawEntity(cPos), EntityWithTypePool::getComponentRef(cPos)
-    );
-    return ptr;
+    return {AAnimatedEntityPool::getRawEntity(cPos), EntityWithTypePool::getComponentRef(cPos)};
 }
 
 std::vector<C::IComponentPool *> DecorAnimatedEntityPool::getComponentPools()
 {
+    auto base = AEntityPool::getComponentPools();
     auto stat = AStaticEntityPool::getComponentPools();
-    auto anim = AAnimatedEntityPool::getComponentPools();
-    auto sum = std::vector<C::IComponentPool *>(stat.size() + anim.size() + 1);
-    std::copy(stat.begin(), stat.end(), sum.begin());
-    std::copy(anim.begin(), anim.end(), sum.begin() + (long) stat.size());
-    sum[stat.size() + anim.size()] = &EntityWithTypePool::getComponentPool();
+    auto sprite = AAnimatedEntityPool::getComponentPools();
+    auto sum = std::vector<C::IComponentPool *>(base.size() + stat.size() + sprite.size() + 1);
+    std::copy(base.begin(), base.end(), sum.begin());
+    std::copy(stat.begin(), stat.end(), sum.begin() + (long) base.size());
+    std::copy(sprite.begin(), sprite.end(), sum.begin() + (long) base.size() + (long) stat.size());
+    sum[base.size() + stat.size() + sprite.size()] = &EntityWithTypePool::getComponentPool();
     return sum;
 }
 }

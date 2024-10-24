@@ -13,7 +13,7 @@ namespace ECS::E {
 
 // ENTITY REF
 ASpriteEntityRef::ASpriteEntityRef(
-    const AStaticEntityRef &ent, C::SpriteRef *sprite, C::SizeRef *size
+    const AStaticEntityRef &ent, C::SpriteRef sprite, C::SizeRef size
 
 ):
     AEntityRef(ent),
@@ -33,16 +33,15 @@ ASpriteEntityPool::ASpriteEntityPool():
 
 std::unique_ptr<E::IEntityRef> ASpriteEntityPool::getEntity(Chunks::chunkPos_t cPos)
 {
-    return getRawEntity(cPos);
+    return std::make_unique<E::ASpriteEntityRef>(getRawEntity(cPos));
 }
 
-std::unique_ptr<E::ASpriteEntityRef> ASpriteEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+E::ASpriteEntityRef ASpriteEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
-    auto ptr = std::make_unique<E::ASpriteEntityRef>(
-        *AStaticEntityPool::getRawEntity(cPos), EntityWithSpritePool::getComponentRef(cPos),
+    return {
+        AStaticEntityPool::getRawEntity(cPos), EntityWithSpritePool::getComponentRef(cPos),
         EntityWithSizePool::getComponentRef(cPos)
-    );
-    return ptr;
+    };
 }
 
 std::vector<C::IComponentPool *> ASpriteEntityPool::getComponentPools()

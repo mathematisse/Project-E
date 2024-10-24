@@ -39,9 +39,9 @@ class GameEntityRef : public ADynamicEntityRef,
                       public EntityWithWeaponRef {
 public:
     GameEntityRef(
-        const ADynamicEntityRef &dynEnt, const ASpriteEntityRef &spriteEnt, C::ColorRef *color,
-        C::TypeRef *type, C::NetworkIDRef *networkID, C::CanShootRef *canShoot,
-        C::IsShootingRef *isShooting, C::HealthRef *health, C::WeaponRef *weapon
+        const ADynamicEntityRef &dynEnt, const ASpriteEntityRef &spriteEnt, C::ColorRef color,
+        C::TypeRef type, C::NetworkIDRef networkID, C::CanShootRef canShoot,
+        C::IsShootingRef isShooting, C::HealthRef health, C::WeaponRef weapon
     );
 };
 
@@ -59,7 +59,7 @@ public:
     GameEntityPool();
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::GameEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::GameEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 
@@ -75,9 +75,9 @@ class GameAnimatedEntityRef : public ADynamicEntityRef,
                               public EntityWithWeaponRef {
 public:
     GameAnimatedEntityRef(
-        const ADynamicEntityRef &dynEnt, const AAnimatedEntityRef &spriteEnt, C::ColorRef *color,
-        C::TypeRef *type, C::NetworkIDRef *networkID, C::CanShootRef *canShoot,
-        C::IsShootingRef *isShooting, C::HealthRef *health, C::WeaponRef *weapon
+        const ADynamicEntityRef &dynEnt, const AAnimatedEntityRef &spriteEnt, C::ColorRef color,
+        C::TypeRef type, C::NetworkIDRef networkID, C::CanShootRef canShoot,
+        C::IsShootingRef isShooting, C::HealthRef health, C::WeaponRef weapon
     );
 };
 
@@ -95,7 +95,7 @@ public:
     GameAnimatedEntityPool();
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::GameAnimatedEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::GameAnimatedEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 }

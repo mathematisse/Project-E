@@ -9,39 +9,40 @@
 
 #include "lib_ecs/Components/AComponentPool.hpp"
 #include <iostream>
+#include <utility>
 
-#define DECLARE_RAW_COMPONENT(name, ...)                                            \
-    inline constexpr char name##ComponentName[] = #name;                            \
-    class name##Pool : public AComponentPool<name##ComponentName, __VA_ARGS__> { }; \
-    using name##Ref = ComponentRef<__VA_ARGS__>;
+#define DECLARE_RAW_COMPONENT(name, ...)                 \
+    inline constexpr char name##ComponentName[] = #name; \
+    using name##Val = ComponentVal<__VA_ARGS__>;         \
+    using name##Ref = ComponentRef<__VA_ARGS__>;         \
+    class name##Pool : public AComponentPool<name##ComponentName, __VA_ARGS__> { };
 
-#define DECLARE_ENTITY_POOL_WITH_COMPONENT(name)                                          \
-    class EntityWith##name##Pool {                                                        \
-    public:                                                                               \
-        C::name##Ref *getComponentRef(Chunks::chunkPos_t cPos)                            \
-        {                                                                                 \
-            return reinterpret_cast<C::name##Ref *>(_##name##Pool.getComponentRef(cPos)); \
-        }                                                                                 \
-        C::name##Pool &getComponentPool() { return _##name##Pool; }                       \
-        const C::name##Pool &getComponentPool() const { return _##name##Pool; }           \
-                                                                                          \
-    protected:                                                                            \
-        C::name##Pool _##name##Pool;                                                      \
+#define DECLARE_ENTITY_POOL_WITH_COMPONENT(name)                                \
+    class EntityWith##name##Pool {                                              \
+    public:                                                                     \
+        C::name##Ref getComponentRef(Chunks::chunkPos_t cPos)                   \
+        {                                                                       \
+            return _##name##Pool.getComponentRef(cPos);                         \
+        }                                                                       \
+        C::name##Pool &getComponentPool() { return _##name##Pool; }             \
+        const C::name##Pool &getComponentPool() const { return _##name##Pool; } \
+                                                                                \
+    protected:                                                                  \
+        C::name##Pool _##name##Pool;                                            \
     };
 
-#define DECLARE_ENTITY_REF_WITH_COMPONENT(name)                           \
-    class EntityWith##name##Ref {                                         \
-    public:                                                               \
-        explicit EntityWith##name##Ref(C::name##Ref *c):                  \
-            _##name(c)                                                    \
-        {                                                                 \
-        }                                                                 \
-        ~EntityWith##name##Ref() { delete _##name; }                      \
-        [[nodiscard]] C::name##Ref *get##name() const { return _##name; } \
-        void set##name(C::name##Ref *c) { _##name = c; }                  \
-                                                                          \
-    protected:                                                            \
-        C::name##Ref *_##name;                                            \
+#define DECLARE_ENTITY_REF_WITH_COMPONENT(name)                          \
+    class EntityWith##name##Ref {                                        \
+    public:                                                              \
+        explicit EntityWith##name##Ref(C::name##Ref c):                  \
+            _##name(std::move(c))                                        \
+        {                                                                \
+        }                                                                \
+        [[nodiscard]] C::name##Ref get##name() const { return _##name; } \
+        void set##name(C::name##Val c) { _##name.set(c); }               \
+                                                                         \
+    protected:                                                           \
+        C::name##Ref _##name;                                            \
     };
 
 #define DECLARE_COMPONENT(name, types...)     \

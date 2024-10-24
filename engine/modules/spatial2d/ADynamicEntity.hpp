@@ -18,8 +18,7 @@ class ADynamicEntityRef : virtual public AStaticEntityRef,
                           virtual public EntityWithAccelerationRef {
 public:
     ADynamicEntityRef(
-        const AStaticEntityRef &staticEnt, C::VelocityRef *velocity,
-        C::AccelerationRef *acceleration
+        const AStaticEntityRef &staticEnt, C::VelocityRef velocity, C::AccelerationRef acceleration
     );
     ~ADynamicEntityRef() override = default;
 };
@@ -33,7 +32,7 @@ public:
     ~ADynamicEntityPool() override = default;
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::ADynamicEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::ADynamicEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 }

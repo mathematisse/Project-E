@@ -34,27 +34,27 @@ public:
      *
      * @return entity_status_t The status of the entity.
      */
-    [[nodiscard]] virtual C::entity_status_t getStatusVal() const = 0;
+    [[nodiscard]] virtual C::entity_status_t getStatusElem() const = 0;
 
     /**
      * @brief Get the chunk position of the entity.
      *
      * @return Chunks::chunkPos_t The chunk position of the entity.
      */
-    [[nodiscard]] virtual Chunks::chunkPos_t getChunkPosVal() const = 0;
+    [[nodiscard]] virtual Chunks::chunkPos_t getChunkPosElem() const = 0;
 
     /**
      * @brief Set the status of the entity.
      *
      * @param status The new status of the entity.
      */
-    virtual void setStatusVal(C::entity_status_t status) = 0;
+    virtual void setStatusElem(C::entity_status_t status) = 0;
 
     /**
      * @brief Set the chunk position of the entity.
      *
      * @param cPos The new chunk position of the entity.
      */
-    virtual void setChunkPosVal(Chunks::chunkPos_t cPos) = 0;
+    virtual void setChunkPosElem(Chunks::chunkPos_t cPos) = 0;
 };
 } // namespace ECS::E

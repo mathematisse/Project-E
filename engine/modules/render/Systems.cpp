@@ -80,7 +80,9 @@ void DrawAnimatedSpriteSystem::_statusOperate(
     auto texture = assetsLoader.get_asset_from_id(id);
     BeginMode2D(camera);
     DrawTexturePro(
-        texture, {start_position, 0, (float) texture.width / nbr_frame, (float) texture.height},
+        texture,
+        {(float) start_position, 0, (float) texture.width / (float) nbr_frame,
+         (float) texture.height},
         {x, rotation == 90 ? y : y + sizeY, sizeX, sizeY}, Vector2 {0, 0}, rotation, WHITE
     );
 }
@@ -97,7 +99,7 @@ void SpriteAnimationSystem::_statusOperate(
 {
     auto [id, nbr_frame, sprite_pos, animation_time] = csprite;
     auto [clock] = ctimer;
-    auto textureWidth = (float) assetsLoader.get_asset_from_id(id).width;
+    auto textureWidth = assetsLoader.get_asset_from_id(id).width;
 
     if (clock < animation_time) {
         return;

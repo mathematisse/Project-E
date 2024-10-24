@@ -13,9 +13,9 @@
 namespace ECS::E {
 class EntityPtrRef : public AEntityRef, public EntityWithEntityPoolIdRef {
 public:
-    EntityPtrRef(const AEntityRef &aEnt, C::EntityPoolIdRef *poolId);
+    EntityPtrRef(const AEntityRef &aEnt, C::EntityPoolIdRef poolId);
     ~EntityPtrRef() override = default;
-    [[nodiscard]] C::entity_pool_id_t getPoolIdVal() const;
-    void setPoolIdVal(C::entity_pool_id_t poolId);
+    [[nodiscard]] C::entity_pool_id_t getPoolIdElem() const;
+    void setPoolIdElem(C::entity_pool_id_t poolId);
 };
 } // namespace ECS::E

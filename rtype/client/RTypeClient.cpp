@@ -56,30 +56,22 @@ void net::RTypeClient::on_packet(const Packet &packet)
                 std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
                 return;
             }
-            square_ennemy->getHealth()->set<0>(5);
-            square_ennemy->getWeapon()->set<0>(WeaponType::BIG_SHOT);
-            square_ennemy->getSize()->set<0>(180);
-            square_ennemy->getSize()->set<1>(120);
-            square_ennemy->getAnimatedSprite()->set<0>(frigateSpriteId);
-            square_ennemy->getAnimatedSprite()->set<1>(6.0F);
-            square_ennemy->getVelocity()->set<1>(0.0F);
-            square_ennemy->getType()->set<0>(GameEntityType::ENEMY);
-            square_ennemy->getRotation()->set<0>(100.0F);
-            square_ennemy->getColor()->set<0>(255);
-            square_ennemy->getColor()->set<1>(0);
-            square_ennemy->getColor()->set<2>(0);
-            square_ennemy->getColor()->set<3>(255);
-            square_ennemy->getSize()->set<0>(80);
-            square_ennemy->getSize()->set<1>(80);
-            square_ennemy->getRotation()->set<0>(90);
+            square_ennemy->setHealth({5});
+            square_ennemy->setWeapon({WeaponType::BIG_SHOT});
+            square_ennemy->setSize({180, 120});
+            square_ennemy->setAnimatedSprite({frigateSpriteId, 6, 0, 0.0F});
+            square_ennemy->setVelocity({0.0F, 0.0F});
+            square_ennemy->setType({GameEntityType::ENEMY});
+            square_ennemy->setRotation({100.0F});
+            square_ennemy->setColor({255, 0, 0, 255});
+            square_ennemy->setSize({80, 80});
+            square_ennemy->setRotation({90.0F});
 
             float _x = newEnnemy.x;
             float _y = newEnnemy.y;
-            square_ennemy->getPosition()->set<0>(_x);
-            square_ennemy->getPosition()->set<1>(_y);
-            square_ennemy->getCanShoot()->set<0>(true);
-            square_ennemy->getCanShoot()->set<1>(1.5F);
-            square_ennemy->getNetworkID()->set<0>(newEnnemy.netId);
+            square_ennemy->setPosition({_x, _y});
+            square_ennemy->setCanShoot({true, 1.5F, 0.0F});
+            square_ennemy->setNetworkID({newEnnemy.netId});
             break;
         } else {
             auto ent = _entityManager.createEntity("GameEntity", ECS::C::ENT_ALIVE);
@@ -89,30 +81,23 @@ void net::RTypeClient::on_packet(const Packet &packet)
                 std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
                 return;
             }
-            square_ennemy->getHealth()->set<0>(2);
-            square_ennemy->getWeapon()->set<0>(WeaponType::BULLET);
-            square_ennemy->getSize()->set<0>(80);
-            square_ennemy->getSize()->set<1>(80);
-            square_ennemy->getSprite()->set<0>(ennemySpriteId);
-            square_ennemy->getRotation()->set<0>(90);
-            square_ennemy->getVelocity()->set<1>(0.0F);
-            square_ennemy->getType()->set<0>(GameEntityType::ENEMY);
-            square_ennemy->getRotation()->set<0>(100.0F);
-            square_ennemy->getColor()->set<0>(255);
-            square_ennemy->getColor()->set<1>(0);
-            square_ennemy->getColor()->set<2>(0);
-            square_ennemy->getColor()->set<3>(255);
-            square_ennemy->getSize()->set<0>(80);
-            square_ennemy->getSize()->set<1>(80);
-            square_ennemy->getRotation()->set<0>(90);
+            square_ennemy->setHealth({2});
+            square_ennemy->setWeapon({WeaponType::BULLET});
+            square_ennemy->setSize({80, 80});
+            square_ennemy->setSprite({ennemySpriteId});
+            square_ennemy->setRotation({90});
+            square_ennemy->setVelocity({0.0F, 0.0F});
+            square_ennemy->setType({GameEntityType::ENEMY});
+            square_ennemy->setRotation({100.0F});
+            square_ennemy->setColor({255, 0, 0, 255});
+            square_ennemy->setSize({80, 80});
+            square_ennemy->setRotation({90.0F});
 
             float _x = newEnnemy.x;
             float _y = newEnnemy.y;
-            square_ennemy->getPosition()->set<0>(_x);
-            square_ennemy->getPosition()->set<1>(_y);
-            square_ennemy->getCanShoot()->set<0>(true);
-            square_ennemy->getCanShoot()->set<1>(1.5F);
-            square_ennemy->getNetworkID()->set<0>(newEnnemy.netId);
+            square_ennemy->setPosition({_x, _y});
+            square_ennemy->setCanShoot({true, 1.5F, 0.0F});
+            square_ennemy->setNetworkID({newEnnemy.netId});
             break;
         }
     }
@@ -127,47 +112,28 @@ void net::RTypeClient::on_packet(const Packet &packet)
             return;
         }
         if (bulletShot.isPlayer) {
-            square_bullet->getVelocity()->set<0>(500.0F);
-            square_bullet->getRotation()->set<0>(90);
-            square_bullet->getType()->set<0>(GameEntityType::BULLET);
+            square_bullet->setVelocity({500.0F, 0.0F});
+            square_bullet->setRotation({90});
+            square_bullet->setType({GameEntityType::BULLET});
         } else {
-            square_bullet->getVelocity()->set<0>(-500.0F);
-            square_bullet->getRotation()->set<0>(-90);
-            square_bullet->getType()->set<0>(GameEntityType::BULLET_ENNEMY);
+            square_bullet->setVelocity({-500.0F, 0.0F});
+            square_bullet->setRotation({-90});
+            square_bullet->setType({GameEntityType::BULLET_ENNEMY});
         }
 
         if (bulletShot.isBigShot) {
-            square_bullet->getAnimatedSprite()->set<0>(bigShotSpriteId);
-            square_bullet->getAnimatedSprite()->set<1>(10.0F);
-            square_bullet->getHealth()->set<0>(5);
-            square_bullet->getSize()->set<0>(70);
-            square_bullet->getSize()->set<1>(70);
+            square_bullet->setAnimatedSprite({bigShotSpriteId, 10, 0, 0.0F});
+            square_bullet->setHealth({5});
+            square_bullet->setSize({70, 70});
         } else {
-            square_bullet->getAnimatedSprite()->set<0>(bulletSpriteId);
-            square_bullet->getAnimatedSprite()->set<1>(4.0F);
-            square_bullet->getHealth()->set<0>(1);
-            square_bullet->getSize()->set<0>(30);
-            square_bullet->getSize()->set<1>(30);
+            square_bullet->setAnimatedSprite({bulletSpriteId, 4, 0, 0.0F});
+            square_bullet->setHealth({1});
+            square_bullet->setSize({30, 30});
         }
-        square_bullet->getPosition()->set<0>(bulletShot.x);
-        square_bullet->getVelocity()->set<1>(0.0F);
-        square_bullet->getColor()->set<0>(255);
-        square_bullet->getColor()->set<1>(255);
-        square_bullet->getColor()->set<2>(0);
-        square_bullet->getColor()->set<3>(255);
-        square_bullet->getPosition()->set<1>(bulletShot.y);
-        square_bullet->getCanShoot()->set<0>(false);
-        square_bullet->getSize()->set<0>(30);
-        square_bullet->getSize()->set<1>(30);
-        square_bullet->getAnimatedSprite()->set<0>(bulletSpriteId);
-        square_bullet->getAnimatedSprite()->set<1>(4.0F);
-        square_bullet->getAnimatedSprite()->set<2>(0);
-        square_bullet->getAnimatedSprite()->set<3>(8.0F);
-        square_bullet->getHealth()->set<0>(1);
-        square_bullet->getAnimatedSprite()->set<1>(true);
-        square_bullet->getAnimatedSprite()->set<2>(0);
-        square_bullet->getTimer()->set<0>(0.0F);
-        square_bullet->getNetworkID()->set<0>(bulletShot.netId);
+        square_bullet->setPosition({bulletShot.x, bulletShot.y});
+        square_bullet->setColor({255, 255, 0, 255});
+        square_bullet->setCanShoot({false, 0.0F, 0.0F});
+        square_bullet->setNetworkID({bulletShot.netId});
         break;
     }
     case ECS::ENTITY_DESTROYED: {
@@ -189,11 +155,10 @@ void net::RTypeClient::on_packet(const Packet &packet)
             std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
             return;
         }
-        square_player->getNetworkID()->set<0>(playerConnectionSuccess.netId);
-        square_player->getColor()->set<0>(playerConnectionSuccess.r);
-        square_player->getColor()->set<1>(playerConnectionSuccess.g);
-        square_player->getColor()->set<2>(playerConnectionSuccess.b);
-        square_player->getColor()->set<3>(255);
+        square_player->setNetworkID({playerConnectionSuccess.netId});
+        square_player->setColor(
+            {playerConnectionSuccess.r, playerConnectionSuccess.g, playerConnectionSuccess.b, 255}
+        );
         break;
     }
     case ECS::FRAME_ID: {

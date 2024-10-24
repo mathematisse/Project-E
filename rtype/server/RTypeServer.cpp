@@ -48,29 +48,23 @@ void net::RTypeServer::on_udp_connect(client_id id)
             std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
             return;
         }
-        square_player->getPosition()->set<0>(1920 / 4);
-        square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getType()->set<0>(GameEntityType::PLAYER);
+        square_player->setPosition({1920.0F / 4.0F, 1080.0F / 2.0F});
+        square_player->setType({GameEntityType::PLAYER});
         unsigned char r = rand() % 255;
         unsigned char g = rand() % 255;
         unsigned char b = rand() % 255;
-        square_player->getColor()->set<0>(r);
-        square_player->getColor()->set<1>(g);
-        square_player->getColor()->set<2>(b);
-        square_player->getWeapon()->set<0>(WeaponType::BULLET);
-        square_player->getCanShoot()->set<0>(true);
-        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
-            square_player->getCanShoot()->set<1>(1.5F);
-        } else {
-            square_player->getCanShoot()->set<1>(0.3F);
-        }
-        square_player->getSize()->set<0>(80);
-        square_player->getSize()->set<1>(80);
-        square_player->getRotation()->set<0>(90);
-        square_player->getSprite()->set<0>(0);
-        square_player->getHealth()->set<0>(4);
+        square_player->setColor({r, g, b, 255});
+        square_player->setWeapon({WeaponType::BULLET});
+        square_player->setCanShoot(
+            {true, (*square_player->getWeapon().get<0>() == WeaponType::BIG_SHOT) ? 1.5F : 0.3F,
+             0.0F}
+        );
+        square_player->setSize({80, 80});
+        square_player->setRotation({90});
+        square_player->setSprite({0});
+        square_player->setHealth({4});
         auto netId = networkManager.getnewNetID();
-        square_player->getNetworkID()->set<0>(netId);
+        square_player->setNetworkID({netId});
 
         client_netIds[id] = netId;
 

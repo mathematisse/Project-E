@@ -18,7 +18,7 @@ class AStaticEntityRef : virtual public AEntityRef,
                          virtual public EntityWithPositionRef,
                          virtual public EntityWithRotationRef {
 public:
-    AStaticEntityRef(const AEntityRef &ent, C::PositionRef *position, C::RotationRef *rotation);
+    AStaticEntityRef(const AEntityRef &ent, C::PositionRef position, C::RotationRef rotation);
     ~AStaticEntityRef() override = default;
 };
 
@@ -31,7 +31,7 @@ public:
     ~AStaticEntityPool() override = default;
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::AStaticEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::AStaticEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 }

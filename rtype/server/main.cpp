@@ -10,6 +10,7 @@
 #include "GameEntities.hpp"
 #include "Systems.hpp"
 #include "ServerSystems.hpp"
+#include "core/Core.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
@@ -28,7 +29,7 @@ char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
         std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
         return 0;
     }
-    return *square_player->getHealth()->get<0>();
+    return *square_player->getHealth().get<0>();
 }
 
 ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager)
@@ -43,24 +44,18 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
             std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
             return {};
         }
-        square_player->getPosition()->set<0>(1920 / 4);
-        square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getType()->set<0>(GameEntityType::PLAYER);
-        square_player->getColor()->set<1>(255);
-        square_player->getColor()->set<3>(255);
-        square_player->getWeapon()->set<0>(WeaponType::BULLET);
-        square_player->getCanShoot()->set<0>(true);
-        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
-            square_player->getCanShoot()->set<1>(1.5F);
-        } else {
-            square_player->getCanShoot()->set<1>(0.3F);
-        }
-        square_player->getSize()->set<0>(80);
-        square_player->getSize()->set<1>(80);
-        square_player->getRotation()->set<0>(90);
-        square_player->getSprite()->set<0>(0);
-        square_player->getHealth()->set<0>(4);
-        square_player->getNetworkID()->set<0>(networkManager.getnewNetID());
+        square_player->setPosition({1920 / 4, 1080 / 2});
+        square_player->setType({GameEntityType::PLAYER});
+        square_player->setColor({255, 0, 0, 255});
+        square_player->setWeapon({WeaponType::BULLET});
+        square_player->setCanShoot(
+            {true, *square_player->getWeapon().get<0>() == WeaponType::BIG_SHOT ? 1.5F : 0.3F, 0.0F}
+        );
+        square_player->setSize({80, 80});
+        square_player->setRotation({90});
+        square_player->setSprite({0});
+        square_player->setHealth({4});
+        square_player->setNetworkID({networkManager.getnewNetID()});
     }
     return player;
 }
@@ -90,6 +85,8 @@ int main(int ac, char **av)
     float cameraX = 1920 / 2;
 
     // Engine modules
+    engine::module::Core mCore;
+    mCore.load(_eM);
     engine::module::Spatial2D mSpatial2D;
     mSpatial2D.load(_eM);
 

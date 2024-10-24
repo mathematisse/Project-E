@@ -25,20 +25,20 @@ public:
 
     bool registerSystemGroup(
         const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
-        bool addInside = false
+        bool addInside = true
     );
     bool registerSystemNode(
         S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
-        bool addInside = false
+        bool addInside = true
     );
     bool registerSystem(S::ISystem &system, const std::string &group, bool atStart = false);
     bool registerFixedSystemGroup(
         const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
-        bool addInside = false
+        bool addInside = true
     );
     bool registerFixedSystemNode(
         S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
-        bool addInside = false
+        bool addInside = true
     );
     bool registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart = false);
     bool registerEntityPool(ECS::E::IEntityPool *entityPool);

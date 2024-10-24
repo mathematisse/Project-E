@@ -23,7 +23,10 @@ public:
 
     void load(ECS::EntityManager &entityManager) override
     {
-        entityManager.registerFixedSystemNode(spatial2DNode, ROOT_SYS_GROUP);
+        std::cout << "Loading Spatial2D module" << std::endl;
+        if (!entityManager.registerFixedSystemNode(spatial2DNode, ROOT_SYS_GROUP)) {
+            std::cerr << "Failed to register Spatial2D system node" << std::endl;
+        }
     }
 };
 

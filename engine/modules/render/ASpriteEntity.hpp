@@ -17,7 +17,7 @@ class ASpriteEntityRef : virtual public AStaticEntityRef,
                          virtual public EntityWithSpriteRef,
                          virtual public EntityWithSizeRef {
 public:
-    ASpriteEntityRef(const AStaticEntityRef &ent, C::SpriteRef *sprite, C::SizeRef *size);
+    ASpriteEntityRef(const AStaticEntityRef &ent, C::SpriteRef sprite, C::SizeRef size);
     ~ASpriteEntityRef() override = default;
 };
 
@@ -30,7 +30,7 @@ public:
     ~ASpriteEntityPool() override = default;
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::ASpriteEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::ASpriteEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 }

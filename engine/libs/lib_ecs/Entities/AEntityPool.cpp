@@ -9,6 +9,7 @@
 
 #include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_ecs/Entities/AEntityRef.hpp"
 #include <iostream>
 #include <utility>
 
@@ -18,6 +19,8 @@ AEntityPool::AEntityPool(std::string entityName, size_t chunkSize):
     _entityName(std::move(entityName)),
     _chunkSize(chunkSize)
 {
+    std::cout << "Creating entity pool " << _entityName << '\n';
+    std::cout << "Chunk size: " << _chunkSize << '\n';
 }
 
 AEntityPool::~AEntityPool() = default;
@@ -67,16 +70,15 @@ void AEntityPool::addChunk()
 
 std::unique_ptr<IEntityRef> AEntityPool::getEntity(Chunks::chunkPos_t cPos)
 {
-    return getRawEntity(cPos);
+    return std::make_unique<AEntityRef>(getRawEntity(cPos));
 }
 
-std::unique_ptr<AEntityRef> AEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+AEntityRef AEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
-    auto ptr = std::make_unique<E::AEntityRef>(
+    return {
         EntityWithEntityStatusPool::getComponentRef(cPos),
         EntityWithChunkPosPool::getComponentRef(cPos)
-    );
-    return ptr;
+    };
 }
 
 std::vector<C::IComponentPool *> AEntityPool::getComponentPools()

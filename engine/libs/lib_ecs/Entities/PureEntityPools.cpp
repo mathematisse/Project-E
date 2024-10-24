@@ -9,7 +9,9 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/Entities/AEntityPool.hpp"
 #include "lib_ecs/Entities/AEntityRef.hpp"
+#include "lib_ecs/Entities/IEntityRef.hpp"
 #include "lib_ecs/Entities/PureEntities.hpp"
+#include <memory>
 
 namespace ECS {
 namespace E {
@@ -21,15 +23,12 @@ EntityPtrPool::EntityPtrPool():
 
 std::unique_ptr<IEntityRef> EntityPtrPool::getEntity(Chunks::chunkPos_t cPos)
 {
-    return getRawEntity(cPos);
+    return std::make_unique<EntityPtrRef>(getRawEntity(cPos));
 }
 
-std::unique_ptr<E::EntityPtrRef> EntityPtrPool::getRawEntity(Chunks::chunkPos_t cPos)
+E::EntityPtrRef EntityPtrPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
-    auto ptr = std::make_unique<E::EntityPtrRef>(
-        *AEntityPool::getRawEntity(cPos), EntityWithEntityPoolIdPool::getComponentRef(cPos)
-    );
-    return ptr;
+    return {AEntityPool::getRawEntity(cPos), EntityWithEntityPoolIdPool::getComponentRef(cPos)};
 }
 
 std::vector<C::IComponentPool *> EntityPtrPool::getComponentPools()

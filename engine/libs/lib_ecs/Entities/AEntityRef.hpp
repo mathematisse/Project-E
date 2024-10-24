@@ -28,7 +28,7 @@ public:
      * @param status Pointer to a ComponentRef object representing the status of the entity.
      * @param cPos Pointer to a ComponentRef2 object representing the chunk position of the entity.
      */
-    explicit AEntityRef(C::EntityStatusRef *status, C::ChunkPosRef *cPos);
+    AEntityRef(C::EntityStatusRef status, C::ChunkPosRef cPos);
 
     /**
      * @brief Destroys the AEntity object.
@@ -40,27 +40,27 @@ public:
      *
      * @return The status of the entity as a entity_status_t.
      */
-    [[nodiscard]] C::entity_status_t getStatusVal() const override;
+    [[nodiscard]] C::entity_status_t getStatusElem() const override;
 
     /**
      * @brief Gets the chunk position of the entity.
      *
      * @return The chunk position of the entity as a Chunks::chunkPos_t.
      */
-    [[nodiscard]] Chunks::chunkPos_t getChunkPosVal() const override;
+    [[nodiscard]] Chunks::chunkPos_t getChunkPosElem() const override;
 
     /**
      * @brief Sets the status of the entity.
      *
      * @param status The new status of the entity as a entity_status_t.
      */
-    void setStatusVal(C::entity_status_t status) override;
+    void setStatusElem(C::entity_status_t status) override;
 
     /**
      * @brief Sets the chunk position of the entity.
      *
      * @param cPos The new chunk position of the entity as a Chunks::chunkPos_t.
      */
-    void setChunkPosVal(Chunks::chunkPos_t cPos) override;
+    void setChunkPosElem(Chunks::chunkPos_t cPos) override;
 };
 } // namespace ECS::E

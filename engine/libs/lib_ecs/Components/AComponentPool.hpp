@@ -8,7 +8,7 @@
 #pragma once
 
 #include "lib_ecs/Chunks/StandardChunkPool.hpp"
-#include "lib_ecs/Components/ComponentRefs.hpp"
+#include "lib_ecs/Components/ComponentRef.hpp"
 #include "lib_ecs/Components/IComponentPool.hpp"
 #include <tuple>
 #include <vector>
@@ -49,9 +49,9 @@ public:
      * @brief Retrieve a reference to a component at the specified chunk position.
      *
      * @param cPos Position of the chunk.
-     * @return IComponentRef* Reference to the component.
+     * @return ComponentRef<Ts...> ref of the component.
      */
-    IComponentRef *getComponentRef(Chunks::chunkPos_t cPos) override
+    ComponentRef<Ts...> getComponentRef(Chunks::chunkPos_t cPos)
     {
         return getComponentRefImpl(cPos, std::index_sequence_for<Ts...> {});
     }
@@ -60,11 +60,11 @@ public:
      * @brief Retrieve a dummy reference to a component at the specified chunk position.
      *
      * @param cPos Position of the chunk.
-     * @return const IComponentRef* Dummy reference to the component.
+     * @return const ComponentRef<Ts...> Dummy ref to the component.
      */
-    [[nodiscard]] const IComponentRef *getDummyComponentRef(Chunks::chunkPos_t cPos) const override
+    [[nodiscard]] ComponentVal<Ts...> getComponentVal(Chunks::chunkPos_t cPos) const
     {
-        return getDummyComponentRefImpl(cPos, std::index_sequence_for<Ts...> {});
+        return getComponentValImpl(cPos, std::index_sequence_for<Ts...> {});
     }
 
     void setComponentAtIndex(const Chunks::chunkPos_t &index, const std::tuple<Ts...> &component)
@@ -187,19 +187,18 @@ private:
 
     // Helper function to retrieve component reference using index sequence
     template<std::size_t... Indices>
-    IComponentRef *
+    ComponentRef<Ts...>
     getComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/)
     {
-        return new ComponentRef<Ts...>(std::get<Indices>(_pools).getElem(cPos)...);
+        return ComponentRef<Ts...>(std::get<Indices>(_pools).getElem(cPos)...);
     }
 
     // Helper function to retrieve dummy component reference using index sequence
     template<std::size_t... Indices>
-    const IComponentRef *
-    getDummyComponentRefImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/)
-        const
+    ComponentRef<Ts...>
+    getComponentValImpl(Chunks::chunkPos_t cPos, std::index_sequence<Indices...> /*unused*/) const
     {
-        return new ComponentRef<Ts...>(*(std::get<Indices>(_pools).getElem(cPos))...);
+        return ComponentRef<Ts...>(*(std::get<Indices>(_pools).getElem(cPos))...);
     }
 
     // Helper function to add chunk for each component type using index sequence

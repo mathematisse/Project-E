@@ -6,6 +6,7 @@
 */
 
 #include "lib_ecs/Systems/SystemTree.hpp"
+#include <iostream>
 #include <iterator>
 #include <utility>
 
@@ -82,17 +83,20 @@ bool SystemTreeNode::addSystemTreeNode(
     SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
+    std::cout << "Adding system tree node with group " << node.getGroup() << std::endl;
     if (targetGroup == _group && addInside) {
         if (addBefore) {
             _children.insert(_children.begin(), node);
         } else {
             _children.push_back(node);
         }
+        std::cout << "Successfully added in group " << _group << std::endl;
         return true;
     }
     if (addInside) {
         for (auto &child : _children) {
             if (child.addSystemTreeNode(node, targetGroup, addBefore, addInside)) {
+                std::cout << "Successfully added in group " << _group << std::endl;
                 return true;
             }
         }
@@ -108,6 +112,7 @@ bool SystemTreeNode::addSystemTreeNode(
         } else {
             _children.insert(std::next(it), node);
         }
+        std::cout << "Successfully added in group " << _group << std::endl;
         return true;
     }
     return false;
@@ -115,6 +120,7 @@ bool SystemTreeNode::addSystemTreeNode(
 
 void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
 {
+    std::cout << "Registering entity pool in group " << _group << std::endl;
     for (auto &startSystem : _startSystems) {
         startSystem->tryAddEntityPool(entityPool);
     }

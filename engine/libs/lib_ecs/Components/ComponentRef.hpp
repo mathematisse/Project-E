@@ -7,31 +7,21 @@
 
 #pragma once
 
-#include "lib_ecs/Components/IComponentRef.hpp"
 #include <tuple>
+#include "lib_ecs/Components/ComponentVal.hpp"
 
 namespace ECS::C {
 
 template<typename... Ts>
-class ComponentRef : public IComponentRef {
+class ComponentRef {
 public:
     /**
      * @brief Construct a new ComponentRef object with component pointers.
      *
      * @param components Pointers to the component values.
      */
-    explicit ComponentRef(Ts *...components):
+    ComponentRef(Ts *...components):
         _components(std::make_tuple(components...))
-    {
-    }
-
-    /**
-     * @brief Construct a new ComponentRef object with component values.
-     *
-     * @param components Component values.
-     */
-    explicit ComponentRef(Ts... components):
-        _components(createPointerTuple(components...))
     {
     }
 
@@ -69,6 +59,28 @@ public:
     void set(const std::tuple_element_t<Index, std::tuple<Ts...>> &value)
     {
         *std::get<Index>(_components) = value;
+    }
+
+    void set(const ComponentRef<Ts...> &ref)
+    {
+        set(ref._components, std::index_sequence_for<Ts...> {});
+    }
+
+    void set(const ComponentVal<Ts...> &val)
+    {
+        set(val._values, std::index_sequence_for<Ts...> {});
+    }
+
+    template<std::size_t... Is>
+    void set(const std::tuple<Ts *...> &components, std::index_sequence<Is...> /*unused*/)
+    {
+        (set<Is>(*std::get<Is>(components)), ...);
+    }
+
+    template<std::size_t... Is>
+    void set(const std::tuple<Ts...> &components, std::index_sequence<Is...> /*unused*/)
+    {
+        (set<Is>(std::get<Is>(components)), ...);
     }
 
 protected:

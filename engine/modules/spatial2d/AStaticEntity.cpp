@@ -12,7 +12,7 @@ namespace ECS::E {
 
 // ENTITY REF
 AStaticEntityRef::AStaticEntityRef(
-    const AEntityRef &ent, C::PositionRef *position, C::RotationRef *rotation
+    const AEntityRef &ent, C::PositionRef position, C::RotationRef rotation
 
 ):
     AEntityRef(ent),
@@ -29,16 +29,15 @@ AStaticEntityPool::AStaticEntityPool():
 
 std::unique_ptr<E::IEntityRef> AStaticEntityPool::getEntity(Chunks::chunkPos_t cPos)
 {
-    return getRawEntity(cPos);
+    return std::make_unique<E::AStaticEntityRef>(getRawEntity(cPos));
 }
 
-std::unique_ptr<E::AStaticEntityRef> AStaticEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
+E::AStaticEntityRef AStaticEntityPool::getRawEntity(Chunks::chunkPos_t cPos)
 {
-    auto ptr = std::make_unique<E::AStaticEntityRef>(
-        *AEntityPool::getRawEntity(cPos), EntityWithPositionPool::getComponentRef(cPos),
+    return {
+        AEntityPool::getRawEntity(cPos), EntityWithPositionPool::getComponentRef(cPos),
         EntityWithRotationPool::getComponentRef(cPos)
-    );
-    return ptr;
+    };
 }
 
 std::vector<C::IComponentPool *> AStaticEntityPool::getComponentPools()

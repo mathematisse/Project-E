@@ -31,7 +31,7 @@ const size_t DecorEntityChunkSize = 64;
 // ENTITY REF
 class DecorEntityRef : public ASpriteEntityRef, public EntityWithTypeRef {
 public:
-    DecorEntityRef(const ASpriteEntityRef &ent, C::TypeRef *type);
+    DecorEntityRef(const ASpriteEntityRef &ent, C::TypeRef type);
     ~DecorEntityRef() override = default;
 };
 
@@ -42,14 +42,14 @@ public:
     ~DecorEntityPool() override = default;
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::DecorEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::DecorEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 
 // ENTITY REF
 class DecorAnimatedEntityRef : public AAnimatedEntityRef, public EntityWithTypeRef {
 public:
-    DecorAnimatedEntityRef(const AAnimatedEntityRef &ent, C::TypeRef *type);
+    DecorAnimatedEntityRef(const AAnimatedEntityRef &ent, C::TypeRef type);
     ~DecorAnimatedEntityRef() override = default;
 };
 
@@ -60,7 +60,7 @@ public:
     ~DecorAnimatedEntityPool() override = default;
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::DecorAnimatedEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::DecorAnimatedEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 }

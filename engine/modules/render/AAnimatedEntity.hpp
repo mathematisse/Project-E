@@ -20,8 +20,8 @@ class AAnimatedEntityRef : virtual public AStaticEntityRef,
                            virtual public EntityWithSizeRef {
 public:
     AAnimatedEntityRef(
-        const AStaticEntityRef &ent, C::AnimatedSpriteRef *animatedSprite, C::TimerRef *timer,
-        C::SizeRef *size
+        const AStaticEntityRef &ent, C::AnimatedSpriteRef animatedSprite, C::TimerRef timer,
+        C::SizeRef size
     );
     ~AAnimatedEntityRef() override = default;
 };
@@ -36,7 +36,7 @@ public:
     ~AAnimatedEntityPool() override = default;
 
     std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
-    std::unique_ptr<E::AAnimatedEntityRef> getRawEntity(Chunks::chunkPos_t cPos);
+    E::AAnimatedEntityRef getRawEntity(Chunks::chunkPos_t cPos);
     std::vector<C::IComponentPool *> getComponentPools() override;
 };
 }

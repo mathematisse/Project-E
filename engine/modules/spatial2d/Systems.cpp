@@ -12,6 +12,8 @@ void ApplyVelocitySystem::_statusOperate(
     y += vY * deltaTime;
 }
 
+void ApplyVelocitySystem::getRunStepData(SystemTree &sysTree) { deltaTime = sysTree.deltaTime; }
+
 //////////////////////////////////////////////////////////////////////////////////
 
 void ApplyAccelerationSystem::_statusOperate(
@@ -23,5 +25,7 @@ void ApplyAccelerationSystem::_statusOperate(
     vX += aX * deltaTime;
     vY += aY * deltaTime;
 }
+
+void ApplyAccelerationSystem::getRunStepData(SystemTree &sysTree) { deltaTime = sysTree.deltaTime; }
 
 }

@@ -16,6 +16,7 @@ protected:
     void _statusOperate(
         typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity
     ) override;
+    void getRunStepData(SystemTree &sysTree) override;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,7 @@ protected:
         typename C::VelocityPool::Types &cvelocity,
         typename C::AccelerationPool::Types &cacceleration
     ) override;
+    void getRunStepData(SystemTree &sysTree) override;
 };
 
 }
