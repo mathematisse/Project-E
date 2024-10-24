@@ -1,12 +1,12 @@
 
 #pragma once
 
+#include <cstddef>
+#include <span>
+
 #include "lib_net/io/Result.hpp"
 #include "lib_net/io/buffered/Buffer.hpp"
 #include "lib_net/result/Result.hpp"
-#include <cstddef>
-#include <span>
-#include <variant>
 
 namespace lnet::io {
 

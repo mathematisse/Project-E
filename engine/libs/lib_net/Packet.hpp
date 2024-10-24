@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <vector>
 
 namespace net {
@@ -27,6 +29,8 @@ public:
     Header header;
     std::vector<std::uint8_t> data;
 
+    auto size() const -> std::size_t { return sizeof(header) + data.size(); }
+
     std::vector<std::uint8_t> serialize() const;
 
     template<typename T>
@@ -39,10 +43,21 @@ public:
     }
 
     static Packet deserialize(MsgType type, const std::vector<std::uint8_t> &data);
+    static std::optional<Packet> deserialize(const std::vector<std::byte> &data);
     static std::optional<Packet> deserialize(const std::vector<std::uint8_t> &data);
+    static std::optional<Packet> deserialize(const std::span<std::byte> &data);
 
     template<typename T>
     static auto deserializeStruct(const std::vector<std::uint8_t> &data) -> std::optional<T>
+    {
+        if (data.size() != sizeof(T)) {
+            return std::nullopt;
+        }
+        return *reinterpret_cast<const T *>(data.data());
+    }
+
+    template<typename T>
+    static auto deserializeStruct(const std::vector<std::byte> &data) -> std::optional<T>
     {
         if (data.size() != sizeof(T)) {
             return std::nullopt;

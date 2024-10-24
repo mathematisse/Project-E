@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <thread>
@@ -11,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include "lib_net/Buffer.hpp"
+#include "lib_net/io/Mutex.hpp"
 #include "lib_net/net/Poll.hpp"
 #include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/net/TcpListener.hpp"
@@ -210,7 +213,7 @@ public:
 
     virtual void on_udp_data(const net::SocketAddr &addr, const std::vector<std::byte> &data) = 0;
 
-    virtual void on_tcp_data(uuid::Uuid id) = 0;
+    virtual void on_tcp_data(uuid::Uuid id, io::Mutex<io::BufReader<net::TcpStream>> &stream) = 0;
 
     static constexpr auto DEFAULT_TIMEOUT = std::chrono::milliseconds(100);
     // this function is semi-blocking and should be called in a loop
@@ -231,7 +234,9 @@ public:
                 ask_disconnect(id);
                 break;
             case Event::TcpRead:
-                on_tcp_data(id);
+                if (tcp_connections.find(id) != tcp_connections.end()) {
+                    on_tcp_data(id, tcp_connections.at(id).reader);
+                }
                 break;
             case Event::UdpRead:
                 // Should always come from the same UDP socket
@@ -245,12 +250,12 @@ public:
 private:
     struct TcpConnection {
         net::TcpStream stream;
-        lnet::io::BufReader<net::TcpStream> reader;
+        lnet::io::Mutex<lnet::io::BufReader<net::TcpStream>> reader;
         lnet::io::BufWriter writer;
 
         explicit TcpConnection(const net::TcpStream &stream):
             stream(stream),
-            reader(this->stream),
+            reader(lnet::io::BufReader(this->stream)),
             writer(this->stream)
         {
         }
@@ -276,17 +281,19 @@ private:
 
     void handle_tcp_read_connection()
     {
-        auto res = tcp_connection->reader.fill_buf();
-        if (!res) {
-            std::cerr << "Tcp read error: " << res.error().message() << std::endl;
-            return;
-        }
-        auto buf = res.value();
-        if (buf.empty()) {
-            _tcp_events.push({Event::TcpDisconnection, *tcp_connection_id});
-            return;
-        }
-        _tcp_events.push({Event::TcpRead, *tcp_connection_id});
+        tcp_connection->reader.with_lock([&](auto &reader) {
+            auto res = reader.fill_buf();
+            if (!res) {
+                std::cerr << "Tcp read error: " << res.error().message() << std::endl;
+                return;
+            }
+            auto buf = res.value();
+            if (buf.empty()) {
+                _tcp_events.push({Event::TcpDisconnection, *tcp_connection_id});
+                return;
+            }
+            _tcp_events.push({Event::TcpRead, *tcp_connection_id});
+        });
     }
 
     void handle_tcp_read_events(const net::PollEvent &event)
@@ -297,17 +304,19 @@ private:
             return;
         }
         auto &connection = it->second;
-        auto res = connection.reader.fill_buf();
-        if (!res) {
-            std::cerr << "Tcp read error: " << res.error().message() << std::endl;
-            return;
-        }
-        auto buf = res.value();
-        if (buf.empty()) {
-            _tcp_events.push({Event::TcpDisconnection, event.fd});
-            return;
-        }
-        _tcp_events.push({Event::TcpRead, event.fd});
+        connection.reader.with_lock([&](auto &reader) {
+            auto res = reader.fill_buf();
+            if (!res) {
+                std::cerr << "Tcp read error: " << res.error().message() << std::endl;
+                return;
+            }
+            auto buf = res.value();
+            if (buf.empty()) {
+                _tcp_events.push({Event::TcpDisconnection, event.fd});
+                return;
+            }
+            _tcp_events.push({Event::TcpRead, event.fd});
+        });
     }
 
     void handle_tcp_write_events(const net::PollEvent &event)
