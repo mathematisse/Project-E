@@ -5,7 +5,7 @@ function (add_module module)
     endif()
 endfunction()
 
+add_module(core)
 add_module(render)
-add_module(ecs)
 add_module(network)
 add_module(spatial2d)
