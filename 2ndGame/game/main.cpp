@@ -47,17 +47,17 @@ void open_tower_menu(
             std::to_string(towerClickSystem.selectedTower.level).c_str()
         );
         if (towerClickSystem.selectedTower.level < 3) {
+            if (towerClickSystem.selectedTower.type == ARCHER) {
+                cost = 50;
+            } else if (towerClickSystem.selectedTower.type == WIZARD) {
+                cost = 80;
+            }
             GuiLabel((Rectangle) {pos.x + 10, pos.y + 65, 100, 20}, "Price:");
             GuiLabel(
                 (Rectangle) {pos.x + 100, pos.y + 65, 100, 20},
-                std::to_string((towerClickSystem.selectedTower.level * 50)).c_str()
+                std::to_string((towerClickSystem.selectedTower.level * cost)).c_str()
             );
             if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
-                if (towerClickSystem.selectedTower.type == ARCHER) {
-                    cost = 50;
-                } else if (towerClickSystem.selectedTower.type == WIZARD) {
-                    cost = 80;
-                }
                 if (money >= towerClickSystem.selectedTower.level * cost) {
                     money -= towerClickSystem.selectedTower.level * cost;
                     towerClickSystem.selectedTower.level++;
