@@ -12,7 +12,7 @@
 #include "lib_ecs/Entities/AEntityPool.hpp"
 
 namespace ECS::C {
-DECLARE_COMPONENT(Position, int, int);
+DECLARE_COMPONENT(Position, float, float);
 DECLARE_COMPONENT(Size, int, int);
 DECLARE_COMPONENT(Sprite, size_t);
 }

@@ -8,6 +8,7 @@
 #include "Decor.hpp"
 #include "Tower.hpp"
 #include "Enemy.hpp"
+#include "Player.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
@@ -101,6 +102,45 @@ protected:
     void _innerOperate(
         typename C::SpritePool::Types &csprite, typename C::TypePool::Types &ctype,
         typename C::LevelPool::Types &clevel, typename C::IDPool::Types &cid
+    ) override;
+};
+
+class SpawnEnemy : public S::AMonoSystem<C::EntityStatusPool, C::ScorePool> {
+public:
+    explicit SpawnEnemy(AssetsLoader &AssetsLoader, EntityManager &_eM);
+    ~SpawnEnemy() override = default;
+
+    SpawnEnemy(const SpawnEnemy &other) = default;
+    SpawnEnemy(SpawnEnemy &&other) = default;
+    SpawnEnemy &operator=(const SpawnEnemy &other) = default;
+    SpawnEnemy &operator=(SpawnEnemy &&other) = default;
+
+    AssetsLoader &assetsLoader;
+    EntityManager &_eM;
+    float delay = 0;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::ScorePool::Types &cscore
+    ) override;
+};
+
+class MoveEnemy : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool> {
+public:
+    explicit MoveEnemy();
+    ~MoveEnemy() override = default;
+
+    MoveEnemy(const MoveEnemy &other) = default;
+    MoveEnemy(MoveEnemy &&other) = default;
+    MoveEnemy &operator=(const MoveEnemy &other) = default;
+    MoveEnemy &operator=(MoveEnemy &&other) = default;
+
+    int player_health = 0;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
+        typename C::VelocityPool::Types &cvelocity
     ) override;
 };
 

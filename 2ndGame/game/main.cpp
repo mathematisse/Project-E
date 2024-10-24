@@ -17,6 +17,7 @@
 
 #include "Decor.hpp"
 #include "Enemy.hpp"
+#include "Player.hpp"
 #include "Systems.hpp"
 
 static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
@@ -123,13 +124,19 @@ int main(int ac, char *av[])
     ECS::E::DecorPool decorPool;
     ECS::E::TowerPool towerPool;
     ECS::E::EnemyPool enemyPool;
+    ECS::E::PlayerPool playerPool;
     ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
     ECS::S::TowerClickSystem towerClickSystem;
     ECS::S::ChangeTowerSprite changeTowerSprite(assetsLoader);
     ECS::S::ApplyVelocitySystem applyVelocitySystem;
+    ECS::S::SpawnEnemy spawnEnemy(assetsLoader, _eM);
+    ECS::S::MoveEnemy moveEnemy;
 
     ECS::S::SystemTreeNode demoNode(
-        42, {&towerClickSystem, &changeTowerSprite, &applyVelocitySystem, &drawSpriteSystem}, {}
+        42,
+        {&towerClickSystem, &changeTowerSprite, &spawnEnemy, &moveEnemy, &applyVelocitySystem,
+         &drawSpriteSystem},
+        {}
     );
 
     _eM.registerSystemNode(demoNode, ECS::S::ROOTSYSGROUP, false, true);
@@ -137,6 +144,7 @@ int main(int ac, char *av[])
     _eM.registerEntityPool(&decorPool);
     _eM.registerEntityPool(&towerPool);
     _eM.registerEntityPool(&enemyPool);
+    _eM.registerEntityPool(&playerPool);
 
     auto background = _eM.createEntities("Decor", 1, ECS::C::ENT_ALIVE);
 
@@ -178,29 +186,25 @@ int main(int ac, char *av[])
         i++;
     }
 
-    auto enemies = _eM.createEntities("Enemy", 1, ECS::C::ENT_ALIVE);
+    auto player = _eM.createEntity("Player", ECS::C::ENT_ALIVE);
 
-    for (const auto &entity : enemies) {
-        auto ref = _eM.getEntity(entity);
+    auto playerRef = _eM.getEntity(player);
 
-        auto square_enemy = dynamic_cast<ECS::E::EnemyRef *>(ref.get());
-        if (!square_enemy) {
-            std::cerr << "Failed to cast IEntityRef to EnemyRef" << std::endl;
-            return 0;
-        }
-        square_enemy->getPosition()->set<0>(500);
-        square_enemy->getPosition()->set<1>(375);
-        square_enemy->getSize()->set<0>(50);
-        square_enemy->getSize()->set<1>(50);
-        square_enemy->getSprite()->set<0>(assetsLoader.get_asset(GOBLIN).id);
-        square_enemy->getVelocity()->set<0>(0);
-        square_enemy->getVelocity()->set<1>(0);
+    auto square_player = dynamic_cast<ECS::E::PlayerRef *>(playerRef.get());
+    if (!square_player) {
+        std::cerr << "Failed to cast IEntityRef to PlayerRef" << std::endl;
+        return 0;
     }
+
+    square_player->getScore()->set<0>(0);
+
+    size_t money = 500;
+    int player_health = 10;
+
+    moveEnemy.player_health = player_health;
 
     auto curr_time = std::chrono::steady_clock::now();
     PlayMusicStream(music);
-
-    size_t money = 500;
 
     while (!WindowShouldClose()) {
         auto new_time = std::chrono::steady_clock::now();
@@ -219,12 +223,17 @@ int main(int ac, char *av[])
         }
 
         applyVelocitySystem.deltaTime = dt;
+        spawnEnemy.delay += dt;
 
         _eM.addTime(dt);
 
-        DrawRectangle(5, 5, 200, 50, {255, 255, 255, 100});
-        DrawText("Money: ", 10, 10, 35, BLACK);
-        DrawText(std::to_string(money).c_str(), 130, 13, 35, BLACK);
+        player_health = moveEnemy.player_health;
+
+        DrawRectangle(5, 5, 200, 100, {255, 255, 255, 200});
+        DrawText("Money: ", 10, 10, 35, YELLOW);
+        DrawText(std::to_string(money).c_str(), 130, 13, 35, YELLOW);
+        DrawText("Health: ", 10, 50, 35, RED);
+        DrawText(std::to_string(player_health).c_str(), 130, 53, 35, RED);
 
         EndShaderMode();
 

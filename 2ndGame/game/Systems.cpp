@@ -9,6 +9,7 @@
 #include "Decor.hpp"
 #include "Tower.hpp"
 #include "Enemy.hpp"
+#include "Player.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iomanip>
 #include <vector>
@@ -17,6 +18,7 @@
 #include "AssetsPath.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
 #include <raylib.h>
+#include "math.h"
 
 #define RED_CLI "\033[31m"
 #define GREEN_CLI "\033[32m"
@@ -76,8 +78,10 @@ void ApplyVelocitySystem::_statusOperate(
 {
     auto [x, y] = cposition;
     auto [vX, vY] = cvelocity;
-    x += vX * deltaTime * 50;
-    y += vY * deltaTime * 50;
+    int speed = 100;
+
+    x += vX * deltaTime * speed;
+    y += vY * deltaTime * speed;
 }
 
 TowerClickSystem::TowerClickSystem():
@@ -161,6 +165,108 @@ void ChangeTowerSprite::_innerOperate(
             sprite = texture.id;
         }
     }
+}
+
+SpawnEnemy::SpawnEnemy(AssetsLoader &assetsLoader, EntityManager &_eM):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader),
+    _eM(_eM)
+{
+}
+
+void SpawnEnemy::_innerOperate(C::EntityStatusPool::Types &cstatus, C::ScorePool::Types &cscore)
+{
+    auto [status] = cstatus;
+    auto [score] = cscore;
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    if (delay < 3) {
+        return;
+    }
+    delay = 0;
+    auto enemies = _eM.createEntities("Enemy", 1, ECS::C::ENT_ALIVE);
+
+    std::vector<Vector2> spawns = {{2020, 900}, {1305, -100}};
+    Vector2 spawn = spawns[rand() % 2];
+
+    for (const auto &entity : enemies) {
+        auto enemyRef = _eM.getEntity(entity);
+
+        auto square_enemy = dynamic_cast<ECS::E::EnemyRef *>(enemyRef.get());
+        if (!square_enemy) {
+            std::cerr << "Failed to cast IEntityRef to EnemyRef" << std::endl;
+            return;
+        }
+        square_enemy->getPosition()->set<0>(spawn.x);
+        square_enemy->getPosition()->set<1>(spawn.y);
+        square_enemy->getSize()->set<0>(50);
+        square_enemy->getSize()->set<1>(50);
+        square_enemy->getSprite()->set<0>(assetsLoader.get_asset(GOBLIN).id);
+        square_enemy->getHealth()->set<0>(100);
+        square_enemy->getVelocity()->set<0>(0);
+        square_enemy->getVelocity()->set<1>(0);
+    }
+}
+
+static Vector2 go_to_pos(Vector2 dest, Vector2 origin)
+{
+    Vector2 dir = {dest.x - origin.x, dest.y - origin.y};
+    float mag = std::sqrt(std::pow(dir.x, 2) + std::pow(dir.y, 2));
+    dir.x /= mag;
+    dir.y /= mag;
+    return dir;
+}
+
+static const std::vector<Vector2> path1 = {{1738, 879}, {1506, 743}, {1375, 760},
+                                           {1225, 863}, {1045, 895}, {830, 782},
+                                           {810, 680},  {750, 411},  {-75, 409}};
+static const std::vector<Vector2> path2 = {{1229, 112}, {949, 158}, {886, 171},
+                                           {842, 210},  {742, 409}, {-75, 409}};
+
+MoveEnemy::MoveEnemy():
+    AMonoSystem(false)
+{
+}
+
+void MoveEnemy::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::VelocityPool::Types &cvelocity
+)
+{
+    auto [x, y] = cposition;
+    auto [vX, vY] = cvelocity;
+    auto [status] = cstatus;
+
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+
+    if (x <= -75) {
+        status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        player_health--;
+        return;
+    }
+
+    vX = 0;
+    vY = 0;
+    size_t i = 0;
+    std::vector<Vector2> path = {{0, 0}};
+
+    if (y > 409) {
+        path = path1;
+    } else {
+        path = path2;
+    }
+    while (path[i].x >= x) {
+        i++;
+        if (i >= path.size()) {
+            return;
+        }
+    }
+    Vector2 dir = go_to_pos(path[i], {x, y});
+    vX = dir.x;
+    vY = dir.y;
 }
 
 } // namespace S
