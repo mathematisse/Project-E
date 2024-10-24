@@ -1,6 +1,9 @@
-# Terminology
+# Lexicon
+
+this page lists all relevant terminologies regarding the project.
 
 ## ECS
+
 
 | Term      | Definition                                                                            |
 | --------- | ------------------------------------------------------------------------------------- |
