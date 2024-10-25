@@ -6,7 +6,7 @@
 
 namespace lnet::net {
 
-class TcpListener {
+class TcpListener final {
 public:
     Socket _sock;
 
@@ -28,6 +28,8 @@ public:
     {
         return _sock.sockfd;
     }
+
+    [[nodiscard]] inline auto close() const -> io::Result<result::Void> { return _sock.close(); }
 
 private:
     explicit TcpListener(Socket sock):

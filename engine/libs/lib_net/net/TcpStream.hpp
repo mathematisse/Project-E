@@ -14,7 +14,7 @@
 
 namespace lnet::net {
 
-class TcpStream : public io::Write, public io::Read {
+class TcpStream final : public io::Write, public io::Read {
 public:
     Socket _sock;
 

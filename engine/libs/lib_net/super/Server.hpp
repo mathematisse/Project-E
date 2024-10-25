@@ -3,8 +3,10 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <random>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -19,14 +21,36 @@ namespace net {
 
 // This server class is a base class for a server that handles clients with both TCP and UDP
 // connections. UDP Connection are linked to TCP connections by a UUID.
-class Server : public lnet::utils::BaseServer {
+// All functions should be called from the same thread (the thread that calls update)
+class Server : private lnet::utils::BaseServer {
 public:
+    struct Client {
+        lnet::uuid::Uuid tcp_connection_id;
+        lnet::net::SocketAddr udp_addr;
+        std::uint64_t generated_number;
+    };
+
+    Server() = default;
+    ~Server() override = default;
+
     virtual void on_tcp_connect(lnet::uuid::Uuid client_uuid) = 0;
     virtual void on_tcp_disconnect(lnet::uuid::Uuid client_uuid) = 0;
 
     virtual void on_udp_connect(lnet::uuid::Uuid client_uuid) = 0;
     virtual void on_packet(const Packet &packet, lnet::uuid::Uuid client_uuid) = 0;
 
+protected:
+    // modifies the number given for security reasons (to prevent replay attacks)
+    // The function should be complex enough to prevent the client from guessing the function
+    // The function should not give the same result for different numbers
+    virtual auto transformNumberFunction(std::uint64_t number) -> std::uint64_t
+    {
+        // example function (should be overriden)
+        constexpr std::uint64_t SECRET_NUMBER = 0x1234567890ABCDEF;
+        return number ^ SECRET_NUMBER;
+    }
+
+public:
     // using the same port for both TCP and UDP (for simplicity)
     auto host(std::uint16_t port
     ) -> lnet::result::Result<lnet::result::Void, lnet::utils::BaseServerError>
@@ -35,6 +59,18 @@ public:
             return res;
         }
         return host_udp(port);
+    }
+
+    auto connect_tcp(const std::string &ip, std::uint16_t port)
+        -> lnet::result::Result<lnet::result::Void, lnet::utils::BaseServerError>
+    {
+        return lnet::utils::BaseServer::connect_tcp(ip, port);
+    }
+
+    auto connect_udp(const std::string &ip, std::uint16_t port)
+        -> lnet::result::Result<lnet::result::Void, lnet::utils::BaseServerError>
+    {
+        return lnet::utils::BaseServer::connect_udp(ip, port);
     }
 
     auto start() -> decltype(start_context()) { return start_context(); }
@@ -124,7 +160,10 @@ public:
         // handle_udp_connection_request
         if (auto matchingClient = _udp_connection_cache.find(addr);
             matchingClient != _udp_connection_cache.end()) {
-            on_packet(Packet::deserialize(data).value(), matchingClient->second);
+            auto packet = Packet::deserialize(data);
+            if (packet.has_value()) {
+                on_packet(packet.value(), matchingClient->second);
+            }
         } else {
             handle_udp_connection_request(data, addr);
         }
@@ -140,15 +179,21 @@ public:
                 return client.second.tcp_connection_id == tcp_connection_id;
             });
         if (matchingClient != _clients.end()) {
-            stream.with_lock([&](auto &reader) {
-                std::optional<Packet> packet;
-                auto buffer = reader.buffer();
-                while ((packet = Packet::deserialize(buffer)).has_value()) {
-                    on_packet(packet.value(), matchingClient->first);
+            std::optional<Packet> packet;
+            std::span<std::byte> buffer;
+            stream.with_lock([&buffer, &packet](auto &reader) {
+                buffer = reader.buffer();
+                packet = Packet::deserialize(buffer);
+            });
+
+            while (packet.has_value()) {
+                on_packet(packet.value(), matchingClient->first);
+                stream.with_lock([&buffer, &packet](auto &reader) {
                     reader.consume(packet->size());
                     buffer = reader.buffer();
-                }
-            });
+                });
+                packet = Packet::deserialize(buffer);
+            }
         }
     }
 
@@ -173,18 +218,6 @@ private:
         std::uint64_t transformed_number;
     };
 
-protected:
-    // modifies the number given for security reasons (to prevent replay attacks)
-    // The function should be complex enough to prevent the client from guessing the function
-    // The function should not give the same result for different numbers
-    virtual auto transformNumberFunction(std::uint64_t number) -> std::uint64_t
-    {
-        // example function (should be overriden)
-        constexpr std::uint64_t SECRET_NUMBER = 0x1234567890ABCDEF;
-        return number ^ SECRET_NUMBER;
-    }
-
-private:
     // ask the client to send the UDP connection request (tell the client that the server is ready
     // to take UDP connection requests)
     // give the client UUID and some random number to the user, and expect the client to send the
@@ -231,19 +264,13 @@ private:
         // else ignore the packet
     }
 
-private:
-    struct Client {
-        lnet::uuid::Uuid tcp_connection_id;
-        lnet::net::SocketAddr udp_addr;
-        std::uint64_t generated_number;
-    };
-
     std::mt19937_64 _number_generator = std::mt19937_64(std::random_device()());
     lnet::uuid::UuidGenerator<> client_uuid_generator =
         lnet::uuid::UuidGenerator(_number_generator);
     std::unordered_map<lnet::uuid::Uuid, Client> _clients;
     // keeps track of the verified UDP connections (linked with a TCP connection)
-    std::unordered_map<lnet::net::SocketAddr, lnet::uuid::Uuid> _udp_connection_cache;
+    // this is some kind of cache to find the client UUID from the UDP address fast
+    std::map<lnet::net::SocketAddr, lnet::uuid::Uuid> _udp_connection_cache;
 };
 
 } // namespace net

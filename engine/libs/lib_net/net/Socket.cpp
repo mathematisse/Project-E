@@ -8,9 +8,9 @@
 
 namespace lnet::net {
 
-auto create_socket(int domain) -> io::Result<int>
+auto create_socket(int domain, int type) -> io::Result<int>
 {
-    auto sockfd = socket(domain, SOCK_DGRAM, 0);
+    auto sockfd = socket(domain, type, 0);
     if (sockfd == INVALID_SOCKET) {
         return io::Result<int>::Error(std::error_code(errno, std::system_category()));
     }

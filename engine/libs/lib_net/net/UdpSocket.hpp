@@ -10,11 +10,11 @@
 
 namespace lnet::net {
 
-class UdpSocket {
+class UdpSocket final {
 public:
     Socket _sock;
 
-    ~UdpSocket();
+    ~UdpSocket() = default;
 
     [[nodiscard]]
     static auto bind(const SocketAddr &addr) -> io::Result<UdpSocket>;
@@ -36,6 +36,8 @@ public:
     }
 
     [[nodiscard]] inline auto get_fd() const -> int { return _sock.sockfd; }
+
+    [[nodiscard]] inline auto close() const -> io::Result<result::Void> { return _sock.close(); }
 
 private:
     explicit UdpSocket(Socket sockfd):

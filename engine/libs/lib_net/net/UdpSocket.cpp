@@ -6,8 +6,6 @@
 
 namespace lnet::net {
 
-UdpSocket::~UdpSocket() { _sock.close(); }
-
 auto UdpSocket::bind(const SocketAddr &addr) -> io::Result<UdpSocket>
 {
     auto sock = Socket::create(addr, SOCK_DGRAM);

@@ -61,6 +61,8 @@ private:
     }
 
 public:
+    SocketAddr() = default;
+
     SocketAddr(const Ipv4Addr &ip, uint16_t port):
         addr_(SocketAddrV4 {ip, port})
     {
@@ -134,9 +136,6 @@ public:
     {
         return std::holds_alternative<SocketAddrV6>(addr_);
     }
-
-public:
-    SocketAddr() = default;
 
 private:
     std::variant<SocketAddrV4, SocketAddrV6> addr_ = SocketAddrV4 {Ipv4Addr {{0, 0, 0, 0}}, 0};

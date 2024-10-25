@@ -4,7 +4,6 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <thread>
@@ -12,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include "lib_net/Buffer.hpp"
 #include "lib_net/io/Mutex.hpp"
 #include "lib_net/net/Poll.hpp"
 #include "lib_net/net/SocketAddr.hpp"
@@ -75,7 +73,26 @@ public:
     };
 
     BaseServer() = default;
-    virtual ~BaseServer() = default;
+    virtual ~BaseServer()
+    {
+        // stop the server to be able to access the connections safely
+        stop_context();
+        // close all existing connections
+        for (auto &[id, connection] : tcp_connections) {
+            connection.stream.shutdown();
+            connection.stream.close();
+        }
+        if (tcp_listener.has_value()) {
+            tcp_listener->close();
+        }
+        if (udp_socket.has_value()) {
+            udp_socket->close();
+        }
+        if (tcp_connection.has_value()) {
+            tcp_connection->stream.shutdown();
+            tcp_connection->stream.close();
+        }
+    }
 
     auto host_tcp(std::uint16_t port) -> result::Result<result::Void, BaseServerError>
     {
@@ -248,6 +265,7 @@ public:
     }
 
 private:
+    // Convinience struct to store the tcp connections
     struct TcpConnection {
         net::TcpStream stream;
         lnet::io::Mutex<lnet::io::BufReader<net::TcpStream>> reader;
@@ -258,6 +276,13 @@ private:
             reader(lnet::io::BufReader(this->stream)),
             writer(this->stream)
         {
+        }
+
+        ~TcpConnection()
+        {
+            if (auto res = stream.close(); !res) {
+                std::cerr << "Tcp close error: " << res.error().message() << std::endl;
+            }
         }
     };
 
@@ -394,7 +419,6 @@ private:
         } else if (tcp_listener && event.fd == tcp_listener->get_fd()) {
             handle_new_tcp_connections(poll);
         } else if (tcp_connection && event.fd == (*tcp_connection).stream.get_fd()) {
-            // not sure about it
             handle_tcp_read_connection();
         } else {
             handle_tcp_read_events(event);
