@@ -1,0 +1,28 @@
+name: Automated release
+
+# Runs when a pull request from dev is merged in main.
+# Creates a new release and publishes it to GitHub.
+# version name is the PR title.
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch --tags
+          git tag -a ${{ github.event.pull_request.title }} -m ${{ github.event.pull_request.title }}
+          git push origin ${{ github.event.pull_request.title }}
+          gh release create ${{ github.event.pull_request.title }} \
+            --title ${{ github.event.pull_request.title }} \
+            --generate-notes
