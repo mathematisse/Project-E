@@ -12,9 +12,10 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/Entities/AEntityRef.hpp"
 #include "lib_ecs/Entities/AEntityPool.hpp"
+#include <raylib.h>
 
 namespace ECS::C {
-DECLARE_COMPONENT(Lifetime, float);
+DECLARE_COMPONENT(Dest, Vector2);
 }
 
 namespace ECS::E {
@@ -25,7 +26,7 @@ class ProjectileRef : public AEntityRef {
 public:
     ProjectileRef(
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *postion, C::SizeRef *size,
-        C::SpriteRef *sprite, C::VelocityRef *velocity, C::LifetimeRef *lifetime
+        C::SpriteRef *sprite, C::VelocityRef *velocity, C::DestRef *dest
     );
     ~ProjectileRef() override;
 
@@ -49,15 +50,15 @@ public:
     [[nodiscard]] C::VelocityRef *getVelocity() const;
     void setVelocity(const C::VelocityRef &velocity);
 
-    [[nodiscard]] C::LifetimeRef *getLifetime() const;
-    void setLifetime(const C::LifetimeRef &Lifetime);
+    [[nodiscard]] C::DestRef *getDest() const;
+    void setDest(const C::DestRef &Dest);
 
 protected:
     C::PositionRef *_postion;
     C::SizeRef *_size;
     C::SpriteRef *_sprite;
     C::VelocityRef *_velocity;
-    C::LifetimeRef *_lifetime;
+    C::DestRef *_dest;
 };
 
 // ENTITY POOL
@@ -81,6 +82,6 @@ protected:
     C::SizePool _sizePool;
     C::SpritePool _spritePool;
     C::VelocityPool _velocityPool;
-    C::LifetimePool _lifetimePool;
+    C::DestPool _destPool;
 };
 }

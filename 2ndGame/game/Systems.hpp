@@ -40,6 +40,28 @@ protected:
     ) override;
 };
 
+class DrawRotationProjectileSystem : public S::AMonoSystem<
+                                         C::EntityStatusPool, C::PositionPool, C::SizePool,
+                                         C::SpritePool, C::VelocityPool, C::DestPool> {
+public:
+    explicit DrawRotationProjectileSystem(AssetsLoader &assetsLoader);
+    ~DrawRotationProjectileSystem() override = default;
+
+    DrawRotationProjectileSystem(const DrawRotationProjectileSystem &other) = default;
+    DrawRotationProjectileSystem(DrawRotationProjectileSystem &&other) = default;
+    DrawRotationProjectileSystem &operator=(const DrawRotationProjectileSystem &other) = default;
+    DrawRotationProjectileSystem &operator=(DrawRotationProjectileSystem &&other) = default;
+
+    AssetsLoader &assetsLoader;
+
+protected:
+    void _innerOperate(
+        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
+        typename C::SizePool::Types &csize, typename C::SpritePool::Types &csprite,
+        typename C::VelocityPool::Types &cvelocity, typename C::DestPool::Types &cdest
+    ) override;
+};
+
 class ApplyVelocitySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool> {
 public:
     explicit ApplyVelocitySystem();
@@ -172,7 +194,8 @@ protected:
     ) override;
 };
 
-class KillProjectile : public AMonoSystem<C::EntityStatusPool, C::VelocityPool, C::LifetimePool> {
+class KillProjectile
+    : public AMonoSystem<C::EntityStatusPool, C::PositionPool, C::VelocityPool, C::DestPool> {
 public:
     explicit KillProjectile();
     ~KillProjectile() override = default;
@@ -182,12 +205,10 @@ public:
     KillProjectile &operator=(const KillProjectile &other) = default;
     KillProjectile &operator=(KillProjectile &&other) = default;
 
-    float deltaTime = 0.0f;
-
 protected:
     void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::VelocityPool::Types &cvelocity,
-        typename C::LifetimePool::Types &clifetime
+        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
+        typename C::VelocityPool::Types &cvelocity, typename C::DestPool::Types &cdest
     ) override;
 };
 

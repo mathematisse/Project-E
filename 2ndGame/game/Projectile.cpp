@@ -13,14 +13,14 @@ namespace ECS::E {
 // ENTITY REF
 ProjectileRef::ProjectileRef(
     C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *Position, C::SizeRef *Size,
-    C::SpriteRef *Sprite, C::VelocityRef *Velocity, C::LifetimeRef *Lifetime
+    C::SpriteRef *Sprite, C::VelocityRef *Velocity, C::DestRef *Dest
 ):
     AEntityRef(status, cPos),
     _postion(Position),
     _size(Size),
     _sprite(Sprite),
     _velocity(Velocity),
-    _lifetime(Lifetime)
+    _dest(Dest)
 {
 }
 
@@ -30,7 +30,7 @@ ProjectileRef::~ProjectileRef()
     delete _size;
     delete _sprite;
     delete _velocity;
-    delete _lifetime;
+    delete _dest;
 }
 
 [[nodiscard]] C::PositionRef *E::ProjectileRef::getPosition() const { return _postion; }
@@ -49,9 +49,9 @@ void E::ProjectileRef::setSprite(const C::SpriteRef &sprite) { *_sprite = sprite
 
 void E::ProjectileRef::setVelocity(const C::VelocityRef &velocity) { *_velocity = velocity; }
 
-[[nodiscard]] C::LifetimeRef *E::ProjectileRef::getLifetime() const { return _lifetime; }
+[[nodiscard]] C::DestRef *E::ProjectileRef::getDest() const { return _dest; }
 
-void E::ProjectileRef::setLifetime(const C::LifetimeRef &lifetime) { *_lifetime = lifetime; }
+void E::ProjectileRef::setDest(const C::DestRef &dest) { *_dest = dest; }
 
 // ENTITY POOL
 ProjectilePool::ProjectilePool():
@@ -73,7 +73,7 @@ std::unique_ptr<E::ProjectileRef> ProjectilePool::getRawEntity(Chunks::chunkPos_
         static_cast<C::SizeRef *>(_sizePool.getComponentRef(cPos)),
         static_cast<C::SpriteRef *>(_spritePool.getComponentRef(cPos)),
         static_cast<C::VelocityRef *>(_velocityPool.getComponentRef(cPos)),
-        static_cast<C::LifetimeRef *>(_lifetimePool.getComponentRef(cPos))
+        static_cast<C::DestRef *>(_destPool.getComponentRef(cPos))
     );
     return ptr;
 }
@@ -81,6 +81,6 @@ std::unique_ptr<E::ProjectileRef> ProjectilePool::getRawEntity(Chunks::chunkPos_
 std::vector<C::IComponentPool *> ProjectilePool::getComponentPools()
 {
     return {&_entityStatusPool, &_chunkPosPool, &_postionPool, &_sizePool,
-            &_spritePool,       &_velocityPool, &_lifetimePool};
+            &_spritePool,       &_velocityPool, &_destPool};
 }
 }

@@ -51,21 +51,58 @@ void DrawSpriteSystem::_innerOperate(
     }
     auto [x, y] = cposition;
     auto [sizeX, sizeY] = csize;
+    if (sizeX == 70 && sizeY == 70) {
+        return;
+    }
     auto texture = assetsLoader.get_asset_from_id(id);
     float scale = texture.width / sizeX;
     float rotation = 0;
-    float adjustedX = x;
-    float adjustedY = y;
-    if (rotation == 90) {
-        adjustedX += sizeX;
-    }
-    if (rotation == -90) {
-        adjustedY += sizeY;
-    }
     if (scale <= 0) {
         scale = 1;
     }
-    DrawTextureEx(texture, {adjustedX, adjustedY}, rotation, 1 / scale, WHITE);
+    DrawTextureEx(texture, {x, y}, rotation, 1 / scale, WHITE);
+}
+
+DrawRotationProjectileSystem::DrawRotationProjectileSystem(AssetsLoader &assetsLoader):
+    AMonoSystem(false),
+    assetsLoader(assetsLoader)
+{
+}
+
+void DrawRotationProjectileSystem::_innerOperate(
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::SizePool::Types &csize, C::SpritePool::Types &csprite, C::VelocityPool::Types &cvelocity,
+    C::DestPool::Types &cdest
+)
+{
+    auto [status] = cstatus;
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    auto [id] = csprite;
+    if (id == 0) {
+        return;
+    }
+    auto [x, y] = cposition;
+    auto [sizeX, sizeY] = csize;
+    auto [velocityX, velocityY] = cvelocity;
+
+    auto texture = assetsLoader.get_asset_from_id(id);
+    float scale = texture.width / sizeX;
+
+    float rotation = atan2(velocityY, velocityX) * (180.0 / M_PI);
+
+    float centerX = x + sizeX / 2;
+    float centerY = y + sizeY / 2;
+
+    if (scale <= 0) {
+        scale = 1;
+    }
+    DrawTexturePro(
+        texture, {0, 0, (float) texture.width, (float) texture.height},
+        {centerX, centerY, (float) sizeX, (float) sizeY}, {(float) sizeX / 2, (float) sizeY / 2},
+        rotation, WHITE
+    );
 }
 
 ApplyVelocitySystem::ApplyVelocitySystem():
@@ -274,8 +311,8 @@ void MoveEnemy::_innerOperate(
         }
     }
     Vector2 dir = go_to_pos(path[i], {x, y});
-    vX = dir.x / 1.5;
-    vY = dir.y / 1.5;
+    vX = dir.x;
+    vY = dir.y;
 }
 
 void shoot_projectile(
@@ -294,8 +331,8 @@ void shoot_projectile(
         }
         square_projectile->getPosition()->set<0>(tower.pos.x + 50);
         square_projectile->getPosition()->set<1>(tower.pos.y + 50);
-        square_projectile->getSize()->set<0>(40);
-        square_projectile->getSize()->set<1>(40);
+        square_projectile->getSize()->set<0>(70);
+        square_projectile->getSize()->set<1>(70);
         if (tower.type == ARCHER) {
             square_projectile->getSprite()->set<0>(assetsLoader.get_asset(ARROW).id);
         } else if (tower.type == WIZARD) {
@@ -304,6 +341,7 @@ void shoot_projectile(
         Vector2 vel = go_to_pos(dest, {tower.pos.x + 50, tower.pos.y + 50});
         square_projectile->getVelocity()->set<0>(vel.x * 5);
         square_projectile->getVelocity()->set<1>(vel.y * 5);
+        square_projectile->getDest()->set<0>(dest);
     }
 }
 
@@ -366,23 +404,44 @@ KillProjectile::KillProjectile():
 }
 
 void KillProjectile::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::VelocityPool::Types &cvelocity,
-    C::LifetimePool::Types &clifetime
+    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
+    C::VelocityPool::Types &cvelocity, C::DestPool::Types &cdest
 )
 {
     auto [status] = cstatus;
+    auto [x, y] = cposition;
+    auto [velx, vely] = cvelocity;
+    bool x_done = false;
+    bool y_done = false;
 
     if (status != C::EntityStatusEnum::ENT_ALIVE) {
         return;
     }
 
-    auto [lifetime] = clifetime;
+    auto [dest] = cdest;
 
-    if (lifetime > 0.5) {
-        status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+    if (velx > 0) {
+        if (x >= dest.x) {
+            x_done = true;
+        }
+    } else {
+        if (x <= dest.x) {
+            x_done = true;
+        }
+    }
+    if (vely > 0) {
+        if (y >= dest.y) {
+            y_done = true;
+        }
+    } else {
+        if (y <= dest.y) {
+            y_done = true;
+        }
     }
 
-    lifetime += deltaTime;
+    if (x_done && y_done) {
+        status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+    }
 }
 
 } // namespace S

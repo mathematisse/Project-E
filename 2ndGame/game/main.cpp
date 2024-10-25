@@ -144,11 +144,12 @@ int main(int ac, char *av[])
     ECS::S::MoveEnemy moveEnemy;
     ECS::S::DamageEnemy damageEnemy(assetsLoader, _eM);
     ECS::S::KillProjectile killProjectile;
+    ECS::S::DrawRotationProjectileSystem drawRotationProjectileSystem(assetsLoader);
 
     ECS::S::SystemTreeNode demoNode(
         42,
         {&killProjectile, &towerClickSystem, &changeTowerSprite, &spawnEnemy, &moveEnemy,
-         &applyVelocitySystem, &damageEnemy, &drawSpriteSystem},
+         &applyVelocitySystem, &damageEnemy, &drawSpriteSystem, &drawRotationProjectileSystem},
         {}
     );
 
@@ -262,7 +263,6 @@ int main(int ac, char *av[])
         score += damageEnemy.kills;
         damageEnemy.kills = 0;
         damageEnemy.money = 0;
-        killProjectile.deltaTime = dt;
 
         _eM.addTime(dt);
 
