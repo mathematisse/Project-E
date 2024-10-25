@@ -44,8 +44,8 @@ void MoveBackgroundSystem::_innerOperate(
         return;
     }
     auto [x, y] = cposition;
-    if (cameraX > x + 3000) {
-        x += 3000;
+    if (cameraX > x + 6000) {
+        x += 9000;
     }
 }
 

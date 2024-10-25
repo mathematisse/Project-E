@@ -120,7 +120,8 @@ void setup_decor(
 )
 {
 
-    auto background = _eM.createEntities("DecorEntity", 1);
+    auto background = _eM.createEntities("DecorEntity", 3);
+    int i = -1;
 
     for (const auto &entity : background) {
         auto ref = _eM.getEntity(entity);
@@ -133,11 +134,13 @@ void setup_decor(
         square_background->setType({GameEntityType::BACKGROUND});
         square_background->setSize({3000, WINDOW_HEIGHT});
         square_background->setSprite({assetsLoader.get_asset(BACKGROUND_PATH).id});
+        square_background->setPosition({static_cast<float>(i * 3000), 0});
+        i++;
     }
 
     auto ground = _eM.createEntities("DecorEntity", 250);
 
-    int i = 0;
+    i = 0;
     for (const auto &entity : ground) {
         auto ref = _eM.getEntity(entity);
 
