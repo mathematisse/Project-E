@@ -17,16 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
 
       - name: Create release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ github.event.pull_request.title }} \
-            --repo="$GITHUB_REPOSITORY" \  
-            --title ${{ github.event.pull_request.title }} \
-            --generate-notes
+          gh release create "${{ github.event.pull_request.title }}" --repo="${{ github.repository }}" --title "${{ github.event.pull_request.title }}" --generate-notes
