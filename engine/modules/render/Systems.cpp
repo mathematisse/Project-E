@@ -10,8 +10,7 @@
 #include "spatial2d/Components.hpp"
 #include <raylib.h>
 
-namespace ECS {
-namespace S {
+namespace ECS::S {
 // SYSTEM
 
 DebugDrawSystem::DebugDrawSystem(Camera2D &camera):
@@ -81,8 +80,7 @@ void DrawAnimatedSpriteSystem::_statusOperate(
     BeginMode2D(camera);
     DrawTexturePro(
         texture,
-        {(float) start_position, 0, (float) texture.width / (float) nbr_frame,
-         (float) texture.height},
+        {start_position, 0, (float) texture.width / (float) nbr_frame, (float) texture.height},
         {x, rotation == 90 ? y : y + sizeY, sizeX, sizeY}, Vector2 {0, 0}, rotation, WHITE
     );
 }
@@ -105,12 +103,11 @@ void SpriteAnimationSystem::_statusOperate(
         return;
     }
     clock -= animation_time;
-    if (sprite_pos < textureWidth) {
-        sprite_pos += textureWidth / nbr_frame;
+    if (sprite_pos < (float) textureWidth) {
+        sprite_pos += (float) textureWidth / (float) nbr_frame;
     } else {
         sprite_pos = 0;
     }
 }
 
-} // namespace S
-} // namespace ECS
+} // namespace ECS::S

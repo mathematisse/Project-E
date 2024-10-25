@@ -19,6 +19,6 @@ DECLARE_COMPONENT(
     AnimatedSprite,
     size_t, // textureId
     std::uint8_t, // nbFrames
-    std::uint8_t, // startPosition
+    float, // startPosition
     float // animationSpeed
 );
