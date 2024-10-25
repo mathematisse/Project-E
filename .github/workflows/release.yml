@@ -24,5 +24,6 @@ jobs:
           git tag -a ${{ github.event.pull_request.title }} -m ${{ github.event.pull_request.title }}
           git push origin ${{ github.event.pull_request.title }}
           gh release create ${{ github.event.pull_request.title }} \
+            --repo="$GITHUB_REPOSITORY" \  
             --title ${{ github.event.pull_request.title }} \
             --generate-notes
