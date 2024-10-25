@@ -218,8 +218,9 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
 
 int main(int ac, char **av)
 {
-    LOG_SET_FILE("rtype_client.log");
     LOG_SET_LEVEL(DEBUG);
+    LOG_SET_STREAM(std::cerr);
+    LOG_SET_FILE("rtype_client.log", true);
 
     if (ac != 1) {
         std::cerr << "Usage: ./rtype_client" << std::endl;
@@ -287,12 +288,22 @@ int main(int ac, char **av)
         "RtypeFixedNode",
         {&moveBackgroundSystem, &moveEnnemySystem, &updateEnginePosition, &moveSystem}
     );
-    _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP);
+    bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP);
     ECS::S::SystemTreeNode rTypeNode(
         "RtypeNode",
         {&moveOtherPlayerSystem, &destroyEntitiesSystem, &getPlayerPositionSystem, &showInfoSystem}
     );
-    _eM.registerSystemNode(rTypeNode, ROOT_SYS_GROUP);
+    if (success) {
+        LOG_INFO("Successfully registered RtypeFixedNode");
+    } else {
+        LOG_ERROR("Failed to register RtypeFixedNode");
+    }
+    success = _eM.registerSystemNode(rTypeNode, ROOT_SYS_GROUP);
+    if (success) {
+        LOG_INFO("Successfully registered RtypeNode");
+    } else {
+        LOG_ERROR("Failed to register RtypeNode");
+    }
 
     // Entity pools
     ECS::E::GameAnimatedEntityPool gameAnimatedEntityPool;

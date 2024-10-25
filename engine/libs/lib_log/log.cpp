@@ -92,15 +92,22 @@ void Logger::resetLogPrefix() { prefix_creator = createDefaultPrefix; }
 
 std::string Logger::createDefaultPrefix(Level level) { return "[" + logLevelToStr(level) + "] "; }
 
-void Logger::openLogFile(const std::filesystem::path &filePath)
+void Logger::openLogFile(const std::filesystem::path &filePath, bool clear_old)
 {
+    std::ios_base::openmode mode = std::ios::out | std::ios::ate;
+
+    if (clear_old) {
+        mode |= std::ios::trunc;
+    } else {
+        mode |= std::ios::app;
+    }
     if (logFileIsOpen()) {
         if (log_file_path == filePath) {
             return;
         }
         closeLogFile();
     }
-    log_file.open(filePath, std::ios::out | std::ios::app | std::ios::ate);
+    log_file.open(filePath, mode);
     log_file_path = filePath;
 }
 

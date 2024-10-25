@@ -63,8 +63,9 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
 
 int main(int ac, char **av)
 {
-    LOG_SET_FILE("rtype_server.log");
     LOG_SET_LEVEL(DEBUG);
+    LOG_SET_STREAM(std::cerr);
+    LOG_SET_FILE("rtype_server.log", true);
 
     ECS::S::MovePlayersSystem movePlayersSystem;
     ECS::EntityManager _eM(FIXED_TIMESTEP);
@@ -115,7 +116,13 @@ int main(int ac, char **av)
          &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
          &sendAllDataToNewClients}
     );
-    _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP, false, true);
+    bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP, false, true);
+
+    if (success) {
+        LOG_INFO("Successfully registered RTypeFixedNode");
+    } else {
+        LOG_ERROR("Failed to register RTypeFixedNode");
+    }
 
     shootSystem.deltaTime = 0.02F;
 

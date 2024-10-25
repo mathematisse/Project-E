@@ -7,22 +7,11 @@
 #include <functional>
 #include <fstream>
 
-namespace rlog {
+#ifndef LOGGING
+#define LOGGING
+#endif
 
-#ifdef LOGGING
-
-#define LOG(level, message) (rlog::global_logger.log(level, message))
-#define LOG_DEBUG(message) LOG(rlog::Level::DEBUG, message)
-#define LOG_INFO(message) LOG(rlog::Level::INFO, message)
-#define LOG_WARNING(message) LOG(rlog::Level::WARNING, message)
-#define LOG_ERROR(message) LOG(rlog::Level::ERROR, message)
-#define LOG_CRITICAL(message) LOG(rlog::Level::CRITICAL, message)
-#define LOG_SET_FILE(file_path) (rlog::global_logger.openLogFile(file_path))
-#define LOG_SET_LEVEL(level_name) (rlog::global_logger.setLogLevel(rlog::Level::level_name))
-#define LOG_SET_STREAM(stream) (rlog::global_logger.setLogStream(&(stream)))
-#define LOG_SET_PREFIX(prefix_creator) (rlog::global_logger.setLogPrefix(prefix_creator))
-
-#else
+#ifndef LOGGING
 
 #define LOG(level, message)
 #define LOG_DEBUG(message)
@@ -35,7 +24,25 @@ namespace rlog {
 #define LOG_SET_STREAM(stream)
 #define LOG_SET_PREFIX(prefix_creator)
 
+#else
+
+#ifdef BASIC_LOGGING
+#define LOG(level, message)                                                           \
+    (std::cerr << logLevelToColor(level) << rlog::global_logger.getLogPrefix()(level) \
+               << LOG_COLOR_RESET << message << std::endl)
+#else
+#define LOG(level, message) (rlog::global_logger.log(level, message))
 #endif
+
+#define LOG_DEBUG(message) LOG(rlog::Level::DEBUG, message)
+#define LOG_INFO(message) LOG(rlog::Level::INFO, message)
+#define LOG_WARNING(message) LOG(rlog::Level::WARNING, message)
+#define LOG_ERROR(message) LOG(rlog::Level::ERROR, message)
+#define LOG_CRITICAL(message) LOG(rlog::Level::CRITICAL, message)
+#define LOG_SET_FILE(file_path, clear_old) (rlog::global_logger.openLogFile(file_path, clear_old))
+#define LOG_SET_LEVEL(level_name) (rlog::global_logger.setLogLevel(rlog::Level::level_name))
+#define LOG_SET_STREAM(stream) (rlog::global_logger.setLogStream(&(stream)))
+#define LOG_SET_PREFIX(prefix_creator) (rlog::global_logger.setLogPrefix(prefix_creator))
 
 #define LOG_PINK "\033[35m"
 #define LOG_GREEN "\033[32m"
@@ -44,6 +51,8 @@ namespace rlog {
 #define LOG_COLOR_RESET "\033[0m"
 
 #define LOG_BOLD "\033[1m"
+
+namespace rlog {
 
 enum class Level {
     DEBUG,
@@ -83,7 +92,7 @@ public:
     void resetLogPrefix();
     static std::string createDefaultPrefix(Level level);
 
-    void openLogFile(const std::filesystem::path &filePath);
+    void openLogFile(const std::filesystem::path &filePath, bool clear_old = false);
     void closeLogFile();
     [[nodiscard]] bool logFileIsOpen() const;
     void setMaxLogSize(std::size_t size);
@@ -101,3 +110,5 @@ private:
 static Logger global_logger;
 
 }
+
+#endif
