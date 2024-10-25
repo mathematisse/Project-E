@@ -19,10 +19,10 @@ jobs:
     steps:
       - name: Check PR title
         run: |
-          if [[ ${{ github.event.pull_request.title }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "${{ github.event.pull_request.title }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "PR title is a valid version number."
           else
-            echo "PR title \" ${{ github.event.pull_request.title }} \" is not a valid version number."
+            echo "PR title \"${{ github.event.pull_request.title }}\" is not a valid version number."
             echo "Please use the format x.y.z"
             exit 1
           fi
