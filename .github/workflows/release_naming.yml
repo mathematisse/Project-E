@@ -1,0 +1,29 @@
+name: Release Pull Request Naming Check
+
+# Runs when a PR is opened, reopened, or synchronized.
+# Checks if the PR title is a valid version number (e.g 1.3.0).
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+    branches:
+      - main
+
+jobs:
+  if_opened:
+    if: github.event.pull_request.head.ref == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        run: |
+          if [[ "${{ github.event.pull_request.title }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "PR title is a valid version number."
+          else
+            echo "PR title \"${{ github.event.pull_request.title }}\" is not a valid version number."
+            echo "Please use the format x.y.z"
+            exit 1
+          fi
