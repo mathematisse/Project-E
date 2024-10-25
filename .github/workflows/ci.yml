@@ -25,7 +25,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile & Install dependencies
-        run: cmake -B build -S .
+        run: | 
+          git submodule update --init --recursive
+          cmake -B build -S .
 
       - name: Build
         run: cmake --build build --target $TARGETS
@@ -44,7 +46,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -G "MinGW Makefiles" -B build -S .
+        run: | 
+          git submodule update --init --recursive
+          cmake -G "MinGW Makefiles" -B build -S .
 
       - name: Build
         run: cmake --build build --target ${{ env.TARGETS }}
