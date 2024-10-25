@@ -10,17 +10,16 @@
 #include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_ecs/Entities/AEntityRef.hpp"
-#include <iostream>
+#include "lib_log/log.hpp"
 #include <utility>
 
-namespace ECS {
-namespace E {
+namespace ECS::E {
 AEntityPool::AEntityPool(std::string entityName, size_t chunkSize):
     _entityName(std::move(entityName)),
     _chunkSize(chunkSize)
 {
-    std::cout << "Creating entity pool " << _entityName << '\n';
-    std::cout << "Chunk size: " << _chunkSize << '\n';
+    LOG_DEBUG("Creating entity pool " + _entityName);
+    LOG_DEBUG("Chunk size: " + std::to_string(_chunkSize));
 }
 
 AEntityPool::~AEntityPool() = default;
@@ -56,7 +55,7 @@ C::IComponentPool *AEntityPool::getComponentPool(const std::string &name)
 
 void AEntityPool::addChunk()
 {
-    std::cout << "Adding chunk to entity pool " << _entityName << '\n';
+    LOG_DEBUG("Adding chunk to entity pool " + _entityName);
     auto cCount = getChunkCount();
     for (auto *componentPool : getComponentPools()) {
         componentPool->addChunk(_chunkSize);
@@ -92,5 +91,4 @@ C::EntityStatusPool &AEntityPool::getEntityStatusPool() { return _EntityStatusPo
 
 C::ChunkPosPool &AEntityPool::getChunkPosPool() { return _ChunkPosPool; }
 
-} // namespace E
-} // namespace ECS
+} // namespace ECS::E

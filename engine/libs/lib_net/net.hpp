@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <iostream>
+#include "lib_log/log.hpp"
 
 #ifdef _WIN32
 /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
@@ -62,7 +62,7 @@ public:
         auto ret = 0;
 #endif
         if (ret != 0) {
-            std::cerr << "Error initializing socket library: " << ret << std::endl;
+            LOG_ERROR("Error initializing socket library: " + std::to_string(ret));
         }
     }
 

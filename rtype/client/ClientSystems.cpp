@@ -12,6 +12,7 @@
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include <iostream>
 #include "AssetsPath.hpp"
+#include "lib_log/log.hpp"
 #include <raylib.h>
 
 #define RED_CLI "\033[31m"
@@ -112,7 +113,7 @@ void DestroyEntitiesSystem::_statusOperate(
 
     for (auto &entityDestroyed : entitiesDestroyed) {
         if (entityDestroyed.netId == netId) {
-            std::cout << RED_CLI << "Destroying entity with netId: " << netId << RESET << std::endl;
+            LOG_DEBUG(RED_CLI "Destroying entity with netId: " + std::to_string(netId) + RESET);
             entityManager.destroyEntity(cchunkPos);
         }
     }

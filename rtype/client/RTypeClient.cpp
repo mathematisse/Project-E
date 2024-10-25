@@ -1,6 +1,7 @@
 #include "RTypeClient.hpp"
 #include "GameEntities.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_log/log.hpp"
 #include "lib_net/Packet.hpp"
 #include "RTypePackets.hpp"
 #include <cstdlib>
@@ -23,9 +24,8 @@ void net::RTypeClient::on_packet(const Packet &packet)
 
     switch (packet.header.type) {
     case Packet::ASKUDP_NUMBER:
-        std::cout << "Received generated number from server: ";
         number = *reinterpret_cast<const std::uint64_t *>(packet.data.data());
-        std::cout << number << std::endl;
+        LOG_DEBUG("Received generated number " + std::to_string(number) + " from server: ");
         // send the number back to the server with the function transformNumberFunction applied
         transformed_number = Gateway::transformNumberFunction(number);
         send_udp(Packet::ASKUDP_RESPONSE, Packet::serializeStruct(transformed_number));
@@ -53,7 +53,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
             auto ref = _entityManager.getEntity(ent);
             auto *square_ennemy = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
             if (square_ennemy == nullptr) {
-                std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+                LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
                 return;
             }
             square_ennemy->setHealth({5});
@@ -78,7 +78,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
             auto ref = _entityManager.getEntity(ent);
             auto *square_ennemy = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
             if (square_ennemy == nullptr) {
-                std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+                LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
                 return;
             }
             square_ennemy->setHealth({2});
@@ -108,7 +108,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
 
         auto *square_bullet = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
         if (square_bullet == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return;
         }
         if (bulletShot.isPlayer) {
@@ -152,7 +152,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
         auto ent = _entityManager.getEntity(playerPos);
         auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ent.get());
         if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return;
         }
         square_player->setNetworkID({playerConnectionSuccess.netId});

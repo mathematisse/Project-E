@@ -59,7 +59,7 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
 
         auto *square_ennemy = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
         if (square_ennemy == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return;
         }
         int rand = std::rand() % 5;
@@ -191,7 +191,7 @@ void ShootSystem::_statusOperate(
 
             auto *square_bullet = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
             if (square_bullet == nullptr) {
-                std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+                LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
                 return;
             }
             if (type == GameEntityType::PLAYER) {

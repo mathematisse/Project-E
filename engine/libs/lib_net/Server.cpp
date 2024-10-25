@@ -2,7 +2,6 @@
 #include "lib_net/Context.hpp"
 #include "lib_net/Gateway.hpp"
 #include "lib_net/Packet.hpp"
-#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -318,7 +317,7 @@ void net::Server::handle_new_tcp_connections()
         if (auto opt_socket = TCPSocket::accept(listenFd); opt_socket.has_value()) {
             gateway.tcp_socket = opt_socket.value();
             if (gateway.tcp_socket.getFD() == INVALID_SOCKET) {
-                std::cerr << "Error accepting connection" << std::endl;
+                LOG_ERROR("Error accepting connection");
                 return;
             }
             gateway.udp_info.udp_address = {};

@@ -13,8 +13,7 @@
 #include <limits>
 #include "lib_ecs/Systems/ADualSystem.hpp"
 
-namespace ECS {
-namespace S {
+namespace ECS::S {
 // SYSTEM
 
 MoveBackgroundSystem::MoveBackgroundSystem():
@@ -194,5 +193,4 @@ void GetPlayerPositionSystem::_statusOperate(
     playersPos.push_back({x, y});
 }
 
-} // namespace S
-} // namespace ECS
+} // namespace ECS::S

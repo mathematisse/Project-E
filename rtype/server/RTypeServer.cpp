@@ -3,7 +3,9 @@
 #include "RTypePackets.hpp"
 #include "GameEntities.hpp"
 #include "lib_net/Packet.hpp"
+#include "lib_log/log.hpp"
 #include <iostream>
+#include <string>
 
 net::RTypeServer::RTypeServer(
     ECS::EntityManager &entityManager, NetworkManager &networkManager,
@@ -19,7 +21,7 @@ net::RTypeServer::RTypeServer(
 
 void net::RTypeServer::on_tcp_connect(client_id id)
 {
-    std::cout << "Client connected: " << id << std::endl;
+    LOG_INFO("Client connected: " + std::to_string(id));
     send_tcp(id, 255, {'h', 'e', 'l', 'l', 'o'});
     // get the generated number from the client
     try {
@@ -28,16 +30,19 @@ void net::RTypeServer::on_tcp_connect(client_id id)
             reinterpret_cast<std::uint8_t *>(&number),
             reinterpret_cast<std::uint8_t *>(&number) + sizeof(number)
         );
-        std::cout << "Sending generated number (" << number << ") to client " << id << std::endl;
+        LOG_DEBUG(
+            "Sending generated number (" + std::to_string(number) + ") to client " +
+            std::to_string(id)
+        );
         send_tcp(id, net::Packet::ASKUDP_NUMBER, number_interpreted_as_vector);
     } catch (const std::out_of_range &e) {
-        std::cerr << "Client not found: " << id << std::endl;
+        LOG_ERROR("Client not found: " + std::to_string(id));
     }
 }
 
 void net::RTypeServer::on_udp_connect(client_id id)
 {
-    std::cout << "UDP client connected: " << id << std::endl;
+    LOG_DEBUG("UDP client connected: " + std::to_string(id));
 
     auto newP = _entityManager.createEntities("GameEntity", 1, ECS::C::ENT_ALIVE);
     for (const auto &entity : newP) {
@@ -45,7 +50,7 @@ void net::RTypeServer::on_udp_connect(client_id id)
 
         auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
         if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return;
         }
         square_player->setPosition({1920.0F / 4.0F, 1080.0F / 2.0F});
@@ -78,7 +83,7 @@ void net::RTypeServer::on_udp_connect(client_id id)
 
 void net::RTypeServer::on_tcp_disconnect(client_id id)
 {
-    std::cout << "Client disconnected: " << id << std::endl;
+    LOG_INFO("Client disconnected: " + std::to_string(id));
 }
 
 void net::RTypeServer::on_packet(const Packet &packet, client_id id)
@@ -87,10 +92,10 @@ void net::RTypeServer::on_packet(const Packet &packet, client_id id)
     // std::cout << "Packet size: " << packet.header.size << std::endl;
     switch (packet.header.type) {
     case Packet::PONG:
-        std::cout << "Received PONG from client " << id << std::endl;
+        LOG_DEBUG("Received PONG from client " + std::to_string(id));
         pong_count++;
         if (pong_count < 10) {
-            std::cout << "Sending PING to client " << id << std::endl;
+            LOG_DEBUG("Sending PING to client " + std::to_string(id));
             send_udp(id, Packet::PING, {'P', 'I', 'N', 'G'});
         }
         break;

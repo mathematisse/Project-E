@@ -2,7 +2,7 @@
 #include <iostream>
 #include <utility>
 
-namespace log {
+namespace rlog {
 
 std::string logLevelToStr(Level level)
 {
@@ -22,6 +22,24 @@ std::string logLevelToStr(Level level)
     }
 }
 
+std::string logLevelToColor(Level level)
+{
+    switch (level) {
+    case Level::DEBUG:
+        return LOG_PINK;
+    case Level::INFO:
+        return LOG_GREEN;
+    case Level::WARNING:
+        return LOG_YELLOW;
+    case Level::ERROR:
+        return LOG_RED;
+    case Level::CRITICAL:
+        return LOG_RED LOG_BOLD;
+    default:
+        return LOG_COLOR_RESET;
+    }
+}
+
 Logger::Logger():
     log_level(Level::INFO),
     prefix_creator(createDefaultPrefix),
@@ -37,23 +55,23 @@ void Logger::log(Level level, const std::string &message)
     if (level < log_level) {
         return;
     }
-    std::string log_line = prefix_creator(level) + message + "\n";
+    std::string prefix = prefix_creator(level);
     if (log_stream != nullptr) {
-        *log_stream << log_line;
+        *log_stream << logLevelToColor(level) << prefix << LOG_COLOR_RESET << message << std::endl;
     }
     if (logFileIsOpen()) {
         if (log_file.tellp() > max_log_size) {
             log_file.close();
             log_file.open(log_file_path, std::ios::out | std::ios::ate);
         }
-        log_file << log_line;
+        log_file << prefix << message << std::endl;
         log_file.flush();
     }
 }
 
-log::Level Logger::getLogLevel() const { return log_level; }
+Level Logger::getLogLevel() const { return log_level; }
 
-void Logger::setLogLevel(log::Level level) { log_level = level; }
+void Logger::setLogLevel(Level level) { log_level = level; }
 
 std::ostream *Logger::getLogStream() const { return log_stream; }
 
@@ -63,9 +81,9 @@ void Logger::resetLogStream() { log_stream = getDefaultLogStream(); }
 
 std::ostream *Logger::getDefaultLogStream() { return &std::cout; }
 
-log::Logger::PrefixCreator Logger::getLogPrefix() const { return prefix_creator; }
+Logger::PrefixCreator Logger::getLogPrefix() const { return prefix_creator; }
 
-void Logger::setLogPrefix(log::Logger::PrefixCreator prefixCreator)
+void Logger::setLogPrefix(Logger::PrefixCreator prefixCreator)
 {
     prefix_creator = std::move(prefixCreator);
 }

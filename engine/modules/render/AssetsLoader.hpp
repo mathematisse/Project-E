@@ -1,10 +1,10 @@
 #pragma once
 
+#include "lib_log/log.hpp"
 #include "raylib.h"
 #include <map>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #ifdef _WIN32 // Windows
 const std::string separator = "\\";
@@ -65,13 +65,13 @@ public:
     {
         Image image = LoadImage(path.c_str());
         if (image.data == nullptr) {
-            std::cerr << "Error loading image: " << path << std::endl;
+            LOG_ERROR("Error loading image: " + path);
             return 1;
         }
         images[path] = image;
         assets[path] = LoadTextureFromImage(image);
         if (assets[path].id == 0) {
-            std::cerr << "Error loading texture: " << path << std::endl;
+            LOG_ERROR("Error loading texture: " + path);
             return 1;
         }
         assets_id[assets[path].id] = path;

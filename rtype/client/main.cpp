@@ -7,6 +7,7 @@
 #include <iostream>
 #include <raylib.h>
 #include "core/Core.hpp"
+#include "lib_log/log.hpp"
 #include "raygui.h"
 #include <thread>
 #include "AssetsPath.hpp"
@@ -48,7 +49,7 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chu
     auto ref = _eM.getEntity(player[0]);
     auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
     if (!square_player) {
-        std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
         return {0, 0};
     }
     return {*square_player->getPosition().get<0>(), *square_player->getPosition().get<1>()};
@@ -77,13 +78,13 @@ char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
 {
     auto player = chunks;
     if (player.empty()) {
-        std::cout << "Player is dead" << std::endl;
+        LOG_INFO("Player is dead");
         return 0;
     }
     auto ref = _eM.getEntity(player[0]);
     auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
     if (!square_player) {
-        std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
         return 0;
     }
     return *square_player->getHealth().get<0>();
@@ -100,7 +101,7 @@ void update_player_sprite(
     auto ref = _eM.getEntity(player[0]);
     auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
     if (!square_player) {
-        std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
         return;
     }
     if (*square_player->getHealth().get<0>() == 1) {
@@ -126,7 +127,7 @@ void setup_decor(
 
         auto square_background = dynamic_cast<ECS::E::DecorEntityRef *>(ref.get());
         if (!square_background) {
-            std::cerr << "Failed to cast IEntityRef to DecorEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to DecorEntityRef");
             return;
         }
         square_background->setType({GameEntityType::BACKGROUND});
@@ -142,7 +143,7 @@ void setup_decor(
 
         auto *square_ground = dynamic_cast<ECS::E::DecorEntityRef *>(ref.get());
         if (!square_ground) {
-            std::cerr << "Failed to cast IEntityRef to DecorEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to DecorEntityRef");
             return;
         }
         square_ground->setType({GameEntityType::WALL});
@@ -160,7 +161,7 @@ void setup_decor(
 
         auto square_ceiling = dynamic_cast<ECS::E::DecorEntityRef *>(ref.get());
         if (!square_ceiling) {
-            std::cerr << "Failed to cast IEntityRef to DecorEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to DecorEntityRef");
             return;
         }
         square_ceiling->setType({GameEntityType::WALL});
@@ -180,7 +181,7 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
 
         auto *square_engine = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
         if (square_engine == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return {};
         }
         square_engine->setType({GameEntityType::ENGINE});
@@ -199,7 +200,7 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
 
         auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
         if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return {};
         }
         square_player->setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
@@ -217,6 +218,9 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asset
 
 int main(int ac, char **av)
 {
+    LOG_SET_FILE("rtype_client.log");
+    LOG_SET_LEVEL(DEBUG);
+
     if (ac != 1) {
         std::cerr << "Usage: ./rtype_client" << std::endl;
         return 1;
@@ -567,15 +571,16 @@ int main(int ac, char **av)
 
         // create palyer for each player states left over
         for (auto &playerState : moveOtherPlayerSystem.playerStates) {
-            std::cout << "Creating player for player state and netid: " << playerState.netId
-                      << std::endl;
+            LOG_DEBUG(
+                "Creating player for player state and netid: " + std::to_string(playerState.netId)
+            );
             auto engine = _eM.createEntities("GameAnimatedEntity", 1);
             for (const auto &entity : engine) {
                 auto ref = _eM.getEntity(entity);
 
                 auto *square_engine = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
                 if (square_engine == nullptr) {
-                    std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+                    LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
                     return 1;
                 }
                 square_engine->setType({GameEntityType::ENGINE});
@@ -592,7 +597,7 @@ int main(int ac, char **av)
 
                 auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
                 if (square_player == nullptr) {
-                    std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+                    LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
                     return 1;
                 }
                 square_player->setPosition({playerState.x * 300.0F, playerState.y * 300.0F});

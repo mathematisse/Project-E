@@ -14,19 +14,20 @@
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_log/log.hpp"
 #include "spatial2d/Spatial2D.hpp"
 
 char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
 {
     auto player = chunks;
     if (player.empty()) {
-        std::cout << "Player is dead" << std::endl;
+        LOG_INFO("Player is dead");
         return 0;
     }
     auto ref = _eM.getEntity(player[0]);
     auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
     if (!square_player) {
-        std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
         return 0;
     }
     return *square_player->getHealth().get<0>();
@@ -41,7 +42,7 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
 
         auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
         if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to GameEntityRef" << std::endl;
+            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return {};
         }
         square_player->setPosition({1920 / 4, 1080 / 2});
@@ -62,6 +63,9 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
 
 int main(int ac, char **av)
 {
+    LOG_SET_FILE("rtype_server.log");
+    LOG_SET_LEVEL(DEBUG);
+
     ECS::S::MovePlayersSystem movePlayersSystem;
     ECS::EntityManager _eM(FIXED_TIMESTEP);
     NetworkManager networkManager;

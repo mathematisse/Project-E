@@ -11,8 +11,8 @@
 #include "lib_ecs/Entities/IEntityPool.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
+#include "lib_log/log.hpp"
 #include <functional>
-#include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -66,7 +66,7 @@ public:
             }
         }
         if (i == sizeof...(Ts)) {
-            std::cout << "Added entity pool " << entityPool->getEntityName() << " to query\n";
+            LOG_DEBUG("Added entity pool " + entityPool->getEntityName() + " to query");
             _componentPoolsArrays.push_back(newComponentPoolsArray);
             return true;
         }
