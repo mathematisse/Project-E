@@ -2,15 +2,14 @@
 
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "Components.hpp"
+#include "lib_ecs/Systems/ASystem.hpp"
 
 namespace ECS::S {
 
-class IncrementTimerSystem : public S::AStatusMonoSystem<C::TimerPool> {
+class IncrementTimerSystem : public S::AStatusMonoSystem<C::TimerPool>,
+                             virtual public S::ADeltaTimeSystem {
 public:
     ~IncrementTimerSystem() override = default;
-
-    void getRunStepData(SystemTree &sysTree) override;
-    float deltaTime = 0.0F;
 
 protected:
     void _statusOperate(typename C::TimerPool::Types &ctimer) override;

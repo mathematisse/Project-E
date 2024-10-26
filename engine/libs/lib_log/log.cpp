@@ -41,7 +41,7 @@ std::string logLevelToColor(Level level)
 }
 
 Logger::Logger():
-    log_level(Level::INFO),
+    log_level(Level::DEBUG),
     prefix_creator(createDefaultPrefix),
     log_stream(getDefaultLogStream()),
     max_log_size(DEFAULT_MAX_LOG_SIZE)

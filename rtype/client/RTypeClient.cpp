@@ -111,6 +111,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
             LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
             return;
         }
+        LOG_DEBUG("Bullet shot by " + std::to_string(bulletShot.netId));
         if (bulletShot.isPlayer) {
             square_bullet->setVelocity({500.0F, 0.0F});
             square_bullet->setRotation({90});

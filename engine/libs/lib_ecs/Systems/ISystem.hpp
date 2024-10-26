@@ -8,6 +8,7 @@
 #pragma once
 
 #include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Systems/ASystemTree.hpp"
 
 namespace ECS::S {
 
@@ -18,7 +19,7 @@ public:
     ISystem() = default;
     virtual ~ISystem() = default;
     virtual bool tryAddEntityPool(E::IEntityPool *entityPool) = 0;
-    virtual void getRunStepData(SystemTree &sysTree) = 0; // get necessary data for that run
+    virtual void getRunStepData(ASystemTree &sysTree) = 0; // get necessary data for that run
     virtual void run() = 0;
 };
 } // namespace ECS::S

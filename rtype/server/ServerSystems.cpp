@@ -147,7 +147,7 @@ void ShootSystem::_statusOperate(
         return;
     }
     if (delay > 0) {
-        delay -= deltaTime;
+        delay -= _deltaTime;
         return;
     }
     auto [weapon] = cweapon;
@@ -184,14 +184,13 @@ void ShootSystem::_statusOperate(
             return;
         }
         delay = base_delay;
-        auto bullets = entityManager.createEntities("GameEntity", 1, ECS::C::ENT_ALIVE);
-
+        auto bullets = entityManager.createEntities("GameAnimatedEntity", 1, ECS::C::ENT_ALIVE);
         for (const auto &entity : bullets) {
             auto ref = entityManager.getEntity(entity);
 
             auto *square_bullet = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
             if (square_bullet == nullptr) {
-                LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
+                LOG_ERROR("Failed to cast IEntityRef to GameAnimatedEntityRef");
                 return;
             }
             if (type == GameEntityType::PLAYER) {

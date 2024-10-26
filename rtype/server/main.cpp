@@ -116,15 +116,13 @@ int main(int ac, char **av)
          &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
          &sendAllDataToNewClients}
     );
-    bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP, false, true);
+    bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP);
 
     if (success) {
         LOG_INFO("Successfully registered RTypeFixedNode");
     } else {
         LOG_ERROR("Failed to register RTypeFixedNode");
     }
-
-    shootSystem.deltaTime = 0.02F;
 
     auto curr_time = std::chrono::steady_clock::now();
 
@@ -446,10 +444,6 @@ int main(int ac, char **av)
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
 
-        moveEnnemySystem.playersPos = getPlayerPositionSystem.playersPos;
-        shootSystem.playersPos = getPlayerPositionSystem.playersPos;
-        getPlayerPositionSystem.playersPos.clear();
-
         countEnnemyAliveSystem.ennemyCount = 0;
         if ((server.clientCount() > 1) || started) {
             cameraX += 80 * dt;
@@ -459,6 +453,9 @@ int main(int ac, char **av)
                 frame++;
                 sendAllDataToNewClients.newClients.clear();
                 movePlayersSystem.playerStates.clear();
+                moveEnnemySystem.playersPos = getPlayerPositionSystem.playersPos;
+                shootSystem.playersPos = getPlayerPositionSystem.playersPos;
+                getPlayerPositionSystem.playersPos.clear();
                 server.send_tcp(ECS::FRAME_ID, net::Packet::serializeStruct(ECS::FrameId {frame}));
                 spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
             }

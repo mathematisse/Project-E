@@ -5,9 +5,7 @@ namespace ECS::S {
 void IncrementTimerSystem::_statusOperate(typename C::TimerPool::Types &ctimer)
 {
     auto [time] = ctimer;
-    time += deltaTime;
+    time += _deltaTime;
 }
-
-void IncrementTimerSystem::getRunStepData(SystemTree &sysTree) { deltaTime = sysTree.deltaTime; }
 
 }

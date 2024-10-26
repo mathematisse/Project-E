@@ -60,7 +60,8 @@ protected:
 
 class ShootSystem
     : public S::AStatusMonoSystem<
-          C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool, C::WeaponPool> {
+          C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool, C::WeaponPool>,
+      virtual public S::ADeltaTimeSystem {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
@@ -70,7 +71,6 @@ public:
 
     EntityManager &entityManager;
     NetworkManager &networkManager;
-    float deltaTime = 0.0f;
     std::vector<Vector2> playersPos;
 
     net::RTypeServer &server;

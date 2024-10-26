@@ -8,6 +8,7 @@
 #pragma once
 
 #include "lib_ecs/Systems/ISystem.hpp"
+#include "lib_ecs/Systems/ASystemTree.hpp"
 
 #define ROOT_SYS_GROUP "ROOT"
 #define SYNC_SYS_GROUP "SYNC"
@@ -42,7 +43,7 @@ private:
     std::vector<ISystem *> _endSystems;
 };
 
-class SystemTree {
+class SystemTree : public ASystemTree {
 public:
     SystemTree();
     ~SystemTree();
@@ -55,8 +56,6 @@ public:
     );
     void registerEntityPool(E::IEntityPool *entityPool);
     void runTree();
-
-    float deltaTime = 0.0F;
 
 private:
     SystemTreeNode _root;

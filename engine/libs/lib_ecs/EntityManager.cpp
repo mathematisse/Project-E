@@ -23,6 +23,7 @@ namespace ECS {
 EntityManager::EntityManager(float fixedUpdateTime):
     _fixedUpdateTime(fixedUpdateTime)
 {
+    _fixedSystemTree.setDeltaTime(fixedUpdateTime);
 }
 
 bool EntityManager::registerSystemGroup(
@@ -277,7 +278,7 @@ bool EntityManager::addTime(float time)
 {
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
-    _systemTree.deltaTime = time;
+    _systemTree.setDeltaTime(time);
     _runSystems();
     if (_timeSinceLastFixedUpdate >= _fixedUpdateTime) {
         _runFixedSystems();

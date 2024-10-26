@@ -16,7 +16,7 @@
 
 namespace ECS::S {
 template<typename... Ts>
-class AMonoSystem : public ASystem {
+class AMonoSystem : virtual public ASystem {
 public:
     explicit AMonoSystem(bool isParallel):
         ASystem(isParallel)

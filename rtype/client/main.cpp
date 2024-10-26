@@ -309,14 +309,14 @@ int main(int ac, char **av)
     }
 
     // Entity pools
-    ECS::E::GameAnimatedEntityPool gameAnimatedEntityPool;
-    _eM.registerEntityPool(&gameAnimatedEntityPool);
-    ECS::E::GameEntityPool gameEntityPool;
-    _eM.registerEntityPool(&gameEntityPool);
     ECS::E::DecorAnimatedEntityPool decorAnimatedEntityPool;
     _eM.registerEntityPool(&decorAnimatedEntityPool);
     ECS::E::DecorEntityPool decorEntityPool;
     _eM.registerEntityPool(&decorEntityPool);
+    ECS::E::GameAnimatedEntityPool gameAnimatedEntityPool;
+    _eM.registerEntityPool(&gameAnimatedEntityPool);
+    ECS::E::GameEntityPool gameEntityPool;
+    _eM.registerEntityPool(&gameEntityPool);
 
     setup_decor(_eM, networkManager, assetsLoader);
 

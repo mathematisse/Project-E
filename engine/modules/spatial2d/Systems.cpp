@@ -8,11 +8,9 @@ void ApplyVelocitySystem::_statusOperate(
 {
     auto [x, y] = cposition;
     auto [vX, vY] = cvelocity;
-    x += vX * deltaTime;
-    y += vY * deltaTime;
+    x += vX * _deltaTime;
+    y += vY * _deltaTime;
 }
-
-void ApplyVelocitySystem::getRunStepData(SystemTree &sysTree) { deltaTime = sysTree.deltaTime; }
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -22,10 +20,8 @@ void ApplyAccelerationSystem::_statusOperate(
 {
     auto [vX, vY] = cvelocity;
     auto [aX, aY] = cacceleration;
-    vX += aX * deltaTime;
-    vY += aY * deltaTime;
+    vX += aX * _deltaTime;
+    vY += aY * _deltaTime;
 }
-
-void ApplyAccelerationSystem::getRunStepData(SystemTree &sysTree) { deltaTime = sysTree.deltaTime; }
 
 }
