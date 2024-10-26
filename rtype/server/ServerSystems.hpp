@@ -61,7 +61,7 @@ protected:
 class ShootSystem
     : public S::AStatusMonoSystem<
           C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool, C::WeaponPool>,
-      virtual public S::ADeltaTimeSystem {
+      public S::ADeltaTimeSystem {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,

@@ -6,7 +6,7 @@
 namespace ECS::S {
 
 class ApplyVelocitySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool>,
-                            virtual public S::ADeltaTimeSystem {
+                            public S::ADeltaTimeSystem {
 public:
     ApplyVelocitySystem() = default;
     ~ApplyVelocitySystem() override = default;
@@ -20,7 +20,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////
 
 class ApplyAccelerationSystem : public S::AStatusMonoSystem<C::VelocityPool, C::AccelerationPool>,
-                                virtual public S::ADeltaTimeSystem {
+                                public S::ADeltaTimeSystem {
 public:
     ~ApplyAccelerationSystem() override = default;
 

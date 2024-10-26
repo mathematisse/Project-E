@@ -6,8 +6,7 @@
 
 namespace ECS::S {
 
-class IncrementTimerSystem : public S::AStatusMonoSystem<C::TimerPool>,
-                             virtual public S::ADeltaTimeSystem {
+class IncrementTimerSystem : public S::AStatusMonoSystem<C::TimerPool>, public S::ADeltaTimeSystem {
 public:
     ~IncrementTimerSystem() override = default;
 
