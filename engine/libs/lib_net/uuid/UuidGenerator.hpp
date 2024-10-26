@@ -32,6 +32,12 @@ public:
     {
     }
 
+    explicit UuidGenerator(std::shared_ptr<G> gen):
+        generator(gen),
+        distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
+    {
+    }
+
     Uuid new_uuid()
     {
         uint64_t uuid = 0;

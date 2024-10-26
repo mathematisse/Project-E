@@ -15,6 +15,15 @@ auto UdpSocket::bind(const SocketAddr &addr) -> io::Result<UdpSocket>
     return io::Result<UdpSocket>::Error(sock.error());
 }
 
+auto UdpSocket::any(int domain) -> io::Result<UdpSocket>
+{
+    auto sock = Socket::create(domain, SOCK_DGRAM);
+    if (sock) {
+        return io::Result<UdpSocket>::Success(UdpSocket(sock.value()));
+    }
+    return io::Result<UdpSocket>::Error(sock.error());
+}
+
 auto UdpSocket::recv_from(std::span<std::byte> &buf
 ) const -> io::Result<std::pair<size_t, SocketAddr>>
 {

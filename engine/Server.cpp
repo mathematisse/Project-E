@@ -312,18 +312,18 @@ bool net::Server::host_udp(std::uint16_t port)
 
 void net::Server::handle_new_tcp_connections()
 {
-    if (context.is_readable(listenFd)) {
-        context.readyCount--;
-        Gateway gateway;
-        if (auto opt_socket = TCPSocket::accept(listenFd); opt_socket.has_value()) {
-            gateway.tcp_socket = opt_socket.value();
-            if (gateway.tcp_socket.getFD() == INVALID_SOCKET) {
-                std::cerr << "Error accepting connection" << std::endl;
-                return;
-            }
-            gateway.udp_info.udp_address = {};
-            clients.insert({next_client_id, gateway});
-            on_tcp_connect(next_client_id++);
-        }
-    }
+    // if (context.is_readable(listenFd)) {
+    //     context.readyCount--;
+    //     Gateway gateway;
+    //     if (auto opt_socket = TCPSocket::accept(listenFd); opt_socket.has_value()) {
+    //         gateway.tcp_socket = opt_socket.value();
+    //         if (gateway.tcp_socket.getFD() == INVALID_SOCKET) {
+    //             std::cerr << "Error accepting connection" << std::endl;
+    //             return;
+    //         }
+    //         gateway.udp_info.udp_address = {};
+    //         clients.insert({next_client_id, gateway});
+    //         on_tcp_connect(next_client_id++);
+    //     }
+    // }
 }

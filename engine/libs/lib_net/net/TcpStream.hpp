@@ -57,6 +57,10 @@ public:
     {
         return _sock.sockfd;
     }
+    inline auto set_nonblocking(bool enable) -> io::Result<result::Void>
+    {
+        return _sock.set_nonblocking(enable);
+    }
 
 protected:
     explicit TcpStream(Socket sock):

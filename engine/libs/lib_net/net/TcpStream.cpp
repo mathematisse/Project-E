@@ -1,13 +1,15 @@
 
 #include "_base.hpp"
+#include "lib_net/net/IpAddr.hpp"
 #include "lib_net/net/Socket.hpp"
+#include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/net/TcpStream.hpp"
 
 namespace lnet::net {
 
 auto TcpStream::connect(const SocketAddr &addr) -> io::Result<TcpStream>
 {
-    auto sock = Socket::create(addr, SOCK_STREAM);
+    auto sock = Socket::create(addr.is_ipv4() ? AF_INET : AF_INET6, SOCK_STREAM);
     if (sock) {
         auto connect_result = sock.value().connect(addr);
         if (connect_result) {

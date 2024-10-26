@@ -22,8 +22,8 @@ public:
     }
     explicit Ipv4Addr(uint32_t addr):
         octets(
-            {static_cast<uint8_t>((addr >> 24) & 0xFF), static_cast<uint8_t>((addr >> 16) & 0xFF),
-             static_cast<uint8_t>((addr >> 8) & 0xFF), static_cast<uint8_t>(addr & 0xFF)}
+            {static_cast<uint8_t>((addr >> 0) & 0xFF), static_cast<uint8_t>((addr >> 8) & 0xFF),
+             static_cast<uint8_t>((addr >> 16) & 0xFF), static_cast<uint8_t>(addr >> 24 & 0xFF)}
         )
     {
     }
@@ -50,6 +50,17 @@ public:
         return std::accumulate(octets.begin(), octets.end(), 0U, [](uint32_t acc, uint8_t octet) {
             return (acc << SHIFT_BITS) | octet;
         });
+    }
+
+    friend bool operator==(const Ipv4Addr &lhs, const Ipv4Addr &rhs)
+    {
+        return lhs.to_uint32_t() == rhs.to_uint32_t();
+    }
+
+    friend bool operator!=(const Ipv4Addr &lhs, const Ipv4Addr &rhs) { return !(lhs == rhs); }
+    friend bool operator<(const Ipv4Addr &lhs, const Ipv4Addr &rhs)
+    {
+        return lhs.to_uint32_t() < rhs.to_uint32_t();
     }
 };
 
@@ -91,6 +102,29 @@ public:
     [[nodiscard]] inline bool is_loopback() const
     {
         return segments == std::array<uint16_t, 8> {0, 0, 0, 0, 0, 0, 0, 1};
+    }
+
+    friend bool operator==(const Ipv6Addr &lhs, const Ipv6Addr &rhs)
+    {
+        bool result = true;
+        for (size_t i = 0; i < lhs.segments.size(); ++i) {
+            if (lhs.segments[i] != rhs.segments[i]) {
+                return false;
+            }
+        }
+        return result;
+    }
+    friend bool operator!=(const Ipv6Addr &lhs, const Ipv6Addr &rhs) { return !(lhs == rhs); }
+    friend bool operator<(const Ipv6Addr &lhs, const Ipv6Addr &rhs)
+    {
+        for (size_t i = 0; i < lhs.segments.size(); ++i) {
+            if (lhs.segments[i] < rhs.segments[i]) {
+                return true;
+            } else if (lhs.segments[i] > rhs.segments[i]) {
+                return false;
+            }
+        }
+        return false;
     }
 };
 

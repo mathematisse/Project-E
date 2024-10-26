@@ -5,6 +5,7 @@
 #include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/result/Result.hpp"
 #include <cstring>
+#include <sys/socket.h>
 
 namespace lnet::net {
 
@@ -46,7 +47,7 @@ auto initialize_address(const SocketAddr &addr) -> std::pair<struct sockaddr_sto
         auto *ipv4 = reinterpret_cast<struct sockaddr_in *>(&address);
         ipv4->sin_family = AF_INET;
         ipv4->sin_port = htons(addr.port());
-        ipv4->sin_addr.s_addr = htonl(addr.ip().to_v4().to_uint32_t());
+        ipv4->sin_addr.s_addr = addr.ip().to_v4().to_uint32_t();
         address_len = sizeof(*ipv4);
     } else {
         auto *ipv6 = reinterpret_cast<struct sockaddr_in6 *>(&address);
@@ -73,6 +74,15 @@ auto address_from_sockaddr(const struct sockaddr_storage &address) -> SocketAddr
         Ipv6Addr ip(ipv6_segments);
         return {IpAddr(ip), ntohs(ipv6->sin6_port)};
     }
+}
+
+auto Socket::create(int domain, int type) -> io::Result<Socket>
+{
+    auto sockfd = socket(domain, type, 0);
+    if (sockfd == INVALID_SOCKET) {
+        return io::Result<Socket>::Error(std::error_code(errno, std::system_category()));
+    }
+    return io::Result<Socket>::Success(Socket(sockfd));
 }
 
 auto Socket::create(const SocketAddr &addr, int type) -> io::Result<Socket>
@@ -126,7 +136,7 @@ auto Socket::accept() const -> io::Result<std::pair<Socket, SocketAddr>>
 
 auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
 {
-    auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), 0);
+    auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
     if (nread == SOCKET_ERROR) {
         return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
@@ -139,7 +149,7 @@ auto Socket::recv_from(const std::span<std::byte> &buf
     struct sockaddr_storage address { };
     socklen_t address_len = sizeof(address);
     auto nread = ::recvfrom(
-        sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), 0,
+        sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL,
         reinterpret_cast<struct sockaddr *>(&address), &address_len
     );
     if (nread == SOCKET_ERROR) {
@@ -153,7 +163,8 @@ auto Socket::recv_from(const std::span<std::byte> &buf
 
 auto Socket::write(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
 {
-    auto nwritten = ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), 0);
+    auto nwritten =
+        ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
     if (nwritten == SOCKET_ERROR) {
         return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
@@ -165,7 +176,7 @@ auto Socket::send_to(const std::span<std::byte> &buf, const SocketAddr &addr) co
 {
     auto [address, address_len] = initialize_address(addr);
     auto nwritten = ::sendto(
-        sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), 0,
+        sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), MSG_NOSIGNAL,
         reinterpret_cast<struct sockaddr *>(&address), address_len
     );
     if (nwritten == SOCKET_ERROR) {
@@ -209,5 +220,35 @@ auto Socket::set_reuse_addr(bool enable) -> io::Result<result::Void>
     int optval = enable ? 1 : 0;
     return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 }
+#ifdef _WIN32
+auto Socket::set_nonblocking(bool enable) -> io::Result<result::Void>
+{
+    unsigned long mode = enable ? 1 : 0;
+    if (ioctlsocket(sockfd, FIONBIO, &mode) != 0) {
+        return io::Result<result::Void>::Error(
+            std::error_code(WSAGetLastError(), std::system_category())
+        );
+    }
+    return io::Result<result::Void>::Success({});
+}
+#else
+#include <fcntl.h>
+auto Socket::set_nonblocking(bool enable) -> io::Result<result::Void>
+{
+    int flags = fcntl(sockfd, F_GETFL, 0);
+    if (flags == -1) {
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
+    }
+    if (enable) {
+        flags |= O_NONBLOCK;
+    } else {
+        flags &= ~O_NONBLOCK;
+    }
+    if (fcntl(sockfd, F_SETFL, flags) == -1) {
+        return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
+    }
+    return io::Result<result::Void>::Success({});
+}
+#endif
 
 } // namespace lnet::net

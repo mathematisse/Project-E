@@ -26,6 +26,16 @@ public:
     {
         return ip.to_string() + ":" + std::to_string(port);
     }
+
+    friend bool operator==(const SocketAddrV4 &lhs, const SocketAddrV4 &rhs)
+    {
+        return lhs.ip == rhs.ip && lhs.port == rhs.port;
+    }
+
+    friend bool operator<(const SocketAddrV4 &lhs, const SocketAddrV4 &rhs)
+    {
+        return lhs.ip < rhs.ip || (lhs.ip == rhs.ip && lhs.port < rhs.port);
+    }
 };
 
 struct SocketAddrV6 {
@@ -46,6 +56,20 @@ public:
     [[nodiscard]] std::string to_string() const
     {
         return "[" + ip.to_string() + "]:" + std::to_string(port);
+    }
+
+    friend bool operator==(const SocketAddrV6 &lhs, const SocketAddrV6 &rhs)
+    {
+        return lhs.ip == rhs.ip && lhs.port == rhs.port && lhs.flowinfo == rhs.flowinfo &&
+            lhs.scope_id == rhs.scope_id;
+    }
+
+    friend bool operator<(const SocketAddrV6 &lhs, const SocketAddrV6 &rhs)
+    {
+        return lhs.ip < rhs.ip || (lhs.ip == rhs.ip && lhs.port < rhs.port) ||
+            (lhs.ip == rhs.ip && lhs.port == rhs.port && lhs.flowinfo < rhs.flowinfo) ||
+            (lhs.ip == rhs.ip && lhs.port == rhs.port && lhs.flowinfo == rhs.flowinfo &&
+             lhs.scope_id < rhs.scope_id);
     }
 };
 
@@ -136,6 +160,32 @@ public:
     {
         return std::holds_alternative<SocketAddrV6>(addr_);
     }
+
+    // comparison operators
+
+    friend bool operator==(const SocketAddr &lhs, const SocketAddr &rhs)
+    {
+        if (lhs.is_ipv4() && rhs.is_ipv4()) {
+            return std::get<SocketAddrV4>(lhs.addr_) == std::get<SocketAddrV4>(rhs.addr_);
+        } else if (lhs.is_ipv6() && rhs.is_ipv6()) {
+            return std::get<SocketAddrV6>(lhs.addr_) == std::get<SocketAddrV6>(rhs.addr_);
+        }
+        return false;
+    }
+
+    friend bool operator!=(const SocketAddr &lhs, const SocketAddr &rhs) { return !(lhs == rhs); }
+    friend bool operator<(const SocketAddr &lhs, const SocketAddr &rhs)
+    {
+        if (lhs.is_ipv4() && rhs.is_ipv4()) {
+            return std::get<SocketAddrV4>(lhs.addr_) < std::get<SocketAddrV4>(rhs.addr_);
+        } else if (lhs.is_ipv6() && rhs.is_ipv6()) {
+            return std::get<SocketAddrV6>(lhs.addr_) < std::get<SocketAddrV6>(rhs.addr_);
+        }
+        return false;
+    }
+    friend bool operator>(const SocketAddr &lhs, const SocketAddr &rhs) { return rhs < lhs; }
+    friend bool operator<=(const SocketAddr &lhs, const SocketAddr &rhs) { return !(lhs > rhs); }
+    friend bool operator>=(const SocketAddr &lhs, const SocketAddr &rhs) { return !(lhs < rhs); }
 
 private:
     std::variant<SocketAddrV4, SocketAddrV6> addr_ = SocketAddrV4 {Ipv4Addr {{0, 0, 0, 0}}, 0};

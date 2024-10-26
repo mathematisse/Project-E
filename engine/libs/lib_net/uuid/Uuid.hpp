@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <ostream>
 #include <random>
 #include <string>
 #include <sstream>
@@ -68,7 +69,7 @@ public:
         if (!(iss >> std::hex >> uuid)) {
             return Result<Uuid>::Error(UuidError {UuidError::Type::InvalidUuidString});
         }
-        return {uuid};
+        return Result<Uuid>::Success(Uuid {uuid});
     }
 
     auto from_str(const char *raw) -> Result<result::Void>
@@ -116,6 +117,12 @@ public:
     size_t hash() const
     {
         return std::hash<uint64_t> {}(data);
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const Uuid &uuid)
+    {
+        os << uuid.to_str();
+        return os;
     }
 
 private:

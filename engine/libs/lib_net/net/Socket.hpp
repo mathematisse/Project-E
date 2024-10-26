@@ -16,6 +16,7 @@ public:
     int sockfd;
 
 public:
+    static auto create(int domain, int type) -> io::Result<Socket>;
     static auto create(const SocketAddr &addr, int type) -> io::Result<Socket>;
     [[nodiscard]] auto connect(const SocketAddr &addr) const -> io::Result<result::Void>;
     [[nodiscard]] auto close() const -> io::Result<result::Void>;
@@ -32,6 +33,7 @@ public:
     [[nodiscard]] auto peer_addr() const -> io::Result<SocketAddr>;
     [[nodiscard]] auto local_addr() const -> io::Result<SocketAddr>;
     auto set_reuse_addr(bool enable) -> io::Result<result::Void>;
+    auto set_nonblocking(bool enable) -> io::Result<result::Void>;
 
 private:
     explicit Socket(int sockfd):

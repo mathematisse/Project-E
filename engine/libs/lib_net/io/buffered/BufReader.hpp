@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cstddef>
@@ -10,26 +9,20 @@
 
 namespace lnet::io {
 
-template<typename R>
+template<typename R, std::size_t N = DEFAULT_BUF_SIZE>
 class BufReader {
 private:
     Buffer _buffer;
-    R _inner;
+    R &_inner;
 
 public:
-    explicit BufReader(R inner):
-        _inner(std::move(inner)),
-        _buffer(DEFAULT_BUF_SIZE)
-    {
-    }
-    BufReader(R inner, size_t size):
-        _inner(std::move(inner)),
-        _buffer(size)
+    explicit BufReader(R &inner):
+        _inner(inner)
     {
     }
 
     [[nodiscard]] auto reader() const -> const R & { return _inner; }
-    [[nodiscard]] auto buffer() const -> std::span<std::byte> { return _buffer.buffer(); }
+    [[nodiscard]] auto buffer() -> std::span<std::byte> { return _buffer.buffer(); }
     [[nodiscard]] auto capacity() const -> size_t { return _buffer.capacity(); }
     auto discard_buffer() -> void { _buffer.discard_buffer(); }
 

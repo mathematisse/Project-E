@@ -39,12 +39,18 @@ public:
 
 // Concept to check if a type T satisfies the Read interface
 template<typename T>
-concept Readable = requires(T t, std::span<std::byte> buf, size_t bytesRead) {
+concept Readable = requires(
+    T t, std::span<std::byte> buf, size_t bytesRead, std::span<std::span<std::byte>> vec,
+    std::vector<std::byte> v, std::string str
+) {
     { t.read(buf) } -> std::same_as<Result<std::size_t>>;
-    { t.read_vectored(buf, bytesRead) } -> std::same_as<Result<std::size_t>>;
-    { t.read_to_end(buf, bytesRead) } -> std::same_as<Result<std::size_t>>;
-    { t.read_to_string(buf, bytesRead) } -> std::same_as<Result<std::size_t>>;
+    { t.read_vectored(vec, bytesRead) } -> std::same_as<Result<std::size_t>>;
+    { t.read_to_end(v, bytesRead) } -> std::same_as<Result<std::size_t>>;
+    { t.read_to_string(str, bytesRead) } -> std::same_as<Result<std::size_t>>;
     { t.read_exact(buf) } -> std::same_as<Result<std::size_t>>;
 };
 
-} // namespace lib_net
+// check if Read class satisfies the Readable concept
+static_assert(Readable<Read>);
+
+} // namespace lnet::io
