@@ -86,7 +86,7 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
 
         square_ennemy->getNetworkID()->set<0>(_netId);
 
-        server.send_tcp(
+        server.send_tcp_all(
             RTypePacketType::NEW_ENNEMY, net::Packet::serializeStruct(NewEnnemy {_x, _y, _netId})
         );
     }
@@ -113,7 +113,7 @@ void DestroyEntitiesSystem::_statusOperate(
     if (networkid == 0) {
         return;
     }
-    server.send_tcp(
+    server.send_tcp_all(
         RTypePacketType::ENTITY_DESTROYED, net::Packet::serializeStruct(EntityDestroyed {networkid})
     );
 }
@@ -222,12 +222,12 @@ void ShootSystem::_statusOperate(
             auto _netId = networkManager.getnewNetID();
             square_bullet->getNetworkID()->set<0>(_netId);
             if (type == SquareType::PLAYER) {
-                server.send_tcp(
+                server.send_tcp_all(
                     RTypePacketType::BULLET_SHOT,
                     net::Packet::serializeStruct(BulletShot {x + 80 + 35, y + 25, true, _netId})
                 );
             } else {
-                server.send_tcp(
+                server.send_tcp_all(
                     RTypePacketType::BULLET_SHOT,
                     net::Packet::serializeStruct(BulletShot {x - 35, y + 25, false, _netId})
                 );
@@ -291,7 +291,7 @@ void SendAllDataToNewClients::_statusOperate(
     //     }
     // } else
     if (type == SquareType::PLAYER) {
-        server->send_tcp(
+        server->send_tcp_all(
             RTypePacketType::PLAYER_STATE,
             net::Packet::serializeStruct(PlayerState {x, y, vX, vY, health, netId})
         );
@@ -312,7 +312,7 @@ void MovePlayersSystem::_statusOperate(
     if (type != SquareType::PLAYER) {
         return;
     }
-    auto [x, y] = cposition;
+    // auto [x, y] = cposition;
     auto [vX, vY, _] = cvelocity;
     auto [netId] = cnetworkid;
     auto [isShooting] = cIsShooting;

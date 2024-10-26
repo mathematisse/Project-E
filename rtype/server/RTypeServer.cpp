@@ -21,19 +21,6 @@ net::RTypeServer::RTypeServer(
 void net::RTypeServer::on_tcp_connect(client_id id)
 {
     std::cout << "Client connected: " << id << std::endl;
-    send_tcp(id, 255, {'h', 'e', 'l', 'l', 'o'});
-    // get the generated number from the client
-    try {
-        auto number = clients.at(id).generated_number;
-        auto number_interpreted_as_vector = std::vector<std::uint8_t>(
-            reinterpret_cast<std::uint8_t *>(&number),
-            reinterpret_cast<std::uint8_t *>(&number) + sizeof(number)
-        );
-        std::cout << "Sending generated number (" << number << ") to client " << id << std::endl;
-        send_tcp(id, net::Packet::ASKUDP_NUMBER, number_interpreted_as_vector);
-    } catch (const std::out_of_range &e) {
-        std::cerr << "Client not found: " << id << std::endl;
-    }
 }
 
 void net::RTypeServer::on_udp_connect(client_id id)
@@ -118,4 +105,4 @@ void net::RTypeServer::on_packet(const Packet &packet, client_id id)
     // std::cout << "\"" << data << "\"" << std::endl;
 }
 
-size_t net::RTypeServer::clientCount() const { return clients.size(); }
+size_t net::RTypeServer::clientCount() const { return numberClients(); }

@@ -53,12 +53,12 @@ void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::Type
         vX += 1;
     }
     if (!auto_shoot) {
-        client.send_udp(
+        client.send_udp_all(
             ECS::RTypePacketType::PLAYER_VELOCITY,
             net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
         );
     } else {
-        client.send_udp(
+        client.send_udp_all(
             ECS::RTypePacketType::PLAYER_VELOCITY,
             net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, true})
         );

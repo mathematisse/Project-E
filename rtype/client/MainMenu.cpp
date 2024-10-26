@@ -21,10 +21,15 @@ void MainMenu::try_to_connect(void)
 {
     int port = std::stoi(_port);
 
-    if (!_client.connect_tcp(_ip, port)) {
+    if (auto res = _client.connect_tcp(_ip, port); !res) {
+        std::cerr << "Failed to connect to server: " << res.error().message() << std::endl;
         return;
     }
-    _client.connect_udp(_ip, port);
+    if (auto res = _client.connect_udp(_ip, port); !res) {
+        std::cerr << "Failed to connect to server: " << res.error().message() << std::endl;
+        return;
+    }
+    _client.start();
     _connected = true;
 }
 
