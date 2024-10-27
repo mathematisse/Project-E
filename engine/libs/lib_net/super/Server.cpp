@@ -87,7 +87,6 @@ void Server::send_udp(
 
 void Server::send_tcp_all(Packet::MsgType type, const std::vector<std::uint8_t> &data)
 {
-    std::cout << "Sending TCP to all clients" << std::endl;
     Packet packet = Packet::deserialize(type, data);
     for (const auto &[client_uuid, client] : _clients) {
         lnet::utils::BaseServer::send_tcp(client.tcp_connection_id, packet.serialize());
@@ -111,7 +110,7 @@ void Server::on_tcp_connection(lnet::uuid::Uuid tcp_connection_id)
     auto client_uuid = client_uuid_generator.new_uuid();
     _clients.insert({client_uuid, Client {tcp_connection_id}});
     on_tcp_connect(client_uuid);
-    ask_udp_connection(client_uuid);
+    ask_udp_connection_request(client_uuid);
 }
 
 void Server::on_tcp_disconnection(lnet::uuid::Uuid tcp_connection_id)
@@ -143,6 +142,7 @@ void Server::on_udp_data(const lnet::net::SocketAddr &addr, const std::vector<st
 {
     // if the client is already connected with UDP on_packet will be called else we call
     // handle_udp_connection_request
+    std::cout << "UDP data received" << std::endl;
     if (auto matchingClient = _udp_connection_cache.find(addr);
         matchingClient != _udp_connection_cache.end()) {
         auto packet = Packet::deserialize(data);
@@ -172,7 +172,18 @@ void Server::on_tcp_data(
         });
 
         while (packet.has_value()) {
-            on_packet(packet.value(), matchingClient->first);
+            if (packet->header.type == Packet::SystemTypes::ASKUDP_NUMBER) {
+                if (auto udp_data =
+                        Packet::deserializeStruct<UdpConnectionPacketInitialisation>(packet->data);
+                    udp_data.has_value()) {
+                    std::cout << "UDP connection response received" << std::endl;
+                    ask_udp_connection_response(
+                        udp_data->client_uuid, transformNumberFunction(udp_data->generated_number)
+                    );
+                }
+            } else {
+                on_packet(packet.value(), matchingClient->first);
+            }
             stream.with_lock([&buffer, &packet](auto &reader) {
                 reader.consume(packet->size());
                 buffer = reader.buffer();
@@ -198,7 +209,7 @@ bool Server::has_udp_connection(lnet::uuid::Uuid client_uuid) const
 // to take UDP connection requests)
 // give the client UUID and some random number to the user, and expect the client to send the
 // UUID back as a tranformed number
-void Server::ask_udp_connection(lnet::uuid::Uuid client_uuid)
+void Server::ask_udp_connection_request(lnet::uuid::Uuid client_uuid)
 {
     auto matchingClient = _clients.find(client_uuid);
     if (matchingClient != _clients.end()) {
@@ -208,10 +219,24 @@ void Server::ask_udp_connection(lnet::uuid::Uuid client_uuid)
             Packet::SystemTypes::ASKUDP_NUMBER,
             Packet::serializeStruct(UdpConnectionPacketInitialisation {client_uuid, number})
         );
+        std::cout << "Asking UDP connection to client " << client_uuid << std::endl;
         lnet::utils::BaseServer::send_tcp(
             matchingClient->second.tcp_connection_id, packet.serialize()
         );
     }
+}
+
+void Server::ask_udp_connection_response(
+    lnet::uuid::Uuid client_uuid, std::uint64_t transformed_number
+)
+{
+    // send to the server this server is connected to
+    /// client_uuid is the uuid of the receiver (the one who calls this function)
+    auto data = Packet::deserialize(
+        Packet::SystemTypes::ASKUDP_RESPONSE,
+        Packet::serializeStruct(UdpConnectionPacketConfirmation {client_uuid, transformed_number})
+    );
+    lnet::utils::BaseServer::send_udp(data.serialize());
 }
 
 // First connection

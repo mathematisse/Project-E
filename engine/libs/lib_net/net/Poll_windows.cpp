@@ -56,33 +56,21 @@ auto Poll::add_write(const UdpSocket &socket) -> io::Result<result::Void>
     return io::Result<result::Void>::Success(result::Void {});
 }
 
-auto Poll::remove_read(const TcpStream &stream) -> io::Result<result::Void>
+auto Poll::remove(const TcpStream &stream) -> io::Result<result::Void>
 {
     // No need to remove from IOCP, just stop issuing read operations
     return io::Result<result::Void>::Success(result::Void {});
 }
 
-auto Poll::remove_read(const UdpSocket &socket) -> io::Result<result::Void>
+auto Poll::remove(const UdpSocket &socket) -> io::Result<result::Void>
 {
     // No need to remove from IOCP, just stop issuing read operations
     return io::Result<result::Void>::Success(result::Void {});
 }
 
-auto Poll::remove_read(const TcpListener &listener) -> io::Result<result::Void>
+auto Poll::remove(const TcpListener &listener) -> io::Result<result::Void>
 {
     // No need to remove from IOCP, just stop issuing read operations
-    return io::Result<result::Void>::Success(result::Void {});
-}
-
-auto Poll::remove_write(const TcpStream &stream) -> io::Result<result::Void>
-{
-    // No need to remove from IOCP, just stop issuing write operations
-    return io::Result<result::Void>::Success(result::Void {});
-}
-
-auto Poll::remove_write(const UdpSocket &socket) -> io::Result<result::Void>
-{
-    // No need to remove from IOCP, just stop issuing write operations
     return io::Result<result::Void>::Success(result::Void {});
 }
 

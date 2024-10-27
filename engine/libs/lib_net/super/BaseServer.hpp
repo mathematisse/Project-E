@@ -328,12 +328,23 @@ private:
         std::cout << "New TCP connection accepted fd: " << stream.get_fd() << std::endl;
         if (auto res2 = poll.add_read(stream); !res2) {
             std::cerr << "Poll add read error: " << res2.error().message() << std::endl;
-            stream.close();
+            if (auto res_ = stream.close(); !res_) {
+                std::cerr << "Tcp close error: " << res_.error().message() << std::endl;
+            }
             return;
         }
-        if (auto res2 = stream.set_nonblocking(true)) {
+        // if (auto res2 = poll.add_write(stream); !res2) {
+        //     std::cerr << "Poll add write error: " << res2.error().message() << std::endl;
+        //     if (auto res_ = stream.close(); !res_) {
+        //         std::cerr << "Tcp close error: " << res_.error().message() << std::endl;
+        //     }
+        //     return;
+        // }
+        if (auto res2 = stream.set_nonblocking(true); !res2) {
             std::cerr << "Tcp set nonblocking error: " << res2.error().message() << std::endl;
-            stream.close();
+            if (auto res_ = stream.close(); !res_) {
+                std::cerr << "Tcp close error: " << res_.error().message() << std::endl;
+            }
             return;
         }
         auto id = tcp_uuid_generator.new_uuid();
@@ -341,7 +352,7 @@ private:
         _tcp_events.push({Event::TcpConnection, id});
     }
 
-    void handle_tcp_read_connection()
+    void handle_tcp_read_connection(net::Poll &poll)
     {
         tcp_connection->reader.with_lock([&](auto &reader) {
             auto res = reader.fill_buf();
@@ -351,7 +362,7 @@ private:
             }
             auto buf = res.value();
             if (buf.empty()) {
-                _tcp_events.push({Event::TcpDisconnection, *tcp_connection_id});
+                disconnect_tcp_connection_single(poll);
                 return;
             }
             _tcp_events.push({Event::TcpRead, *tcp_connection_id});
@@ -371,7 +382,7 @@ private:
         return it;
     }
 
-    void handle_tcp_read_events(const net::PollEvent &event)
+    void handle_tcp_read_events(const net::PollEvent &event, net::Poll &poll)
     {
         auto maybe_connection = get_tcp_connection(event.fd);
         if (!maybe_connection) {
@@ -388,9 +399,7 @@ private:
             }
             auto buf = res.value();
             if (buf.empty()) {
-                _tcp_events.push({Event::TcpDisconnection, id});
-                std::cout << "Client (" << id << ") disconnected" << std::endl;
-                tcp_connections.erase(id);
+                // disconnect_tcp_connection(id, poll);
                 return;
             }
             std::cout << "Tcp read event (" << id << ")" << std::endl;
@@ -398,7 +407,7 @@ private:
         });
     }
 
-    void handle_tcp_write_events(const net::PollEvent &event)
+    void handle_tcp_write_events(const net::PollEvent &event, net::Poll &poll)
     {
         auto maybe_connection = get_tcp_connection(event.fd);
         if (!maybe_connection) {
@@ -409,15 +418,17 @@ private:
         auto res = connection.writer.flush();
         if (!res) {
             std::cerr << "Tcp write error: " << res.error().message() << std::endl;
+            disconnect_tcp_connection(id, poll);
             return;
         }
     }
 
-    void handle_tcp_write_connection()
+    void handle_tcp_write_connection(net::Poll &poll)
     {
         auto res = tcp_connection->writer.flush();
         if (!res) {
             std::cerr << "Tcp write error: " << res.error().message() << std::endl;
+            disconnect_tcp_connection_single(poll);
         }
     }
 
@@ -438,7 +449,10 @@ private:
 
     void handle_udp_write_event()
     {
-        auto maybe_data = _send_udp_queue.wait_pop();
+        if (_send_tcp_queue.empty()) {
+            return;
+        }
+        auto maybe_data = _send_udp_queue.wait_pop(std::chrono::milliseconds(100));
         if (maybe_data) {
             auto [addr, data] = maybe_data.value();
             if (udp_connection_addr.has_value()) {
@@ -455,27 +469,55 @@ private:
         }
     }
 
+    void disconnect_tcp_connection_single(net::Poll &poll)
+    {
+        if (tcp_connection) {
+            auto &connection = *tcp_connection;
+            std::cout << "About to Disconnect client (" << *tcp_connection_id << ")" << std::endl;
+            if (auto res = poll.remove(connection.stream); !res) {
+                std::cerr << "Poll remove read error: " << res.error().message() << std::endl;
+            }
+            if (auto res = connection.stream.shutdown(); !res) {
+                std::cerr << "Tcp shutdown error: " << res.error().message() << std::endl;
+            }
+            if (auto res = connection.stream.close(); !res) {
+                std::cerr << "Tcp close error: " << res.error().message() << std::endl;
+            }
+            _tcp_events.push({Event::TcpDisconnection, *tcp_connection_id});
+            tcp_connection.reset();
+            tcp_connection_id.reset();
+        }
+    }
+
+    // direclty disconnect the client
+    void disconnect_tcp_connection(uuid::Uuid id, net::Poll &poll)
+    {
+        auto it = tcp_connections.find(id);
+        if (it == tcp_connections.end()) {
+            std::cerr << "Tcp connection not found" << std::endl;
+            return;
+        }
+        auto &connection = it->second;
+        std::cout << "About to Disconnect client (" << it->first << ")" << std::endl;
+        if (auto res = poll.remove(connection.stream); !res) {
+            std::cerr << "Poll remove read error: " << res.error().message() << std::endl;
+        }
+        if (auto res = connection.stream.shutdown(); !res) {
+            std::cerr << "Tcp shutdown error: " << res.error().message() << std::endl;
+        }
+        if (auto res = connection.stream.close(); !res) {
+            std::cerr << "Tcp close error: " << res.error().message() << std::endl;
+        }
+        tcp_connections.erase(it);
+        _tcp_events.push({Event::TcpDisconnection, id});
+    }
+
     void handle_disconnection(net::Poll &poll)
     {
         while (!_disconnect_queue.empty()) {
-            auto id = _disconnect_queue.wait_pop();
-            if (id) {
-                auto it = tcp_connections.find(*id);
-                if (it == tcp_connections.end()) {
-                    std::cerr << "Tcp connection not found" << std::endl;
-                    continue;
-                }
-                auto &connection = it->second;
-                if (auto res = connection.stream.shutdown(); !res) {
-                    std::cerr << "Tcp shutdown error: " << res.error().message() << std::endl;
-                }
-                if (auto res = connection.stream.close(); !res) {
-                    std::cerr << "Tcp close error: " << res.error().message() << std::endl;
-                }
-                if (auto res = poll.remove_read(connection.stream); !res) {
-                    std::cerr << "Poll remove read error: " << res.error().message() << std::endl;
-                }
-                tcp_connections.erase(it);
+            auto maybe_uuid = _disconnect_queue.wait_pop();
+            if (maybe_uuid) {
+                disconnect_tcp_connection(maybe_uuid.value(), poll);
             }
         }
     }
@@ -487,89 +529,109 @@ private:
         } else if (tcp_listener && event.fd == tcp_listener->get_fd()) {
             handle_new_tcp_connections(poll);
         } else if (tcp_connection && event.fd == (*tcp_connection).stream.get_fd()) {
-            handle_tcp_read_connection();
+            handle_tcp_read_connection(poll);
         } else {
-            handle_tcp_read_events(event);
+            handle_tcp_read_events(event, poll);
         }
     }
 
-    void handle_write(const net::PollEvent &event)
+    void handle_write(const net::PollEvent &event, net::Poll &poll)
     {
         if (udp_socket && event.fd == udp_socket->get_fd()) {
             handle_udp_write_event();
         } else if (tcp_connection && event.fd == (*tcp_connection).stream.get_fd()) {
-            handle_tcp_write_connection();
+            handle_tcp_write_connection(poll);
         } else {
-            handle_tcp_write_events(event);
+            handle_tcp_write_events(event, poll);
         }
     }
 
     void prepare_write(net::Poll &poll)
     {
-        handle_tcp_connection_write(poll);
-        handle_tcp_connections_write(poll);
+        // handle_tcp_connection_write(poll);
+        // handle_tcp_connections_write(poll);
         // handle_udp_socket_write(poll);
-    }
-
-    void handle_tcp_connection_write(net::Poll &poll)
-    {
+        for (auto &[id, connection] : tcp_connections) {
+            connection.writer.flush();
+        }
         if (tcp_connection) {
-            auto &connection = *tcp_connection;
-            if (!connection.writer.is_empty()) {
-                auto res = poll.add_write(connection.stream);
-                if (!res) {
-                    std::cerr << "Poll add write error: " << res.error().message() << std::endl;
-                }
-            } else {
-                if (auto res = poll.remove_write(connection.stream); !res) {
-                    std::cerr << "Poll remove TCP Connection write error: " << res.error().message()
-                              << std::endl;
-                }
-            }
+            tcp_connection->writer.flush();
         }
-    }
-
-    void handle_tcp_connections_write(net::Poll &poll)
-    {
-        for (const auto &[id, connection] : tcp_connections) {
-            if (!connection.writer.is_empty()) {
-                auto res = poll.add_write(connection.stream);
-                if (!res) {
-                    std::cerr << "Poll add write error: " << res.error().message() << std::endl;
-                }
-            } else {
-                if (auto res = poll.remove_write(connection.stream); !res) {
-                    std::cerr << "Poll remove TCP ()" << id
-                              << ") write error: " << res.error().message() << std::endl;
-                }
-            }
-        }
-    }
-
-    void handle_udp_socket_write(net::Poll &poll)
-    {
         if (udp_socket) {
-            if (!_send_udp_queue.empty()) {
-                auto res = poll.add_write(*udp_socket);
-                if (!res) {
-                    std::cerr << "Poll add write error: " << res.error().message() << std::endl;
-                }
-            } else {
-                if (auto res = poll.remove_write(*udp_socket); !res) {
-                    std::cerr << "Poll remove UDP write error: " << res.error().message()
-                              << std::endl;
+            while (!_send_udp_queue.empty()) {
+                auto maybe_data = _send_udp_queue.wait_pop();
+                if (maybe_data) {
+                    auto [addr, data] = maybe_data.value();
+                    std::vector<std::uint8_t> byte_data(data.size());
+                    auto byte_data_span = std::span<std::byte>(
+                        reinterpret_cast<std::byte *>(byte_data.data()), byte_data.size()
+                    );
+                    auto res = udp_socket->send_to(byte_data_span, addr);
+                    if (!res) {
+                        std::cerr << "Udp send error: " << res.error().message() << std::endl;
+                    }
                 }
             }
         }
     }
+
+    // void handle_tcp_connection_write(net::Poll &poll)
+    // {
+    //     if (tcp_connection) {
+    //         auto &connection = *tcp_connection;
+    //         if (!connection.writer.is_empty()) {
+    //             auto res = poll.add_write(connection.stream);
+    //             if (!res) {
+    //                 std::cerr << "Poll add write error: " << res.error().message() << std::endl;
+    //             }
+    //         } else {
+    //             if (auto res = poll.remove_write(connection.stream); !res) {
+    //                 std::cerr << "Poll remove TCP Connection write error: " <<
+    //                 res.error().message()
+    //                           << std::endl;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // void handle_tcp_connections_write(net::Poll &poll)
+    // {
+    //     for (const auto &[id, connection] : tcp_connections) {
+    //         if (!connection.writer.is_empty()) {
+    //             auto res = poll.add_write(connection.stream);
+    //             if (!res) {
+    //                 std::cerr << "Poll add write error: " << res.error().message() << std::endl;
+    //             }
+    //         } else {
+    //             if (auto res = poll.remove_write(connection.stream); !res) {
+    //                 std::cerr << "Poll remove TCP ()" << id
+    //                           << ") write error: " << res.error().message() << std::endl;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // void handle_udp_socket_write(net::Poll &poll)
+    // {
+    //     if (udp_socket) {
+    //         if (!_send_udp_queue.empty()) {
+    //             auto res = poll.add_write(*udp_socket);
+    //             if (!res) {
+    //                 std::cerr << "Poll add write error: " << res.error().message() << std::endl;
+    //             }
+    //         } else {
+    //             if (auto res = poll.remove_write(*udp_socket); !res) {
+    //                 std::cerr << "Poll remove UDP write error: " << res.error().message()
+    //                           << std::endl;
+    //             }
+    //         }
+    //     }
+    // }
 
     void context_loop(net::Poll &poll)
     {
         while (_running) {
 
-            prepare_write(poll);
-
-            std::cout << "Poll wait" << std::endl;
             auto events = poll.wait(500 /*ms*/);
             if (!events) {
                 std::cerr << "Poll wait error: " << events.error().message() << std::endl;
@@ -582,7 +644,7 @@ private:
                     handle_read(event, poll);
                     break;
                 case net::PollEvent::Type::Write:
-                    handle_write(event);
+                    handle_write(event, poll);
                     break;
                 case net::PollEvent::Type::Error:
                     std::cerr << "Error on fd: " << event.fd << std::endl;
@@ -605,6 +667,8 @@ private:
                 }
             }
         }
+
+        // prepare_write(poll);
     }
 
     void run_context()
@@ -626,7 +690,7 @@ private:
             }
         }
         if (tcp_connection) {
-            auto res = poll.add_read((*tcp_connection).stream);
+            auto res = poll.add_read(tcp_connection->stream);
             if (!res) {
                 std::cerr << "Poll add read error: " << res.error().message() << std::endl;
                 return;

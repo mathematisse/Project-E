@@ -109,9 +109,20 @@ private:
         std::uint64_t transformed_number;
     };
 
-    void ask_udp_connection(lnet::uuid::Uuid client_uuid);
+    /// The server sends a random number to the client
+    void ask_udp_connection_request(lnet::uuid::Uuid client_uuid);
 
+    /// The client receives the number
+    void
+    ask_udp_connection_response(lnet::uuid::Uuid client_uuid, std::uint64_t transformed_number);
+
+    /// The client sends back the number transformed by the client
     void handle_udp_connection_request(
+        const std::vector<std::byte> &data, const lnet::net::SocketAddr &addr
+    );
+
+    /// The server receives the transformed number and checks if it is correct
+    void handle_udp_connection_response(
         const std::vector<std::byte> &data, const lnet::net::SocketAddr &addr
     );
 

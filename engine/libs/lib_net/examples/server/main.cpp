@@ -109,7 +109,7 @@ int main()
                                               << " bytes" << std::endl;
                                 } else {
                                     // Connection closed
-                                    auto close_result = poll.remove_read(*it);
+                                    auto close_result = poll.remove(*it);
                                     if (!close_result) {
                                         std::cerr << "Poll remove_read error: "
                                                   << close_result.error().message() << std::endl;

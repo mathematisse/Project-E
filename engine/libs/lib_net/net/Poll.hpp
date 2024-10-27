@@ -84,16 +84,11 @@ public:
     auto add_write(const UdpSocket &socket) -> io::Result<result::Void>;
 
     [[nodiscard]]
-    auto remove_read(const TcpStream &stream) -> io::Result<result::Void>;
+    auto remove(const TcpStream &stream) -> io::Result<result::Void>;
     [[nodiscard]]
-    auto remove_read(const UdpSocket &socket) -> io::Result<result::Void>;
+    auto remove(const UdpSocket &socket) -> io::Result<result::Void>;
     [[nodiscard]]
-    auto remove_read(const TcpListener &listener) -> io::Result<result::Void>;
-
-    [[nodiscard]]
-    auto remove_write(const TcpStream &stream) -> io::Result<result::Void>;
-    [[nodiscard]]
-    auto remove_write(const UdpSocket &socket) -> io::Result<result::Void>;
+    auto remove(const TcpListener &listener) -> io::Result<result::Void>;
 
     [[nodiscard]]
     auto wait(std::optional<std::size_t>) -> io::Result<std::vector<PollEvent>>;
