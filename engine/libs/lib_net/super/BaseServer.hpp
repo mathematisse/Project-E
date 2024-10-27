@@ -326,7 +326,7 @@ private:
         }
         auto [stream, addr] = res.value();
         std::cout << "New TCP connection accepted fd: " << stream.get_fd() << std::endl;
-        if (auto res2 = poll.add_read(stream); !res2) {
+        if (auto res2 = poll.add(stream); !res2) {
             std::cerr << "Poll add read error: " << res2.error().message() << std::endl;
             if (auto res_ = stream.close(); !res_) {
                 std::cerr << "Tcp close error: " << res_.error().message() << std::endl;
@@ -676,21 +676,21 @@ private:
         net::Poll poll;
 
         if (udp_socket) {
-            auto res = poll.add_read(*udp_socket);
+            auto res = poll.add(*udp_socket);
             if (!res) {
                 std::cerr << "Poll add read error: " << res.error().message() << std::endl;
                 return;
             }
         }
         if (tcp_listener) {
-            auto res = poll.add_read(*tcp_listener);
+            auto res = poll.add(*tcp_listener);
             if (!res) {
                 std::cerr << "Poll add read error: " << res.error().message() << std::endl;
                 return;
             }
         }
         if (tcp_connection) {
-            auto res = poll.add_read(tcp_connection->stream);
+            auto res = poll.add(tcp_connection->stream);
             if (!res) {
                 std::cerr << "Poll add read error: " << res.error().message() << std::endl;
                 return;

@@ -4,7 +4,6 @@
 #include <optional>
 #include <vector>
 
-#include "lib_net/net/_base.hpp"
 #include "lib_net/io/Result.hpp"
 #include "lib_net/net/TcpStream.hpp"
 #include "lib_net/net/UdpSocket.hpp"
@@ -33,7 +32,7 @@ public:
 /**
  * @brief Poll for I/O events on sockets
  *
- * This class is a wrapper around the epoll system call on Linux and the IOCP system call on
+ * This class is a wrapper around the poll system call on Linux and the WSApoll system call on
  * Windows. It allows for polling for read and write events on sockets.
  *
  * # Example
@@ -60,6 +59,14 @@ public:
  */
 class Poll {
 public:
+    struct Fd {
+        int fd; /* file descriptor */
+        short events; /* requested events */
+        short revents; /* returned events */
+
+        bool operator==(const Fd &other) const { return fd == other.fd; }
+    };
+
     static constexpr int MAX_EVENTS = 64;
 
     Poll() = default;
@@ -72,11 +79,11 @@ public:
     Poll &operator=(Poll &&) = default;
 
     [[nodiscard]]
-    auto add_read(const TcpStream &stream) -> io::Result<result::Void>;
+    auto add(const TcpStream &stream) -> io::Result<result::Void>;
     [[nodiscard]]
-    auto add_read(const UdpSocket &socket) -> io::Result<result::Void>;
+    auto add(const UdpSocket &socket) -> io::Result<result::Void>;
     [[nodiscard]]
-    auto add_read(const TcpListener &listener) -> io::Result<result::Void>;
+    auto add(const TcpListener &listener) -> io::Result<result::Void>;
 
     [[nodiscard]]
     auto add_write(const TcpStream &stream) -> io::Result<result::Void>;
@@ -90,44 +97,14 @@ public:
     [[nodiscard]]
     auto remove(const TcpListener &listener) -> io::Result<result::Void>;
 
+    auto remove_write(const TcpStream &stream) -> io::Result<result::Void>;
+    auto remove_write(const UdpSocket &socket) -> io::Result<result::Void>;
+
     [[nodiscard]]
     auto wait(std::optional<std::size_t>) -> io::Result<std::vector<PollEvent>>;
 
 private:
-#ifdef __linux__
-    struct Impl {
-        int epoll_fd;
-
-        Impl():
-            epoll_fd(epoll_create1(0))
-        {
-            if (epoll_fd == -1) {
-                throw std::system_error(errno, std::generic_category(), "epoll_create1 failed");
-            }
-        }
-
-        ~Impl() { close(epoll_fd); }
-    };
-#elif _WIN32
-    struct Impl {
-        HANDLE iocp;
-
-        Impl()
-        {
-            iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
-            if (iocp == nullptr) {
-                throw std::system_error(
-                    GetLastError(), std::system_category(), "CreateIoCompletionPort failed"
-                );
-            }
-        }
-
-        ~Impl() { CloseHandle(iocp); }
-    };
-#else
-#error "Unsupported platform"
-#endif
-    Impl _impl;
+    std::vector<Poll::Fd> fds;
 };
 
 }

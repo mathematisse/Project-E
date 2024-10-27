@@ -28,7 +28,7 @@ int main()
 
         // Add TcpListener to Poll for read events
 
-        if (auto res = poll.add_read(listen_result); !res) {
+        if (auto res = poll.add(listen_result); !res) {
             auto error = res.error();
             std::cerr << "Poll add_read tcp error: " << error.message() << std::endl;
             return 1;
@@ -46,7 +46,7 @@ int main()
         std::cout << "UdpSocket bound to: "
                   << udp_socket_result._sock.local_addr().value().to_string() << std::endl;
         // Add UdpSocket to Poll for read events
-        if (auto res = poll.add_read(udp_socket_result); !res) {
+        if (auto res = poll.add(udp_socket_result); !res) {
             std::cerr << "Poll add_read udp error: " << res.error().message() << std::endl;
             return 1;
         }
@@ -67,7 +67,7 @@ int main()
                         auto new_connection = listen_result.accept();
                         if (new_connection) {
                             auto [stream, addr] = new_connection.value();
-                            if (!poll.add_read(stream)) {
+                            if (!poll.add(stream)) {
                                 std::cerr << "Poll add_read error" << std::endl;
                                 return 1;
                             }
