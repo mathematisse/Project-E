@@ -18,6 +18,7 @@ public:
     size_t bulletSpriteId = 0;
     size_t bigShotSpriteId = 0;
     size_t frigateSpriteId = 0;
+    size_t powerUpSpriteId = 0;
     ECS::Chunks::chunkPos_t playerPos;
 
     float &cameraX;

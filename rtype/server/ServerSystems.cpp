@@ -6,6 +6,7 @@
 */
 
 #include <cmath>
+#include <cstdlib>
 #include <limits>
 #include "ServerSystems.hpp"
 #include "RTypeServer.hpp"
@@ -17,6 +18,7 @@
 #define YELLOW_CLI "\033[33m"
 #define RESET "\033[0m"
 
+int powerupcount = 0;
 namespace ECS {
 namespace S {
 // SYSTEM
@@ -295,6 +297,90 @@ void MovePlayersSystem::_statusOperate(
             vY = pState.y * 300;
             isShooting = (pState.shoot) != 0;
         }
+    }
+}
+
+SpawnPowerUpSystem::SpawnPowerUpSystem(
+    EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
+    net::RTypeServer &server, size_t maxPowerUp
+):
+    AStatusMonoSystem(false, C::ENT_ALIVE),
+    entityManager(entityManager),
+    networkManager(networkManager),
+    server(server),
+    _spriteId(spriteId),
+    maxPowerUp(maxPowerUp)
+{
+}
+
+void SpawnPowerUpSystem::_statusOperate(
+    C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+)
+{
+    auto [type] = ctype;
+
+    if (type != SquareType::PLAYER) {
+        return;
+    }
+    if (powerupcount >= 1) {
+        return;
+    }
+    auto need_to_spawn = 1 - powerupcount;
+    if (need_to_spawn <= 0) {
+        return;
+    }
+    auto [x, y] = cposition;
+    auto powerUps = entityManager.createEntities("Square", need_to_spawn, ECS::C::ENT_ALIVE);
+
+    for (const auto &entity : powerUps) {
+        auto ref = entityManager.getEntity(entity);
+
+        auto *square_powerUp = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (square_powerUp == nullptr) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return;
+        }
+        float _x = x + 500 + std::rand() % (int) (x + 1000);
+        float _y = 100 + std::rand() % 800;
+        square_powerUp->getType()->set<0>(SquareType::POWERUP);
+        square_powerUp->getSize()->set<0>(80);
+        square_powerUp->getSize()->set<1>(80);
+        square_powerUp->getSize()->set<2>(90);
+        square_powerUp->getPosition()->set<0>(_x);
+        square_powerUp->getPosition()->set<1>(_y);
+        square_powerUp->getSprite()->set<0>(_spriteId);
+        square_powerUp->getSprite()->set<2>(80.0F);
+        square_powerUp->getSprite()->set<3>(80.0F);
+        square_powerUp->getHealth()->set<0>(1);
+        square_powerUp->getVelocity()->set<0>(0.0F);
+        square_powerUp->getVelocity()->set<1>(0.0F);
+        square_powerUp->getVelocity()->set<2>(0.0F);
+        square_powerUp->getCanShoot()->set<0>(false);
+        square_powerUp->getColor()->set<0>(255);
+        square_powerUp->getColor()->set<1>(255);
+        square_powerUp->getColor()->set<2>(0);
+
+        auto _netId = networkManager.getnewNetID();
+        square_powerUp->getNetworkID()->set<0>(_netId);
+
+        server.send_tcp(
+            RTypePacketType::NEW_POWERUP, net::Packet::serializeStruct(NewPowerUp {_x, _y, _netId})
+        );
+        powerupcount = 1;
+    }
+}
+
+CountPowerUpAliveSystem::CountPowerUpAliveSystem(size_t &powerUpCount):
+    AStatusMonoSystem(false, C::ENT_ALIVE),
+    powerUpCount(powerUpCount)
+{
+}
+
+void CountPowerUpAliveSystem::_statusOperate(C::TypePool::Types &ctype)
+{
+    auto [type] = ctype;
+    if (type == SquareType::POWERUP) {
+        powerUpCount++;
     }
 }
 

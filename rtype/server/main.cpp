@@ -77,8 +77,11 @@ int main(int ac, char **av)
     ECS::S::MoveBackgroundSystem moveBackgroundSystem;
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
+    ECS::S::ChangePlayerWeaponSystem changePlayerWeaponSystem;
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.enemyCount);
     ECS::S::GetPlayerPositionSystem getPlayerPositionSystem;
+    ECS::S::SpawnPowerUpSystem spawnPowerUpSystem(_eM, networkManager, 0, server);
+    ECS::S::CountPowerUpAliveSystem countPowerUpAliveSystem(spawnPowerUpSystem._powerUpCount);
 
     // Entity pools
     ECS::E::BaseEntity::Pool gameEntityPool(RTYPE_ENTITY_POOL_SIZE);
@@ -86,9 +89,9 @@ int main(int ac, char **av)
 
     ECS::S::SystemTreeNode rTypeFixedNode(
         "RTypeFixedNode", {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &shootSystem,
-         &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
-         &sendAllDataToNewClients}
+        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &spawnPowerUpSystem,
+         &countEnnemyAliveSystem, &shootSystem, &colliderSystem, &changePlayerWeaponSystem,
+         &destroyEntitiesSystem, &getPlayerPositionSystem, &sendAllDataToNewClients}
     );
     bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP);
 
@@ -432,6 +435,7 @@ int main(int ac, char **av)
                 getPlayerPositionSystem.playersPos.clear();
                 server.send_tcp(ECS::FRAME_ID, net::Packet::serializeStruct(ECS::FrameId {frame}));
                 spawnEnnemySystem.enemyCount = countEnnemyAliveSystem.enemyCount;
+                spawnPowerUpSystem._powerUpCount = countPowerUpAliveSystem.powerUpCount;
             }
         }
     }

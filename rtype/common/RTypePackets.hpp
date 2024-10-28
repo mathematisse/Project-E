@@ -21,6 +21,7 @@ enum RTypePacketType : net::Packet::MsgType {
     PLAYER_STATE = 261,
     FRAME_ID = 262,
     PLAYER_HURT = 263,
+    NEW_POWERUP = 264,
 };
 
 // from client to server
@@ -68,6 +69,12 @@ struct PlayerConnectionSuccess {
 
 struct FrameId {
     size_t frame;
+};
+
+struct NewPowerUp {
+    float x;
+    float y;
+    size_t netId;
 };
 
 } // namespace ECS

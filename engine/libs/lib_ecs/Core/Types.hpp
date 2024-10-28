@@ -24,6 +24,7 @@ enum EntityStatusEnum : entity_status_t {
     ENT_NEEDS_INIT = 1,
     ENT_NEEDS_DESTROY = 2,
     ENT_ALIVE = 3,
+    ENT_CHANGE_WEAPON = 4,
 };
 } // namespace ECS::C
 

@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_RTYPE "Build R-Type" ON)
 
+option(BUILD_2NDGAME "Build 2ndGame" ON)
+
 enable_testing()
 
 if(UNIX)
@@ -56,4 +58,8 @@ add_subdirectory(engine)
 
 if(BUILD_RTYPE)
     add_subdirectory(rtype)
+endif()
+
+if(BUILD_2NDGAME)
+    add_subdirectory(2ndGame)
 endif()

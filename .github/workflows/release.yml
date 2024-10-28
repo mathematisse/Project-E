@@ -1,0 +1,29 @@
+name: Automated release
+
+# Runs when a pull request from dev is merged in main.
+# Creates a new release and publishes it to GitHub.
+# version name is the PR title.
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.event.pull_request.title }}" --repo="${{ github.repository }}" --title "${{ github.event.pull_request.title }}" --generate-notes

@@ -15,6 +15,7 @@
 #include "NetworkManager.hpp"
 #include "lib_net/Context.hpp"
 #include "raylib.h"
+#include <cstddef>
 #include <vector>
 
 namespace ECS::S {
@@ -128,6 +129,50 @@ protected:
         typename C::Type::Pool::Types &ctype, typename C::NetworkID::Pool::Types &cnetworkid,
         typename C::IsShooting::Pool::Types &cIsShooting
     ) override;
+};
+
+class SpawnPowerUpSystem : public S::AStatusMonoSystem<C::PositionPool, C::TypePool> {
+public:
+    explicit SpawnPowerUpSystem(
+        EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
+        net::RTypeServer &server, size_t maxPowerUp = 1
+    );
+    ~SpawnPowerUpSystem() override = default;
+
+    SpawnPowerUpSystem(const SpawnPowerUpSystem &other) = default;
+    SpawnPowerUpSystem(SpawnPowerUpSystem &&other) = default;
+    SpawnPowerUpSystem &operator=(const SpawnPowerUpSystem &other) = default;
+    SpawnPowerUpSystem &operator=(SpawnPowerUpSystem &&other) = default;
+
+    EntityManager &entityManager;
+    NetworkManager &networkManager;
+    size_t _powerUpCount = 0;
+    net::RTypeServer &server;
+
+protected:
+    size_t _spriteId = 0;
+    void _statusOperate(
+        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype
+    ) override;
+
+private:
+    size_t maxPowerUp = 0;
+};
+
+class CountPowerUpAliveSystem : public S::AStatusMonoSystem<C::TypePool> {
+public:
+    explicit CountPowerUpAliveSystem(size_t &powerUpCount);
+    ~CountPowerUpAliveSystem() override = default;
+
+    CountPowerUpAliveSystem(const CountPowerUpAliveSystem &other) = default;
+    CountPowerUpAliveSystem(CountPowerUpAliveSystem &&other) = default;
+    CountPowerUpAliveSystem &operator=(const CountPowerUpAliveSystem &other) = default;
+    CountPowerUpAliveSystem &operator=(CountPowerUpAliveSystem &&other) = default;
+
+    size_t powerUpCount = 0;
+
+protected:
+    void _statusOperate(C::TypePool::Types &ctype) override;
 };
 
 } // namespace ECS::S

@@ -158,9 +158,21 @@ void ColliderSystem::_innerOperate(
         collide = true;
     }
 
-    if (collide) {
-        healthA -= 1;
-        healthB -= 1;
+    if (typeA == SquareType::POWERUP || typeB == SquareType::POWERUP) {
+        if (typeA == SquareType::PLAYER || typeB == SquareType::PLAYER) {
+            if (typeA == SquareType::POWERUP && collide) {
+                healthA = 0;
+                healthB += 50;
+            } else if (typeB == SquareType::POWERUP && collide) {
+                healthB = 0;
+                healthA += 50;
+            }
+        }
+    } else {
+        if (collide) {
+            healthA -= 1;
+            healthB -= 1;
+        }
     }
 
     // Set flags to destroy entities
@@ -190,6 +202,68 @@ void GetPlayerPositionSystem::_innerOperate(
     }
     auto [x, y] = cposition;
     playersPos.push_back({x, y});
+}
+
+ChangePlayerWeaponSystem::ChangePlayerWeaponSystem():
+    AStatusMonoSystem(false, C::ENT_ALIVE)
+{
+}
+
+void ChangePlayerWeaponSystem::_statusOperate(
+    C::EntityStatusPool::Types &cEntityStatus, C::TypePool::Types &ctype,
+    C::HealthPool::Types &cHealth, C::WeaponPool::Types &cweapon
+)
+{
+    auto [type] = ctype;
+    if (type != SquareType::PLAYER) {
+        return;
+    }
+    auto [status] = cEntityStatus;
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    auto [health] = cHealth;
+    if (health < 50) {
+        return;
+    }
+    auto [weapon] = cweapon;
+    if (weapon == WeaponType::BULLET) {
+        weapon = WeaponType::BIG_SHOT;
+    } else {
+        weapon = WeaponType::BULLET;
+    }
+    health -= 50;
+}
+
+ChangePlayerWeaponSystem::ChangePlayerWeaponSystem():
+    AStatusMonoSystem(false, C::ENT_ALIVE)
+{
+}
+
+void ChangePlayerWeaponSystem::_statusOperate(
+    C::EntityStatusPool::Types &cEntityStatus, C::TypePool::Types &ctype,
+    C::HealthPool::Types &cHealth, C::WeaponPool::Types &cweapon
+)
+{
+    auto [type] = ctype;
+    if (type != SquareType::PLAYER) {
+        return;
+    }
+    auto [status] = cEntityStatus;
+    if (status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    auto [health] = cHealth;
+    if (health < 50) {
+        return;
+    }
+    auto [weapon] = cweapon;
+    if (weapon == WeaponType::BULLET) {
+        weapon = WeaponType::BIG_SHOT;
+    } else {
+        weapon = WeaponType::BULLET;
+    }
+    health -= 50;
 }
 
 } // namespace ECS::S
