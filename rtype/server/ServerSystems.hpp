@@ -131,18 +131,13 @@ protected:
     ) override;
 };
 
-class SpawnPowerUpSystem : public S::AStatusMonoSystem<C::PositionPool, C::TypePool> {
+class SpawnPowerUpSystem : public S::AMonoSystem<C::Position::Pool, C::Type::Pool> {
 public:
     explicit SpawnPowerUpSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
         net::RTypeServer &server, size_t maxPowerUp = 1
     );
     ~SpawnPowerUpSystem() override = default;
-
-    SpawnPowerUpSystem(const SpawnPowerUpSystem &other) = default;
-    SpawnPowerUpSystem(SpawnPowerUpSystem &&other) = default;
-    SpawnPowerUpSystem &operator=(const SpawnPowerUpSystem &other) = default;
-    SpawnPowerUpSystem &operator=(SpawnPowerUpSystem &&other) = default;
 
     EntityManager &entityManager;
     NetworkManager &networkManager;
@@ -151,28 +146,23 @@ public:
 
 protected:
     size_t _spriteId = 0;
-    void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype
+    void _innerOperate(
+        typename C::Position::Pool::Types &cposition, typename C::Type::Pool::Types &ctype
     ) override;
 
 private:
     size_t maxPowerUp = 0;
 };
 
-class CountPowerUpAliveSystem : public S::AStatusMonoSystem<C::TypePool> {
+class CountPowerUpAliveSystem : public S::AMonoSystem<C::Type::Pool> {
 public:
     explicit CountPowerUpAliveSystem(size_t &powerUpCount);
     ~CountPowerUpAliveSystem() override = default;
 
-    CountPowerUpAliveSystem(const CountPowerUpAliveSystem &other) = default;
-    CountPowerUpAliveSystem(CountPowerUpAliveSystem &&other) = default;
-    CountPowerUpAliveSystem &operator=(const CountPowerUpAliveSystem &other) = default;
-    CountPowerUpAliveSystem &operator=(CountPowerUpAliveSystem &&other) = default;
-
     size_t powerUpCount = 0;
 
 protected:
-    void _statusOperate(C::TypePool::Types &ctype) override;
+    void _innerOperate(C::Type::Pool::Types &ctype) override;
 };
 
 } // namespace ECS::S

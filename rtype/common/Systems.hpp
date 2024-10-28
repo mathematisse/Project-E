@@ -77,20 +77,15 @@ protected:
 };
 
 class ChangePlayerWeaponSystem
-    : public S::AStatusMonoSystem<C::EntityStatusPool, C::TypePool, C::HealthPool, C::WeaponPool> {
+    : public S::AMonoSystem<C::Type::Pool, C::Health::Pool, C::Weapon::Pool> {
 public:
-    explicit ChangePlayerWeaponSystem();
+    ChangePlayerWeaponSystem() = default;
     ~ChangePlayerWeaponSystem() override = default;
 
-    ChangePlayerWeaponSystem(const ChangePlayerWeaponSystem &other) = default;
-    ChangePlayerWeaponSystem(ChangePlayerWeaponSystem &&other) = default;
-    ChangePlayerWeaponSystem &operator=(const ChangePlayerWeaponSystem &other) = default;
-    ChangePlayerWeaponSystem &operator=(ChangePlayerWeaponSystem &&other) = default;
-
 protected:
-    void _statusOperate(
-        typename C::EntityStatusPool::Types &cEntityStatus, typename C::TypePool::Types &ctype,
-        typename C::HealthPool::Types &cHealth, typename C::WeaponPool::Types &cweapon
+    void _innerOperate(
+        typename C::Type::Pool::Types &ctype, typename C::Health::Pool::Types &cHealth,
+        typename C::Weapon::Pool::Types &cweapon
     ) override;
 };
 

@@ -304,7 +304,6 @@ SpawnPowerUpSystem::SpawnPowerUpSystem(
     EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
     net::RTypeServer &server, size_t maxPowerUp
 ):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
     entityManager(entityManager),
     networkManager(networkManager),
     server(server),
@@ -313,13 +312,13 @@ SpawnPowerUpSystem::SpawnPowerUpSystem(
 {
 }
 
-void SpawnPowerUpSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::TypePool::Types &ctype
+void SpawnPowerUpSystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Type::Pool::Types &ctype
 )
 {
     auto [type] = ctype;
 
-    if (type != SquareType::PLAYER) {
+    if (type != GameEntityType::PLAYER) {
         return;
     }
     if (powerupcount >= 1) {
@@ -330,38 +329,20 @@ void SpawnPowerUpSystem::_statusOperate(
         return;
     }
     auto [x, y] = cposition;
-    auto powerUps = entityManager.createEntities("Square", need_to_spawn, ECS::C::ENT_ALIVE);
 
-    for (const auto &entity : powerUps) {
-        auto ref = entityManager.getEntity(entity);
-
-        auto *square_powerUp = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-        if (square_powerUp == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-            return;
-        }
-        float _x = x + 500 + std::rand() % (int) (x + 1000);
-        float _y = 100 + std::rand() % 800;
-        square_powerUp->getType()->set<0>(SquareType::POWERUP);
-        square_powerUp->getSize()->set<0>(80);
-        square_powerUp->getSize()->set<1>(80);
-        square_powerUp->getSize()->set<2>(90);
-        square_powerUp->getPosition()->set<0>(_x);
-        square_powerUp->getPosition()->set<1>(_y);
-        square_powerUp->getSprite()->set<0>(_spriteId);
-        square_powerUp->getSprite()->set<2>(80.0F);
-        square_powerUp->getSprite()->set<3>(80.0F);
-        square_powerUp->getHealth()->set<0>(1);
-        square_powerUp->getVelocity()->set<0>(0.0F);
-        square_powerUp->getVelocity()->set<1>(0.0F);
-        square_powerUp->getVelocity()->set<2>(0.0F);
-        square_powerUp->getCanShoot()->set<0>(false);
-        square_powerUp->getColor()->set<0>(255);
-        square_powerUp->getColor()->set<1>(255);
-        square_powerUp->getColor()->set<2>(0);
-
+    for (auto powerUp : entityManager.createEntities<ECS::E::BaseEntity>(need_to_spawn)) {
+        float _x = x + 500.0F + (float) (std::rand() % ((int) x + 1000));
+        float _y = 100.0F + (float) (std::rand() % 800);
+        powerUp.setType({GameEntityType::POWERUP});
+        powerUp.setSize({80, 80});
+        powerUp.setRotation({90});
+        powerUp.setPosition({_x, _y});
+        powerUp.setHealth({1});
+        powerUp.setVelocity({0.0F, 0.0F});
+        powerUp.setCanShoot({false, 0.0F, 0.0F});
+        powerUp.setColor({255, 255, 0, 255});
         auto _netId = networkManager.getnewNetID();
-        square_powerUp->getNetworkID()->set<0>(_netId);
+        powerUp.setNetworkID({_netId});
 
         server.send_tcp(
             RTypePacketType::NEW_POWERUP, net::Packet::serializeStruct(NewPowerUp {_x, _y, _netId})
@@ -371,15 +352,14 @@ void SpawnPowerUpSystem::_statusOperate(
 }
 
 CountPowerUpAliveSystem::CountPowerUpAliveSystem(size_t &powerUpCount):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
     powerUpCount(powerUpCount)
 {
 }
 
-void CountPowerUpAliveSystem::_statusOperate(C::TypePool::Types &ctype)
+void CountPowerUpAliveSystem::_innerOperate(C::Type::Pool::Types &ctype)
 {
     auto [type] = ctype;
-    if (type == SquareType::POWERUP) {
+    if (type == GameEntityType::POWERUP) {
         powerUpCount++;
     }
 }

@@ -218,7 +218,7 @@ public:
 
     static constexpr const char *componentName = Name;
 
-    void deleteEverything()
+    void deleteEverything() override
     {
         std::apply(
             [](auto &...pools) {
