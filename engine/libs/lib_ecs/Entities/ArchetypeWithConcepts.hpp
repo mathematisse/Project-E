@@ -7,18 +7,20 @@
 
 #pragma once
 
-#include "lib_ecs/Entities/AArchetypes.hpp"
+#include "lib_ecs/Entities/AArchetypeVal.hpp"
+#include "lib_ecs/Entities/AArchetypeRef.hpp"
+#include "lib_ecs/Entities/AArchetypePool.hpp"
 #include <concepts>
 
 namespace ECS::E {
 
-template<typename T, typename ComponentType, size_t N>
-concept ArchetypeValWithComponentConcept = std::derived_from<T, AArchetypeVal<N>>;
+template<typename T, typename ComponentType>
+concept ArchetypeValWithComponentConcept = std::derived_from<T, AArchetypeVal>;
 
-template<typename T, typename ComponentType, size_t N>
-concept ArchetypeRefWithComponentConcept = std::derived_from<T, AArchetypeRef<N>>;
+template<typename T, typename ComponentType>
+concept ArchetypeRefWithComponentConcept = std::derived_from<T, AArchetypeRef>;
 
-template<typename T, typename ComponentType, size_t N>
-concept ArchetypePoolWithComponentConcept = std::derived_from<T, AArchetypePool<N>>;
+template<typename T, typename ComponentType>
+concept ArchetypePoolWithComponentConcept = std::derived_from<T, AArchetypePool>;
 
 } // namespace ECS::E

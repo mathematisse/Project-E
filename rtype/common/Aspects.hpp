@@ -20,12 +20,13 @@
 
 namespace ECS::E {
 
-using DecorEntityAspect = Aspect<std::tuple<C::Type>, std::tuple<SpriteEntityAspect>>;
-using AnimatedDecorEntityAspect = Aspect<std::tuple<C::Type>, std::tuple<AnimatedEntityAspect>>;
+using DecorEntityAspect = Aspect<std::tuple<C::ArchType>, std::tuple<SpriteEntityAspect>>;
+using AnimatedDecorEntityAspect = Aspect<std::tuple<C::ArchType>, std::tuple<AnimatedEntityAspect>>;
 
 using BaseEntityAspect = Aspect<
     std::tuple<
-        C::Color, C::Type, C::NetworkID, C::CanShoot, C::IsShooting, C::Health, C::Weapon, C::Size>,
+        C::ArchColor, C::ArchType, C::ArchNetworkID, C::ArchCanShoot, C::ArchIsShooting,
+        C::ArchHealth, C::ArchWeapon, C::ArchSize>,
     std::tuple<DynamicEntityAspect>>;
 
 using GameEntityAspect = Aspect<std::tuple<>, std::tuple<BaseEntityAspect, SpriteEntityAspect>>;

@@ -53,7 +53,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
             enemy.setWeapon({WeaponType::BIG_SHOT});
             enemy.setSize({180, 120});
             enemy.setAnimatedSprite({frigateSpriteId, 6, 0, 0.0F});
-            enemy.setVelocity({0.0F, 0.0F});
+            enemy.setVelocity();
             enemy.setType({GameEntityType::ENEMY});
             enemy.setRotation({100.0F});
             enemy.setColor({255, 0, 0, 255});
@@ -70,7 +70,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
             enemy.setSize({80, 80});
             enemy.setSprite({enemySpriteId});
             enemy.setRotation({90});
-            enemy.setVelocity({0.0F, 0.0F});
+            enemy.setVelocity();
             enemy.setType({GameEntityType::ENEMY});
             enemy.setRotation({100.0F});
             enemy.setColor({255, 0, 0, 255});

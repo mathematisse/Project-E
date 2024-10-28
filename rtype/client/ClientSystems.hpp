@@ -9,7 +9,7 @@
 #include "NetworkManager.hpp"
 #include "spatial2d/Components.hpp"
 #include "RTypePackets.hpp"
-#include "lib_ecs/Core/PureComponents.hpp"
+#include "lib_ecs/Core/RawComponents.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "raylib.h"

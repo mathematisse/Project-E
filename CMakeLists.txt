@@ -29,8 +29,8 @@ endif()
 
 if(ENABLE_ASAN)
     message(STATUS "AddressSanitizer enabled")
-    add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address)
+    add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope)
+    add_link_options(-fsanitize=address -fsanitize-address-use-after-scope)
 endif()
 
 if(ENABLE_UBSAN)

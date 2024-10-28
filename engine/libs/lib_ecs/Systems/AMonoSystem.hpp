@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include "lib_ecs/Core/PureComponents.hpp"
-#include "lib_ecs/Entities/IArchetypes.hpp"
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 

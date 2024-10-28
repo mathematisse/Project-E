@@ -8,7 +8,6 @@
 #pragma once
 
 #include "lib_ecs/Components/IComponentPool.hpp"
-#include "lib_ecs/Entities/IArchetypes.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
 #include "lib_log/log.hpp"

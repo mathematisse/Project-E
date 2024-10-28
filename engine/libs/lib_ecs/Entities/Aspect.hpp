@@ -7,10 +7,14 @@
 
 #pragma once
 
-#include "lib_ecs/Core/PureComponents.hpp"
 #include "lib_ecs/Utils/TupConcat.hpp"
 #include "lib_ecs/Utils/TypeSet.hpp"
 #include <tuple>
+
+namespace ECS::C {
+class ArchEntityStatus;
+class ArchChunkPos;
+}
 
 namespace ECS::E {
 
@@ -27,7 +31,7 @@ public:
     // Concatenate FlattenedAspectComponents and TComps into AllComponents
     using AllComponents = TUPSET(TUPCAT(FlattenedAspectComponents, std::tuple<TComps...>));
 
-    using _baseComponents = std::tuple<C::EntityStatus, C::ChunkPos>;
+    using _baseComponents = std::tuple<C::ArchEntityStatus, C::ArchChunkPos>;
 
     using ArchComponents = TUPSET(TUPCAT(_baseComponents, AllComponents));
 };

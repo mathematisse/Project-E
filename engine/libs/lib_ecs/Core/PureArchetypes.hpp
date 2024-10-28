@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "lib_ecs/Core/PureComponents.hpp"
 #include "lib_ecs/Core/ArchetypeMaker.hpp"
+#include "lib_ecs/Core/RawArchComponents.hpp"
 #include "lib_ecs/Entities/Aspect.hpp"
 #include <tuple>
 
 namespace ECS::E {
 
-using EntrPtrAspect = Aspect<std::tuple<ECS::C::EntityPoolId>>;
+using EntrPtrAspect = Aspect<std::tuple<ECS::C::ArchEntityPoolId>>;
 
 } // namespace ECS::E
 

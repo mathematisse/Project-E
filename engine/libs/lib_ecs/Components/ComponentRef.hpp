@@ -30,7 +30,21 @@ public:
     {
     }
 
-    ~ComponentRef() override = default;
+    ~ComponentRef() override {
+        // do nothing
+    };
+
+    // move constructor
+    ComponentRef(ComponentRef &&other) noexcept:
+        _components(std::move(other._components))
+    {
+    }
+
+    // copy constructor
+    ComponentRef(const ComponentRef &other):
+        _components(other._components)
+    {
+    }
 
     /**
      * @brief Get the component value pointer at the specified index.
@@ -75,7 +89,10 @@ public:
         set(ref._components, std::index_sequence_for<Ts...> {});
     }
 
-    void set(ComponentVal<Ts...> val) { set(val._values, std::index_sequence_for<Ts...> {}); }
+    void set(const ComponentVal<Ts...> &val)
+    {
+        set(val._values, std::index_sequence_for<Ts...> {});
+    }
 
     template<std::size_t... Is>
     void set(const std::tuple<Ts *...> &components, std::index_sequence<Is...> /*unused*/)

@@ -10,15 +10,15 @@
 #include "lib_ecs/Components/ComponentRef.hpp"
 #include "lib_ecs/Components/ComponentVal.hpp"
 #include "lib_ecs/Components/IComponentPool.hpp"
-#include "lib_ecs/Components/ComponentConcept.hpp"
-#include "lib_ecs/Core/PureComponents.hpp"
+#include "lib_ecs/Components/ArchComponentConcept.hpp"
+#include "lib_ecs/Core/RawComponents.hpp"
 #include "lib_ecs/Core/Types.hpp"
 #include "lib_ecs/Utils/TupleClass.hpp"
 
 namespace ECS::E {
 
 template<typename T, typename... TComps>
-concept ArchetypeConcept = (C::ComponentConcept<TComps> && ...
+concept ArchetypeConcept = (C::ArchComponentConcept<TComps> && ...
                            ) && // Check each component type conforms to ComponentConcept
     requires {
         // Type aliases for component-related types
@@ -26,18 +26,19 @@ concept ArchetypeConcept = (C::ComponentConcept<TComps> && ...
         typename T::ValTypes;
         typename T::RefTypes;
         typename T::PoolTypes;
-        typename T::ArchValTypes;
-        typename T::ArchRefTypes;
-        typename T::ArchPoolTypes;
+        // typename T::ArchValTypes;
+        // typename T::ArchRefTypes;
+        // typename T::ArchPoolTypes;
 
         // Ensure type aliases are correctly defined as tuples of the nested types
         requires std::same_as<typename T::ComponentTypes, std::tuple<TComps...>>;
         requires std::same_as<typename T::ValTypes, std::tuple<typename TComps::Val...>>;
         requires std::same_as<typename T::RefTypes, std::tuple<typename TComps::Ref...>>;
         requires std::same_as<typename T::PoolTypes, std::tuple<typename TComps::Pool...>>;
-        requires std::same_as<typename T::ArchValTypes, std::tuple<typename TComps::ArchVal...>>;
-        requires std::same_as<typename T::ArchRefTypes, std::tuple<typename TComps::ArchRef...>>;
-        requires std::same_as<typename T::ArchPoolTypes, std::tuple<typename TComps::ArchPool...>>;
+        // requires std::same_as<typename T::ArchValTypes, std::tuple<typename TComps::ArchVal...>>;
+        // requires std::same_as<typename T::ArchRefTypes, std::tuple<typename TComps::ArchRef...>>;
+        // requires std::same_as<typename T::ArchPoolTypes, std::tuple<typename
+        // TComps::ArchPool...>>;
     };
 
 template<typename T, typename TTupClass, typename TAccessor>

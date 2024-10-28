@@ -52,7 +52,7 @@ void SpawnEnnemySystem::_innerOperate(
     }
     auto [x, y] = cposition;
 
-    for (auto &enemy : entityManager.createEntities<E::BaseEntity>(need_to_spawn)) {
+    for (auto enemy : entityManager.createEntities<E::BaseEntity>(need_to_spawn)) {
         int rand = std::rand() % 5;
         if (rand == 2) {
             enemy.setHealth({5});
@@ -63,7 +63,7 @@ void SpawnEnnemySystem::_innerOperate(
             enemy.setWeapon({WeaponType::BULLET});
             enemy.setSize({80, 80});
         }
-        enemy.setVelocity({0.0F, 0.0F});
+        enemy.setVelocity();
         enemy.setType({GameEntityType::ENEMY});
         enemy.setColor({255, 0, 0, 255});
         enemy.setRotation({90});
@@ -293,7 +293,7 @@ void MovePlayersSystem::_statusOperate(
         if (pNetId == netId) {
             vX = pState.x * 300;
             vY = pState.y * 300;
-            isShooting = static_cast<char>(static_cast<int>(pState.shoot) != 0);
+            isShooting = (pState.shoot) != 0;
         }
     }
 }

@@ -29,6 +29,23 @@ public:
     {
     }
 
+    static constexpr const ComponentVal Zero() { return ComponentVal(std::tuple<Ts...> {}); }
+
+    ComponentVal():
+        _values(std::tuple<Ts...> {})
+    {
+    }
+
+    explicit ComponentVal(Ts *...components):
+        _values(*components...)
+    {
+    }
+
+    explicit ComponentVal(const Ts *...components):
+        _values(*components...)
+    {
+    }
+
     // tuple versions
     explicit ComponentVal(std::tuple<Ts...> components):
         _values(components)

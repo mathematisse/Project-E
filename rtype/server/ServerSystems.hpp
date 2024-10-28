@@ -9,7 +9,7 @@
 #include "RTypeServer.hpp"
 #include "Components.hpp"
 #include "spatial2d/Components.hpp"
-#include "lib_ecs/Core/PureComponents.hpp"
+#include "lib_ecs/Core/RawComponents.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "NetworkManager.hpp"

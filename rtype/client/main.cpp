@@ -49,7 +49,7 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::chunkPos_t &pl
 //     auto enemies = _eM.getEntities(ECS::C::ENT_ALIVE, ECS::C::ENT_ENEMY);
 //     for (const auto &entity : enemies) {
 //         auto ref = _eM.getEntity(entity);
-//         auto square_enemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+//         auto square_enemy = static_cast<ECS::E::SquareRef *>(ref.get());
 //         if (!square_enemy) {
 //             std::cerr << "Failed to cast IArchetypeRef to SquareRef" << std::endl;
 //             return {};
@@ -86,7 +86,7 @@ void update_player_sprite(
 void setup_decor(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
 {
     size_t i = 0;
-    for (auto &background : _eM.createEntities<ECS::E::DecorEntity, 3>()) {
+    for (auto background : _eM.createEntities<ECS::E::DecorEntity, 3>()) {
         background.setType({GameEntityType::BACKGROUND});
         background.setSize({3000, WINDOW_HEIGHT});
         background.setSprite({assetsLoader.get_asset(BACKGROUND_PATH).id});
@@ -94,7 +94,7 @@ void setup_decor(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
         i++;
     }
     i = 0;
-    for (auto &ground : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
+    for (auto ground : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
         ground.setType({GameEntityType::WALL});
         ground.setSize({80, 100});
         ground.setPosition({(float) i * 80.0F, WINDOW_HEIGHT - 100});
@@ -102,7 +102,7 @@ void setup_decor(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
         i++;
     }
     i = 0;
-    for (auto &ceiling : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
+    for (auto ceiling : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
         ceiling.setType({GameEntityType::WALL});
         ceiling.setSize({80, 100});
         ceiling.setPosition({(float) i * 80.0F, 0});
@@ -119,8 +119,8 @@ ECS::Chunks::chunkPos_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asse
     engine.setRotation({90});
     engine.setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
     engine.setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
-    engine.setTimer({0.0F});
-    engine.setNetworkID(ECS::C::NetworkID::Val(0));
+    engine.setTimer();
+    engine.setNetworkID();
 
     auto player = _eM.createEntity<ECS::E::GameEntity>();
     player.setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
@@ -131,7 +131,7 @@ ECS::Chunks::chunkPos_t setup_player(ECS::EntityManager &_eM, AssetsLoader &asse
     player.setRotation({90});
     player.setSprite({assetsLoader.get_asset(P1FR).id});
     player.setHealth({4});
-    player.setNetworkID(ECS::C::NetworkID::Val {0});
+    player.setNetworkID();
 
     return player.getChunkPosVal();
 }
@@ -524,7 +524,7 @@ int main(int ac, char ** /*av*/)
             engine.setRotation({90});
             engine.setPosition({playerState.x, playerState.y});
             engine.setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
-            engine.setTimer({0.0F});
+            engine.setTimer();
             engine.setNetworkID(ECS::C::NetworkID::Val {playerState.netId});
 
             auto player = _eM.createEntity<ECS::E::GameEntity>();
@@ -549,5 +549,7 @@ int main(int ac, char ** /*av*/)
     UnloadMusicStream(game_music);
     CloseWindow();
     CloseAudioDevice();
+
+    _eM.deleteEverything();
     return 0;
 }

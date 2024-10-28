@@ -6,7 +6,7 @@
 */
 
 #include "Components.hpp"
-#include "lib_ecs/Core/PureComponents.hpp"
+#include "lib_ecs/Core/RawComponents.hpp"
 #include "spatial2d/Components.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"

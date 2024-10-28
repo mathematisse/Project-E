@@ -8,7 +8,6 @@
 #pragma once
 
 #include "core/Components.hpp"
-#include "lib_ecs/Core/PureComponents.hpp"
 #include "lib_ecs/Entities/Aspect.hpp"
 #include "render/Components.hpp"
 #include "spatial2d/Aspects.hpp"
@@ -17,8 +16,9 @@
 
 namespace ECS::E {
 
-using AnimatedEntityAspect =
-    Aspect<std::tuple<C::AnimatedSprite, C::Timer, C::Size>, std::tuple<StaticEntityAspect>>;
-using SpriteEntityAspect = Aspect<std::tuple<C::Sprite, C::Size>, std::tuple<StaticEntityAspect>>;
+using AnimatedEntityAspect = Aspect<
+    std::tuple<C::ArchAnimatedSprite, C::ArchTimer, C::ArchSize>, std::tuple<StaticEntityAspect>>;
+using SpriteEntityAspect =
+    Aspect<std::tuple<C::ArchSprite, C::ArchSize>, std::tuple<StaticEntityAspect>>;
 
 } // namespace ECS::E

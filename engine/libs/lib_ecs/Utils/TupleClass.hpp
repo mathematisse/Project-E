@@ -24,6 +24,11 @@ public:
     {
     }
 
+    explicit TupleClass(TElems &...elems):
+        _elems(elems...)
+    {
+    }
+
     explicit TupleClass(const std::tuple<TElems...> &elems):
         _elems(elems)
     {

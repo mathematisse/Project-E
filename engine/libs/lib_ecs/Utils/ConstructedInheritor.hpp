@@ -7,38 +7,16 @@
 
 #pragma once
 
-#include <cstddef>
+#pragma once
+
 #include <tuple>
+#include <utility>
 
-template<typename... Args>
-struct ConstructedInheritorImpl;
-
-template<typename First, typename... Rest>
-struct ConstructedInheritorImpl<First, Rest...> : First, ConstructedInheritorImpl<Rest...> {
-    explicit ConstructedInheritorImpl(First first, Rest... rest):
-        First(first),
-        ConstructedInheritorImpl<Rest...>(rest...)
+#include <functional> // For std::reference_wrapper
+template<typename... TArchetypePools>
+struct TupConstructedInheritor : TArchetypePools... {
+    explicit TupConstructedInheritor(std::tuple<TArchetypePools *...> pointers):
+        TArchetypePools(*std::get<TArchetypePools *>(pointers))...
     {
     }
 };
-
-template<>
-struct ConstructedInheritorImpl<> {
-    ConstructedInheritorImpl() = default;
-};
-
-template<typename... Args>
-using ConstructedInheritor = ConstructedInheritorImpl<Args...>;
-
-#define CONSTRUCTED_INHERITANCE(Ts) ConstructedInheritor<Ts...>
-
-// helper to use with a tuple instead of variadic template
-template<typename Tuple>
-struct TupConstructedInheritor;
-
-template<typename... Types>
-struct TupConstructedInheritor<std::tuple<Types...>> {
-    using type = ConstructedInheritor<Types...>;
-};
-
-#define TUP_CONSTRUCTED_INHERITANCE(Tuple) typename TupConstructedInheritor<Tuple>::type

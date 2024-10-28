@@ -8,32 +8,24 @@
 #pragma once
 
 #include "lib_ecs/Components/ComponentRef.hpp"
-#include "lib_ecs/Entities/AArchetypes.hpp"
+#include "lib_ecs/Entities/BaseArchetype.hpp"
+#include "lib_ecs/Entities/AArchetypeRef.hpp"
 #include <tuple>
 
 namespace ECS::E {
 
 template<typename... TComps>
-    requires(C::ComponentConcept<TComps> && ...)
-class ArchetypeRef : public BASE_ARCHETYPE(TComps, Ref),
-                     virtual public AArchetypeRef<sizeof...(TComps)> {
+// requires(C::ArchComponentConcept<TComps> && ...)
+class ArchetypeRef : public BaseArchetypeRef<TComps...>, public AArchetypeRef {
 public:
     ArchetypeRef() = delete;
-    // ArchetypeRef() : BASE_ARCHETYPE(TComps, Ref)()
-    // {
-    //     this->_interfaces = this->template getInterfacePtr<ECS ::C ::IComponentRef>();
-    // }
-    explicit ArchetypeRef(typename TComps::Ref... input):
-        AArchetypeRef<sizeof...(TComps)>(this->template getInterfacePtr<ECS ::C ::IComponentRef>()),
-        BASE_ARCHETYPE(TComps, Ref)(std::make_tuple(input...))
+    explicit ArchetypeRef(typename TComps::Comp::Ref... input):
+        BaseArchetypeRef<TComps...>(input...)
     {
-        this->_interfaces = this->template getInterfacePtr<ECS::C::IComponentRef>();
     }
-    explicit ArchetypeRef(std::tuple<typename TComps::Ref...> input):
-        AArchetypeRef<sizeof...(TComps)>(this->template getInterfacePtr<ECS ::C ::IComponentRef>()),
-        BASE_ARCHETYPE(TComps, Ref)(input)
+    explicit ArchetypeRef(std::tuple<typename TComps::Comp::Ref...> input):
+        BaseArchetypeRef<TComps...>(input)
     {
-        this->_interfaces = this->template getInterfacePtr<ECS::C::IComponentRef>();
     }
     ~ArchetypeRef() override = default;
 

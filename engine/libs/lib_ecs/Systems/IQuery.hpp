@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "lib_ecs/Entities/IArchetypes.hpp"
+#include "lib_ecs/Entities/IArchetypePool.hpp"
 
 namespace ECS::S {
 

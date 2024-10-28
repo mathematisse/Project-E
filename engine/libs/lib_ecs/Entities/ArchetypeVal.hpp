@@ -7,28 +7,23 @@
 
 #pragma once
 
-#include "lib_ecs/Components/ComponentVal.hpp"
-#include "lib_ecs/Entities/AArchetypes.hpp"
+#include "lib_ecs/Entities/BaseArchetype.hpp"
+#include "lib_ecs/Entities/AArchetypeVal.hpp"
 #include <tuple>
 
 namespace ECS::E {
 
 template<typename... TComps>
-    requires(C::ComponentConcept<TComps> && ...)
-class ArchetypeVal : public BASE_ARCHETYPE(TComps, Val),
-                     virtual public AArchetypeVal<sizeof...(TComps)> {
+// requires(C::ArchComponentConcept<TComps> && ...)
+class ArchetypeVal : public BaseArchetypeVal<TComps...>, public AArchetypeVal {
 public:
     ArchetypeVal():
-        AArchetypeVal<sizeof...(TComps)>(this->template getInterfacePtr<ECS ::C ::IComponentVal>()),
-        BASE_ARCHETYPE(TComps, Val)()
+        BaseArchetypeVal<TComps...>()
     {
-        this->_interfaces = this->template getInterfacePtr<ECS ::C ::IComponentVal>();
     }
     explicit ArchetypeVal(const TComps ::Val &...input):
-        AArchetypeVal<sizeof...(TComps)>(this->template getInterfacePtr<ECS ::C ::IComponentVal>()),
-        BASE_ARCHETYPE(TComps, Val)()
+        BaseArchetypeVal<TComps...>(input...)
     {
-        this->_interfaces = this->template getInterfacePtr<ECS ::C ::IComponentVal>();
     }
     ~ArchetypeVal() override = default;
 

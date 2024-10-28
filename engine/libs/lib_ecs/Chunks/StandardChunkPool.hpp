@@ -38,9 +38,9 @@ public:
      */
     ~StandardChunkPool()
     {
-        for (auto &chunk : this->_chunks) {
-            delete chunk;
-        }
+        // for (auto *chunk : this->_chunks) {
+        //     delete chunk;
+        // }
     }
 
     /**
@@ -53,6 +53,14 @@ public:
     void addChunk(size_t elemCount) override
     {
         this->_chunks.push_back(new StandardChunk<T>(elemCount));
+    }
+
+    void deleteEverything() override
+    {
+        for (auto *chunk : this->_chunks) {
+            delete chunk;
+        }
+        this->_chunks.clear();
     }
 };
 } // namespace ECS::Chunks
