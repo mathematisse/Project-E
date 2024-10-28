@@ -14,6 +14,7 @@
 namespace ECS::E {
 
 using StaticEntityAspect = Aspect<std::tuple<C::ArchPosition, C::ArchRotation>>;
+
 using DynamicEntityAspect =
     Aspect<std::tuple<C::ArchVelocity, C::ArchAcceleration>, std::tuple<StaticEntityAspect>>;
 

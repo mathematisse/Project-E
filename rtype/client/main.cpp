@@ -525,7 +525,7 @@ int main(int ac, char ** /*av*/)
             engine.setPosition({playerState.x, playerState.y});
             engine.setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
             engine.setTimer();
-            engine.setNetworkID(ECS::C::NetworkID::Val {playerState.netId});
+            engine.setNetworkID({playerState.netId});
 
             auto player = _eM.createEntity<ECS::E::GameEntity>();
             player.setPosition({playerState.x * 300.0F, playerState.y * 300.0F});
@@ -540,7 +540,7 @@ int main(int ac, char ** /*av*/)
             player.setRotation({90});
             player.setSprite({assetsLoader.get_asset(P2).id});
             player.setHealth({4});
-            player.setNetworkID(ECS::C::NetworkID::Val {playerState.netId});
+            player.setNetworkID({playerState.netId});
         }
         moveOtherPlayerSystem.playerStates.clear();
         destroyEntitiesSystem.entitiesDestroyed.clear();

@@ -103,5 +103,7 @@ public:
     virtual void setValueAtIndexes(std::span<chunkPos_t> indexes, const T &value) = 0;
 
     virtual void setValuesAtIndexes(std::span<chunkPos_t> indexes, const std::span<T> values) = 0;
+
+    virtual void deleteEverything() = 0;
 };
 } // namespace ECS::Chunks

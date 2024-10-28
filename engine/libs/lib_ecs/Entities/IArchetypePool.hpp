@@ -29,6 +29,8 @@ public:
 
     virtual C::EntityStatus::Pool getEntityStatusPoolCore() = 0;
     virtual C::ChunkPos::Pool getChunkPosPoolCore() = 0;
+
+    virtual void deleteEverything() = 0;
 };
 
 } // namespace ECS::E

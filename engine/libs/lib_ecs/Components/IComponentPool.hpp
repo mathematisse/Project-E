@@ -58,6 +58,8 @@ public:
     virtual void resetComponentAtIndex(const Chunks::chunkPos_t &index) = 0;
 
     virtual void resetComponentAtIndexes(const Chunks::cPosArr_t &indexes) = 0;
+
+    virtual void deleteEverything() = 0;
 };
 
 } // namespace ECS::C
