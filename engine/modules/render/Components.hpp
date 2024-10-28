@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_ecs/Core/ComponentMaker.hpp"
 #include <cstdint>
 
 DECLARE_COMPONENT(

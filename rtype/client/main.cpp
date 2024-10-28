@@ -1,4 +1,4 @@
-#include "DecorEntities.hpp"
+#include "Archetypes.hpp"
 #include "MainMenu.hpp"
 #include <cstdlib>
 #include <chrono>
@@ -6,17 +6,14 @@
 
 #include <iostream>
 #include <raylib.h>
+#include "NetworkManager.hpp"
 #include "core/Core.hpp"
 #include "lib_log/log.hpp"
 #include "raygui.h"
-#include <thread>
 #include "AssetsPath.hpp"
-#include "MainMenu.hpp"
 
 // ECS includes
 #include "lib_ecs/Chunks/ChunkPos.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include "GameEntities.hpp"
 #include "Systems.hpp"
 #include "ClientSystems.hpp"
 #include "DrawSystems.hpp"
@@ -40,19 +37,10 @@ void update_camera(Camera2D &camera, float dt)
     camera.target = {old.x + 80 * dt, WINDOW_HEIGHT / 2};
 }
 
-Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
+Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::chunkPos_t &playerPos)
 {
-    auto player = chunks;
-    if (player.empty()) {
-        return {0, 0};
-    }
-    auto ref = _eM.getEntity(player[0]);
-    auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-    if (!square_player) {
-        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-        return {0, 0};
-    }
-    return {*square_player->getPosition().get<0>(), *square_player->getPosition().get<1>()};
+    auto player = _eM.getEntity<ECS::E::GameEntity>(playerPos);
+    return {player.getPositionVal().get<0>(), player.getPositionVal().get<1>()};
 }
 
 // std::vector<Vector2> get_enemies_position(ECS::EntityManager &_eM)
@@ -63,7 +51,7 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chu
 //         auto ref = _eM.getEntity(entity);
 //         auto square_enemy = dynamic_cast<ECS::E::SquareRef *>(ref.get());
 //         if (!square_enemy) {
-//             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+//             std::cerr << "Failed to cast IArchetypeRef to SquareRef" << std::endl;
 //             return {};
 //         }
 //         enemiesPos.push_back(
@@ -74,170 +62,111 @@ Vector2 get_player_position(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chu
 //     return enemiesPos;
 // }
 
-char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
+bool player_is_alive(ECS::EntityManager &_eM, const ECS::Chunks::chunkPos_t &playerPos)
 {
-    auto player = chunks;
-    if (player.empty()) {
-        LOG_INFO("Player is dead");
-        return 0;
-    }
-    auto ref = _eM.getEntity(player[0]);
-    auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-    if (!square_player) {
-        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-        return 0;
-    }
-    return *square_player->getHealth().get<0>();
+    return _eM.getEntity<ECS::E::GameEntity>(playerPos).getHealthVal() > 0;
 }
 
 void update_player_sprite(
-    ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks, AssetsLoader &assetsLoader
+    ECS::EntityManager &_eM, const ECS::Chunks::chunkPos_t &playerPos, AssetsLoader &assetsLoader
 )
 {
-    auto player = chunks;
-    if (player.empty()) {
-        return;
-    }
-    auto ref = _eM.getEntity(player[0]);
-    auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-    if (!square_player) {
-        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-        return;
-    }
-    if (*square_player->getHealth().get<0>() == 1) {
-        square_player->setSprite({assetsLoader.get_asset(P1VD).id});
-    } else if (*square_player->getHealth().get<0>() == 2) {
-        square_player->setSprite({assetsLoader.get_asset(P1D).id});
-    } else if (*square_player->getHealth().get<0>() == 3) {
-        square_player->setSprite({assetsLoader.get_asset(P1SD).id});
-    } else if (*square_player->getHealth().get<0>() == 4) {
-        square_player->setSprite({assetsLoader.get_asset(P1FR).id});
+    auto player = _eM.getEntity<ECS::E::GameEntity>(playerPos);
+    if (player.getHealthVal() == 1) {
+        player.setSprite({assetsLoader.get_asset(P1VD).id});
+    } else if (player.getHealthVal() == 2) {
+        player.setSprite({assetsLoader.get_asset(P1D).id});
+    } else if (player.getHealthVal() == 3) {
+        player.setSprite({assetsLoader.get_asset(P1SD).id});
+    } else if (player.getHealthVal() == 4) {
+        player.setSprite({assetsLoader.get_asset(P1FR).id});
     }
 }
 
-void setup_decor(
-    ECS::EntityManager &_eM, NetworkManager &networkManager, AssetsLoader &assetsLoader
-)
+void setup_decor(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
 {
-
-    auto background = _eM.createEntities("DecorEntity", 3);
-    int i = -1;
-
-    for (const auto &entity : background) {
-        auto ref = _eM.getEntity(entity);
-
-        auto square_background = dynamic_cast<ECS::E::DecorEntityRef *>(ref.get());
-        if (!square_background) {
-            LOG_ERROR("Failed to cast IEntityRef to DecorEntityRef");
-            return;
-        }
-        square_background->setType({GameEntityType::BACKGROUND});
-        square_background->setSize({3000, WINDOW_HEIGHT});
-        square_background->setSprite({assetsLoader.get_asset(BACKGROUND_PATH).id});
-        square_background->setPosition({static_cast<float>(i * 3000), 0});
+    size_t i = 0;
+    for (auto &background : _eM.createEntities<ECS::E::DecorEntity, 3>()) {
+        background.setType({GameEntityType::BACKGROUND});
+        background.setSize({3000, WINDOW_HEIGHT});
+        background.setSprite({assetsLoader.get_asset(BACKGROUND_PATH).id});
+        background.setPosition({(float) i * 3000.0F, 0});
         i++;
     }
-
-    auto ground = _eM.createEntities("DecorEntity", 250);
-
     i = 0;
-    for (const auto &entity : ground) {
-        auto ref = _eM.getEntity(entity);
-
-        auto *square_ground = dynamic_cast<ECS::E::DecorEntityRef *>(ref.get());
-        if (!square_ground) {
-            LOG_ERROR("Failed to cast IEntityRef to DecorEntityRef");
-            return;
-        }
-        square_ground->setType({GameEntityType::WALL});
-        square_ground->setSize({80, 100});
-        square_ground->setPosition({(float) i * 80.0F, WINDOW_HEIGHT - 100});
-        square_ground->setSprite({assetsLoader.get_asset(FLOOR).id});
+    for (auto &ground : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
+        ground.setType({GameEntityType::WALL});
+        ground.setSize({80, 100});
+        ground.setPosition({(float) i * 80.0F, WINDOW_HEIGHT - 100});
+        ground.setSprite({assetsLoader.get_asset(FLOOR).id});
         i++;
     }
-
-    auto ceiling = _eM.createEntities("DecorEntity", 250);
-
     i = 0;
-    for (const auto &entity : ceiling) {
-        auto ref = _eM.getEntity(entity);
-
-        auto square_ceiling = dynamic_cast<ECS::E::DecorEntityRef *>(ref.get());
-        if (!square_ceiling) {
-            LOG_ERROR("Failed to cast IEntityRef to DecorEntityRef");
-            return;
-        }
-        square_ceiling->setType({GameEntityType::WALL});
-        square_ceiling->setSize({80, 100});
-        square_ceiling->setPosition({(float) i * 80.0F, 0});
-        square_ceiling->setSprite({assetsLoader.get_asset(CEILING).id});
+    for (auto &ceiling : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
+        ceiling.setType({GameEntityType::WALL});
+        ceiling.setSize({80, 100});
+        ceiling.setPosition({(float) i * 80.0F, 0});
+        ceiling.setSprite({assetsLoader.get_asset(CEILING).id});
         i++;
     }
 }
 
-ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
+ECS::Chunks::chunkPos_t setup_player(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
 {
-    auto engine = _eM.createEntities("GameAnimatedEntity", 1);
+    auto engine = _eM.createEntity<ECS::E::AnimatedGameEntity>();
+    engine.setType({GameEntityType::ENGINE});
+    engine.setSize({80, 80});
+    engine.setRotation({90});
+    engine.setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
+    engine.setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
+    engine.setTimer({0.0F});
+    engine.setNetworkID(ECS::C::NetworkID::Val(0));
 
-    for (const auto &entity : engine) {
-        auto ref = _eM.getEntity(entity);
+    auto player = _eM.createEntity<ECS::E::GameEntity>();
+    player.setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
+    player.setType({GameEntityType::LPLAYER});
+    player.setColor({255, 255, 255, 255});
+    player.setCanShoot({0, 0.3F, 0.0F});
+    player.setSize({80, 80});
+    player.setRotation({90});
+    player.setSprite({assetsLoader.get_asset(P1FR).id});
+    player.setHealth({4});
+    player.setNetworkID(ECS::C::NetworkID::Val {0});
 
-        auto *square_engine = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
-        if (square_engine == nullptr) {
-            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-            return {};
-        }
-        square_engine->setType({GameEntityType::ENGINE});
-        square_engine->setSize({80, 80});
-        square_engine->setRotation({90});
-        square_engine->setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
-        square_engine->setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
-        square_engine->setTimer({0.0F});
-        square_engine->setNetworkID({0});
-    }
-
-    auto player = _eM.createEntities("GameEntity", 1);
-
-    for (const auto &entity : player) {
-        auto ref = _eM.getEntity(entity);
-
-        auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-        if (square_player == nullptr) {
-            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-            return {};
-        }
-        square_player->setPosition({WINDOW_WIDTH / 4.0F, WINDOW_HEIGHT / 2.0F});
-        square_player->setType({GameEntityType::LPLAYER});
-        square_player->setColor({255, 255, 255, 255});
-        square_player->setCanShoot({0, 0.3F, 0.0F});
-        square_player->setSize({80, 80});
-        square_player->setRotation({90});
-        square_player->setSprite({assetsLoader.get_asset(P1FR).id});
-        square_player->setHealth({4});
-        square_player->setNetworkID({0});
-    }
-    return player;
+    return player.getChunkPosVal();
 }
 
-int main(int ac, char **av)
-{
-    LOG_SET_LEVEL(DEBUG);
-    LOG_SET_STREAM(std::cerr);
-    LOG_SET_FILE("rtype_client.log", true);
+#define SPATIAL2D_SYS_GROUP "SPATIAL2D"
 
+namespace engine::module {
+
+class RTypeModule : public IModule {
+protected:
+public:
+    RTypeModule() { }
+
+    void load(ECS::EntityManager &entityManager) override { }
+};
+
+}
+
+int main(int ac, char ** /*av*/)
+{
     if (ac != 1) {
         std::cerr << "Usage: ./rtype_client" << std::endl;
         return 1;
     }
+    LOG_SET_LEVEL(DEBUG);
+    LOG_SET_STREAM(std::cerr);
+    LOG_SET_FILE("rtype_client.log", true);
+    srand(time(NULL));
 
     Camera2D camera = {};
     init_camera(camera);
 
-    srand(time(NULL));
-    AssetsLoader assetsLoader;
     ECS::EntityManager _eM(FIXED_TIMESTEP);
-    ECS::S::MoveOtherPlayerSystem moveOtherPlayerSystem;
     ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
+    ECS::S::MoveOtherPlayerSystem moveOtherPlayerSystem;
     net::RTypeClient client(
         _eM, moveOtherPlayerSystem.playerStates, destroyEntitiesSystem.entitiesDestroyed,
         camera.target.x
@@ -247,17 +176,19 @@ int main(int ac, char **av)
     InitAudioDevice();
     SetTargetFPS(60);
 
+    AssetsLoader assetsLoader;
     assetsLoader.load_assets(paths);
 
-    client.ennemySpriteId = assetsLoader.get_asset(E1FC).id;
+    client.enemySpriteId = assetsLoader.get_asset(E1FC).id;
     client.frigateSpriteId = assetsLoader.get_asset(FRIGATE_1).id;
     client.bulletSpriteId = assetsLoader.get_asset(BASE_BULLET_PATH).id;
     client.bigShotSpriteId = assetsLoader.get_asset(BIG_SHOT_PATH).id;
 
     MainMenu mainMenu(client, assetsLoader);
 
-    if (!mainMenu.open())
+    if (!mainMenu.open()) {
         return 0;
+    }
     Texture2D loading_background = assetsLoader.get_asset(LOADING_BACKGROUND);
     Music loading_music = LoadMusicStream(assetsLoader.get_real_path(LOADING_MUSIC).c_str());
     Music game_music = LoadMusicStream(assetsLoader.get_real_path(GAME_MUSIC).c_str());
@@ -266,8 +197,6 @@ int main(int ac, char **av)
     SetMusicVolume(loading_music, mainMenu.settings.volume / 100.0f);
     SetMusicVolume(game_music, mainMenu.settings.volume / 100.0f);
     bool change_music = false;
-
-    NetworkManager networkManager;
 
     // Engine modules
     engine::module::Core mCore;
@@ -309,22 +238,22 @@ int main(int ac, char **av)
     }
 
     // Entity pools
-    ECS::E::DecorAnimatedEntityPool decorAnimatedEntityPool;
-    _eM.registerEntityPool(&decorAnimatedEntityPool);
-    ECS::E::DecorEntityPool decorEntityPool;
+    ECS::E::AnimatedDecorEntity::Pool animatedDecorEntityPool(RTYPE_ENTITY_POOL_SIZE);
+    _eM.registerEntityPool(&animatedDecorEntityPool);
+    ECS::E::DecorEntity::Pool decorEntityPool(RTYPE_ENTITY_POOL_SIZE);
     _eM.registerEntityPool(&decorEntityPool);
-    ECS::E::GameAnimatedEntityPool gameAnimatedEntityPool;
-    _eM.registerEntityPool(&gameAnimatedEntityPool);
-    ECS::E::GameEntityPool gameEntityPool;
+    ECS::E::AnimatedGameEntity::Pool animatedGameEntityPool(RTYPE_ENTITY_POOL_SIZE);
+    _eM.registerEntityPool(&animatedGameEntityPool);
+    ECS::E::GameEntity::Pool gameEntityPool(RTYPE_ENTITY_POOL_SIZE);
     _eM.registerEntityPool(&gameEntityPool);
 
-    setup_decor(_eM, networkManager, assetsLoader);
+    setup_decor(_eM, assetsLoader);
 
     auto player = setup_player(_eM, assetsLoader);
-    client.playerPos = player[0];
+    client.playerPos = player;
 
     Vector2 playerPosition = {0, 0};
-    char playerAlive = 1;
+    bool playerAlive = true;
 
     auto curr_time = std::chrono::steady_clock::now();
 
@@ -538,8 +467,9 @@ int main(int ac, char **av)
             BeginShaderMode(mainMenu.colorblindSimShader);
         }
 
-        if (client.started)
+        if (client.started) {
             update_camera(camera, dt);
+        }
         moveBackgroundSystem.cameraX = camera.target.x;
         update_player_sprite(_eM, player, assetsLoader);
 
@@ -588,48 +518,29 @@ int main(int ac, char **av)
             LOG_DEBUG(
                 "Creating player for player state and netid: " + std::to_string(playerState.netId)
             );
-            auto engine = _eM.createEntities("GameAnimatedEntity", 1);
-            for (const auto &entity : engine) {
-                auto ref = _eM.getEntity(entity);
+            auto engine = _eM.createEntity<ECS::E::AnimatedGameEntity>();
+            engine.setType({GameEntityType::ENGINE});
+            engine.setSize({80, 80});
+            engine.setRotation({90});
+            engine.setPosition({playerState.x, playerState.y});
+            engine.setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
+            engine.setTimer({0.0F});
+            engine.setNetworkID(ECS::C::NetworkID::Val {playerState.netId});
 
-                auto *square_engine = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
-                if (square_engine == nullptr) {
-                    LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-                    return 1;
-                }
-                square_engine->setType({GameEntityType::ENGINE});
-                square_engine->setSize({80, 80});
-                square_engine->setRotation({90});
-                square_engine->setPosition({playerState.x, playerState.y});
-                square_engine->setAnimatedSprite({assetsLoader.get_asset(ENGINE_1).id, 4, 0, 8.0F});
-                square_engine->setTimer({0.0F});
-                square_engine->setNetworkID({playerState.netId});
-            }
-            auto player = _eM.createEntities("GameEntity", 1);
-            for (const auto &entity : player) {
-                auto ref = _eM.getEntity(entity);
-
-                auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-                if (square_player == nullptr) {
-                    LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-                    return 1;
-                }
-                square_player->setPosition({playerState.x * 300.0F, playerState.y * 300.0F});
-                square_player->setVelocity({playerState.vx * 300.0F, playerState.vy * 200.0F});
-                square_player->setType({GameEntityType::PLAYER});
-                square_player->setColor({255, 255, 255, 255});
-                square_player->setWeapon({WeaponType::BIG_SHOT});
-                square_player->setCanShoot(
-                    {true,
-                     *square_player->getWeapon().get<0>() == WeaponType::BIG_SHOT ? 1.5F : 0.3F,
-                     0.0F}
-                );
-                square_player->setSize({80, 80});
-                square_player->setRotation({90});
-                square_player->setSprite({assetsLoader.get_asset(P2).id});
-                square_player->setHealth({4});
-                square_player->setNetworkID({playerState.netId});
-            }
+            auto player = _eM.createEntity<ECS::E::GameEntity>();
+            player.setPosition({playerState.x * 300.0F, playerState.y * 300.0F});
+            player.setVelocity({playerState.vx * 300.0F, playerState.vy * 200.0F});
+            player.setType({GameEntityType::PLAYER});
+            player.setColor({255, 255, 255, 255});
+            player.setWeapon({WeaponType::BIG_SHOT});
+            player.setCanShoot(
+                {true, player.getWeaponVal() == WeaponType::BIG_SHOT ? 1.5F : 0.3F, 0.0F}
+            );
+            player.setSize({80, 80});
+            player.setRotation({90});
+            player.setSprite({assetsLoader.get_asset(P2).id});
+            player.setHealth({4});
+            player.setNetworkID(ECS::C::NetworkID::Val {playerState.netId});
         }
         moveOtherPlayerSystem.playerStates.clear();
         destroyEntitiesSystem.entitiesDestroyed.clear();

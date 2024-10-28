@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Entities/IArchetypes.hpp"
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 
@@ -28,7 +28,7 @@ public:
     }
     ~ADualSystem() override = default;
 
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    bool tryAddEntityPool(E::IArchetypePool *entityPool) override
     {
         auto q1 = _query1.tryAddEntityPool(entityPool);
         auto q2 = _query2.tryAddEntityPool(entityPool);

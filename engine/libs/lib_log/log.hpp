@@ -47,6 +47,7 @@
 #define LOG_PINK "\033[35m"
 #define LOG_GREEN "\033[32m"
 #define LOG_YELLOW "\033[33m"
+#define LOG_BLUE "\033[34m"
 #define LOG_RED "\033[31m"
 #define LOG_COLOR_RESET "\033[0m"
 

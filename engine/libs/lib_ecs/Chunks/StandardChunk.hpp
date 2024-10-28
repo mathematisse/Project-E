@@ -31,7 +31,7 @@ public:
      */
     explicit StandardChunk(size_t elemCount):
         AChunk<T>(STDCHUNK, elemCount),
-        _elems(elemCount)
+        _elems(elemCount, T {0})
     {
     }
 

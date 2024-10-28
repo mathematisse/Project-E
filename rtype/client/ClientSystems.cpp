@@ -6,31 +6,25 @@
 */
 
 #include "ClientSystems.hpp"
-#include "DecorEntities.hpp"
 #include "RTypePackets.hpp"
-#include "GameEntities.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include <iostream>
 #include "AssetsPath.hpp"
 #include "lib_log/log.hpp"
 #include <raylib.h>
-
-#define RED_CLI "\033[31m"
-#define GREEN_CLI "\033[32m"
-#define YELLOW_CLI "\033[33m"
-#define RESET "\033[0m"
 
 namespace ECS {
 namespace S {
 // SYSTEM
 
-MovePlayerSystem::MovePlayerSystem(net::RTypeClient &client):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
-    client(client)
+MovePlayerSystem::MovePlayerSystem(net::RTypeClient &client, bool auto_shoot):
+    AMonoSystem(false),
+    client(client),
+    auto_shoot(auto_shoot)
 {
 }
 
-void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
+void MovePlayerSystem::_innerOperate(
+    C::Velocity::Pool::Types &cvelocity, C::Type::Pool::Types &ctype
+)
 {
     auto [type] = ctype;
     if (type != GameEntityType::LPLAYER) {
@@ -65,13 +59,14 @@ void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::Type
 }
 
 MoveOtherPlayerSystem::MoveOtherPlayerSystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+    AMonoSystem(false)
 {
 }
 
-void MoveOtherPlayerSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype,
-    C::HealthPool::Types &chealth, C::NetworkIDPool::Types &cnetworkid
+void MoveOtherPlayerSystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+    C::Type::Pool::Types &ctype, C::Health::Pool::Types &chealth,
+    C::NetworkID::Pool::Types &cnetworkid
 )
 {
     auto [type] = ctype;
@@ -100,20 +95,22 @@ void MoveOtherPlayerSystem::_statusOperate(
 }
 
 DestroyEntitiesSystem::DestroyEntitiesSystem(ECS::EntityManager &entityManager):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     entityManager(entityManager)
 {
 }
 
-void DestroyEntitiesSystem::_statusOperate(
-    C::ChunkPosPool::Types &cchunkPos, C::NetworkIDPool::Types &cnetworkid
+void DestroyEntitiesSystem::_innerOperate(
+    C::ChunkPos::Pool::Types &cchunkPos, C::NetworkID::Pool::Types &cnetworkid
 )
 {
     auto [netId] = cnetworkid;
 
     for (auto &entityDestroyed : entitiesDestroyed) {
         if (entityDestroyed.netId == netId) {
-            LOG_DEBUG(RED_CLI "Destroying entity with netId: " + std::to_string(netId) + RESET);
+            LOG_DEBUG(
+                LOG_RED "Destroying entity with netId: " + std::to_string(netId) + LOG_COLOR_RESET
+            );
             entityManager.destroyEntity(cchunkPos);
         }
     }
@@ -125,8 +122,8 @@ UpdateEnginePosition::UpdateEnginePosition():
 }
 
 void UpdateEnginePosition::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
-    C::TypePool::Types &ctype
+    C::EntityStatus::Pool::Types &cstatus, C::Position::Pool::Types &cposition,
+    C::Type::Pool::Types &ctype
 )
 {
     auto [engine_status] = cstatus;

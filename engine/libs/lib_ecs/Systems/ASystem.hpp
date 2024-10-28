@@ -12,7 +12,7 @@
 
 namespace ECS::S {
 
-class ASystem : virtual public ISystem {
+class ASystem : public ISystem {
 public:
     explicit ASystem(bool isParallel = false):
         _isParallel(isParallel)
@@ -20,7 +20,7 @@ public:
     }
     ~ASystem() override = default;
     [[nodiscard]] bool getIsParallel() const { return _isParallel; };
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override = 0;
+    bool tryAddEntityPool(E::IArchetypePool *entityPool) override = 0;
     void getRunStepData(ASystemTree &sysTree) override {};
 
 protected:

@@ -12,18 +12,25 @@
 
 namespace ECS::C {
 
+class IComponentRef {
+public:
+    virtual ~IComponentRef() = default;
+};
+
 template<typename... Ts>
-class ComponentRef {
+class ComponentRef : public IComponentRef {
 public:
     /**
      * @brief Construct a new ComponentRef object with component pointers.
      *
      * @param components Pointers to the component values.
      */
-    ComponentRef(Ts *...components):
+    explicit ComponentRef(Ts *...components):
         _components(std::make_tuple(components...))
     {
     }
+
+    ~ComponentRef() override = default;
 
     /**
      * @brief Get the component value pointer at the specified index.
@@ -49,6 +56,8 @@ public:
         return std::get<Index>(_components);
     }
 
+    operator ComponentVal<Ts...>() const { return ComponentVal<Ts...>(_components); }
+
     /**
      * @brief Set the component value at the specified index.
      *
@@ -66,10 +75,7 @@ public:
         set(ref._components, std::index_sequence_for<Ts...> {});
     }
 
-    void set(const ComponentVal<Ts...> &val)
-    {
-        set(val._values, std::index_sequence_for<Ts...> {});
-    }
+    void set(ComponentVal<Ts...> val) { set(val._values, std::index_sequence_for<Ts...> {}); }
 
     template<std::size_t... Is>
     void set(const std::tuple<Ts *...> &components, std::index_sequence<Is...> /*unused*/)
@@ -83,17 +89,14 @@ public:
         (set<Is>(std::get<Is>(components)), ...);
     }
 
+    // Automatic casting to the first element
+    operator std::tuple_element_t<0, std::tuple<Ts...>>() const { return std::get<0>(_components); }
+
+    // auto casting to tuple
+    operator std::tuple<Ts...>() const { return _components; }
+
 protected:
     std::tuple<Ts *...> _components; ///< Tuple of pointers to component values.
-
-private:
-    /**
-     * @brief Creates a tuple of pointers to the provided components.
-     *
-     * @param components Component values.
-     * @return Tuple of pointers to the values.
-     */
-    static auto createPointerTuple(Ts... components) { return std::make_tuple(&components...); }
 };
 
 } // namespace ECS::C

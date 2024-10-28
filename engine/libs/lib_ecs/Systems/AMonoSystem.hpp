@@ -7,24 +7,22 @@
 
 #pragma once
 
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Core/PureComponents.hpp"
+#include "lib_ecs/Entities/IArchetypes.hpp"
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
-#include <iostream>
-// # include <chrono>
 
 namespace ECS::S {
 template<typename... Ts>
 class AMonoSystem : virtual public ASystem {
 public:
-    explicit AMonoSystem(bool isParallel):
+    explicit AMonoSystem(bool isParallel = false):
         ASystem(isParallel)
     {
     }
     ~AMonoSystem() override = default;
 
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    bool tryAddEntityPool(E::IArchetypePool *entityPool) override
     {
         return _query.tryAddEntityPool(entityPool);
     }
@@ -62,10 +60,10 @@ protected:
 };
 
 template<typename... Ts>
-class AStatusMonoSystem : public AMonoSystem<C::EntityStatusPool, Ts...> {
+class AStatusMonoSystem : public AMonoSystem<C::EntityStatus::Pool, Ts...> {
 public:
     explicit AStatusMonoSystem(bool isParallel = false, C::EntityStatusEnum status = C::ENT_ALIVE):
-        AMonoSystem<C::EntityStatusPool, Ts...>(isParallel),
+        AMonoSystem<C::EntityStatus::Pool, Ts...>(isParallel),
         _status(status)
     {
     }
@@ -73,7 +71,7 @@ public:
 
 protected:
     C::EntityStatusEnum _status;
-    void _innerOperate(C::EntityStatusPool::Types &cStatus, typename Ts::Types &...componentPools)
+    void _innerOperate(C::EntityStatus::Pool::Types &cStatus, typename Ts::Types &...componentPools)
         override
     {
         auto [status] = cStatus;

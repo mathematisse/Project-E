@@ -5,10 +5,11 @@
 ** Demo lib ecs
 */
 
-#include "DecorEntities.hpp"
+#include "Components.hpp"
+#include "NetworkManager.hpp"
+#include "spatial2d/Components.hpp"
 #include "RTypePackets.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include "GameEntities.hpp"
+#include "lib_ecs/Core/PureComponents.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "raylib.h"
@@ -16,24 +17,24 @@
 
 namespace ECS::S {
 
-class MovePlayerSystem : public S::AStatusMonoSystem<C::VelocityPool, C::TypePool> {
+class MovePlayerSystem : public S::AMonoSystem<C::Velocity::Pool, C::Type::Pool> {
 public:
-    explicit MovePlayerSystem(net::RTypeClient &client);
+    explicit MovePlayerSystem(net::RTypeClient &client, bool auto_shoot = false);
     ~MovePlayerSystem() override = default;
 
     net::RTypeClient &client;
-    bool auto_shoot = false;
+    bool auto_shoot;
     size_t frame;
 
 protected:
-    void _statusOperate(
-        typename C::VelocityPool::Types &cvelocity, typename C::TypePool::Types &ctype
+    void _innerOperate(
+        typename C::Velocity::Pool::Types &cvelocity, typename C::Type::Pool::Types &ctype
     ) override;
 };
 
-class MoveOtherPlayerSystem
-    : public S::AStatusMonoSystem<
-          C::PositionPool, C::VelocityPool, C::TypePool, C::HealthPool, C::NetworkIDPool> {
+class MoveOtherPlayerSystem : public S::AMonoSystem<
+                                  C::Position::Pool, C::Velocity::Pool, C::Type::Pool,
+                                  C::Health::Pool, C::NetworkID::Pool> {
 public:
     explicit MoveOtherPlayerSystem();
     ~MoveOtherPlayerSystem() override = default;
@@ -41,14 +42,14 @@ public:
     std::vector<ECS::PlayerState> playerStates;
 
 protected:
-    void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity,
-        typename C::TypePool::Types &ctype, typename C::HealthPool::Types &chealth,
-        typename C::NetworkIDPool::Types &cnetworkid
+    void _innerOperate(
+        typename C::Position::Pool::Types &cposition, typename C::Velocity::Pool::Types &cvelocity,
+        typename C::Type::Pool::Types &ctype, typename C::Health::Pool::Types &chealth,
+        typename C::NetworkID::Pool::Types &cnetworkid
     ) override;
 };
 
-class DestroyEntitiesSystem : public S::AStatusMonoSystem<C::ChunkPosPool, C::NetworkIDPool> {
+class DestroyEntitiesSystem : public S::AMonoSystem<C::ChunkPos::Pool, C::NetworkID::Pool> {
 public:
     explicit DestroyEntitiesSystem(ECS::EntityManager &entityManager);
     ~DestroyEntitiesSystem() override = default;
@@ -57,24 +58,24 @@ public:
 
 protected:
     ECS::EntityManager &entityManager;
-    void _statusOperate(
-        typename C::ChunkPosPool::Types &cchunkPos, typename C::NetworkIDPool::Types &cnetworkid
+    void _innerOperate(
+        typename C::ChunkPos::Pool::Types &cchunkPos, typename C::NetworkID::Pool::Types &cnetworkid
     ) override;
 };
 
 class UpdateEnginePosition
-    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+    : public S::AMonoSystem<C::EntityStatus::Pool, C::Position::Pool, C::Type::Pool> {
 public:
     explicit UpdateEnginePosition();
     ~UpdateEnginePosition() override = default;
 
-    Vector2 playerPosition;
-    char playerAlive;
+    Vector2 playerPosition = {0, 0};
+    bool playerAlive = true;
 
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
-        C::TypePool::Types &ctype
+        C::EntityStatus::Pool::Types &cstatus, C::Position::Pool::Types &cposition,
+        C::Type::Pool::Types &ctype
     ) override;
 };
 

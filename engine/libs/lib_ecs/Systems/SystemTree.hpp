@@ -31,7 +31,7 @@ public:
     bool addSystemTreeNode(
         SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
     );
-    void registerEntityPool(E::IEntityPool *entityPool);
+    void registerEntityPool(E::IArchetypePool *entityPool);
     void runNode(SystemTree &tree);
     [[nodiscard]] const std::string &getGroup() const;
 
@@ -54,7 +54,7 @@ public:
     bool addSystemTreeNode(
         SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
     );
-    void registerEntityPool(E::IEntityPool *entityPool);
+    void registerEntityPool(E::IArchetypePool *entityPool);
     void runTree();
 
 private:

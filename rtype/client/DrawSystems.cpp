@@ -6,8 +6,7 @@
 */
 
 #include "DrawSystems.hpp"
-#include "DecorEntities.hpp"
-#include "GameEntities.hpp"
+#include "Components.hpp"
 #include "AssetsPath.hpp"
 #include <raylib.h>
 
@@ -21,7 +20,7 @@ ShowInfoSystem::ShowInfoSystem(Camera2D &camera):
 {
 }
 
-void ShowInfoSystem::_innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth)
+void ShowInfoSystem::_innerOperate(C::Type::Pool::Types &ctype, C::Health::Pool::Types &chealth)
 {
     auto [type] = ctype;
 

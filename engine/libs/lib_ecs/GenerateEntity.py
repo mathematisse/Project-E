@@ -54,7 +54,7 @@ namespace ECS::E
         {entity_name}Pool();
         ~{entity_name}Pool() override = default;
 
-        std::unique_ptr<E::IEntityRef> getEntity(Chunks::chunkPos_t cPos) override;
+        std::unique_ptr<E::IArchetypeRef> getEntity(Chunks::chunkPos_t cPos) override;
         std::unique_ptr<E::{entity_name}Ref> getRawEntity(Chunks::chunkPos_t cPos);
         std::vector<C::IComponentPool *> getComponentPools() override;
     protected:
@@ -101,7 +101,7 @@ namespace ECS::E
     {{
     }}
 
-    std::unique_ptr<E::IEntityRef> {entity_name}Pool::getEntity(Chunks::chunkPos_t cPos)
+    std::unique_ptr<E::IArchetypeRef> {entity_name}Pool::getEntity(Chunks::chunkPos_t cPos)
     {{
         return getRawEntity(cPos);
     }}

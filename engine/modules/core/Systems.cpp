@@ -2,7 +2,7 @@
 
 namespace ECS::S {
 
-void IncrementTimerSystem::_statusOperate(typename C::TimerPool::Types &ctimer)
+void IncrementTimerSystem::_innerOperate(typename C::Timer::Pool::Types &ctimer)
 {
     auto [time] = ctimer;
     time += _deltaTime;

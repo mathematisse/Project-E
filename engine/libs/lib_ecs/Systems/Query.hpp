@@ -8,7 +8,7 @@
 #pragma once
 
 #include "lib_ecs/Components/IComponentPool.hpp"
-#include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Entities/IArchetypes.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
 #include "lib_log/log.hpp"
@@ -45,9 +45,12 @@ class Query : public IQuery {
     );
 
 public:
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    Query() = default;
+    ~Query() override = default;
+
+    bool tryAddEntityPool(E::IArchetypePool *entityPool) override
     {
-        std::vector<C::IComponentPool *> componentPools = entityPool->getComponentPools();
+        std::vector<C::IComponentPool *> componentPools = entityPool->getVecComponentPools();
 
         std::array<const std::string, sizeof...(Ts)> componentNames = {Ts::componentName...};
         std::array<C::IComponentPool *, sizeof...(Ts)> newComponentPoolsArray = {nullptr};
@@ -66,7 +69,9 @@ public:
             }
         }
         if (i == sizeof...(Ts)) {
-            LOG_DEBUG("Added entity pool " + entityPool->getEntityName() + " to query");
+            LOG_DEBUG(
+                "Added entity pool " + std::string(entityPool->getEntityName()) + " to query"
+            );
             _componentPoolsArrays.push_back(newComponentPoolsArray);
             return true;
         }
@@ -168,7 +173,7 @@ public:
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply(
                             [i](auto &...pools) {
-                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i
+                                return std::make_tuple(static_cast<Ts *>(pools)->getRawStdVectors(i
                                 )...);
                             },
                             std::tie(componentPools...)
@@ -200,7 +205,7 @@ public:
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply(
                             [i](auto &...pools) {
-                                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(i
+                                return std::make_tuple(static_cast<Ts *>(pools)->getRawStdVectors(i
                                 )...);
                             },
                             std::tie(componentPools...)
@@ -229,7 +234,7 @@ public:
                 threads.emplace_back([&f, &componentPools]() {
                     std::apply(
                         [&f](auto &...pools) {
-                            f(dynamic_cast<Ts *>(pools)...);
+                            f(static_cast<Ts *>(pools)...);
                         },
                         componentPools
                     );
@@ -248,7 +253,7 @@ public:
             for (auto &componentPools : _componentPoolsArrays) {
                 std::apply(
                     [&f](auto &...pools) {
-                        f(dynamic_cast<Ts *>(pools)...);
+                        f(static_cast<Ts *>(pools)...);
                     },
                     componentPools
                 );
@@ -322,13 +327,13 @@ protected:
     {
         auto componentPoolsTuple1 = std::apply(
             [index1](auto &...pools) {
-                return std::make_tuple(dynamic_cast<Ts *>(pools)->getRawStdVectors(index1)...);
+                return std::make_tuple(static_cast<Ts *>(pools)->getRawStdVectors(index1)...);
             },
             componentPools1
         );
         auto componentPoolsTuple2 = std::apply(
             [index2](auto &...pools) {
-                return std::make_tuple(dynamic_cast<TOthers *>(pools)->getRawStdVectors(index2)...);
+                return std::make_tuple(static_cast<TOthers *>(pools)->getRawStdVectors(index2)...);
             },
             componentPools2
         );

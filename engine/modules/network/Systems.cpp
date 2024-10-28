@@ -6,7 +6,7 @@
 */
 
 #include "Systems.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_ecs/Core/ComponentMaker.hpp"
 #include "spatial2d/Components.hpp"
 
 namespace ECS {

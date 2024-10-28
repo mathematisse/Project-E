@@ -8,11 +8,8 @@
 #include <cmath>
 #include <limits>
 #include "ServerSystems.hpp"
-#include "DecorEntities.hpp"
 #include "RTypeServer.hpp"
-#include "GameEntities.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include <iostream>
+#include "Archetypes.hpp"
 #include "RTypePackets.hpp"
 
 #define RED_CLI "\033[31m"
@@ -28,7 +25,7 @@ SpawnEnnemySystem::SpawnEnnemySystem(
     EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
     net::RTypeServer &server, size_t maxEnnemyCount
 ):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     entityManager(entityManager),
     networkManager(networkManager),
     server(server),
@@ -37,58 +34,50 @@ SpawnEnnemySystem::SpawnEnnemySystem(
 {
 }
 
-void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::TypePool::Types &ctype)
+void SpawnEnnemySystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Type::Pool::Types &ctype
+)
 {
     auto [type] = ctype;
 
     if (type != GameEntityType::PLAYER) {
         return;
     }
-    if (ennemyCount >= _maxEnnemyCount) {
+    if (enemyCount >= _maxEnnemyCount) {
         return;
     }
-    auto need_to_spawn = _maxEnnemyCount - ennemyCount;
+    auto need_to_spawn = _maxEnnemyCount - enemyCount;
     if (need_to_spawn <= 0) {
         return;
     }
     auto [x, y] = cposition;
-    auto ennemies = entityManager.createEntities("GameEntity", need_to_spawn, ECS::C::ENT_ALIVE);
 
-    for (const auto &entity : ennemies) {
-        auto ref = entityManager.getEntity(entity);
-
-        auto *square_ennemy = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-        if (square_ennemy == nullptr) {
-            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-            return;
-        }
+    for (auto &enemy : entityManager.createEntities<E::BaseEntity>(need_to_spawn)) {
         int rand = std::rand() % 5;
         if (rand == 2) {
-            square_ennemy->setHealth({5});
-            square_ennemy->setWeapon({WeaponType::BIG_SHOT});
-            square_ennemy->setSize({180, 120});
+            enemy.setHealth({5});
+            enemy.setWeapon({WeaponType::BIG_SHOT});
+            enemy.setSize({180, 120});
         } else {
-            square_ennemy->setHealth({2});
-            square_ennemy->setWeapon({WeaponType::BULLET});
-            square_ennemy->setSize({80, 80});
+            enemy.setHealth({2});
+            enemy.setWeapon({WeaponType::BULLET});
+            enemy.setSize({80, 80});
         }
-        square_ennemy->setVelocity({0.0F, 0.0F});
-        square_ennemy->setType({GameEntityType::ENEMY});
-        square_ennemy->setColor({255, 0, 0, 255});
-        square_ennemy->setRotation({90});
+        enemy.setVelocity({0.0F, 0.0F});
+        enemy.setType({GameEntityType::ENEMY});
+        enemy.setColor({255, 0, 0, 255});
+        enemy.setRotation({90});
 
-        float _x = x + 500 + std::rand() % (int) (x + 1000);
-        float _y = 100 + std::rand() % 800;
-        square_ennemy->setPosition({_x, _y});
-        square_ennemy->setCanShoot(
-            {true, (*square_ennemy->getWeapon().get<0>() == WeaponType::BIG_SHOT) ? 3.0F : 1.5F,
-             0.0F}
+        float _x = x + 500.0F + (float) (std::rand() % (int) x + 1000);
+        float _y = 100.0F + (float) (std::rand() % 800);
+
+        enemy.setPosition({_x, _y});
+        enemy.setCanShoot({true, (enemy.getWeaponVal() == WeaponType::BIG_SHOT) ? 3.0F : 1.5F, 0.0F}
         );
-        square_ennemy->setSprite({_spriteId});
 
         auto _netId = networkManager.getnewNetID();
 
-        square_ennemy->setNetworkID({_netId});
+        enemy.setNetworkID({_netId});
 
         server.send_tcp(
             RTypePacketType::NEW_ENNEMY,
@@ -96,7 +85,7 @@ void SpawnEnnemySystem::_statusOperate(C::PositionPool::Types &cposition, C::Typ
         );
     }
 
-    ennemyCount = 5;
+    enemyCount = 5;
 }
 
 DestroyEntitiesSystem::DestroyEntitiesSystem(
@@ -109,7 +98,7 @@ DestroyEntitiesSystem::DestroyEntitiesSystem(
 }
 
 void DestroyEntitiesSystem::_statusOperate(
-    C::ChunkPosPool::Types &cchunkpos, C::NetworkIDPool::Types &cnetworkid
+    C::ChunkPos::Pool::Types &cchunkpos, C::NetworkID::Pool::Types &cnetworkid
 )
 {
     auto [networkid] = cnetworkid;
@@ -127,7 +116,7 @@ ShootSystem::ShootSystem(
     EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
     net::RTypeServer &server
 ):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     entityManager(entityManager),
     networkManager(networkManager),
     server(server),
@@ -135,9 +124,10 @@ ShootSystem::ShootSystem(
 {
 }
 
-void ShootSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::TypePool::Types &ctype, C::CanShootPool::Types &canshoot,
-    C::IsShootingPool::Types &cIsShooting, C::WeaponPool::Types &cweapon
+void ShootSystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Type::Pool::Types &ctype,
+    C::CanShoot::Pool::Types &canshoot, C::IsShooting::Pool::Types &cIsShooting,
+    C::Weapon::Pool::Types &cweapon
 )
 {
     auto [type] = ctype;
@@ -151,125 +141,81 @@ void ShootSystem::_statusOperate(
         return;
     }
     auto [weapon] = cweapon;
-    if (((isShooting != 0) && type == GameEntityType::PLAYER) || type == GameEntityType::ENEMY) {
-        auto [x, y] = cposition;
-        Vector2 playerPosition = {x, y};
-        if (type == GameEntityType::ENEMY) {
-            auto [ennemyX, ennemyY] = cposition;
-
-            float closestDistance = std::numeric_limits<float>::max();
-            float closestPlayerX = 0;
-            float closestPlayerY = 0;
-
-            if (playersPos.empty()) {
-                return;
-            }
-            for (const auto &playerPos : playersPos) {
-                float playerX = playerPos.x;
-                float playerY = playerPos.y;
-                auto distance = (float
-                ) std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
-
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestPlayerX = playerX;
-                    closestPlayerY = playerY;
-                }
-            }
-            playerPosition = {closestPlayerX, closestPlayerY};
-        }
-        if (type == GameEntityType::ENEMY &&
-            ((x - playerPosition.x) > 1000 || x <= playerPosition.x || y < playerPosition.y ||
-             y > playerPosition.y + 50)) {
+    if (((isShooting == 0) || type != GameEntityType::PLAYER) && type != GameEntityType::ENEMY) {
+        return;
+    }
+    auto [x, y] = cposition;
+    Vector2 playerPosition = {x, y};
+    if (type == GameEntityType::ENEMY) {
+        auto [enemyX, enemyY] = cposition;
+        float closestDistance = std::numeric_limits<float>::max();
+        float closestPlayerX = 0;
+        float closestPlayerY = 0;
+        if (playersPos.empty()) {
             return;
         }
-        delay = base_delay;
-        auto bullets = entityManager.createEntities("GameAnimatedEntity", 1, ECS::C::ENT_ALIVE);
-        for (const auto &entity : bullets) {
-            auto ref = entityManager.getEntity(entity);
-
-            auto *square_bullet = dynamic_cast<ECS::E::GameAnimatedEntityRef *>(ref.get());
-            if (square_bullet == nullptr) {
-                LOG_ERROR("Failed to cast IEntityRef to GameAnimatedEntityRef");
-                return;
-            }
-            if (type == GameEntityType::PLAYER) {
-                square_bullet->setVelocity({300.0F, 0.0F});
-                square_bullet->setPosition({x + 80 + 35, y + 25});
-                square_bullet->setRotation({90});
-                square_bullet->setType({GameEntityType::BULLET});
-            } else {
-                square_bullet->setVelocity({-300.0F, 0.0F});
-                square_bullet->setPosition({x - 35, y + 25});
-                square_bullet->setRotation({-90});
-                square_bullet->setType({GameEntityType::BULLET_ENNEMY});
-            }
-            square_bullet->setColor({255, 255, 0, 255});
-            square_bullet->setCanShoot({false, 0.0F, 0.0F});
-            if (weapon == WeaponType::BULLET) {
-                square_bullet->setAnimatedSprite({_spriteId, 4, 0, 0.0F});
-                square_bullet->setHealth({1});
-                square_bullet->setSize({30, 30});
-            }
-            if (weapon == WeaponType::BIG_SHOT) {
-                square_bullet->setAnimatedSprite({_spriteId, 10, 0, 0.0F});
-                square_bullet->setHealth({5});
-                square_bullet->setSize({70, 70});
-            }
-            square_bullet->setTimer({0.0F});
-
-            auto _netId = networkManager.getnewNetID();
-            square_bullet->setNetworkID({_netId});
-            if (type == GameEntityType::PLAYER) {
-                if (weapon == WeaponType::BULLET) {
-                    server.send_tcp(
-                        RTypePacketType::BULLET_SHOT,
-                        net::Packet::serializeStruct(
-                            BulletShot {x + 80 + 35, y + 25, true, _netId, false}
-                        )
-                    );
-                }
-                if (weapon == WeaponType::BIG_SHOT) {
-                    server.send_tcp(
-                        RTypePacketType::BULLET_SHOT,
-                        net::Packet::serializeStruct(
-                            BulletShot {x + 80 + 35, y + 25, true, _netId, true}
-                        )
-                    );
-                }
-            } else {
-                if (weapon == WeaponType::BULLET) {
-                    server.send_tcp(
-                        RTypePacketType::BULLET_SHOT,
-                        net::Packet::serializeStruct(
-                            BulletShot {x - 35, y + 25, false, _netId, false}
-                        )
-                    );
-                }
-                if (weapon == WeaponType::BIG_SHOT) {
-                    server.send_tcp(
-                        RTypePacketType::BULLET_SHOT,
-                        net::Packet::serializeStruct(
-                            BulletShot {x - 35, y + 25, false, _netId, true}
-                        )
-                    );
-                }
+        for (const auto &playerPos : playersPos) {
+            float playerX = playerPos.x;
+            float playerY = playerPos.y;
+            auto distance =
+                (float) std::sqrt(std::pow(playerX - enemyX, 2) + std::pow(playerY - enemyY, 2));
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestPlayerX = playerX;
+                closestPlayerY = playerY;
             }
         }
+        playerPosition = {closestPlayerX, closestPlayerY};
     }
+    if (type == GameEntityType::ENEMY &&
+        ((x - playerPosition.x) > 1000 || x <= playerPosition.x || y < playerPosition.y ||
+         y > playerPosition.y + 50)) {
+        return;
+    }
+    delay = base_delay;
+    auto bullet = entityManager.createEntity<E::BaseEntity>();
+
+    bool playerShot = type == GameEntityType::PLAYER;
+    float factor = playerShot ? 1.0F : -1.0F;
+    float _x = playerShot ? x + 80 + 35 : x - 35;
+
+    bullet.setVelocity({300.0F * factor, 0.0F});
+    bullet.setPosition({_x, y + 25});
+    bullet.setRotation({90});
+    bullet.setType({playerShot ? GameEntityType::BULLET : GameEntityType::BULLET_ENNEMY});
+    bullet.setColor({255, 255, 0, 255});
+    bullet.setCanShoot({false, 0.0F, 0.0F});
+
+    if (weapon == WeaponType::BULLET) {
+        bullet.setHealth({1});
+        bullet.setSize({30, 30});
+    }
+    if (weapon == WeaponType::BIG_SHOT) {
+        bullet.setHealth({5});
+        bullet.setSize({70, 70});
+    }
+
+    auto _netId = networkManager.getnewNetID();
+    bullet.setNetworkID({_netId});
+    server.send_tcp(
+        RTypePacketType::BULLET_SHOT,
+        net::Packet::serializeStruct(
+            BulletShot {_x, y + 25, playerShot, _netId, weapon == WeaponType::BIG_SHOT}
+        )
+    );
 }
 
-CountEnnemyAliveSystem::CountEnnemyAliveSystem(size_t &ennemyCount):
+CountEnnemyAliveSystem::CountEnnemyAliveSystem(size_t &enemyCount):
     AStatusMonoSystem(false, C::ENT_ALIVE),
-    ennemyCount(ennemyCount)
+    enemyCount(enemyCount)
 {
 }
 
-void CountEnnemyAliveSystem::_statusOperate(C::TypePool::Types &ctype)
+void CountEnnemyAliveSystem::_statusOperate(C::Type::Pool::Types &ctype)
 {
     auto [type] = ctype;
     if (type == GameEntityType::ENEMY) {
-        ennemyCount++;
+        enemyCount++;
     }
 }
 
@@ -279,8 +225,9 @@ SendAllDataToNewClients::SendAllDataToNewClients():
 }
 
 void SendAllDataToNewClients::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype,
-    C::HealthPool::Types &chealth, C::NetworkIDPool::Types &cnetworkid
+    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+    C::Type::Pool::Types &ctype, C::Health::Pool::Types &chealth,
+    C::NetworkID::Pool::Types &cnetworkid
 )
 {
     auto [x, y] = cposition;
@@ -327,8 +274,9 @@ MovePlayersSystem::MovePlayersSystem():
 }
 
 void MovePlayersSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype,
-    C::NetworkIDPool::Types &cnetworkid, C::IsShootingPool::Types &cIsShooting
+    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+    C::Type::Pool::Types &ctype, C::NetworkID::Pool::Types &cnetworkid,
+    C::IsShooting::Pool::Types &cIsShooting
 )
 {
     auto [type] = ctype;

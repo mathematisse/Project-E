@@ -14,7 +14,8 @@
 
 namespace ECS::S {
 
-class DebugDrawSystem : public S::AStatusMonoSystem<C::PositionPool, C::ColorPool, C::SizePool> {
+class DebugDrawSystem
+    : public S::AStatusMonoSystem<C::Position::Pool, C::Color::Pool, C::Size::Pool> {
 public:
     explicit DebugDrawSystem(Camera2D &camera);
     ~DebugDrawSystem() override = default;
@@ -23,13 +24,13 @@ public:
 
 protected:
     void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::ColorPool::Types &ccolor,
-        typename C::SizePool::Types &csize
+        typename C::Position::Pool::Types &cposition, typename C::Color::Pool::Types &ccolor,
+        typename C::Size::Pool::Types &csize
     ) override;
 };
 
 class DrawSpriteSystem
-    : public S::AStatusMonoSystem<C::PositionPool, C::SizePool, C::RotationPool, C::SpritePool> {
+    : public S::AMonoSystem<C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::Sprite::Pool> {
 public:
     explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
     ~DrawSpriteSystem() override = default;
@@ -38,15 +39,15 @@ public:
     Camera2D &camera;
 
 protected:
-    void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::SizePool::Types &csize,
-        typename C::RotationPool::Types &crotation, typename C::SpritePool::Types &csprite
+    void _innerOperate(
+        typename C::Position::Pool::Types &cposition, typename C::Size::Pool::Types &csize,
+        typename C::Rotation::Pool::Types &crotation, typename C::Sprite::Pool::Types &csprite
     ) override;
 };
 
 class DrawAnimatedSpriteSystem
-    : public S::AStatusMonoSystem<
-          C::PositionPool, C::SizePool, C::RotationPool, C::AnimatedSpritePool> {
+    : public S::AMonoSystem<
+          C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::AnimatedSprite::Pool> {
 public:
     DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
     ~DrawAnimatedSpriteSystem() override = default;
@@ -55,13 +56,14 @@ public:
     Camera2D &camera;
 
 protected:
-    void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::SizePool::Types &csize,
-        typename C::RotationPool::Types &crotation, typename C::AnimatedSpritePool::Types &csprite
+    void _innerOperate(
+        typename C::Position::Pool::Types &cposition, typename C::Size::Pool::Types &csize,
+        typename C::Rotation::Pool::Types &crotation,
+        typename C::AnimatedSprite::Pool::Types &csprite
     ) override;
 };
 
-class SpriteAnimationSystem : public S::AStatusMonoSystem<C::AnimatedSpritePool, C::TimerPool> {
+class SpriteAnimationSystem : public S::AMonoSystem<C::AnimatedSprite::Pool, C::Timer::Pool> {
 public:
     explicit SpriteAnimationSystem(AssetsLoader &assetsLoader);
     ~SpriteAnimationSystem() override = default;
@@ -69,8 +71,8 @@ public:
     AssetsLoader &assetsLoader;
 
 protected:
-    void _statusOperate(
-        typename C::AnimatedSpritePool::Types &csprite, typename C::TimerPool::Types &ctimer
+    void _innerOperate(
+        typename C::AnimatedSprite::Pool::Types &csprite, typename C::Timer::Pool::Types &ctimer
     ) override;
 };
 

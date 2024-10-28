@@ -6,7 +6,6 @@
 */
 
 #include "Systems.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
 #include "spatial2d/Components.hpp"
 #include <raylib.h>
 
@@ -20,7 +19,7 @@ DebugDrawSystem::DebugDrawSystem(Camera2D &camera):
 }
 
 void DebugDrawSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::ColorPool::Types &ccolor, C::SizePool::Types &csize
+    C::Position::Pool::Types &cposition, C::Color::Pool::Types &ccolor, C::Size::Pool::Types &csize
 )
 {
     auto [x, y] = cposition;
@@ -31,15 +30,15 @@ void DebugDrawSystem::_statusOperate(
 }
 
 DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     assetsLoader(assetsLoader),
     camera(camera)
 {
 }
 
-void DrawSpriteSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::SizePool::Types &csize, C::RotationPool::Types &crotation,
-    C::SpritePool::Types &csprite
+void DrawSpriteSystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Size::Pool::Types &csize,
+    C::Rotation::Pool::Types &crotation, C::Sprite::Pool::Types &csprite
 )
 {
     auto [id] = csprite;
@@ -58,15 +57,15 @@ void DrawSpriteSystem::_statusOperate(
 }
 
 DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     assetsLoader(assetsLoader),
     camera(camera)
 {
 }
 
-void DrawAnimatedSpriteSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::SizePool::Types &csize, C::RotationPool::Types &crotation,
-    C::AnimatedSpritePool::Types &csprite
+void DrawAnimatedSpriteSystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Size::Pool::Types &csize,
+    C::Rotation::Pool::Types &crotation, C::AnimatedSprite::Pool::Types &csprite
 )
 {
     auto [id, nbr_frame, start_position, _] = csprite;
@@ -86,20 +85,20 @@ void DrawAnimatedSpriteSystem::_statusOperate(
 }
 
 SpriteAnimationSystem::SpriteAnimationSystem(AssetsLoader &assetsLoader):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     assetsLoader(assetsLoader)
 {
 }
 
-void SpriteAnimationSystem::_statusOperate(
-    C::AnimatedSpritePool::Types &csprite, C::TimerPool::Types &ctimer
+void SpriteAnimationSystem::_innerOperate(
+    C::AnimatedSprite::Pool::Types &csprite, C::Timer::Pool::Types &ctimer
 )
 {
     auto [id, nbr_frame, sprite_pos, animation_time] = csprite;
     auto [clock] = ctimer;
     auto textureWidth = assetsLoader.get_asset_from_id(id).width;
 
-    if (clock < animation_time) {
+    if (id == 0 || clock < animation_time) {
         return;
     }
     clock -= animation_time;

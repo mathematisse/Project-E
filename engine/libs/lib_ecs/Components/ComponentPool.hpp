@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2024
 ** CPP-ECS
 ** File description:
-** Ecs pure base AComponentPool
+** Ecs pure base ComponentPool
 */
 
 #pragma once
@@ -21,23 +21,23 @@ namespace ECS::C {
  * @tparam Ts Types of the components managed by the pool.
  */
 template<const char *Name, typename... Ts>
-class AComponentPool : virtual public IComponentPool {
+class ComponentPool : public IComponentPool {
 public:
     /**
-     * @brief Construct a new AComponentPool object.
+     * @brief Construct a new ComponentPool object.
      */
-    explicit AComponentPool():
+    explicit ComponentPool():
         IComponentPool(),
         _pools {Chunks::StandardChunkPool<Ts>()...}
     {
     }
 
-    ~AComponentPool() override = default;
+    ~ComponentPool() override = default;
 
-    AComponentPool(const AComponentPool &) = default;
-    AComponentPool &operator=(const AComponentPool &) = default;
-    AComponentPool(AComponentPool &&) = default;
-    AComponentPool &operator=(AComponentPool &&) = default;
+    ComponentPool(const ComponentPool &) = default;
+    ComponentPool &operator=(const ComponentPool &) = default;
+    ComponentPool(ComponentPool &&) = default;
+    ComponentPool &operator=(ComponentPool &&) = default;
 
     using Types = std::tuple<Ts &...>; ///< The types of the components managed by the pool.
     using VTypes = std::tuple<std::vector<Ts> &...>; ///< The vector types of the components managed
@@ -67,9 +67,21 @@ public:
         return getComponentValImpl(cPos, std::index_sequence_for<Ts...> {});
     }
 
+    void resetComponentAtIndex(const Chunks::chunkPos_t &index) override
+    {
+        setComponentAtIndex(index, std::tuple<Ts...> {});
+    }
+
     void setComponentAtIndex(const Chunks::chunkPos_t &index, const std::tuple<Ts...> &component)
     {
         setComponentAtIndexImpl(index, component, std::index_sequence_for<Ts...> {});
+    }
+
+    void resetComponentAtIndexes(const Chunks::cPosArr_t &indexes) override
+    {
+        for (const auto &index : indexes) {
+            setComponentAtIndex(index, std::tuple<Ts...> {});
+        }
     }
 
     /**

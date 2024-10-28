@@ -5,14 +5,15 @@
 ** Demo lib ecs
 */
 
-#include "DecorEntities.hpp"
-#include "GameEntities.hpp"
+#pragma once
+
+#include "Components.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "raylib.h"
 
 namespace ECS::S {
 
-class ShowInfoSystem : public S::AMonoSystem<C::TypePool, C::HealthPool> {
+class ShowInfoSystem : public S::AMonoSystem<C::Type::Pool, C::Health::Pool> {
 public:
     explicit ShowInfoSystem(Camera2D &camera);
     ~ShowInfoSystem() override = default;
@@ -21,7 +22,7 @@ public:
     bool one_time = false;
 
 protected:
-    void _innerOperate(C::TypePool::Types &ctype, C::HealthPool::Types &chealth) override;
+    void _innerOperate(C::Type::Pool::Types &ctype, C::Health::Pool::Types &chealth) override;
 };
 
 } // namespace ECS::S

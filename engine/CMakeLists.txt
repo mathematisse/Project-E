@@ -3,6 +3,7 @@ project(Engine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(CORE_ENABLED "Enable core module" ON)
 option(RENDER_ENABLED "Enable render module" ON)

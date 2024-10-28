@@ -1,64 +1,40 @@
 
 #include "RTypePackets.hpp"
 #include "RTypeServer.hpp"
-#include "DecorEntities.hpp"
+#include "Archetypes.hpp"
 #include <cstdlib>
 #include <chrono>
 #include <vector>
 
 // ECS includes
-#include "GameEntities.hpp"
 #include "Systems.hpp"
 #include "ServerSystems.hpp"
 #include "core/Core.hpp"
+#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_log/log.hpp"
 #include "spatial2d/Spatial2D.hpp"
 
-char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
+bool player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::chunkPos_t &player)
 {
-    auto player = chunks;
-    if (player.empty()) {
-        LOG_INFO("Player is dead");
-        return 0;
-    }
-    auto ref = _eM.getEntity(player[0]);
-    auto square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-    if (!square_player) {
-        LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-        return 0;
-    }
-    return *square_player->getHealth().get<0>();
+    return _eM.getEntity<ECS::E::BaseEntity>(player).getHealthVal() > 0;
 }
 
-ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager)
+ECS::Chunks::chunkPos_t setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager)
 {
-    auto player = _eM.createEntities("GameEntity", 1, ECS::C::ENT_ALIVE);
+    auto player = _eM.createEntity<ECS::E::BaseEntity>();
 
-    for (const auto &entity : player) {
-        auto ref = _eM.getEntity(entity);
-
-        auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-        if (square_player == nullptr) {
-            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-            return {};
-        }
-        square_player->setPosition({1920 / 4, 1080 / 2});
-        square_player->setType({GameEntityType::PLAYER});
-        square_player->setColor({255, 0, 0, 255});
-        square_player->setWeapon({WeaponType::BULLET});
-        square_player->setCanShoot(
-            {true, *square_player->getWeapon().get<0>() == WeaponType::BIG_SHOT ? 1.5F : 0.3F, 0.0F}
-        );
-        square_player->setSize({80, 80});
-        square_player->setRotation({90});
-        square_player->setSprite({0});
-        square_player->setHealth({4});
-        square_player->setNetworkID({networkManager.getnewNetID()});
-    }
-    return player;
+    player.setPosition({1920.0F / 4, 1080.0F / 2});
+    player.setType({GameEntityType::PLAYER});
+    player.setColor({255, 0, 0, 255});
+    player.setWeapon({WeaponType::BULLET});
+    player.setCanShoot({true, player.getWeaponVal() == WeaponType::BIG_SHOT ? 1.5F : 0.3F, 0.0F});
+    player.setSize({80, 80});
+    player.setRotation({90});
+    player.setHealth({4});
+    player.setNetworkID({networkManager.getnewNetID()});
+    return player.getChunkPosVal();
 }
 
 int main(int ac, char **av)
@@ -85,9 +61,9 @@ int main(int ac, char **av)
 
     server.host(port);
     std::cout << "Server started on port " << port << std::endl;
-    srand(time(NULL));
+    srand(time(nullptr));
 
-    float cameraX = 1920 / 2;
+    float cameraX = 1920.0F / 2;
 
     // Engine modules
     engine::module::Core mCore;
@@ -101,13 +77,11 @@ int main(int ac, char **av)
     ECS::S::MoveBackgroundSystem moveBackgroundSystem;
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
-    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
+    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.enemyCount);
     ECS::S::GetPlayerPositionSystem getPlayerPositionSystem;
 
     // Entity pools
-    ECS::E::GameAnimatedEntityPool gameAnimatedEntityPool;
-    _eM.registerEntityPool(&gameAnimatedEntityPool);
-    ECS::E::GameEntityPool gameEntityPool;
+    ECS::E::BaseEntity::Pool gameEntityPool(RTYPE_ENTITY_POOL_SIZE);
     _eM.registerEntityPool(&gameEntityPool);
 
     ECS::S::SystemTreeNode rTypeFixedNode(
@@ -444,7 +418,7 @@ int main(int ac, char **av)
         auto dt = std::chrono::duration<float>(new_time - curr_time).count();
         curr_time = new_time;
 
-        countEnnemyAliveSystem.ennemyCount = 0;
+        countEnnemyAliveSystem.enemyCount = 0;
         if ((server.clientCount() > 1) || started) {
             cameraX += 80 * dt;
             moveBackgroundSystem.cameraX = cameraX;
@@ -457,7 +431,7 @@ int main(int ac, char **av)
                 shootSystem.playersPos = getPlayerPositionSystem.playersPos;
                 getPlayerPositionSystem.playersPos.clear();
                 server.send_tcp(ECS::FRAME_ID, net::Packet::serializeStruct(ECS::FrameId {frame}));
-                spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+                spawnEnnemySystem.enemyCount = countEnnemyAliveSystem.enemyCount;
             }
         }
     }

@@ -118,7 +118,7 @@ bool SystemTreeNode::addSystemTreeNode(
     return false;
 }
 
-void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
+void SystemTreeNode::registerEntityPool(E::IArchetypePool *entityPool)
 {
     LOG_DEBUG("Registering entity pool in group " + _group);
     for (auto &startSystem : _startSystems) {
@@ -178,7 +178,7 @@ bool SystemTree::addSystemTreeNode(
     return _root.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }
 
-void SystemTree::registerEntityPool(E::IEntityPool *entityPool)
+void SystemTree::registerEntityPool(E::IArchetypePool *entityPool)
 {
     _root.registerEntityPool(entityPool);
 }

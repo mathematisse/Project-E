@@ -2,8 +2,8 @@
 
 namespace ECS::S {
 
-void ApplyVelocitySystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity
+void ApplyVelocitySystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity
 )
 {
     auto [x, y] = cposition;
@@ -14,8 +14,8 @@ void ApplyVelocitySystem::_statusOperate(
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void ApplyAccelerationSystem::_statusOperate(
-    C::VelocityPool::Types &cvelocity, C::AccelerationPool::Types &cacceleration
+void ApplyAccelerationSystem::_innerOperate(
+    C::Velocity::Pool::Types &cvelocity, C::Acceleration::Pool::Types &cacceleration
 )
 {
     auto [vX, vY] = cvelocity;

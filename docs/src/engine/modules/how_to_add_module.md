@@ -15,6 +15,7 @@ project(<module-name>) # Swap <module-name> with the name of your module
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(spatial2d STATIC Systems.cpp) # Change the source file to the source file of the module
 target_link_libraries(spatial2d lib_ecs) # link the needed libraries (ex: raylib, etc...)

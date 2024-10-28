@@ -6,9 +6,7 @@
 */
 
 #include "Systems.hpp"
-#include "DecorEntities.hpp"
-#include "GameEntities.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
+#include "Components.hpp"
 #include <cmath>
 #include <limits>
 #include "lib_ecs/Systems/ADualSystem.hpp"
@@ -22,8 +20,8 @@ MoveBackgroundSystem::MoveBackgroundSystem():
 }
 
 void MoveBackgroundSystem::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
-    C::TypePool::Types &ctype
+    C::EntityStatus::Pool::Types &cstatus, C::Position::Pool::Types &cposition,
+    C::Type::Pool::Types &ctype
 )
 {
     auto [status] = cstatus;
@@ -50,12 +48,13 @@ void MoveBackgroundSystem::_innerOperate(
 }
 
 MoveEnnemySystem::MoveEnnemySystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+    AMonoSystem(false)
 {
 }
 
-void MoveEnnemySystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype
+void MoveEnnemySystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+    C::Type::Pool::Types &ctype
 )
 {
     auto [type] = ctype;
@@ -67,7 +66,7 @@ void MoveEnnemySystem::_statusOperate(
         return;
     }
 
-    auto [ennemyX, ennemyY] = cposition;
+    auto [enemyX, enemyY] = cposition;
     auto [vX, vY] = cvelocity;
     vX = 0;
     vY = 0;
@@ -80,7 +79,7 @@ void MoveEnnemySystem::_statusOperate(
         float playerX = playerPos.x;
         float playerY = playerPos.y;
         auto distance =
-            (float) std::sqrt(std::pow(playerX - ennemyX, 2) + std::pow(playerY - ennemyY, 2));
+            (float) std::sqrt(std::pow(playerX - enemyX, 2) + std::pow(playerY - enemyY, 2));
 
         if (distance < closestDistance) {
             closestDistance = distance;
@@ -89,16 +88,16 @@ void MoveEnnemySystem::_statusOperate(
         }
     }
 
-    if ((ennemyX - closestPlayerX) > 1000) {
+    if ((enemyX - closestPlayerX) > 1000) {
         return;
     }
-    if (closestPlayerY < ennemyY) {
+    if (closestPlayerY < enemyY) {
         vY = -150;
     }
-    if (closestPlayerY > ennemyY) {
+    if (closestPlayerY > enemyY) {
         vY = 150;
     }
-    if (closestPlayerY < ennemyY && closestPlayerY + 50 > ennemyY) {
+    if (closestPlayerY < enemyY && closestPlayerY + 50 > enemyY) {
         vY = 0;
     }
 }
@@ -109,10 +108,10 @@ ColliderSystem::ColliderSystem():
 }
 
 void ColliderSystem::_innerOperate(
-    C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
-    C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA,
-    C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
-    C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB, C::HealthPool::Types &chealthB
+    C::EntityStatus::Pool::Types &cStatusA, C::Position::Pool::Types &cpositionA,
+    C::Size::Pool::Types &csizeA, C::Type::Pool::Types &ctypeA, C::Health::Pool::Types &chealthA,
+    C::EntityStatus::Pool::Types &cStatusB, C::Position::Pool::Types &cpositionB,
+    C::Size::Pool::Types &csizeB, C::Type::Pool::Types &ctypeB, C::Health::Pool::Types &chealthB
 )
 {
     auto [statusA] = cStatusA;
@@ -174,13 +173,13 @@ void ColliderSystem::_innerOperate(
 }
 
 GetPlayerPositionSystem::GetPlayerPositionSystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+    AMonoSystem(false)
 {
 }
 
-void GetPlayerPositionSystem::_statusOperate(
-    C::EntityStatusPool::Types &centitystatus, C::PositionPool::Types &cposition,
-    C::TypePool::Types &ctype
+void GetPlayerPositionSystem::_innerOperate(
+    C::EntityStatus::Pool::Types &centitystatus, C::Position::Pool::Types &cposition,
+    C::Type::Pool::Types &ctype
 )
 {
     auto [entityStatus] = centitystatus;

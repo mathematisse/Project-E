@@ -6,12 +6,12 @@
 
 namespace ECS::S {
 
-class IncrementTimerSystem : public S::AStatusMonoSystem<C::TimerPool>, public S::ADeltaTimeSystem {
+class IncrementTimerSystem : public S::AMonoSystem<C::Timer::Pool>, public S::ADeltaTimeSystem {
 public:
     ~IncrementTimerSystem() override = default;
 
 protected:
-    void _statusOperate(typename C::TimerPool::Types &ctimer) override;
+    void _innerOperate(typename C::Timer::Pool::Types &ctimer) override;
 };
 
 }

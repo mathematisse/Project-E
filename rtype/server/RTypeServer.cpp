@@ -1,10 +1,8 @@
 #include "RTypeServer.hpp"
-#include "DecorEntities.hpp"
+#include "Archetypes.hpp"
 #include "RTypePackets.hpp"
-#include "GameEntities.hpp"
 #include "lib_net/Packet.hpp"
 #include "lib_log/log.hpp"
-#include <iostream>
 #include <string>
 
 net::RTypeServer::RTypeServer(
@@ -44,40 +42,27 @@ void net::RTypeServer::on_udp_connect(client_id id)
 {
     LOG_DEBUG("UDP client connected: " + std::to_string(id));
 
-    auto newP = _entityManager.createEntities("GameEntity", 1, ECS::C::ENT_ALIVE);
-    for (const auto &entity : newP) {
-        auto ref = _entityManager.getEntity(entity);
+    auto player = _entityManager.createEntity<ECS::E::BaseEntity>();
 
-        auto *square_player = dynamic_cast<ECS::E::GameEntityRef *>(ref.get());
-        if (square_player == nullptr) {
-            LOG_ERROR("Failed to cast IEntityRef to GameEntityRef");
-            return;
-        }
-        square_player->setPosition({1920.0F / 4.0F, 1080.0F / 2.0F});
-        square_player->setType({GameEntityType::PLAYER});
-        unsigned char r = rand() % 255;
-        unsigned char g = rand() % 255;
-        unsigned char b = rand() % 255;
-        square_player->setColor({r, g, b, 255});
-        square_player->setWeapon({WeaponType::BULLET});
-        square_player->setCanShoot(
-            {true, (*square_player->getWeapon().get<0>() == WeaponType::BIG_SHOT) ? 1.5F : 0.3F,
-             0.0F}
-        );
-        square_player->setSize({80, 80});
-        square_player->setRotation({90});
-        square_player->setSprite({0});
-        square_player->setHealth({4});
-        auto netId = networkManager.getnewNetID();
-        square_player->setNetworkID({netId});
+    player.setPosition({1920.0F / 4.0F, 1080.0F / 2.0F});
+    player.setType({GameEntityType::PLAYER});
+    unsigned char r = rand() % 255;
+    unsigned char g = rand() % 255;
+    unsigned char b = rand() % 255;
+    player.setColor({r, g, b, 255});
+    player.setWeapon({WeaponType::BULLET});
+    player.setCanShoot({true, (player.getWeaponVal() == WeaponType::BIG_SHOT) ? 1.5F : 0.3F, 0.0F});
+    player.setSize({80, 80});
+    player.setRotation({90});
+    player.setHealth({4});
 
-        client_netIds[id] = netId;
-
-        send_tcp(
-            id, ECS::PLAYER_CONNECTION_SUCCESS,
-            net::Packet::serializeStruct(ECS::PlayerConnectionSuccess {netId, r, g, b})
-        );
-    }
+    auto netId = networkManager.getnewNetID();
+    player.setNetworkID({netId});
+    client_netIds[id] = netId;
+    send_tcp(
+        id, ECS::PLAYER_CONNECTION_SUCCESS,
+        net::Packet::serializeStruct(ECS::PlayerConnectionSuccess {netId, r, g, b})
+    );
     newClientIds.push_back(id);
 }
 

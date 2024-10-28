@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include <cstddef>
 
 namespace ECS::C {
@@ -53,6 +54,10 @@ public:
      * @param elemCount The number of elements in the chunk to be added.
      */
     virtual void addChunk(size_t elemCount) = 0;
+
+    virtual void resetComponentAtIndex(const Chunks::chunkPos_t &index) = 0;
+
+    virtual void resetComponentAtIndexes(const Chunks::cPosArr_t &indexes) = 0;
 };
 
 } // namespace ECS::C
