@@ -1,4 +1,5 @@
 #include "RTypeClient.hpp"
+#include "DecorSquare.hpp"
 #include "Square.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_net/Packet.hpp"
@@ -92,6 +93,10 @@ void net::RTypeClient::on_packet(const Packet &packet)
         float _y = newEnnemy.y;
         square_ennemy->getPosition()->set<0>(_x);
         square_ennemy->getPosition()->set<1>(_y);
+        if (WeaponType::BIG_SHOT == *square_ennemy->getWeapon()->get<0>()) {
+            square_ennemy->getPosition()->set<0>(_x - 200);
+            square_ennemy->getPosition()->set<1>(_y - 100);
+        }
         square_ennemy->getCanShoot()->set<0>(true);
         square_ennemy->getCanShoot()->set<1>(1.5F);
         square_ennemy->getNetworkID()->set<0>(newEnnemy.netId);
@@ -179,6 +184,40 @@ void net::RTypeClient::on_packet(const Packet &packet)
         auto frameId = *Packet::deserializeStruct<ECS::FrameId>(packet.data);
         cameraX = (80 * frameId.frame * 0.02F) + (1920 / 2);
         started = true;
+        break;
+    }
+    case ECS::NEW_POWERUP: {
+        auto newPowerUp = *Packet::deserializeStruct<ECS::NewPowerUp>(packet.data);
+        auto ent = _entityManager.createEntity("Square", ECS::C::ENT_ALIVE);
+        auto ref = _entityManager.getEntity(ent);
+        auto *square_powerUp = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (square_powerUp == nullptr) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return;
+        }
+        float _x = newPowerUp.x;
+        float _y = newPowerUp.y;
+        square_powerUp->getType()->set<0>(SquareType::POWERUP);
+        square_powerUp->getSize()->set<0>(80);
+        square_powerUp->getSize()->set<1>(80);
+        square_powerUp->getSize()->set<2>(90);
+        square_powerUp->getPosition()->set<0>(_x);
+        square_powerUp->getPosition()->set<1>(_y);
+        square_powerUp->getSprite()->set<0>(powerUpSpriteId);
+        square_powerUp->getSprite()->set<1>(true);
+        square_powerUp->getSprite()->set<2>(80.0F);
+        square_powerUp->getSprite()->set<3>(80.0F);
+        square_powerUp->getSprite()->set<4>(13.0F);
+        square_powerUp->getSprite()->set<5>(0);
+        square_powerUp->getHealth()->set<0>(1);
+        square_powerUp->getVelocity()->set<0>(0.0F);
+        square_powerUp->getVelocity()->set<1>(0.0F);
+        square_powerUp->getVelocity()->set<2>(0.0F);
+        square_powerUp->getCanShoot()->set<0>(false);
+        square_powerUp->getColor()->set<0>(255);
+        square_powerUp->getColor()->set<1>(255);
+        square_powerUp->getColor()->set<2>(0);
+        square_powerUp->getNetworkID()->set<0>(newPowerUp.netId);
         break;
     }
     default:

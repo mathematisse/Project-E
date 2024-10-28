@@ -13,7 +13,10 @@
     {                                                             \
         "assets", "Main ship weapons", "Aseprite", "big_shot.png" \
     }
-
+#define POWER_UP_PATH                                                           \
+    {                                                                           \
+        "assets", "Main Ship", "Main Ship - Weapons", "Aseprite", "big_gun.png" \
+    }
 #define P1F                                                     \
     {                                                           \
         "assets", "Main Ship", "Main Ship - Bases", "Aseprite", \
@@ -119,5 +122,6 @@ const std::vector<std::vector<std::string>> paths = {
     FRIGATE_1,
     MENU_BACKGROUND,
     LOADING_BACKGROUND,
-    P2
+    P2,
+    POWER_UP_PATH
 };

@@ -263,6 +263,7 @@ int main(int ac, char **av)
     client.frigateSpriteId = assetsLoader.get_asset(FRIGATE_1).id;
     client.bulletSpriteId = assetsLoader.get_asset(BASE_BULLET_PATH).id;
     client.bigShotSpriteId = assetsLoader.get_asset(BIG_SHOT_PATH).id;
+    client.powerUpSpriteId = assetsLoader.get_asset(POWER_UP_PATH).id;
 
     MainMenu mainMenu(client, assetsLoader);
 
