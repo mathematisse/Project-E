@@ -204,11 +204,8 @@ void net::RTypeClient::on_packet(const Packet &packet)
         square_powerUp->getPosition()->set<0>(_x);
         square_powerUp->getPosition()->set<1>(_y);
         square_powerUp->getSprite()->set<0>(powerUpSpriteId);
-        square_powerUp->getSprite()->set<1>(true);
         square_powerUp->getSprite()->set<2>(80.0F);
         square_powerUp->getSprite()->set<3>(80.0F);
-        square_powerUp->getSprite()->set<4>(13.0F);
-        square_powerUp->getSprite()->set<5>(0);
         square_powerUp->getHealth()->set<0>(1);
         square_powerUp->getVelocity()->set<0>(0.0F);
         square_powerUp->getVelocity()->set<1>(0.0F);
