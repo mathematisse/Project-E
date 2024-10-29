@@ -1,6 +1,5 @@
 #include "MainMenu.hpp"
 #include "AssetsPath.hpp"
-#include <chrono>
 #include "raylib.h"
 #include "raygui.h"
 

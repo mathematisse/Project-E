@@ -35,6 +35,16 @@ public:
     {
     }
 
+    // Copy constructor disabled
+    StandardChunk(const StandardChunk &other) = delete;
+
+    // move operator ok
+    StandardChunk(StandardChunk &&other) noexcept:
+        AChunk<T>(STDCHUNK, other._elems.size()),
+        _elems(std::move(other._elems))
+    {
+    }
+
     /**
      * @brief Default destructor.
      */

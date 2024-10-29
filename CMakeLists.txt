@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_RTYPE "Build R-Type" ON)
 
-# option(BUILD_2NDGAME "Build 2ndGame" ON)
+option(BUILD_2NDGAME "Build 2ndGame" ON)
 
 enable_testing()
 

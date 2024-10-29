@@ -14,13 +14,17 @@
 
 namespace ECS::S {
 
+static Camera2D dummyCamera2D = {};
+
 class DebugDrawSystem
     : public S::AStatusMonoSystem<C::Position::Pool, C::Color::Pool, C::Size::Pool> {
 public:
     explicit DebugDrawSystem(Camera2D &camera);
+    DebugDrawSystem();
     ~DebugDrawSystem() override = default;
 
     Camera2D &camera;
+    bool hasCamera;
 
 protected:
     void _statusOperate(
@@ -33,10 +37,12 @@ class DrawSpriteSystem
     : public S::AMonoSystem<C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::Sprite::Pool> {
 public:
     explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
+    DrawSpriteSystem(AssetsLoader &assetsLoader);
     ~DrawSpriteSystem() override = default;
 
     AssetsLoader &assetsLoader;
     Camera2D &camera;
+    bool hasCamera;
 
 protected:
     void _innerOperate(
@@ -50,10 +56,12 @@ class DrawAnimatedSpriteSystem
           C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::AnimatedSprite::Pool> {
 public:
     DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
+    DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader);
     ~DrawAnimatedSpriteSystem() override = default;
 
     AssetsLoader &assetsLoader;
     Camera2D &camera;
+    bool hasCamera;
 
 protected:
     void _innerOperate(

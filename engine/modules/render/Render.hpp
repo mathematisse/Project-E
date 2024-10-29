@@ -31,6 +31,17 @@ public:
         debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
     {
     }
+    explicit Render(AssetsLoader &assetsLoader):
+        debugDrawSystem(),
+        drawSpriteSystem(assetsLoader),
+        drawAnimatedSpriteSystem(assetsLoader),
+        spriteAnimationSystem(assetsLoader),
+        renderNode(
+            RENDER_SYS_GROUP, {&drawSpriteSystem, &drawAnimatedSpriteSystem, &spriteAnimationSystem}
+        ),
+        debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
+    {
+    }
     void load(ECS::EntityManager &entityManager) override
     {
         entityManager.registerSystemNode(renderNode, ROOT_SYS_GROUP);

@@ -13,8 +13,14 @@ namespace ECS::S {
 // SYSTEM
 
 DebugDrawSystem::DebugDrawSystem(Camera2D &camera):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
-    camera(camera)
+    camera(camera),
+    hasCamera(true)
+{
+}
+
+DebugDrawSystem::DebugDrawSystem():
+    camera(dummyCamera2D),
+    hasCamera(false)
 {
 }
 
@@ -25,14 +31,23 @@ void DebugDrawSystem::_statusOperate(
     auto [x, y] = cposition;
     auto [r, g, b, a] = ccolor;
     auto [sizeX, sizeY] = csize;
-    BeginMode2D(camera);
+    if (hasCamera) {
+        BeginMode2D(camera);
+    }
     DrawRectangle((int) x, (int) y, (int) sizeX, (int) sizeY, {r, g, b, a});
 }
 
 DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
-    AMonoSystem(false),
     assetsLoader(assetsLoader),
-    camera(camera)
+    camera(camera),
+    hasCamera(true)
+{
+}
+
+DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader):
+    assetsLoader(assetsLoader),
+    camera(dummyCamera2D),
+    hasCamera(false)
 {
 }
 
@@ -49,7 +64,9 @@ void DrawSpriteSystem::_innerOperate(
     auto [sizeX, sizeY] = csize;
     auto [rotation] = crotation;
     auto texture = assetsLoader.get_asset_from_id(id);
-    BeginMode2D(camera);
+    if (hasCamera) {
+        BeginMode2D(camera);
+    }
     DrawTextureEx(
         texture, {rotation == 90 ? x + sizeX : x, rotation == -90 ? y + sizeY : y}, rotation,
         sizeX / (float) texture.width, WHITE
@@ -57,9 +74,17 @@ void DrawSpriteSystem::_innerOperate(
 }
 
 DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
+    assetsLoader(assetsLoader),
+    camera(camera),
+    hasCamera(true)
+{
+}
+
+DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader):
     AMonoSystem(false),
     assetsLoader(assetsLoader),
-    camera(camera)
+    camera(dummyCamera2D),
+    hasCamera(false)
 {
 }
 
@@ -76,7 +101,9 @@ void DrawAnimatedSpriteSystem::_innerOperate(
     auto [sizeX, sizeY] = csize;
     auto [rotation] = crotation;
     auto texture = assetsLoader.get_asset_from_id(id);
-    BeginMode2D(camera);
+    if (hasCamera) {
+        BeginMode2D(camera);
+    }
     DrawTexturePro(
         texture,
         {start_position, 0, (float) texture.width / (float) nbr_frame, (float) texture.height},
