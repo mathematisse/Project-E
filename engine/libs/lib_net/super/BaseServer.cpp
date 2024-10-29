@@ -1,11 +1,7 @@
-
-#pragma once
-
 #include <algorithm>
 #include <atomic>
 #include <cstdint>
 #include <iostream>
-#include <memory>
 #include <optional>
 #include <string>
 #include <thread>
@@ -24,9 +20,7 @@
 #include "lib_net/super/TSQueue.hpp"
 #include "lib_net/uuid/Uuid.hpp"
 #include "lib_net/uuid/UuidGenerator.hpp"
-#include "lib_net/io/buffered/BufReader.hpp"
 #include "lib_net/io/buffered/BufWriter.hpp"
-#include "lib_net/Packet.hpp"
 #include "lib_net/super/BaseServer.hpp"
 
 namespace lnet::utils {
@@ -583,10 +577,7 @@ void BaseServer::context_loop(net::Poll &poll)
                 auto [id, data] = maybe_data.value();
                 if (auto it = tcp_connections.find(id); it != tcp_connections.end()) {
                     auto &connection = it->second;
-                    auto data_span = std::span<std::uint8_t>(
-                        reinterpret_cast<std::uint8_t *>(data.data()), data.size()
-                    );
-                    auto ret = connection.writer.write(data_span);
+                    auto ret = connection.writer.write(data);
                     if (!ret) {
                         std::cerr << "Tcp write error: " << ret.error().message() << std::endl;
                     }
