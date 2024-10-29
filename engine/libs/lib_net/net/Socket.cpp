@@ -134,7 +134,7 @@ auto Socket::accept() const -> io::Result<std::pair<Socket, SocketAddr>>
     );
 }
 
-auto Socket::read(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
+auto Socket::read(std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
 {
     auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
     if (nread == SOCKET_ERROR) {
@@ -143,7 +143,7 @@ auto Socket::read(const std::span<std::uint8_t> &buf) const -> io::Result<std::s
     return io::Result<std::size_t>::Success(nread);
 }
 
-auto Socket::recv_from(const std::span<std::uint8_t> &buf
+auto Socket::recv_from(std::span<std::uint8_t> &buf
 ) const -> io::Result<std::pair<std::size_t, SocketAddr>>
 {
     struct sockaddr_storage address { };

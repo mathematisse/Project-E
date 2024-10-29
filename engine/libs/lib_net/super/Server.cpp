@@ -1,14 +1,10 @@
 
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <map>
-#include <memory>
 #include <optional>
-#include <random>
 #include <span>
-#include <unordered_map>
 #include <vector>
 
 #include "lib_net/Packet.hpp"
@@ -24,7 +20,7 @@ namespace net {
 // The function should not give the same result for different numbers
 auto Server::transformNumberFunction(std::uint64_t number) -> std::uint64_t
 {
-    // example function (should be overriden)
+    // example function (should be overriden by the higher order class)
     constexpr std::uint64_t SECRET_NUMBER = 0x1234567890ABCDEF;
     return number ^ SECRET_NUMBER;
 }
@@ -157,6 +153,7 @@ void Server::on_udp_data(const lnet::net::SocketAddr &addr, const std::vector<st
     }
 }
 
+// TODO: remove stream reference (edge case exist where the stream is deleted in another thread)
 void Server::on_tcp_data(
     lnet::uuid::Uuid tcp_connection_id,
     lnet::io::Mutex<lnet::io::BufReader<lnet::net::TcpStream>> &stream
@@ -175,12 +172,11 @@ void Server::on_tcp_data(
         });
 
         while (packet.has_value()) {
-            std::cout << "TCP data received from client " << matchingClient->first << std::endl;
             if (packet->header.type == Packet::SystemTypes::ASKUDP_NUMBER) {
                 if (auto udp_data =
                         Packet::deserializeStruct<UdpConnectionPacketInitialisation>(packet->data);
                     udp_data.has_value()) {
-                    std::cout << "UDP connection response received LLLL" << std::endl;
+                    std::cout << "UDP connection response received" << std::endl;
                     ask_udp_connection_response(
                         udp_data->client_uuid, transformNumberFunction(udp_data->generated_number)
                     );
@@ -237,8 +233,6 @@ void Server::ask_udp_connection_response(
         Packet::SystemTypes::ASKUDP_RESPONSE,
         Packet::serializeStruct(UdpConnectionPacketConfirmation {client_uuid, transformed_number})
     );
-    std::cout << "Asking UDP connection response to client " << client_uuid
-              << " DATA: size = " << data.size() << std::endl;
     lnet::utils::BaseServer::send_udp(data.serialize());
 }
 
@@ -247,15 +241,11 @@ void Server::handle_udp_connection_request(
     const std::vector<std::uint8_t> &data, const lnet::net::SocketAddr &addr
 )
 {
-    std::cout << "UDP Entering maybe connection" << std::endl;
     if (auto packet = Packet::deserialize(data); packet.has_value()) {
-        std::cout << "UDP connection request of size " << packet->size() << std::endl;
         if (packet->header.type == Packet::SystemTypes::ASKUDP_RESPONSE) {
-            std::cout << "UDP connection response received UUUUU" << std::endl;
             if (auto udp_data =
                     Packet::deserializeStruct<UdpConnectionPacketConfirmation>(packet->data);
                 udp_data.has_value()) {
-                std::cout << "UDP connection request received PPPPP" << std::endl;
                 auto matchingClient = _clients.find(udp_data->client_uuid);
                 // check if the client is indeed the one that sent the request
                 if (matchingClient != _clients.end() &&
@@ -265,17 +255,9 @@ void Server::handle_udp_connection_request(
                     matchingClient->second.udp_addr = addr;
                     _udp_connection_cache.insert({addr, udp_data->client_uuid});
                     on_udp_connect(udp_data->client_uuid);
-                } else {
-                    std::cerr << "UDP not valid client" << std::endl;
                 }
-            } else {
-                std::cerr << "UDP not valid packet data" << std::endl;
             }
-        } else {
-            std::cerr << "UDP not valid header type " << packet->header.type << std::endl;
         }
-    } else {
-        std::cerr << "UDP not valid packet" << std::endl;
     }
     // else ignore the packet
 }

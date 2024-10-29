@@ -21,8 +21,8 @@ public:
     [[nodiscard]] auto connect(const SocketAddr &addr) const -> io::Result<result::Void>;
     [[nodiscard]] auto close() const -> io::Result<result::Void>;
     [[nodiscard]] auto accept() const -> io::Result<std::pair<Socket, SocketAddr>>;
-    [[nodiscard]] auto read(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>;
-    [[nodiscard]] auto recv_from(const std::span<std::uint8_t> &buf
+    [[nodiscard]] auto read(std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>;
+    [[nodiscard]] auto recv_from(std::span<std::uint8_t> &buf
     ) const -> io::Result<std::pair<std::size_t, SocketAddr>>;
     [[nodiscard]] auto write(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>;
     [[nodiscard]] auto send_to(const std::span<std::uint8_t> &buf, const SocketAddr &addr) const

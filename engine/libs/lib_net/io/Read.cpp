@@ -62,7 +62,8 @@ Result<std::size_t> Read::read_exact(std::span<std::uint8_t> buf)
     size_t bytesRead = 0;
     size_t totalBytesRead = 0;
     while (totalBytesRead < buf.size()) {
-        auto result = read(buf.subspan(totalBytesRead));
+        auto subBuf = buf.subspan(totalBytesRead);
+        auto result = read(subBuf);
         if (result.isError()) {
             return io::Result<std::size_t>::Error(result.error());
         }

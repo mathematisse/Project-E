@@ -1,16 +1,11 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
 #include <map>
 #include <memory>
-#include <optional>
 #include <random>
-#include <span>
-#include <unordered_map>
 #include <vector>
 
 #include "lib_net/Packet.hpp"
@@ -94,6 +89,12 @@ public:
     */
     void
     on_udp_data(const lnet::net::SocketAddr &addr, const std::vector<std::uint8_t> &data) override;
+
+    inline bool is_valid_udp_message(const std::vector<std::uint8_t> &data) override
+    {
+        auto packet = Packet::deserialize(data);
+        return packet.has_value() && packet->header.size != 0;
+    }
 
     void on_tcp_data(
         lnet::uuid::Uuid tcp_connection_id,

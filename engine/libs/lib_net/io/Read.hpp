@@ -16,7 +16,7 @@ public:
 
     // Pull some bytes from this source into the specified buffer, returning
     // how many bytes were read.
-    [[nodiscard]] virtual Result<std::size_t> read(const std::span<std::uint8_t> &buf) = 0;
+    [[nodiscard]] virtual Result<std::size_t> read(std::span<std::uint8_t> &buf) = 0;
 
     // Like `read`, except that it reads into a slice of buffers.
     [[nodiscard]] virtual Result<std::size_t>
