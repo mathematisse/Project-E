@@ -27,6 +27,7 @@ auto Ipv4Addr::parse_ascii(const std::string &str) -> result::Result<Ipv4Addr, A
 
     auto *ipv4 = reinterpret_cast<sockaddr_in *>(result->ai_addr);
     auto addr = Ipv4Addr(ipv4->sin_addr.s_addr);
+    ::freeaddrinfo(result);
     return result::Result<Ipv4Addr, AddrParseError>::Success(addr);
 }
 

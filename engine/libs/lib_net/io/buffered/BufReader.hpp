@@ -22,15 +22,15 @@ public:
     }
 
     [[nodiscard]] auto reader() const -> const R & { return _inner; }
-    [[nodiscard]] auto buffer() -> std::span<std::byte> { return _buffer.buffer(); }
+    [[nodiscard]] auto buffer() -> std::span<std::uint8_t> { return _buffer.buffer(); }
     [[nodiscard]] auto capacity() const -> size_t { return _buffer.capacity(); }
     auto discard_buffer() -> void { _buffer.discard_buffer(); }
 
-    auto fill_buf() -> Result<std::span<std::byte>> { return _buffer.fill_buf(_inner); }
+    auto fill_buf() -> Result<std::span<std::uint8_t>> { return _buffer.fill_buf(_inner); }
     auto consume(size_t amt) -> void { _buffer.consume(amt); }
 
     // read implementation part
-    auto read(std::span<std::byte> buf) -> Result<std::size_t>
+    auto read(std::span<std::uint8_t> buf) -> Result<std::size_t>
     {
         if (_buffer.pos() == _buffer.filled() && buf.size() >= capacity()) {
             discard_buffer();
@@ -48,7 +48,7 @@ public:
         return Result<std::size_t>::Success(nread.value());
     }
 
-    auto read_exact(std::span<std::byte> buf) -> Result<result::Void>
+    auto read_exact(std::span<std::uint8_t> buf) -> Result<result::Void>
     {
         size_t total_read = 0;
         while (total_read < buf.size()) {
@@ -61,7 +61,7 @@ public:
         return Result<result::Void>::Success({});
     }
 
-    auto read_vectored(std::span<std::span<std::byte>> bufs) -> Result<std::size_t>
+    auto read_vectored(std::span<std::span<std::uint8_t>> bufs) -> Result<std::size_t>
     {
         size_t total_len = 0;
         for (const auto &buf : bufs) {
@@ -85,7 +85,7 @@ public:
 
     [[nodiscard]] auto is_read_vectored() const -> bool { return _inner.is_read_vectored(); }
 
-    auto read_to_end(std::vector<std::byte> &buf) -> Result<std::size_t>
+    auto read_to_end(std::vector<std::uint8_t> &buf) -> Result<std::size_t>
     {
         auto inner_buf = _buffer.buffer();
         buf.reserve(buf.size() + inner_buf.size());
@@ -102,7 +102,7 @@ public:
     auto read_to_string(std::string &buf) -> Result<std::size_t>
     {
         if (buf.empty()) {
-            std::vector<std::byte> byte_buf;
+            std::vector<std::uint8_t> byte_buf;
             auto result = read_to_end(byte_buf);
             if (!result) {
                 return result.error();
@@ -110,7 +110,7 @@ public:
             buf.append(reinterpret_cast<const char *>(byte_buf.data()), byte_buf.size());
             return Result<std::size_t>::Success(result.value());
         } else {
-            std::vector<std::byte> byte_buf;
+            std::vector<std::uint8_t> byte_buf;
             auto result = read_to_end(byte_buf);
             if (!result) {
                 return result.error();

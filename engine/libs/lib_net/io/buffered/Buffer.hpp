@@ -17,7 +17,7 @@ private:
     std::size_t _pos = 0;
     std::size_t _filled = 0;
     std::size_t _capacity;
-    std::vector<std::byte> _buffer;
+    std::vector<std::uint8_t> _buffer;
 
 public:
     explicit Buffer(std::size_t capacity = DEFAULT_BUF_SIZE):
@@ -32,9 +32,9 @@ public:
     Buffer(Buffer &&other) noexcept = default;
     Buffer &operator=(Buffer &&other) noexcept = default;
 
-    inline auto buffer() -> std::span<std::byte>
+    inline auto buffer() -> std::span<std::uint8_t>
     {
-        return std::span<std::byte>(_buffer).subspan(_pos, _filled - _pos);
+        return std::span<std::uint8_t>(_buffer).subspan(_pos, _filled - _pos);
     }
 
     [[nodiscard]] inline auto capacity() const -> std::size_t { return _capacity; }
@@ -56,7 +56,7 @@ public:
             return false;
         }
 
-        visitor(std::span<std::byte>(_buffer).subspan(_pos, amt));
+        visitor(std::span<std::uint8_t>(_buffer).subspan(_pos, amt));
         consume(amt);
         return true;
     }
@@ -65,7 +65,7 @@ public:
 
     template<typename R>
         requires io::Readable<R>
-    inline auto fill_buf(R &reader) -> io::Result<std::span<std::byte>>
+    inline auto fill_buf(R &reader) -> io::Result<std::span<std::uint8_t>>
     {
         if (_pos == _filled) {
             _pos = 0;
@@ -73,22 +73,23 @@ public:
         }
 
         if (_filled == _capacity) {
-            return io::Result<std::span<std::byte>>(std::span<std::byte>());
+            return io::Result<std::span<std::uint8_t>>(std::span<std::uint8_t>());
         }
 
-        auto buf = std::span<std::byte>(_buffer).subspan(_filled);
+        auto buf = std::span<std::uint8_t>(_buffer).subspan(_filled);
         auto result = reader.read(buf);
         if (result) {
             size_t bytesRead = result.value();
             _filled += bytesRead;
             if (bytesRead == 0) {
-                return io::Result<std::span<std::byte>>::Success(std::span<std::byte>());
+                return io::Result<std::span<std::uint8_t>>::Success(std::span<std::uint8_t>());
             }
             // return the part of the buffer that was filled
-            auto filled_buf = std::span<std::byte>(_buffer).subspan(_filled - bytesRead, bytesRead);
-            return io::Result<std::span<std::byte>>::Success(filled_buf);
+            auto filled_buf =
+                std::span<std::uint8_t>(_buffer).subspan(_filled - bytesRead, bytesRead);
+            return io::Result<std::span<std::uint8_t>>::Success(filled_buf);
         }
-        return io::Result<std::span<std::byte>>::Error(result.error());
+        return io::Result<std::span<std::uint8_t>>::Error(result.error());
     }
 };
 }

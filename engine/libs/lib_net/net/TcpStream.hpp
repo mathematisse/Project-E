@@ -38,11 +38,11 @@ public:
         return _sock.shutdown();
     }
 
-    inline auto read(const std::span<std::byte> &buf) -> io::Result<std::size_t> override
+    inline auto read(const std::span<std::uint8_t> &buf) -> io::Result<std::size_t> override
     {
         return _sock.read(buf);
     }
-    inline auto write(const std::span<std::byte> &buf) -> io::Result<std::size_t> override
+    inline auto write(const std::span<std::uint8_t> &buf) -> io::Result<std::size_t> override
     {
         return _sock.write(buf);
     }

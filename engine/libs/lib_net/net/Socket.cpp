@@ -134,7 +134,7 @@ auto Socket::accept() const -> io::Result<std::pair<Socket, SocketAddr>>
     );
 }
 
-auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
+auto Socket::read(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
 {
     auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
     if (nread == SOCKET_ERROR) {
@@ -143,7 +143,7 @@ auto Socket::read(const std::span<std::byte> &buf) const -> io::Result<std::size
     return io::Result<std::size_t>::Success(nread);
 }
 
-auto Socket::recv_from(const std::span<std::byte> &buf
+auto Socket::recv_from(const std::span<std::uint8_t> &buf
 ) const -> io::Result<std::pair<std::size_t, SocketAddr>>
 {
     struct sockaddr_storage address { };
@@ -161,7 +161,7 @@ auto Socket::recv_from(const std::span<std::byte> &buf
     return io::Result<std::pair<std::size_t, SocketAddr>>::Success({nread, addr});
 }
 
-auto Socket::write(const std::span<std::byte> &buf) const -> io::Result<std::size_t>
+auto Socket::write(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
 {
     auto nwritten =
         ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
@@ -171,7 +171,7 @@ auto Socket::write(const std::span<std::byte> &buf) const -> io::Result<std::siz
     return io::Result<std::size_t>::Success(nwritten);
 }
 
-auto Socket::send_to(const std::span<std::byte> &buf, const SocketAddr &addr) const
+auto Socket::send_to(const std::span<std::uint8_t> &buf, const SocketAddr &addr) const
     -> io::Result<std::size_t>
 {
     auto [address, address_len] = initialize_address(addr);

@@ -24,13 +24,13 @@ auto UdpSocket::any(int domain) -> io::Result<UdpSocket>
     return io::Result<UdpSocket>::Error(sock.error());
 }
 
-auto UdpSocket::recv_from(std::span<std::byte> &buf
+auto UdpSocket::recv_from(std::span<std::uint8_t> &buf
 ) const -> io::Result<std::pair<size_t, SocketAddr>>
 {
     return _sock.recv_from(buf);
 }
 
-auto UdpSocket::send_to(const std::span<std::byte> &buf, const SocketAddr &addr) const
+auto UdpSocket::send_to(const std::span<std::uint8_t> &buf, const SocketAddr &addr) const
     -> io::Result<size_t>
 {
     return _sock.send_to(buf, addr);
@@ -41,12 +41,12 @@ auto UdpSocket::connect(const SocketAddr &addr) const -> io::Result<result::Void
     return _sock.connect(addr);
 }
 
-auto UdpSocket::send(const std::span<std::byte> &buf) const -> io::Result<size_t>
+auto UdpSocket::send(const std::span<std::uint8_t> &buf) const -> io::Result<size_t>
 {
     return _sock.write(buf);
 }
 
-auto UdpSocket::recv(std::span<std::byte> &buf) const -> io::Result<size_t>
+auto UdpSocket::recv(std::span<std::uint8_t> &buf) const -> io::Result<size_t>
 {
     return _sock.read(buf);
 }

@@ -31,6 +31,12 @@ public:
         lnet::uuid::Uuid tcp_connection_id;
         lnet::net::SocketAddr udp_addr;
         std::uint64_t generated_number;
+
+        Client(lnet::uuid::Uuid tcp_connection_id, std::uint64_t generated_number):
+            tcp_connection_id(tcp_connection_id),
+            generated_number(generated_number)
+        {
+        }
     };
 
     Server() = default;
@@ -87,7 +93,7 @@ public:
         the udp connection request and the udp connection response
     */
     void
-    on_udp_data(const lnet::net::SocketAddr &addr, const std::vector<std::byte> &data) override;
+    on_udp_data(const lnet::net::SocketAddr &addr, const std::vector<std::uint8_t> &data) override;
 
     void on_tcp_data(
         lnet::uuid::Uuid tcp_connection_id,
@@ -96,21 +102,27 @@ public:
 
     bool has_udp_connection(lnet::uuid::Uuid client_uuid) const;
 
-    size_t numberClients() const { return _clients.size(); }
+    size_t numberClients() const { return _udp_connection_cache.size(); }
 
 private:
+#pragma pack(push, 1)
     struct UdpConnectionPacketInitialisation {
         lnet::uuid::Uuid client_uuid;
         std::uint64_t generated_number;
     };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
     struct UdpConnectionPacketConfirmation {
         lnet::uuid::Uuid client_uuid;
         std::uint64_t transformed_number;
     };
+#pragma pack(pop)
 
     /// The server sends a random number to the client
-    void ask_udp_connection_request(lnet::uuid::Uuid client_uuid);
+    void ask_udp_connection_request(
+        lnet::uuid::Uuid client_uuid, std::uint64_t number, lnet::uuid::Uuid tcp_connection_id
+    );
 
     /// The client receives the number
     void
@@ -118,19 +130,19 @@ private:
 
     /// The client sends back the number transformed by the client
     void handle_udp_connection_request(
-        const std::vector<std::byte> &data, const lnet::net::SocketAddr &addr
+        const std::vector<std::uint8_t> &data, const lnet::net::SocketAddr &addr
     );
 
     /// The server receives the transformed number and checks if it is correct
     void handle_udp_connection_response(
-        const std::vector<std::byte> &data, const lnet::net::SocketAddr &addr
+        const std::vector<std::uint8_t> &data, const lnet::net::SocketAddr &addr
     );
 
     std::shared_ptr<std::mt19937_64> _number_generator =
         std::make_shared<std::mt19937_64>(std::random_device()());
     lnet::uuid::UuidGenerator<std::mt19937_64> client_uuid_generator =
         lnet::uuid::UuidGenerator(_number_generator);
-    std::unordered_map<lnet::uuid::Uuid, Client> _clients;
+    std::map<lnet::uuid::Uuid, Client> _clients;
     /// keeps track of the verified UDP connections (linked with a TCP connection)
     /// this is some kind of cache to find the client UUID from the UDP address fast
     std::map<lnet::net::SocketAddr, lnet::uuid::Uuid> _udp_connection_cache;

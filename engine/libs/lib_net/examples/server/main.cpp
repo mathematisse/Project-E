@@ -77,8 +77,8 @@ int main()
                     } else if (event.fd == udp_socket_result.get_fd()) {
                         // Handle UDP data
                         std::vector<uint8_t> buffer(1024);
-                        auto span_buffer = std::span<std::byte>(
-                            reinterpret_cast<std::byte *>(buffer.data()), buffer.size()
+                        auto span_buffer = std::span<std::uint8_t>(
+                            reinterpret_cast<std::uint8_t *>(buffer.data()), buffer.size()
                         );
                         auto recv_result = udp_socket_result.recv_from(span_buffer);
                         if (recv_result) {
@@ -99,8 +99,8 @@ int main()
                         );
                         if (it != tcp_connections.end()) {
                             std::vector<uint8_t> buffer(1024);
-                            auto span_buffer = std::span<std::byte>(
-                                reinterpret_cast<std::byte *>(buffer.data()), buffer.size()
+                            auto span_buffer = std::span<std::uint8_t>(
+                                reinterpret_cast<std::uint8_t *>(buffer.data()), buffer.size()
                             );
                             auto recv_result = it->read(span_buffer);
                             if (recv_result) {

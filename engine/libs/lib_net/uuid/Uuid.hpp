@@ -49,7 +49,7 @@ public:
     {
     }
 
-    static auto new_from_bytes(const std::vector<std::byte> &bytes) -> Result<Uuid>
+    static auto new_from_bytes(const std::vector<std::uint8_t> &bytes) -> Result<Uuid>
     {
         if (bytes.size() != sizeof(data)) {
             return Result<Uuid>::Error(UuidError {UuidError::Type::InvalidByteStringSize});
@@ -98,10 +98,10 @@ public:
     friend bool operator>=(const Uuid &lhs, const Uuid &rhs) { return !(lhs < rhs); }
 
     [[nodiscard]]
-    std::vector<std::byte> to_bytes() const
+    std::vector<std::uint8_t> to_bytes() const
     {
-        const std::byte *begin = reinterpret_cast<const std::byte *>(&data);
-        const std::byte *end = begin + sizeof(data);
+        const std::uint8_t *begin = reinterpret_cast<const std::uint8_t *>(&data);
+        const std::uint8_t *end = begin + sizeof(data);
         return {begin, end};
     }
 

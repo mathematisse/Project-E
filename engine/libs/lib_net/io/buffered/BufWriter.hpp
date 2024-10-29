@@ -2,6 +2,8 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
+#include <system_error>
 #include <vector>
 
 #include "lib_net/io/Write.hpp"
@@ -12,7 +14,7 @@ namespace lnet::io {
 
 class BufWriter {
 private:
-    std::vector<std::byte> _buffer;
+    std::vector<std::uint8_t> _buffer;
     Write &_inner;
 
 public:
@@ -28,13 +30,13 @@ public:
     }
 
     [[nodiscard]] auto writer() const -> const Write & { return _inner; }
-    [[nodiscard]] auto buffer() const -> const std::vector<std::byte> & { return _buffer; }
+    [[nodiscard]] auto buffer() const -> const std::vector<std::uint8_t> & { return _buffer; }
     [[nodiscard]] auto capacity() const -> size_t { return _buffer.capacity(); }
     [[nodiscard]] auto len() const -> size_t { return _buffer.size(); }
     [[nodiscard]] auto is_empty() const -> bool { return _buffer.empty(); }
 
 private:
-    size_t write_to_buf(const std::span<std::byte> &buf)
+    size_t write_to_buf(const std::span<std::uint8_t> &buf)
     {
         size_t available = _buffer.capacity() - _buffer.size();
         size_t amt_to_buffer = std::min(available, buf.size());
@@ -44,7 +46,7 @@ private:
         return amt_to_buffer;
     }
 
-    auto write_cold(const std::span<std::byte> &buf) -> Result<size_t>
+    auto write_cold(const std::span<std::uint8_t> &buf) -> Result<size_t>
     {
         if (buf.size() > (_buffer.capacity() - _buffer.size())) {
             auto flush_result = flush_buf();
@@ -65,7 +67,7 @@ private:
         }
     }
 
-    auto write_all_cold(const std::span<std::byte> &buf) -> Result<result::Void>
+    auto write_all_cold(const std::span<std::uint8_t> &buf) -> Result<result::Void>
     {
         if (buf.size() > (_buffer.capacity() - _buffer.size())) {
             auto flush_result = flush_buf();
@@ -87,17 +89,20 @@ private:
     }
 
 public:
-    auto write(const std::span<std::byte> &buf) -> Result<size_t>
+    auto write(const std::span<std::uint8_t> &buf) -> Result<size_t>
     {
         if (buf.size() < (_buffer.capacity() - _buffer.size())) {
             _buffer.insert(_buffer.end(), buf.begin(), buf.end());
             return Result<size_t>(buf.size());
         } else {
-            return write_cold(buf);
+            /// This should not be called for sockets
+            // return write_cold(buf);
+            std::cerr << "write_cold should not be called for sockets" << std::endl;
+            return Result<size_t>::Success(0);
         }
     }
 
-    auto write_all(const std::span<std::byte> &buf) -> Result<result::Void>
+    auto write_all(const std::span<std::uint8_t> &buf) -> Result<result::Void>
     {
         if (buf.size() < (_buffer.capacity() - _buffer.size())) {
             _buffer.insert(_buffer.end(), buf.begin(), buf.end());
@@ -107,7 +112,7 @@ public:
         }
     }
 
-    auto write_vectored(const std::vector<std::span<std::byte>> &bufs) -> Result<size_t>
+    auto write_vectored(const std::vector<std::span<std::uint8_t>> &bufs) -> Result<size_t>
     {
         size_t total_len = 0;
         for (const auto &buf : bufs) {
@@ -154,12 +159,17 @@ private:
             return Result<result::Void>(result::Void {});
         }
 
-        auto write_result = _inner.write_all(_buffer);
+        auto write_result = _inner.write(_buffer);
         if (!write_result) {
-            return write_result;
+            return Result<result::Void>::Error(write_result);
         }
-
-        _buffer.clear();
+        // _buffer.clear();s
+        // remove the written bytes and move the rest to the beginning of the buffer while keeping
+        // the capacity given intially
+        auto capacity = _buffer.capacity();
+        _buffer.erase(_buffer.begin(), _buffer.begin() + write_result.value());
+        _buffer.shrink_to_fit();
+        _buffer.reserve(capacity);
         return Result<result::Void>(result::Void {});
     }
 };

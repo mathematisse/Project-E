@@ -113,7 +113,11 @@ auto Poll::remove(const TcpListener &listener) -> io::Result<result::Void>
 auto Poll::wait(std::optional<std::size_t> timeout) -> io::Result<std::vector<PollEvent>>
 {
     int poll_timeout = timeout.has_value() ? static_cast<int>(*timeout) : -1;
+#ifdef __linux__
     int nfds = ::poll(reinterpret_cast<pollfd *>(fds.data()), fds.size(), poll_timeout);
+#else
+    int nfds = ::WSAPoll(reinterpret_cast<WSAPOLLFD *>(fds.data()), fds.size(), poll_timeout);
+#endif
 
     if (nfds == -1) {
         return io::Result<std::vector<PollEvent>>::Error(

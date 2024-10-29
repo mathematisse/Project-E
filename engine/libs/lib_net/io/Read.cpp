@@ -6,7 +6,7 @@
 namespace lnet::io {
 
 // Like `read`, except that it reads into a slice of buffers.
-Result<std::size_t> Read::read_vectored(std::span<std::span<std::byte>> bufs, size_t &bytesRead)
+Result<std::size_t> Read::read_vectored(std::span<std::span<std::uint8_t>> bufs, size_t &bytesRead)
 {
     size_t totalBytesRead = 0;
     for (auto &buf : bufs) {
@@ -23,10 +23,10 @@ Result<std::size_t> Read::read_vectored(std::span<std::span<std::byte>> bufs, si
 }
 
 // Read all bytes until EOF in this source, placing them into `buf`.
-Result<std::size_t> Read::read_to_end(std::vector<std::byte> &buf, size_t &bytesRead)
+Result<std::size_t> Read::read_to_end(std::vector<std::uint8_t> &buf, size_t &bytesRead)
 {
     size_t totalBytesRead = 0;
-    std::span<std::byte> tempBuf(buf.data(), buf.size());
+    std::span<std::uint8_t> tempBuf(buf.data(), buf.size());
     while (true) {
         auto errorCode = read(tempBuf);
         if (errorCode.isError()) {
@@ -45,7 +45,7 @@ Result<std::size_t> Read::read_to_end(std::vector<std::byte> &buf, size_t &bytes
 // Read all bytes until EOF in this source, appending them to `buf`.
 Result<std::size_t> Read::read_to_string(std::string &buf, size_t &bytesRead)
 {
-    std::vector<std::byte> tempBuf;
+    std::vector<std::uint8_t> tempBuf;
     auto result = read_to_end(tempBuf, bytesRead);
     if (result.isError()) {
         return io::Result<std::size_t>::Error(result.error());
@@ -57,7 +57,7 @@ Result<std::size_t> Read::read_to_string(std::string &buf, size_t &bytesRead)
 }
 
 // Read the exact number of bytes required to fill `buf`.
-Result<std::size_t> Read::read_exact(std::span<std::byte> buf)
+Result<std::size_t> Read::read_exact(std::span<std::uint8_t> buf)
 {
     size_t bytesRead = 0;
     size_t totalBytesRead = 0;

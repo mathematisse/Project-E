@@ -9,7 +9,7 @@
 
 namespace lnet::io {
 
-Result<size_t> Write::write_vectored(const std::span<std::span<std::byte>> &bufs)
+Result<size_t> Write::write_vectored(const std::span<std::span<std::uint8_t>> &bufs)
 {
     size_t total_written = 0;
     for (const auto &buf : bufs) {
@@ -22,7 +22,7 @@ Result<size_t> Write::write_vectored(const std::span<std::span<std::byte>> &bufs
     return Result<size_t>(total_written);
 }
 
-Result<result::Void> Write::write_all(const std::span<std::byte> &buf)
+Result<result::Void> Write::write_all(const std::span<std::uint8_t> &buf)
 {
     size_t total_written = 0;
     while (total_written < buf.size()) {
@@ -35,7 +35,7 @@ Result<result::Void> Write::write_all(const std::span<std::byte> &buf)
     return Result<result::Void>(result::Void {});
 }
 
-Result<result::Void> Write::write_all_vectored(std::span<std::span<std::byte>> &bufs)
+Result<result::Void> Write::write_all_vectored(std::span<std::span<std::uint8_t>> &bufs)
 {
     for (auto &buf : bufs) {
         auto result = write_all(buf);
@@ -48,10 +48,10 @@ Result<result::Void> Write::write_all_vectored(std::span<std::span<std::byte>> &
 
 Result<result::Void> Write::write_str(const std::string &str)
 {
-    std::vector<std::byte> byte_buf(str.size());
+    std::vector<std::uint8_t> byte_buf(str.size());
     // Convert the string to a byte buffer
     std::transform(str.begin(), str.end(), byte_buf.begin(), [](char c) {
-        return std::byte(c);
+        return std::uint8_t(c);
     });
     return write_all(byte_buf);
 }
