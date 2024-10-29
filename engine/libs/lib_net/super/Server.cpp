@@ -141,7 +141,6 @@ void Server::on_udp_data(const lnet::net::SocketAddr &addr, const std::vector<st
 {
     // if the client is already connected with UDP on_packet will be called else we call
     // handle_udp_connection_request
-    std::cout << "UDP data received from " << addr.to_string() << std::endl;
     if (auto matchingClient = _udp_connection_cache.find(addr);
         matchingClient != _udp_connection_cache.end()) {
         auto packet = Packet::deserialize(data);
