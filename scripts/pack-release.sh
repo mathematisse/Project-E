@@ -6,6 +6,8 @@ if [ "$#" -ne 1 ]; then
 fi
 RELEASE_DIR=release/rtype-$1-x86_64-linux
 
+./scripts/check-version-name.sh $1 || exit 1
+
 bash scripts/build-release.sh
 
 # Create release folder
