@@ -5,56 +5,56 @@
 
 #define BASE_BULLET_PATH                                               \
     {                                                                  \
-        "assets", "Main ship weapons", "Aseprite", "Cannon_bullet.png" \
+        "assets", "Mainshipweapons", "Aseprite", "Cannon_bullet.png" \
     }
 #define CUT_BULLET_PATH                                                 \
     {                                                                   \
-        "assets", "Main ship weapons", "Aseprite", "Cannon_bulletC.png" \
+        "assets", "Mainshipweapons", "Aseprite", "Cannon_bulletC.png" \
     }
 #define BIG_SHOT_PATH                                             \
     {                                                             \
-        "assets", "Main ship weapons", "Aseprite", "big_shot.png" \
+        "assets", "Mainshipweapons", "Aseprite", "big_shot.png" \
     }
 #define POWER_UP_PATH                                                            \
     {                                                                            \
-        "assets", "Main Ship", "Main Ship - Weapons", "Aseprite", "power_up.png" \
+        "assets", "MainShip", "MainShipWeapons", "Aseprite", "power_up.png" \
     }
 #define P1F                                                     \
     {                                                           \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", \
-            "Main Ship - Base - Full health.png"                \
+        "assets", "MainShip", "MainShipBases", "Aseprite", \
+            "MainShipBaseFull health.png"                \
     }
 #define P1FR                                                                           \
     {                                                                                  \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "MainShipFResized.png" \
+        "assets", "MainShip", "MainShipBases", "Aseprite", "MainShipFResized.png" \
     }
 #define P2                                                                        \
     {                                                                             \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "OtherPlayer.png" \
+        "assets", "MainShip", "MainShipBases", "Aseprite", "OtherPlayer.png" \
     }
 #define P1SD                                                               \
     {                                                                      \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1SD.png" \
+        "assets", "MainShip", "MainShipBases", "Aseprite", "P1SD.png" \
     }
 #define P1D                                                               \
     {                                                                     \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1D.png" \
+        "assets", "MainShip", "MainShipBases", "Aseprite", "P1D.png" \
     }
 #define P1VD                                                               \
     {                                                                      \
-        "assets", "Main Ship", "Main Ship - Bases", "Aseprite", "P1VD.png" \
+        "assets", "MainShip", "MainShipBases", "Aseprite", "P1VD.png" \
     }
 #define E1F                                                        \
     {                                                              \
-        "assets", "Kla'ed", "Weapons", "Aseprite", "FigtherT1.png" \
+        "assets", "Klaed", "Weapons", "Aseprite", "FigtherT1.png" \
     }
 #define E1FC                                                          \
     {                                                                 \
-        "assets", "Kla'ed", "Weapons", "Aseprite", "00_FigtherT1.png" \
+        "assets", "Klaed", "Weapons", "Aseprite", "00_FigtherT1.png" \
     }
 #define BACKGROUND_PATH                  \
     {                                    \
-        "assets", "Space Background.png" \
+        "assets", "SpaceBackground.png" \
     }
 #define MENU_BACKGROUND                 \
     {                                   \
@@ -74,21 +74,21 @@
     }
 #define ENGINE_1                                                                       \
     {                                                                                  \
-        "assets", "Main Ship", "Main Ship - Engine Effects", "Aseprite", "Engine1.png" \
+        "assets", "MainShip", "MainShipEngineEffects", "Aseprite", "Engine1.png" \
     }
 #define FRIGATE_1                                                \
     {                                                            \
-        "assets", "Kla'ed", "Weapons", "Aseprite", "frigate.png" \
+        "assets", "Klaed", "Weapons", "Aseprite", "frigate.png" \
     }
 
 #define MENU_MUSIC                              \
     {                                           \
-        "assets", "musics", "Retro-Sax-Guy.ogg" \
+        "assets", "musics", "RetroSaxGuy.ogg" \
     }
 
 #define LOADING_MUSIC                           \
     {                                           \
-        "assets", "musics", "Waiting-Music.ogg" \
+        "assets", "musics", "WaitingMusic.ogg" \
     }
 
 #define GAME_MUSIC                                  \
