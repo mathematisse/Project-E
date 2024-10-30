@@ -104,11 +104,12 @@ void DrawAnimatedSpriteSystem::_innerOperate(
     if (hasCamera) {
         BeginMode2D(camera);
     }
-    DrawTexturePro(
-        texture,
-        {start_position, 0, (float) texture.width / (float) nbr_frame, (float) texture.height},
-        {x, rotation == 90 ? y : y + sizeY, sizeX, sizeY}, Vector2 {0, 0}, rotation, WHITE
-    );
+    Rectangle source = {
+        start_position, 0, (float) texture.width / (float) nbr_frame, (float) texture.height
+    };
+    Rectangle dest = {x, y, sizeX, sizeY};
+    Vector2 origin = {sizeX / 2.0F, sizeY / 2.0F}; // centers rot and position
+    DrawTexturePro(texture, source, dest, origin, rotation, WHITE);
 }
 
 SpriteAnimationSystem::SpriteAnimationSystem(AssetsLoader &assetsLoader):

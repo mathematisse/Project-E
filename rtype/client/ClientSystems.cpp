@@ -141,7 +141,7 @@ void UpdateEnginePosition::_innerOperate(
         engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         return;
     }
-    x = playerPosition.x + 80;
+    x = playerPosition.x;
     y = playerPosition.y;
 }
 

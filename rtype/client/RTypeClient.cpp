@@ -51,14 +51,12 @@ void net::RTypeClient::on_packet(const Packet &packet)
             auto enemy = _entityManager.createEntity<ECS::E::AnimatedGameEntity>();
             enemy.setHealth({5});
             enemy.setWeapon({WeaponType::BIG_SHOT});
-            enemy.setSize({180, 120});
+            enemy.setSize({180, 180});
             enemy.setAnimatedSprite({frigateSpriteId, 6, 0, 0.0F});
             enemy.setVelocity();
             enemy.setType({GameEntityType::ENEMY});
-            enemy.setRotation({100.0F});
+            enemy.setRotation({270.0F});
             enemy.setColor({255, 0, 0, 255});
-            enemy.setSize({80, 80});
-            enemy.setRotation({90.0F});
             enemy.setPosition({newEnnemy.x, newEnnemy.y});
             enemy.setCanShoot({true, 1.5F, 0.0F});
             enemy.setNetworkID({newEnnemy.netId});
@@ -69,13 +67,11 @@ void net::RTypeClient::on_packet(const Packet &packet)
             enemy.setWeapon({WeaponType::BULLET});
             enemy.setSize({80, 80});
             enemy.setSprite({enemySpriteId});
-            enemy.setRotation({90});
             enemy.setVelocity();
             enemy.setType({GameEntityType::ENEMY});
-            enemy.setRotation({100.0F});
             enemy.setColor({255, 0, 0, 255});
             enemy.setSize({80, 80});
-            enemy.setRotation({90.0F});
+            enemy.setRotation({270.0F});
             enemy.setPosition({newEnnemy.x, newEnnemy.y});
             enemy.setCanShoot({true, 1.5F, 0.0F});
             enemy.setNetworkID({newEnnemy.netId});
@@ -133,14 +129,14 @@ void net::RTypeClient::on_packet(const Packet &packet)
     }
     case ECS::NEW_POWERUP: {
         auto newPowerUp = *Packet::deserializeStruct<ECS::NewPowerUp>(packet.data);
-        auto powerUp = _entityManager.createEntity<ECS::E::AnimatedGameEntity>();
+        auto powerUp = _entityManager.createEntity<ECS::E::GameEntity>();
         float _x = newPowerUp.x;
         float _y = newPowerUp.y;
         powerUp.setType({GameEntityType::POWERUP});
         powerUp.setSize({80, 80});
         powerUp.setRotation({90});
         powerUp.setPosition({_x, _y});
-        powerUp.setAnimatedSprite({powerUpSpriteId, 13, 0.0F, 0.0F});
+        powerUp.setSprite((powerUpSpriteId));
         powerUp.setHealth({1});
         powerUp.setVelocity({0.0F, 0.0F});
         powerUp.setCanShoot({false, 0.0F, 0.0F});

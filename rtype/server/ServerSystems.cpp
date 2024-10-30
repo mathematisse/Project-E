@@ -185,7 +185,7 @@ void ShootSystem::_innerOperate(
     float _x = playerShot ? x + 80 + 35 : x - 35;
 
     bullet.setVelocity({300.0F * factor, 0.0F});
-    bullet.setPosition({_x, y + 25});
+    bullet.setPosition({_x, y});
     bullet.setRotation({90});
     bullet.setType({playerShot ? GameEntityType::BULLET : GameEntityType::BULLET_ENNEMY});
     bullet.setColor({255, 255, 0, 255});
