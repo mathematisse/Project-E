@@ -146,9 +146,9 @@ static Vector2 go_to_pos(Vector2 dest, Vector2 origin)
 
 static const std::vector<Vector2> path1 = {{1788, 929}, {1556, 793}, {1425, 810},
                                            {1275, 913}, {1095, 945}, {880, 832},
-                                           {860, 730},  {800, 461},  {-25, 459}};
+                                           {860, 730},  {800, 461},  {-100, 459}};
 static const std::vector<Vector2> path2 = {{1279, 162}, {999, 208}, {936, 221},
-                                           {892, 260},  {792, 459}, {-25, 459}};
+                                           {892, 260},  {792, 459}, {-100, 459}};
 
 MoveEnemy::MoveEnemy():
     AMonoSystem(false)
