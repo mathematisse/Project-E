@@ -47,17 +47,12 @@ void MovePlayerSystem::_innerOperate(
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
     }
-    if (!auto_shoot) {
-        client.send_udp_all(
-            ECS::RTypePacketType::PLAYER_VELOCITY,
-            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
-        );
-    } else {
-        client.send_udp_all(
-            ECS::RTypePacketType::PLAYER_VELOCITY,
-            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, true})
-        );
-    }
+    client.send_udp_all(
+        ECS::RTypePacketType::PLAYER_VELOCITY,
+        net::Packet::serializeStruct(
+            ECS::PlayerVelocityInput {vX, vY, auto_shoot || IsKeyDown(KEY_SPACE)}
+        )
+    );
 }
 
 MoveOtherPlayerSystem::MoveOtherPlayerSystem():
@@ -137,7 +132,7 @@ void UpdateEnginePosition::_innerOperate(
     if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
         return;
     }
-    if (playerAlive == 0) {
+    if (!playerAlive) {
         engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
         return;
     }

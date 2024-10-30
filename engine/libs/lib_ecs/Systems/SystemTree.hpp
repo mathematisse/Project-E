@@ -9,6 +9,7 @@
 
 #include "lib_ecs/Systems/ISystem.hpp"
 #include "lib_ecs/Systems/ASystemTree.hpp"
+#include <functional>
 
 #define ROOT_SYS_GROUP "ROOT"
 #define SYNC_SYS_GROUP "SYNC"
@@ -34,6 +35,11 @@ public:
     void registerEntityPool(E::IArchetypePool *entityPool);
     void runNode(SystemTree &tree);
     [[nodiscard]] const std::string &getGroup() const;
+
+    bool shouldRun = true;
+
+    // std::function that takes a node and a systemtree that will be the start callback
+    std::function<void(SystemTreeNode &, SystemTree &)> startCallback = nullptr;
 
 private:
     std::string _group;

@@ -134,6 +134,12 @@ void SystemTreeNode::registerEntityPool(E::IArchetypePool *entityPool)
 
 void SystemTreeNode::runNode(SystemTree &tree)
 {
+    if (startCallback) {
+        startCallback(*this, tree);
+    }
+    if (!shouldRun) {
+        return;
+    }
     for (auto &startSystem : _startSystems) {
         startSystem->getRunStepData(tree);
         startSystem->run();

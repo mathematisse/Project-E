@@ -19,6 +19,8 @@ class Render : public IModule {
     ECS::S::SystemTreeNode renderNode;
     ECS::S::SystemTreeNode debugRenderNode;
 
+    bool _debug = false;
+
 public:
     Render(Camera2D &camera, AssetsLoader &assetsLoader):
         debugDrawSystem(camera),
@@ -30,9 +32,22 @@ public:
         ),
         debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
     {
+        debugRenderNode.shouldRun = false;
+
+        debugRenderNode.startCallback =
+            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+                if (IsKeyPressed(KEY_F3)) {
+                    this->_debug = !this->_debug;
+                }
+
+                node.shouldRun = this->_debug;
+            };
+        renderNode.startCallback =
+            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+                node.shouldRun = !this->_debug;
+            };
     }
     explicit Render(AssetsLoader &assetsLoader):
-        debugDrawSystem(),
         drawSpriteSystem(assetsLoader),
         drawAnimatedSpriteSystem(assetsLoader),
         spriteAnimationSystem(assetsLoader),
@@ -41,10 +56,25 @@ public:
         ),
         debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
     {
+        debugRenderNode.shouldRun = false;
+
+        debugRenderNode.startCallback =
+            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+                if (IsKeyPressed(KEY_F3)) {
+                    this->_debug = !this->_debug;
+                }
+
+                node.shouldRun = this->_debug;
+            };
+        renderNode.startCallback =
+            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+                node.shouldRun = !this->_debug;
+            };
     }
     void load(ECS::EntityManager &entityManager) override
     {
         entityManager.registerSystemNode(renderNode, ROOT_SYS_GROUP);
+        entityManager.registerSystemNode(debugRenderNode, ROOT_SYS_GROUP);
     }
 };
 
