@@ -13,7 +13,6 @@
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
 #include "NetworkManager.hpp"
-#include "lib_net/Context.hpp"
 #include "raylib.h"
 #include <cstddef>
 #include <vector>
@@ -92,7 +91,7 @@ public:
     explicit SendAllDataToNewClients();
     ~SendAllDataToNewClients() override = default;
 
-    std::vector<net::client_id> newClients;
+    std::vector<net::RTypeServer::client_id> newClients;
     net::RTypeServer *server = nullptr;
 
 protected:

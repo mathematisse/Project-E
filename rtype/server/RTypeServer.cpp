@@ -3,7 +3,6 @@
 #include "RTypePackets.hpp"
 #include "lib_net/Packet.hpp"
 #include "lib_log/log.hpp"
-#include <string>
 
 net::RTypeServer::RTypeServer(
     ECS::EntityManager &entityManager, NetworkManager &networkManager,
