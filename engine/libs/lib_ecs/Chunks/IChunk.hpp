@@ -32,11 +32,6 @@ public:
      */
     virtual ~IChunk() = default;
 
-    IChunk(const IChunk &other) = default;
-    IChunk(IChunk &&other) = default;
-    IChunk &operator=(const IChunk &other) = default;
-    IChunk &operator=(IChunk &&other) = default;
-
     /**
      * @brief Get the element at the specified index.
      *
@@ -66,6 +61,8 @@ public:
      * @return ChunkType Type of the chunk.
      */
     [[nodiscard]] virtual ChunkType getType() const = 0;
+
+    virtual void resetAtIndex(size_t idx) = 0;
 };
 
 } // namespace ECS::Chunks

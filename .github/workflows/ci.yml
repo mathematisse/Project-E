@@ -5,10 +5,7 @@ on:
     branches:
       - main
       - dev
-  pull_request:
-    branches:
-      - main
-      - dev
+
 env:
   TARGETS: "r-type_client r-type_server"
 

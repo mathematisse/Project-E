@@ -11,6 +11,7 @@
 #include "lib_ecs/Chunks/IChunk.hpp"
 #include "lib_ecs/Chunks/IChunkPool.hpp"
 #include <iostream>
+#include <span>
 #include <vector>
 
 namespace ECS::Chunks {
@@ -30,12 +31,9 @@ public:
     /**
      * @brief Virtual destructor.
      */
-    virtual ~AChunkPool() = default;
-
-    AChunkPool(const AChunkPool &other) = default;
-    AChunkPool(AChunkPool &&other) = default;
-    AChunkPool &operator=(const AChunkPool &other) = default;
-    AChunkPool &operator=(AChunkPool &&other) = default;
+    virtual ~AChunkPool() {
+        // no need to delete chunks, they are managed by the pool
+    };
 
     /**
      * @brief Access an element by its position.
@@ -80,7 +78,13 @@ public:
      *
      * @return std::vector<IChunk<T> *> Vector of references to all chunks.
      */
-    std::vector<IChunk<T> *> getChunks() override { return _chunks; }
+    const std::vector<IChunk<T> *> &getChunks() override { return _chunks; }
+
+    // same but with span
+    std::span<IChunk<T> *> getChunksSpan() override { return _chunks; }
+
+    // same but with range
+    std::ranges::input_range auto &&getChunksRange() { return _chunks; }
 
     /**
      * @brief set values at indexes
@@ -94,10 +98,45 @@ public:
         }
     }
 
+    // same but with span
+    void setValueAtIndexes(std::span<chunkPos_t> indexes, const T &value) override
+    {
+        for (const auto &index : indexes) {
+            *(_chunks[std::get<0>(index)]->getElem(std::get<1>(index))) = value;
+        }
+    }
+
+    // same but with range
+    void setValueAtIndexes(std::ranges::input_range auto &&indexes, const T &value)
+    {
+        for (const auto &index : indexes) {
+            *(_chunks[std::get<0>(index)]->getElem(std::get<1>(index))) = value;
+        }
+    }
+
     void setValuesAtIndexes(const cPosArr_t &indexes, const std::vector<T> &values) override
     {
         for (size_t i = 0; i < indexes.size(); i++) {
             *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i]))) = values[i];
+        }
+    }
+
+    // same but with span
+    void setValuesAtIndexes(std::span<chunkPos_t> indexes, const std::span<T> values) override
+    {
+        for (size_t i = 0; i < indexes.size(); i++) {
+            *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i]))) = values[i];
+        }
+    }
+
+    // same but with range
+    void setValuesAtIndexes(std::ranges::input_range auto &&indexes, const std::vector<T> &values)
+    {
+
+        size_t i = 0;
+        for (const auto &index : indexes) {
+            *(_chunks[std::get<0>(index)]->getElem(std::get<1>(index))) = values[i];
+            i++;
         }
     }
 
@@ -107,6 +146,29 @@ public:
         for (size_t i = 0; i < indexes.size(); i++) {
             std::get<Idx>(values[i]) =
                 *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i])));
+        }
+    }
+
+    // same but with span
+    template<std::size_t Idx, typename... Ts>
+    void getValuesAtIndexes(std::span<chunkPos_t> indexes, std::vector<std::tuple<Ts...>> &values)
+    {
+        for (size_t i = 0; i < indexes.size(); i++) {
+            std::get<Idx>(values[i]) =
+                *(_chunks[std::get<0>(indexes[i])]->getElem(std::get<1>(indexes[i])));
+        }
+    }
+
+    // same but with range
+    template<std::size_t Idx, typename... Ts>
+    void getValuesAtIndexes(
+        std::ranges::input_range auto &&indexes, std::vector<std::tuple<Ts...>> &values
+    )
+    {
+        size_t i = 0;
+        for (const auto &index : indexes) {
+            std::get<Idx>(values[i]) = *(_chunks[std::get<0>(index)]->getElem(std::get<1>(index)));
+            i++;
         }
     }
 

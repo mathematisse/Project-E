@@ -7,69 +7,230 @@
 
 #pragma once
 
+#include "lib_ecs/AEntityManager.hpp"
 #include "lib_ecs/Chunks/ChunkPos.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include "lib_ecs/Entities/IEntityPool.hpp"
-#include "lib_ecs/Entities/IEntityRef.hpp"
-#include "lib_ecs/Entities/PureEntities.hpp"
-#include "lib_ecs/Entities/PureEntityPools.hpp"
-#include "lib_ecs/Systems/IQuery.hpp"
-#include "lib_ecs/Systems/SystemTree.hpp"
-#include <memory>
+#include "lib_ecs/Core/PureArchetypes.hpp"
+#include "lib_ecs/Entities/IArchetypePool.hpp"
+#include "lib_log/log.hpp"
 #include <vector>
+#include <ranges> // Include for C++20 ranges
+
+#define ENTITY_PTR_POOL_SIZE 64
 
 namespace ECS {
-class EntityManager {
+class EntityManager : public AEntityManager {
 public:
-    bool registerSystemGroup(
-        int targetGroup, int newGroup, bool addBefore = false, bool addInside = false
-    );
-    bool registerSystemNode(
-        S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false
-    );
-    bool registerSystem(S::ISystem &system, int group, bool atStart = false);
-    bool registerFixedSystemGroup(
-        int targetGroup, int newGroup, bool addBefore = false, bool addInside = false
-    );
-    bool registerFixedSystemNode(
-        S::SystemTreeNode &node, int targetGroup, bool addBefore = false, bool addInside = false
-    );
-    bool registerFixedSystem(S::ISystem &system, int group, bool atStart = false);
-    bool registerEntityPool(ECS::E::IEntityPool *entityPool);
-    S::IQuery &initializeQuery(S::IQuery &query);
-    std::unique_ptr<ECS::E::IEntityRef> getEntity(const ECS::E::EntityPtrRef &entityPtr);
-    std::unique_ptr<ECS::E::IEntityRef> getEntity(const Chunks::chunkPos_t &cPos);
-    Chunks::chunkPos_t
-    createEntity(const std::string &entityName, C::EntityStatusEnum status = C::ENT_ALIVE);
-    Chunks::cPosArr_t createEntities(
-        const std::string &entityName, size_t count = 0, C::EntityStatusEnum status = C::ENT_ALIVE
-    );
-    void destroyEntity(const Chunks::chunkPos_t &cPos);
-    void destroyEntities(const Chunks::cPosArr_t &cPosArr);
-    void destroyEntities(const Chunks::cPosArr_t &cPosArr, const std::string &entityName);
+    ~EntityManager() override = default;
+    explicit EntityManager(float fixedUpdateTime = 0);
 
-    bool addTime(float time);
+    // templated get that can raise an exception (notice no need of pool id here)
+    template<typename TArch>
+    typename TArch::Ref getEntity(const E::EntityPtr::Ref &entityPtr)
+    {
+        auto *pool =
+            static_cast<typename TArch::Pool *>(_entityPools[entityPtr.getEntityPoolIdVal()]);
+        return pool->getRawEntity(entityPtr.getChunkPosElem());
+    }
 
-private:
-    void _runSystems();
-    void _runFixedSystems();
-    Chunks::cPosArr_t _createEntities(
-        std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, size_t count,
+    template<typename TArch>
+    typename TArch::Ref getEntity(const Chunks::chunkPos_t &cPos)
+    {
+        auto entityPtr = _entityPtrPool.getRawEntity(cPos);
+        auto epool = _getEntityPool(TArch::getArchetypeName());
+        auto *pool = static_cast<typename TArch::Pool *>(std::get<0>(epool));
+        return pool->getRawEntity(entityPtr.getChunkPosElem());
+    }
+
+    void destroyEntities(std::ranges::input_range auto &&cPosRange);
+
+    void
+    _destroyEntities(std::ranges::input_range auto &&cPosRange, ECS::E::IArchetypePool *entityPool);
+
+    template<typename TArch>
+    typename TArch::Ref createEntity(C::EntityStatusEnum status = C::ENT_ALIVE)
+    {
+        LOG_DEBUG(
+            LOG_BLUE "Creating entity of type " LOG_COLOR_RESET +
+            std::string(TArch::getArchetypeName())
+        );
+        auto ePool = _getEntityPool(TArch::getArchetypeName());
+        return _createEntity<TArch>(ePool, status);
+    }
+
+    template<typename TArch, size_t N>
+    auto createEntities(C::EntityStatusEnum status = C::ENT_ALIVE)
+    {
+        LOG_DEBUG(
+            LOG_BLUE "Creating " + std::to_string(N) + " entities of type " LOG_COLOR_RESET +
+            std::string(TArch::getArchetypeName())
+        );
+        auto ePool = _getEntityPool(TArch::getArchetypeName());
+        return _createEntities<TArch, N>(ePool, status) | std::views::take(N);
+    }
+
+    void
+    destroyEntities(std::span<Chunks::chunkPos_t> cPosArr, const std::string &entityName) override;
+    void destroyEntity(const Chunks::chunkPos_t &cPos) override;
+
+    template<typename TArch>
+    auto createEntities(size_t count, C::EntityStatusEnum status = C::ENT_ALIVE)
+    {
+        LOG_DEBUG(
+            LOG_BLUE "Creating " + std::to_string(count) + " entities of type " LOG_COLOR_RESET +
+            std::string(TArch::getArchetypeName())
+        );
+
+        auto ePool = _getEntityPool(TArch::getArchetypeName());
+        return _createEntities<TArch>(ePool, count, status) | std::views::take(count);
+    }
+
+    void deleteEverything()
+    {
+        for (auto &entityPool : _entityPools) {
+            entityPool->deleteEverything();
+        }
+        _entityPtrPool.deleteEverything();
+    }
+
+protected:
+    auto _createEntities(
+        std::tuple<ECS::E::IArchetypePool *, C::entity_pool_id_t> ePool, size_t count,
         C::EntityStatusEnum status
     );
-    Chunks::chunkPos_t _createEntity(
-        std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>, C::EntityStatusEnum status
-    );
-    std::tuple<ECS::E::IEntityPool *, C::entity_pool_id_t>
-    _getEntityPool(const std::string &entityName);
-    void _destroyEntities(const Chunks::cPosArr_t &cPosArr, ECS::E::IEntityPool *entityPool);
 
-    ECS::E::EntityPtrPool _entityPtrPool;
-    std::vector<ECS::E::IEntityPool *> _entityPools;
-    S::SystemTree _systemTree;
-    S::SystemTree _fixedSystemTree; // run on fixed update
-    float _timePassed = 0;
-    float _timeNotAdded = 0;
-    float _timeSinceLastFixedUpdate = 0;
+    E::EntityPtr::Pool _entityPtrPool;
+
+    template<typename TArch, size_t N>
+    auto _createEntities(
+        std::tuple<ECS::E::IArchetypePool *, C::entity_pool_id_t> ePool, C::EntityStatusEnum status
+    )
+    {
+        auto [_entityPool, poolId] = ePool;
+        auto *entityPool = static_cast<typename TArch::Pool *>(_entityPool);
+
+        auto &freePos = entityPool->getFreePos();
+        auto &freePtrPos = _entityPtrPool.getFreePos();
+
+        while (freePos.size() < N) {
+            entityPool->addChunk();
+        }
+        while (freePtrPos.size() < N) {
+            _entityPtrPool.addChunk();
+        }
+
+        auto nextFreePosRange = freePos | std::views::take(N);
+        auto nextFreePtrPosRange = freePtrPos | std::views::take(N);
+
+        entityPool->getEntityStatusPoolCore().setComponentAtIndexes(nextFreePosRange, status);
+        entityPool->getChunkPosPoolCore().setComponentsAtIndexes(
+            nextFreePosRange, nextFreePtrPosRange
+        );
+
+        _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(
+            nextFreePtrPosRange, C::ENT_ALIVE
+        );
+        _entityPtrPool.getChunkPosPool().setComponentsAtIndexes(
+            nextFreePtrPosRange, nextFreePosRange
+        );
+        _entityPtrPool.getEntityPoolIdPool().setComponentAtIndexes(nextFreePtrPosRange, poolId);
+        // copy nextFreePosRange
+        static Chunks::cPosArr_t tempCopy;
+        tempCopy.clear();
+        tempCopy.reserve(N);
+        std::copy(nextFreePosRange.begin(), nextFreePosRange.end(), std::back_inserter(tempCopy));
+
+        auto entities = tempCopy | std::views::transform([entityPool](auto pos) {
+                            return entityPool->getRawEntity(Chunks::chunkPos_t(pos));
+                        });
+
+        freePtrPos.erase(freePtrPos.begin(), freePtrPos.begin() + N);
+        freePos.erase(freePos.begin(), freePos.begin() + N);
+
+        return entities;
+    }
+
+    template<typename TArch>
+    typename TArch::Ref _createEntity(
+        std::tuple<ECS::E::IArchetypePool *, C::entity_pool_id_t> ePool, C::EntityStatusEnum status
+    )
+    {
+        auto [_entityPool, poolId] = ePool;
+        auto *entityPool = static_cast<typename TArch::Pool *>(_entityPool);
+        auto &freePos = entityPool->getFreePos();
+        auto &freePtrPos = _entityPtrPool.getFreePos();
+
+        if (freePos.empty()) {
+            entityPool->addChunk();
+        }
+        if (freePtrPos.empty()) {
+            _entityPtrPool.addChunk();
+        }
+        auto nextFreePos = freePos.front();
+        auto nextFreePtrPos = freePtrPos.front();
+
+        auto entity = entityPool->getRawEntity(Chunks::chunkPos_t(nextFreePos));
+        entity.setEntityStatusElem(status);
+        entity.setChunkPosElem(Chunks::chunkPos_t(nextFreePtrPos));
+
+        auto entityPtr = _entityPtrPool.getRawEntity(Chunks::chunkPos_t(nextFreePtrPos));
+        entityPtr.setEntityStatusElem(C::ENT_ALIVE);
+        entityPtr.setChunkPosElem(Chunks::chunkPos_t(nextFreePos));
+        entityPtr.setEntityPoolId({poolId});
+
+        freePtrPos.erase(freePtrPos.begin());
+        freePos.erase(freePos.begin());
+
+        return entity;
+    }
+
+    template<typename TArch>
+    auto _createEntities(
+        std::tuple<ECS::E::IArchetypePool *, C::entity_pool_id_t> ePool, size_t count,
+        C::EntityStatusEnum status
+    )
+    {
+        auto [_entityPool, poolId] = ePool;
+        auto *entityPool = dynamic_cast<typename TArch::Pool *>(_entityPool);
+        auto &freePos = entityPool->getFreePos();
+        auto &freePtrPos = _entityPtrPool.getFreePos();
+
+        while (freePos.size() < count) {
+            entityPool->addChunk();
+        }
+        while (freePtrPos.size() < count) {
+            _entityPtrPool.addChunk();
+        }
+
+        auto nextFreePosRange = freePos | std::views::take(count);
+        auto nextFreePtrPosRange = freePtrPos | std::views::take(count);
+
+        entityPool->getEntityStatusPoolCore().setComponentAtIndexes(nextFreePosRange, status);
+        entityPool->getChunkPosPoolCore().setComponentsAtIndexes(
+            nextFreePosRange, nextFreePtrPosRange
+        );
+
+        _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(
+            nextFreePtrPosRange, C::ENT_ALIVE
+        );
+        _entityPtrPool.getChunkPosPool().setComponentsAtIndexes(
+            nextFreePtrPosRange, nextFreePosRange
+        );
+        _entityPtrPool.getEntityPoolIdPool().setComponentAtIndexes(nextFreePtrPosRange, poolId);
+
+        // copy nextFreePosRange
+        static Chunks::cPosArr_t tempCopy;
+        tempCopy.clear();
+        tempCopy.reserve(count);
+        std::copy(nextFreePosRange.begin(), nextFreePosRange.end(), std::back_inserter(tempCopy));
+
+        auto entities = tempCopy | std::views::transform([entityPool](auto pos) {
+                            return entityPool->getRawEntity(Chunks::chunkPos_t(pos));
+                        });
+
+        freePtrPos.erase(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
+        freePos.erase(freePos.begin(), freePos.begin() + static_cast<long>(count));
+
+        return entities;
+    }
 };
 } // namespace ECS

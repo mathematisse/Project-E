@@ -6,35 +6,30 @@
 */
 
 #include "ClientSystems.hpp"
-#include "DecorSquare.hpp"
+#include "NetworkManager.hpp"
 #include "RTypePackets.hpp"
-#include "Square.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include <iomanip>
-#include <iostream>
 #include "AssetsPath.hpp"
-#include "lib_ecs/Systems/ADualSystem.hpp"
+#include "lib_log/log.hpp"
 #include <raylib.h>
-
-#define RED_CLI "\033[31m"
-#define GREEN_CLI "\033[32m"
-#define YELLOW_CLI "\033[33m"
-#define RESET "\033[0m"
+#include <string>
 
 namespace ECS {
 namespace S {
 // SYSTEM
 
-MovePlayerSystem::MovePlayerSystem(net::RTypeClient &client):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
-    client(client)
+MovePlayerSystem::MovePlayerSystem(net::RTypeClient &client, bool auto_shoot):
+    AMonoSystem(false),
+    client(client),
+    auto_shoot(auto_shoot)
 {
 }
 
-void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype)
+void MovePlayerSystem::_innerOperate(
+    C::Velocity::Pool::Types &cvelocity, C::Type::Pool::Types &ctype
+)
 {
     auto [type] = ctype;
-    if (type != SquareType::LPLAYER) {
+    if (type != GameEntityType::LPLAYER) {
         return;
     }
 
@@ -52,35 +47,32 @@ void MovePlayerSystem::_statusOperate(C::VelocityPool::Types &cvelocity, C::Type
     if (IsKeyDown(KEY_RIGHT)) {
         vX += 1;
     }
-    if (!auto_shoot) {
-        client.send_udp(
-            ECS::RTypePacketType::PLAYER_VELOCITY,
-            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, IsKeyDown(KEY_SPACE)})
-        );
-    } else {
-        client.send_udp(
-            ECS::RTypePacketType::PLAYER_VELOCITY,
-            net::Packet::serializeStruct(ECS::PlayerVelocityInput {vX, vY, true})
-        );
-    }
+    client.send_udp_all(
+        ECS::RTypePacketType::PLAYER_VELOCITY,
+        net::Packet::serializeStruct(
+            ECS::PlayerVelocityInput {vX, vY, auto_shoot || IsKeyDown(KEY_SPACE)}
+        )
+    );
 }
 
 MoveOtherPlayerSystem::MoveOtherPlayerSystem():
-    AStatusMonoSystem(false, C::ENT_ALIVE)
+    AMonoSystem(false)
 {
 }
 
-void MoveOtherPlayerSystem::_statusOperate(
-    C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity, C::TypePool::Types &ctype,
-    C::HealthPool::Types &chealth, C::NetworkIDPool::Types &cnetworkid
+void MoveOtherPlayerSystem::_innerOperate(
+    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+    C::Type::Pool::Types &ctype, C::Health::Pool::Types &chealth,
+    C::NetworkID::Pool::Types &cnetworkid
 )
 {
     auto [type] = ctype;
-    if ((type != SquareType::PLAYER && type != SquareType::LPLAYER) || playerStates.empty()) {
+    if ((type != GameEntityType::PLAYER && type != GameEntityType::LPLAYER) ||
+        playerStates.empty()) {
         return;
     }
     auto [x, y] = cposition;
-    auto [vX, vY, _] = cvelocity;
+    auto [vX, vY] = cvelocity;
     auto [health] = chealth;
     auto [netId] = cnetworkid;
     // print size of pstates
@@ -100,20 +92,22 @@ void MoveOtherPlayerSystem::_statusOperate(
 }
 
 DestroyEntitiesSystem::DestroyEntitiesSystem(ECS::EntityManager &entityManager):
-    AStatusMonoSystem(false, C::ENT_ALIVE),
+    AMonoSystem(false),
     entityManager(entityManager)
 {
 }
 
-void DestroyEntitiesSystem::_statusOperate(
-    C::ChunkPosPool::Types &cchunkPos, C::NetworkIDPool::Types &cnetworkid
+void DestroyEntitiesSystem::_innerOperate(
+    C::ChunkPos::Pool::Types &cchunkPos, C::NetworkID::Pool::Types &cnetworkid
 )
 {
     auto [netId] = cnetworkid;
 
     for (auto &entityDestroyed : entitiesDestroyed) {
         if (entityDestroyed.netId == netId) {
-            std::cout << RED_CLI << "Destroying entity with netId: " << netId << RESET << std::endl;
+            LOG_DEBUG(
+                LOG_RED "Destroying entity with netId: " + std::to_string(netId) + LOG_COLOR_RESET
+            );
             entityManager.destroyEntity(cchunkPos);
         }
     }
@@ -125,24 +119,25 @@ UpdateEnginePosition::UpdateEnginePosition():
 }
 
 void UpdateEnginePosition::_innerOperate(
-    C::EntityStatusPool::Types &cstatus, C::PositionPool::Types &cposition,
-    C::TypePool::Types &ctype
+    C::EntityStatus::Pool::Types &cstatus, C::Position::Pool::Types &cposition,
+    C::Type::Pool::Types &ctype
 )
 {
     auto [engine_status] = cstatus;
     auto [x, y] = cposition;
     auto [type] = ctype;
-    if (type == SquareType::ENGINE) {
-        if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
-            return;
-        }
-        if (playerAlive == 0) {
-            engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            return;
-        }
-        x = playerPosition.x + 80;
-        y = playerPosition.y;
+    if (type != GameEntityType::ENGINE) {
+        return;
     }
+    if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    if (!playerAlive) {
+        engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        return;
+    }
+    x = playerPosition.x;
+    y = playerPosition.y;
 }
 
 } // namespace S

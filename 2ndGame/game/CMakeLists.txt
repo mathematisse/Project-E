@@ -23,4 +23,4 @@ execute_process(
 
 include_directories(${GIT_ROOT}/.submodules/raygui/src)
 
-target_link_libraries(game render physics lib_ecs raylib network)
+target_link_libraries(game render lib_ecs raylib spatial2d lib_log)

@@ -3,10 +3,11 @@ project(Engine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(CORE_ENABLED "Enable core module" ON)
 option(RENDER_ENABLED "Enable render module" ON)
-option(PHYSICS_ENABLED "Enable physics module" ON)
-option(ECS_ENABLED "Enable ecs module" ON)
+option(SPATIAL2D_ENABLED "Enable spatial2D module" ON)
 option(NETWORK_ENABLED "Enable network module" ON)
 
 include(FetchContent)
@@ -73,6 +74,18 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 ## End of raylib
+
+# ## Google Test
+# include(FetchContent)
+# FetchContent_Declare(
+#     googletest
+#     URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+# )
+# # For Windows: Prevent overriding the parent project's compiler/linker settings
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# FetchContent_MakeAvailable(googletest)
+
+# ## End of Google Test
 
 #enable the warnings back
 set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})

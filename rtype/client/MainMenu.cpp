@@ -21,10 +21,15 @@ void MainMenu::try_to_connect(void)
 {
     int port = std::stoi(_port);
 
-    if (!_client.connect_tcp(_ip, port)) {
+    if (auto res = _client.connect_tcp(_ip, port); !res) {
+        std::cerr << "Failed to connect to server: " << res.error().message() << std::endl;
         return;
     }
-    _client.connect_udp(_ip, port);
+    if (auto res = _client.connect_udp(_ip, port); !res) {
+        std::cerr << "Failed to connect to server: " << res.error().message() << std::endl;
+        return;
+    }
+    _client.start();
     _connected = true;
 }
 
@@ -34,15 +39,11 @@ void MainMenu::show_info_box(void)
     static const std::string message = "Failed to connect to server ";
 
     if (_showInfoBox) {
-        GuiWindowBox(
-            (Rectangle) {WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 100, 600, 250}, "Info"
-        );
-        GuiLabel(
-            (Rectangle) {WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20}, message.c_str()
-        );
-        GuiLabel((Rectangle) {WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2, 350, 20}, ip_text.c_str());
+        GuiWindowBox({WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 100, 600, 250}, "Info");
+        GuiLabel({WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20}, message.c_str());
+        GuiLabel({WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2, 350, 20}, ip_text.c_str());
 
-        if (GuiButton((Rectangle) {WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 50, 100, 30}, "OK")) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 50, 100, 30}, "OK")) {
             _showInfoBox = false;
         }
     }
@@ -56,20 +57,20 @@ void MainMenu::get_ip_and_port(void)
     static char inputPort[64] = "";
 
     DrawRectangle(150, 500, 400, 200, Fade(WHITE, 0.8f));
-    GuiLabel((Rectangle) {200, 550, 200, 30}, "IP:");
-    GuiLabel((Rectangle) {200, 600, 200, 30}, "Port:");
-    GuiTextBox((Rectangle) {300, 550, 200, 30}, inputIP, 64, IPBoxEditMode);
-    GuiTextBox((Rectangle) {300, 600, 200, 30}, inputPort, 64, portBoxEditMode);
+    GuiLabel({200, 550, 200, 30}, "IP:");
+    GuiLabel({200, 600, 200, 30}, "Port:");
+    GuiTextBox({300, 550, 200, 30}, inputIP, 64, IPBoxEditMode);
+    GuiTextBox({300, 600, 200, 30}, inputPort, 64, portBoxEditMode);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle) {300, 550, 200, 30})) {
+        if (CheckCollisionPointRec(GetMousePosition(), {300, 550, 200, 30})) {
             IPBoxEditMode = !IPBoxEditMode;
         } else {
             IPBoxEditMode = false;
             if (!((std::string) inputIP).empty())
                 _ip = inputIP;
         }
-        if (CheckCollisionPointRec(GetMousePosition(), (Rectangle) {300, 600, 200, 30})) {
+        if (CheckCollisionPointRec(GetMousePosition(), {300, 600, 200, 30})) {
             portBoxEditMode = !portBoxEditMode;
         } else {
             portBoxEditMode = false;
@@ -84,37 +85,27 @@ void MainMenu::show_settings(void)
     static int old_volume = 50;
 
     if (_showSettings) {
-        GuiWindowBox(
-            (Rectangle) {WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings"
-        );
-        GuiLabel((Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2, 350, 20}, "Auto Shoot:");
+        if (GuiWindowBox({WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings")) {
+            _showSettings = false;
+            return;
+        }
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2, 350, 20}, "Auto Shoot:");
+        GuiCheckBox({WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2, 20, 20}, "", &settings.auto_shoot);
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20}, "High Saturation:");
         GuiCheckBox(
-            (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2, 20, 20}, "",
-            &settings.auto_shoot
+            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "", &settings.color_blind
         );
-        GuiLabel(
-            (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
-            "High Saturation:"
-        );
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:");
         GuiCheckBox(
-            (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",
-            &settings.color_blind
-        );
-        GuiLabel(
-            (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:"
-        );
-        GuiCheckBox(
-            (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
+            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
             &settings.color_blind_simulation
         );
-        GuiLabel((Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 150, 350, 20}, "Volume:");
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 150, 350, 20}, "Volume:");
         GuiSlider(
-            (Rectangle) {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150, 350, 20}, "0", "100",
-            &settings.volume, 0, 100
+            {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150, 350, 20}, "0", "100", &settings.volume, 0,
+            100
         );
-        if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 250, 100, 30}, "Back"
-            )) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 250, 100, 30}, "Back")) {
             _showSettings = false;
         }
 
@@ -165,20 +156,16 @@ bool MainMenu::open(void)
 
         get_ip_and_port();
 
-        if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings"
-            )) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings")) {
             _showSettings = true;
         }
 
-        if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit"
-            )) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit")) {
             EndDrawing();
             break;
         }
 
-        if (GuiButton((Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2, 300, 100}, "Start") &&
+        if (GuiButton({WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2, 300, 100}, "Start") &&
             !_showSettings && !_showInfoBox) {
             try_to_connect();
             if (!_connected) {

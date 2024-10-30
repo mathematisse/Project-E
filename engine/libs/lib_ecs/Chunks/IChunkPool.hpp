@@ -9,6 +9,7 @@
 
 #include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Chunks/IChunk.hpp"
+#include <span>
 #include <vector>
 
 namespace ECS::Chunks {
@@ -29,11 +30,6 @@ public:
      * @brief Virtual destructor.
      */
     virtual ~IChunkPool() = default;
-
-    IChunkPool(const IChunkPool &other) = default;
-    IChunkPool(IChunkPool &&other) = default;
-    IChunkPool &operator=(const IChunkPool &other) = default;
-    IChunkPool &operator=(IChunkPool &&other) = default;
 
     /**
      * @brief Get a chunk by index.
@@ -88,8 +84,8 @@ public:
      *
      * @return std::vector<IChunk<T>*> Vector of pointers to all chunks.
      */
-    virtual std::vector<IChunk<T> *> getChunks() = 0;
-
+    virtual const std::vector<IChunk<T> *> &getChunks() = 0;
+    virtual std::span<IChunk<T> *> getChunksSpan() = 0;
     /**
      * @brief Get the total number of elements.
      *
@@ -103,5 +99,13 @@ public:
      * @return chunk_pos_t The total number of chunks.
      */
     [[nodiscard]] virtual chunk_idx_t chunkCount() const = 0;
+
+    virtual void setValueAtIndexes(std::span<chunkPos_t> indexes, const T &value) = 0;
+
+    virtual void setValuesAtIndexes(std::span<chunkPos_t> indexes, const std::span<T> values) = 0;
+
+    virtual void deleteEverything() = 0;
+
+    virtual void resetAtChunkPos(Chunks::chunkPos_t cPos) = 0;
 };
 } // namespace ECS::Chunks

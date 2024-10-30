@@ -2,13 +2,11 @@ cmake_minimum_required(VERSION 3.15)
 project(render)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(render STATIC render.cpp)
+file(GLOB_RECURSE SOURCES "*.cpp")
 
-target_link_libraries(render raylib)
+add_library(render STATIC ${SOURCES})
 
-# Required for testing
-# enable_testing()
-# add_executable(render_test tests/render_test.cpp)
-# target_link_libraries(render_test ${Boost_LIBRARIES} raylib)
-# add_test(NAME RenderTest COMMAND render_test)
+target_link_libraries(render lib_ecs core spatial2d raylib)

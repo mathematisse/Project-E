@@ -2,9 +2,7 @@
 
 #include "raylib.h"
 #include <string>
-#include <vector>
-#include <iostream>
-#include "AssetsLoader.hpp"
+#include "render/AssetsLoader.hpp"
 #include "RTypeClient.hpp"
 
 #define WINDOW_WIDTH 1920

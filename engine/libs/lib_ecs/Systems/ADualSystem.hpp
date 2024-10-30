@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Entities/IArchetypePool.hpp"
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 
@@ -28,12 +28,7 @@ public:
     }
     ~ADualSystem() override = default;
 
-    ADualSystem(const ADualSystem &other) = default;
-    ADualSystem(ADualSystem &&other) = default;
-    ADualSystem &operator=(const ADualSystem &other) = default;
-    ADualSystem &operator=(ADualSystem &&other) = default;
-
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    bool tryAddEntityPool(E::IArchetypePool *entityPool) override
     {
         auto q1 = _query1.tryAddEntityPool(entityPool);
         auto q2 = _query2.tryAddEntityPool(entityPool);
@@ -78,11 +73,6 @@ public:
     {
     }
     ~ASelfDualSystem() override = default;
-
-    ASelfDualSystem(const ASelfDualSystem &other) = default;
-    ASelfDualSystem(ASelfDualSystem &&other) = default;
-    ASelfDualSystem &operator=(const ASelfDualSystem &other) = default;
-    ASelfDualSystem &operator=(ASelfDualSystem &&other) = default;
 
 protected:
     void run() override

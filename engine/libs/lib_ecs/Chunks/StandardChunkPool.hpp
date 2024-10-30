@@ -38,15 +38,10 @@ public:
      */
     ~StandardChunkPool()
     {
-        for (auto &chunk : this->_chunks) {
-            delete chunk;
-        }
+        // for (auto *chunk : this->_chunks) {
+        //     delete chunk;
+        // }
     }
-
-    StandardChunkPool(const StandardChunkPool &other) = default;
-    StandardChunkPool(StandardChunkPool &&other) = default;
-    StandardChunkPool &operator=(const StandardChunkPool &other) = default;
-    StandardChunkPool &operator=(StandardChunkPool &&other) = default;
 
     /**
      * @brief Add a new chunk to the pool.
@@ -58,6 +53,19 @@ public:
     void addChunk(size_t elemCount) override
     {
         this->_chunks.push_back(new StandardChunk<T>(elemCount));
+    }
+
+    void deleteEverything() override
+    {
+        for (auto *chunk : this->_chunks) {
+            delete chunk;
+        }
+        this->_chunks.clear();
+    }
+
+    void resetAtChunkPos(Chunks::chunkPos_t cPos) override
+    {
+        this->_chunks[std::get<0>(cPos)]->resetAtIndex(std::get<1>(cPos));
     }
 };
 } // namespace ECS::Chunks

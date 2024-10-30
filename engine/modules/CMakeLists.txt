@@ -1,16 +1,11 @@
+function (add_module module)
+    option(${module}_ENABLED "Enable ${module} module" OFF)
+    if(${module}_ENABLED AND NOT TARGET ${module})
+        add_subdirectory(${module})
+    endif()
+endfunction()
 
-if(RENDER_ENABLED AND NOT TARGET render)
-    add_subdirectory(render)
-endif()
-
-if(PHYSICS_ENABLED AND NOT TARGET physics)
-    add_subdirectory(physics)
-endif()
-
-if(ECS_ENABLED AND NOT TARGET ecs)
-    add_subdirectory(ecs)
-endif()
-
-if(NETWORK_ENABLED AND NOT TARGET network)
-    add_subdirectory(network)
-endif()
+add_module(core)
+add_module(render)
+add_module(network)
+add_module(spatial2d)

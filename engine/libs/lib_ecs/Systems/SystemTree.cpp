@@ -6,28 +6,26 @@
 */
 
 #include "lib_ecs/Systems/SystemTree.hpp"
+#include "lib_log/log.hpp"
 #include <iterator>
 #include <utility>
-
-#include <iostream>
-
-#define BLUE "\033[34m"
-#define RESET "\033[0m"
 
 namespace ECS {
 namespace S {
 SystemTreeNode::SystemTreeNode(
-    int group, std::vector<ISystem *> startSystems, std::vector<ISystem *> endSystems,
+    std::string group, std::vector<ISystem *> startSystems, std::vector<ISystem *> endSystems,
     std::vector<SystemTreeNode> children
 ):
-    _group(group),
+    _group(std::move(group)),
     _startSystems(std::move(startSystems)),
     _children(std::move(children)),
     _endSystems(std::move(endSystems))
 {
 }
 
-bool SystemTreeNode::addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
+bool SystemTreeNode::addSystemGroup(
+    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+)
 {
     // First check if are in a match case (will add in children)
     if (targetGroup == _group && addInside) {
@@ -63,7 +61,7 @@ bool SystemTreeNode::addSystemGroup(int targetGroup, int newGroup, bool addBefor
     return false;
 }
 
-bool SystemTreeNode::addSystem(ISystem *system, int group, bool atStart)
+bool SystemTreeNode::addSystem(ISystem *system, const std::string &group, bool atStart)
 {
     if (group == _group) {
         if (atStart) {
@@ -82,20 +80,23 @@ bool SystemTreeNode::addSystem(ISystem *system, int group, bool atStart)
 }
 
 bool SystemTreeNode::addSystemTreeNode(
-    SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside
+    SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
+    LOG_DEBUG("Adding system tree node with group " + node.getGroup());
     if (targetGroup == _group && addInside) {
         if (addBefore) {
             _children.insert(_children.begin(), node);
         } else {
             _children.push_back(node);
         }
+        LOG_DEBUG("Successfully added in group " + _group);
         return true;
     }
     if (addInside) {
         for (auto &child : _children) {
             if (child.addSystemTreeNode(node, targetGroup, addBefore, addInside)) {
+                LOG_DEBUG("Successfully added in group " + _group);
                 return true;
             }
         }
@@ -111,13 +112,15 @@ bool SystemTreeNode::addSystemTreeNode(
         } else {
             _children.insert(std::next(it), node);
         }
+        LOG_DEBUG("Successfully added in group " + _group);
         return true;
     }
     return false;
 }
 
-void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
+void SystemTreeNode::registerEntityPool(E::IArchetypePool *entityPool)
 {
+    LOG_DEBUG("Registering entity pool in group " + _group);
     for (auto &startSystem : _startSystems) {
         startSystem->tryAddEntityPool(entityPool);
     }
@@ -129,24 +132,32 @@ void SystemTreeNode::registerEntityPool(E::IEntityPool *entityPool)
     }
 }
 
-void SystemTreeNode::runNode()
+void SystemTreeNode::runNode(SystemTree &tree)
 {
+    if (startCallback) {
+        startCallback(*this, tree);
+    }
+    if (!shouldRun) {
+        return;
+    }
     for (auto &startSystem : _startSystems) {
+        startSystem->getRunStepData(tree);
         startSystem->run();
     }
     for (auto &child : _children) {
-        child.runNode();
+        child.runNode(tree);
     }
     for (auto &endSystem : _endSystems) {
+        endSystem->getRunStepData(tree);
         endSystem->run();
     }
 }
 
-int SystemTreeNode::getGroup() const { return _group; }
+const std::string &SystemTreeNode::getGroup() const { return _group; }
 
 SystemTree::SystemTree():
     _root(
-        ROOTSYSGROUP, std::vector<ISystem *>(), std::vector<ISystem *>(),
+        ROOT_SYS_GROUP, std::vector<ISystem *>(), std::vector<ISystem *>(),
         std::vector<SystemTreeNode>()
     )
 {
@@ -154,28 +165,30 @@ SystemTree::SystemTree():
 
 SystemTree::~SystemTree() = default;
 
-bool SystemTree::addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside)
+bool SystemTree::addSystemGroup(
+    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+)
 {
     return _root.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
 }
 
-bool SystemTree::addSystem(ISystem *system, int group, bool atStart)
+bool SystemTree::addSystem(ISystem *system, const std::string &group, bool atStart)
 {
     return _root.addSystem(system, group, atStart);
 }
 
 bool SystemTree::addSystemTreeNode(
-    SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside
+    SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     return _root.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }
 
-void SystemTree::registerEntityPool(E::IEntityPool *entityPool)
+void SystemTree::registerEntityPool(E::IArchetypePool *entityPool)
 {
     _root.registerEntityPool(entityPool);
 }
 
-void SystemTree::runTree() { _root.runNode(); }
+void SystemTree::runTree() { _root.runNode(*this); }
 } // namespace S
 } // namespace ECS

@@ -8,53 +8,59 @@
 #pragma once
 
 #include "lib_ecs/Systems/ISystem.hpp"
+#include "lib_ecs/Systems/ASystemTree.hpp"
+#include <functional>
+
+#define ROOT_SYS_GROUP "ROOT"
+#define SYNC_SYS_GROUP "SYNC"
 
 namespace ECS::S {
-enum PureSystemGroups {
-    NONESYSGROUP = 0,
-    ROOTSYSGROUP = 1,
-    SYNCSYSGROUP = 2,
-};
+class SystemTree;
 
 class SystemTreeNode {
 public:
     explicit SystemTreeNode(
-        int group, std::vector<ISystem *> startSystems = std::vector<ISystem *>(),
+        const std::string group, std::vector<ISystem *> startSystems = std::vector<ISystem *>(),
         std::vector<ISystem *> endSystems = std::vector<ISystem *>(),
         std::vector<SystemTreeNode> children = std::vector<SystemTreeNode>()
     );
     ~SystemTreeNode() = default;
-    SystemTreeNode(const SystemTreeNode &other) = default;
-    SystemTreeNode(SystemTreeNode &&other) = default;
-    SystemTreeNode &operator=(const SystemTreeNode &other) = default;
-    SystemTreeNode &operator=(SystemTreeNode &&other) = default;
-    bool addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside);
-    bool addSystem(ISystem *system, int group, bool atStart);
-    bool addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside);
-    void registerEntityPool(E::IEntityPool *entityPool);
-    void runNode();
-    [[nodiscard]] int getGroup() const;
+    bool addSystemGroup(
+        const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    );
+    bool addSystem(ISystem *system, const std::string &group, bool atStart);
+    bool addSystemTreeNode(
+        SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+    );
+    void registerEntityPool(E::IArchetypePool *entityPool);
+    void runNode(SystemTree &tree);
+    [[nodiscard]] const std::string &getGroup() const;
+
+    bool shouldRun = true;
+
+    // std::function that takes a node and a systemtree that will be the start callback
+    std::function<void(SystemTreeNode &, SystemTree &)> startCallback = nullptr;
 
 private:
-    int _group;
+    std::string _group;
 
     std::vector<ISystem *> _startSystems;
     std::vector<SystemTreeNode> _children;
     std::vector<ISystem *> _endSystems;
 };
 
-class SystemTree {
+class SystemTree : public ASystemTree {
 public:
     SystemTree();
     ~SystemTree();
-    SystemTree(const SystemTree &other) = default;
-    SystemTree(SystemTree &&other) = default;
-    SystemTree &operator=(const SystemTree &other) = default;
-    SystemTree &operator=(SystemTree &&other) = default;
-    bool addSystemGroup(int targetGroup, int newGroup, bool addBefore, bool addInside);
-    bool addSystem(ISystem *system, int group, bool atStart);
-    bool addSystemTreeNode(SystemTreeNode &node, int targetGroup, bool addBefore, bool addInside);
-    void registerEntityPool(E::IEntityPool *entityPool);
+    bool addSystemGroup(
+        const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    );
+    bool addSystem(ISystem *system, const std::string &group, bool atStart);
+    bool addSystemTreeNode(
+        SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+    );
+    void registerEntityPool(E::IArchetypePool *entityPool);
     void runTree();
 
 private:

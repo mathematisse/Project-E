@@ -1,5 +1,9 @@
 #pragma once
 
+#include "lib_ecs/Core/ComponentMaker.hpp"
+
+DECLARE_COMPONENT(NetworkID, size_t);
+
 class NetworkManager {
 public:
     NetworkManager() = default;
