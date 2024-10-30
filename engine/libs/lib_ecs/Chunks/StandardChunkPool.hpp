@@ -62,5 +62,10 @@ public:
         }
         this->_chunks.clear();
     }
+
+    void resetAtChunkPos(Chunks::chunkPos_t cPos) override
+    {
+        this->_chunks[std::get<0>(cPos)]->resetAtIndex(std::get<1>(cPos));
+    }
 };
 } // namespace ECS::Chunks

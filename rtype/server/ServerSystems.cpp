@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
 #include <limits>
 #include "ServerSystems.hpp"
 #include "RTypeServer.hpp"
@@ -105,13 +106,15 @@ void DestroyEntitiesSystem::_statusOperate(
 {
     auto [networkid] = cnetworkid;
 
-    entityManager.destroyEntity(cchunkpos);
     if (networkid == 0) {
+        entityManager.destroyEntity(cchunkpos);
         return;
     }
+    std::cout << RED_CLI << "Destroying entity with networkid: " << networkid << RESET << std::endl;
     server.send_tcp(
         RTypePacketType::ENTITY_DESTROYED, net::Packet::serializeStruct(EntityDestroyed {networkid})
     );
+    entityManager.destroyEntity(cchunkpos);
 }
 
 ShootSystem::ShootSystem(

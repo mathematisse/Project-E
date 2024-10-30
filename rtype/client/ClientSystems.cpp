@@ -6,10 +6,12 @@
 */
 
 #include "ClientSystems.hpp"
+#include "NetworkManager.hpp"
 #include "RTypePackets.hpp"
 #include "AssetsPath.hpp"
 #include "lib_log/log.hpp"
 #include <raylib.h>
+#include <string>
 
 namespace ECS {
 namespace S {
@@ -129,17 +131,18 @@ void UpdateEnginePosition::_innerOperate(
     auto [engine_status] = cstatus;
     auto [x, y] = cposition;
     auto [type] = ctype;
-    if (type == GameEntityType::ENGINE) {
-        if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
-            return;
-        }
-        if (playerAlive == 0) {
-            engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
-            return;
-        }
-        x = playerPosition.x + 80;
-        y = playerPosition.y;
+    if (type != GameEntityType::ENGINE) {
+        return;
     }
+    if (engine_status != C::EntityStatusEnum::ENT_ALIVE) {
+        return;
+    }
+    if (playerAlive == 0) {
+        engine_status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
+        return;
+    }
+    x = playerPosition.x + 80;
+    y = playerPosition.y;
 }
 
 } // namespace S

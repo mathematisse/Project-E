@@ -37,7 +37,7 @@ class DrawSpriteSystem
     : public S::AMonoSystem<C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::Sprite::Pool> {
 public:
     explicit DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera);
-    DrawSpriteSystem(AssetsLoader &assetsLoader);
+    explicit DrawSpriteSystem(AssetsLoader &assetsLoader);
     ~DrawSpriteSystem() override = default;
 
     AssetsLoader &assetsLoader;

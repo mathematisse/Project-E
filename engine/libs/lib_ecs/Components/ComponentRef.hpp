@@ -112,6 +112,14 @@ public:
     // auto casting to tuple
     operator std::tuple<Ts...>() const { return _components; }
 
+    void reset() { reset(std::index_sequence_for<Ts...> {}); }
+
+    template<std::size_t... Is>
+    void reset(std::index_sequence<Is...> /*unused*/)
+    {
+        ((*std::get<Is>(_components) = Ts {}), ...);
+    }
+
 protected:
     std::tuple<Ts *...> _components; ///< Tuple of pointers to component values.
 };

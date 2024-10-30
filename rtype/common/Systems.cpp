@@ -131,14 +131,18 @@ void ColliderSystem::_innerOperate(
     auto [healthA] = chealthA;
     auto [healthB] = chealthB;
 
-    bool collide = false;
-
     // Check if entities are colliding with walls
     if (yA < 100 || yA + sizeYA > 980) {
         healthA = 0;
     }
     if (yB < 100 || yB + sizeYB > 980) {
         healthB = 0;
+    }
+
+    // only player collides with powerups
+    if ((typeA == GameEntityType::POWERUP && typeB != GameEntityType::PLAYER) ||
+        (typeB == GameEntityType::POWERUP && typeA != GameEntityType::PLAYER)) {
+        return;
     }
 
     // "Allies" can't collide
@@ -155,25 +159,20 @@ void ColliderSystem::_innerOperate(
     }
 
     // Check if entities are colliding
-    if (xA < xB + sizeXB && xA + sizeXA > xB && yA < yB + sizeYB && yA + sizeYA > yB) {
-        collide = true;
+    if (xA >= xB + sizeXB || xA + sizeXA <= xB || yA >= yB + sizeYB || yA + sizeYA <= yB) {
+        return;
     }
+    LOG_DEBUG(LOG_YELLOW "COLLISION" LOG_COLOR_RESET);
 
-    if (typeA == GameEntityType::POWERUP || typeB == GameEntityType::POWERUP) {
-        if (typeA == GameEntityType::PLAYER || typeB == GameEntityType::PLAYER) {
-            if (typeA == GameEntityType::POWERUP && collide) {
-                healthA = 0;
-                healthB += 50;
-            } else if (typeB == GameEntityType::POWERUP && collide) {
-                healthB = 0;
-                healthA += 50;
-            }
-        }
+    if (typeA == GameEntityType::POWERUP) {
+        healthA = 0;
+        healthB += 50;
+    } else if (typeB == GameEntityType::POWERUP) {
+        healthB = 0;
+        healthA += 50;
     } else {
-        if (collide) {
-            healthA -= 1;
-            healthB -= 1;
-        }
+        healthA -= 1;
+        healthB -= 1;
     }
 
     // Set flags to destroy entities

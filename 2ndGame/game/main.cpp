@@ -20,7 +20,8 @@
 #include "spatial2d/Spatial2D.hpp"
 
 void open_tower_menu(
-    ECS::S::TowerClickSystem &towerClickSystem, size_t &money, std::vector<tower_info> &towers_info
+    ECS::S::TowerClickSystem &towerClickSystem, size_t &money,
+    std::array<tower_info, TOWER_COUNT> &towers_info
 )
 {
     Vector2 pos = {towerClickSystem.pos.x + 100, towerClickSystem.pos.y};
@@ -33,7 +34,7 @@ void open_tower_menu(
             tower_names[(size_t) towerClickSystem.selectedTower.type].c_str()
         );
         DrawCircleLines(
-            towerClickSystem.pos.x + 50, towerClickSystem.pos.y + 50,
+            towerClickSystem.pos.x, towerClickSystem.pos.y,
             tower_range[(size_t) towerClickSystem.selectedTower.type]
                        [towerClickSystem.selectedTower.level - 1],
             WHITE
@@ -113,7 +114,7 @@ int main(int ac, char *av[])
 
     srand(time(NULL));
     AssetsLoader assetsLoader;
-    ECS::EntityManager _eM(0.02F);
+    ECS::EntityManager _eM;
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tower Defense");
     InitAudioDevice();
@@ -142,24 +143,30 @@ int main(int ac, char *av[])
     ECS::E::PlayerEntity::Pool playerPool(1);
     ECS::E::ProjectileEntity::Pool projectilePool(1024);
 
-    ECS::S::DrawSpriteSystem drawSpriteSystem(assetsLoader);
     ECS::S::TowerClickSystem towerClickSystem;
     ECS::S::ChangeTowerSprite changeTowerSprite(assetsLoader);
-    ECS::S::ApplyVelocitySystem applyVelocitySystem;
     ECS::S::SpawnEnemy spawnEnemy(assetsLoader, _eM);
     ECS::S::MoveEnemy moveEnemy;
     ECS::S::DamageEnemy damageEnemy(assetsLoader, _eM);
     ECS::S::KillProjectile killProjectile;
     ECS::S::DrawRotationProjectileSystem drawRotationProjectileSystem(assetsLoader);
+    ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM);
 
     ECS::S::SystemTreeNode TDNode(
         "TDNode",
         {&killProjectile, &towerClickSystem, &changeTowerSprite, &spawnEnemy, &moveEnemy,
-         &applyVelocitySystem, &damageEnemy, &drawSpriteSystem, &drawRotationProjectileSystem},
-        {}
+         &damageEnemy, &drawRotationProjectileSystem},
+        {&destroyEntitiesSystem}
     );
 
-    _eM.registerSystemNode(TDNode, ROOT_SYS_GROUP, false, true);
+    spawnEnemy.spriteId = assetsLoader.get_asset(GOBLIN).id;
+    changeTowerSprite.spriteIds = {
+        assetsLoader.get_asset(ARCHER1_TOWER).id, assetsLoader.get_asset(WIZARD1_TOWER).id,
+        assetsLoader.get_asset(ARCHER2_TOWER).id, assetsLoader.get_asset(WIZARD2_TOWER).id,
+        assetsLoader.get_asset(ARCHER3_TOWER).id, assetsLoader.get_asset(WIZARD3_TOWER).id
+    };
+
+    _eM.registerSystemNode(TDNode, ROOT_SYS_GROUP);
 
     _eM.registerEntityPool(&decorPool);
     _eM.registerEntityPool(&towerPool);
@@ -169,17 +176,18 @@ int main(int ac, char *av[])
 
     auto bg = _eM.createEntity<ECS::E::DecorEntity>();
     bg.setSize({1920, 1080});
+    bg.setPosition({1920.0F / 2, 1080.0F / 2});
     bg.setSprite(assetsLoader.get_asset(GAME_BACKGROUND).id);
 
-    const std::vector<Vector2> towers_positions = {{1287, 224}, {1452, 889}, {616, 266},
-                                                   {531, 559},  {901, 462},  {1139, 741},
-                                                   {1012, 271}, {205, 280},  {682, 841}};
+    const std::vector<Vector2> towers_positions = {{1337, 274}, {1502, 939}, {666, 316},
+                                                   {581, 609},  {951, 512},  {1189, 791},
+                                                   {1062, 321}, {255, 330},  {732, 891}};
     int i = 0;
-    std::vector<tower_info> towers_info;
+    std::array<tower_info, TOWER_COUNT> towers_info;
 
-    for (auto tower : _eM.createEntities<ECS::E::TowerEntity>(9)) {
+    for (auto tower : _eM.createEntities<ECS::E::TowerEntity, TOWER_COUNT>()) {
         tower.setPosition({towers_positions[i].x, towers_positions[i].y - 50});
-        tower.setSize({75, 75});
+        tower.setSize({120, 120});
         tower.setSprite(assetsLoader.get_asset(EMPTY_TOWER).id);
         tower.setID(i);
         tower_info towerInfo {};
@@ -187,7 +195,7 @@ int main(int ac, char *av[])
         towerInfo.level = 0;
         towerInfo.type = TowerType::NONE;
         towerInfo.pos = {towers_positions[i].x, towers_positions[i].y - 50};
-        towers_info.push_back(towerInfo);
+        towers_info[i] = towerInfo;
         i++;
     }
 

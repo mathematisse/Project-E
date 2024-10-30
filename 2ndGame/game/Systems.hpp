@@ -16,9 +16,8 @@
 
 namespace ECS::S {
 
-class DrawRotationProjectileSystem : public S::AMonoSystem<
-                                         C::EntityStatus::Pool, C::Position::Pool, C::Size::Pool,
-                                         C::Sprite::Pool, C::Velocity::Pool, C::Dest::Pool> {
+class DrawRotationProjectileSystem
+    : public S::AMonoSystem<C::Rotation::Pool, C::Velocity::Pool, C::Dest::Pool> {
 public:
     explicit DrawRotationProjectileSystem(AssetsLoader &assetsLoader);
     ~DrawRotationProjectileSystem() override = default;
@@ -27,9 +26,7 @@ public:
 
 protected:
     void _innerOperate(
-        typename C::EntityStatus::Pool::Types &cstatus,
-        typename C::Position::Pool::Types &cposition, typename C::Size::Pool::Types &csize,
-        typename C::Sprite::Pool::Types &csprite, typename C::Velocity::Pool::Types &cvelocity,
+        typename C::Rotation::Pool::Types &csprite, typename C::Velocity::Pool::Types &cvelocity,
         typename C::Dest::Pool::Types &cdest
     ) override;
 };
@@ -66,6 +63,7 @@ public:
     ~ChangeTowerSprite() override = default;
 
     AssetsLoader &assetsLoader;
+    std::array<unsigned int, 6> spriteIds = {0, 0, 0, 0, 0, 0};
 
 protected:
     void _innerOperate(
@@ -83,6 +81,8 @@ public:
     EntityManager &_eM;
     float delay = 0;
     size_t kills = 0;
+
+    unsigned int spriteId = 0;
 
 protected:
     void _innerOperate(
@@ -113,7 +113,7 @@ public:
     explicit DamageEnemy(AssetsLoader &assetsLoader, EntityManager &_eM);
     ~DamageEnemy() override = default;
 
-    std::vector<tower_info> towers;
+    std::array<tower_info, TOWER_COUNT> towers;
     size_t money = 0;
     AssetsLoader &assetsLoader;
     EntityManager &_eM;
@@ -136,10 +136,21 @@ public:
 
 protected:
     void _innerOperate(
-        typename C::EntityStatus::Pool::Types &cstatus,
+        typename C::EntityStatus::Pool::Types &crotation,
         typename C::Position::Pool::Types &cposition, typename C::Velocity::Pool::Types &cvelocity,
-        typename C::Dest::Pool::Types &cdest
+        typename C::Dest::Pool::Types & /*cdest*/
     ) override;
+};
+
+class DestroyEntitiesSystem : public S::AStatusMonoSystem<C::ChunkPos::Pool> {
+public:
+    explicit DestroyEntitiesSystem(EntityManager &entityManager);
+    ~DestroyEntitiesSystem() override = default;
+
+    EntityManager &entityManager;
+
+protected:
+    void _statusOperate(typename C::ChunkPos::Pool::Types &cchunkpos) override;
 };
 
 } // namespace ECS::S

@@ -19,7 +19,6 @@ public:
     ~ShowInfoSystem() override = default;
 
     Camera2D &camera;
-    bool one_time = false;
 
 protected:
     void _innerOperate(C::Type::Pool::Types &ctype, C::Health::Pool::Types &chealth) override;

@@ -112,6 +112,13 @@ public:
             cPool->resetComponentAtIndexes(indexes);
         }
     }
+    // range version
+    void resetEntityAtIndexes(std::ranges::input_range auto &&indexes)
+    {
+        resetEntityAtIndexesImpl(
+            std::forward<decltype(indexes)>(indexes), std::index_sequence_for<TComps...> {}
+        );
+    }
 
     C::EntityStatus::Pool getEntityStatusPoolCore() override { return this->getEntityStatusPool(); }
     C::ChunkPos::Pool getChunkPosPoolCore() override { return this->getChunkPosPool(); }
@@ -125,6 +132,17 @@ public:
     }
 
 protected:
+    template<typename Range, std::size_t... Is>
+    void resetEntityAtIndexesImpl(Range &&indexes, std::index_sequence<Is...> /*unused*/)
+    {
+        auto cPools = getVecComponentPools();
+        (static_cast<typename std::tuple_element<Is, std::tuple<TComps...>>::type::Comp::Pool *>(
+             cPools[Is]
+         )
+             ->resetComponentAtIndexes(indexes),
+         ...);
+    }
+
     std::vector<C::IComponentPool *> _componentPools;
     size_t _chunkSize;
 

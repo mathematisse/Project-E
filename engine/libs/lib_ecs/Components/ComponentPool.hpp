@@ -85,6 +85,15 @@ public:
         }
     }
 
+    // range version
+
+    void resetComponentAtIndexes(std::ranges::input_range auto &&indexes)
+    {
+        for (const auto &index : indexes) {
+            setComponentAtIndex(index, std::tuple<Ts...> {});
+        }
+    }
+
     /**
      * @brief Set components at the specified indexes.
      * @param indexes The indexes at which to set the components.
@@ -223,6 +232,16 @@ public:
         std::apply(
             [](auto &...pools) {
                 (pools.deleteEverything(), ...);
+            },
+            _pools
+        );
+    }
+
+    void resetAtChunkPos(Chunks::chunkPos_t cPos) override
+    {
+        std::apply(
+            [cPos](auto &...pools) {
+                (pools.resetAtChunkPos(cPos), ...);
             },
             _pools
         );

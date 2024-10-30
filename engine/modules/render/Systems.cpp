@@ -67,10 +67,10 @@ void DrawSpriteSystem::_innerOperate(
     if (hasCamera) {
         BeginMode2D(camera);
     }
-    DrawTextureEx(
-        texture, {rotation == 90 ? x + sizeX : x, rotation == -90 ? y + sizeY : y}, rotation,
-        sizeX / (float) texture.width, WHITE
-    );
+    Rectangle source = {0, 0, (float) texture.width, (float) texture.height};
+    Rectangle dest = {x, y, sizeX, sizeY};
+    Vector2 origin = {sizeX / 2.0F, sizeY / 2.0F}; // centers rot and position
+    DrawTexturePro(texture, source, dest, origin, rotation, WHITE);
 }
 
 DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):

@@ -19,7 +19,7 @@
 namespace ECS {
 class AEntityManager : public IEntityManager {
 public:
-    explicit AEntityManager(float fixedUpdateTime);
+    explicit AEntityManager(float fixedUpdateTime = 0);
     ~AEntityManager() override = default;
     bool registerSystemGroup(
         const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,

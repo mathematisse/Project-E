@@ -24,13 +24,13 @@ void ShowInfoSystem::_innerOperate(C::Type::Pool::Types &ctype, C::Health::Pool:
 {
     auto [type] = ctype;
 
-    if (type == GameEntityType::PLAYER && !one_time) {
-        one_time = true;
-        auto [health] = chealth;
-        Vector2 top_left = {camera.target.x - 1920 / 2, camera.target.y - 1080 / 2};
-        DrawText("Player health: ", top_left.x + 10, top_left.y + 10, 20, RED);
-        DrawText(std::to_string(health).c_str(), top_left.x + 200, top_left.y + 10, 20, RED);
+    if (type != GameEntityType::LPLAYER) {
+        return;
     }
+    auto [health] = chealth;
+    Vector2 top_left = {camera.target.x - 1920 / 2, camera.target.y - 1080 / 2};
+    DrawText("Player health: ", top_left.x + 10, top_left.y + 10, 20, RED);
+    DrawText(std::to_string(health).c_str(), top_left.x + 200, top_left.y + 10, 20, RED);
 }
 
 } // namespace S

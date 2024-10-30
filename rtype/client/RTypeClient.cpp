@@ -85,7 +85,7 @@ void net::RTypeClient::on_packet(const Packet &packet)
     case ECS::BULLET_SHOT: {
         auto bulletShot = *Packet::deserializeStruct<ECS::BulletShot>(packet.data);
         auto bullet = _entityManager.createEntity<ECS::E::AnimatedGameEntity>();
-        LOG_DEBUG("Bullet shot by " + std::to_string(bulletShot.netId));
+        LOG_DEBUG("Bullet shot with netId " + std::to_string(bulletShot.netId));
         if (bulletShot.isPlayer) {
             bullet.setVelocity({500.0F, 0.0F});
             bullet.setRotation({90});
@@ -112,11 +112,6 @@ void net::RTypeClient::on_packet(const Packet &packet)
     }
     case ECS::ENTITY_DESTROYED: {
         auto entityDestroyed = *Packet::deserializeStruct<ECS::EntityDestroyed>(packet.data);
-        for (auto &_entityDestroyed : entitiesDestroyed) {
-            if (_entityDestroyed.netId == entityDestroyed.netId) {
-                return;
-            }
-        }
         entitiesDestroyed.push_back(entityDestroyed);
         break;
     }

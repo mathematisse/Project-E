@@ -80,6 +80,8 @@ public:
      */
     const std::vector<T> &getElems() const { return _elems; }
 
+    void resetAtIndex(size_t idx) override { _elems[idx] = T {0}; }
+
 protected:
     std::vector<T> _elems; ///< The vector storing the elements.
 };

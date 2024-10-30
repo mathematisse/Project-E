@@ -25,39 +25,14 @@ DrawRotationProjectileSystem::DrawRotationProjectileSystem(AssetsLoader &assetsL
 }
 
 void DrawRotationProjectileSystem::_innerOperate(
-    C::EntityStatus::Pool::Types &cstatus, C::Position::Pool::Types &cposition,
-    C::Size::Pool::Types &csize, C::Sprite::Pool::Types &csprite,
-    C::Velocity::Pool::Types &cvelocity, C::Dest::Pool::Types & /*cdest*/
+    C::Rotation::Pool::Types &crotation, C::Velocity::Pool::Types &cvelocity,
+    C::Dest::Pool::Types & /*cdest*/
 )
 {
-    auto [status] = cstatus;
-    if (status != C::EntityStatusEnum::ENT_ALIVE) {
-        return;
-    }
-    auto [id] = csprite;
-    if (id == 0) {
-        return;
-    }
-    auto [x, y] = cposition;
-    auto [sizeX, sizeY] = csize;
-    auto [velocityX, velocityY] = cvelocity;
+    auto [vX, vY] = cvelocity;
+    auto [rotation] = crotation;
 
-    auto texture = assetsLoader.get_asset_from_id(id);
-    float scale = (float) texture.width / sizeX;
-
-    auto rotation = (float) (std::atan2(velocityY, velocityX) * (180.0 / M_PI));
-
-    float centerX = x + sizeX / 2;
-    float centerY = y + sizeY / 2;
-
-    if (scale <= 0) {
-        scale = 1;
-    }
-    DrawTexturePro(
-        texture, {0, 0, (float) texture.width, (float) texture.height},
-        {centerX, centerY, (float) sizeX, (float) sizeY}, {(float) sizeX / 2, (float) sizeY / 2},
-        rotation, WHITE
-    );
+    rotation = (float) (std::atan2(vY, vX) * (180.0 / M_PI));
 }
 
 TowerClickSystem::TowerClickSystem():
@@ -92,9 +67,9 @@ void TowerClickSystem::_innerOperate(
         level = selectedTower.level;
         type = selectedTower.type;
     }
-    if (type == TowerType::WIZARD && sizeX == 75) {
-        sizeX = 100;
-        sizeY = 100;
+    if (type == TowerType::WIZARD && sizeX == 120) {
+        sizeX = 140;
+        sizeY = 140;
     }
 }
 
@@ -113,34 +88,10 @@ void ChangeTowerSprite::_innerOperate(
     auto [level] = clevel;
     auto [sprite] = csprite;
 
-    if (level == 1) {
-        if (type == TowerType::ARCHER) {
-            auto texture = assetsLoader.get_asset(ARCHER1_TOWER);
-            sprite = texture.id;
-        }
-        if (type == TowerType::WIZARD) {
-            auto texture = assetsLoader.get_asset(WIZARD1_TOWER);
-            sprite = texture.id;
-        }
-    } else if (level == 2) {
-        if (type == TowerType::ARCHER) {
-            auto texture = assetsLoader.get_asset(ARCHER2_TOWER);
-            sprite = texture.id;
-        }
-        if (type == TowerType::WIZARD) {
-            auto texture = assetsLoader.get_asset(WIZARD2_TOWER);
-            sprite = texture.id;
-        }
-    } else if (level == 3) {
-        if (type == TowerType::ARCHER) {
-            auto texture = assetsLoader.get_asset(ARCHER3_TOWER);
-            sprite = texture.id;
-        }
-        if (type == TowerType::WIZARD) {
-            auto texture = assetsLoader.get_asset(WIZARD3_TOWER);
-            sprite = texture.id;
-        }
+    if (level == 0) {
+        return;
     }
+    sprite = spriteIds[(level - 1) * 2 + (int) (type == TowerType::WIZARD)];
 }
 
 SpawnEnemy::SpawnEnemy(AssetsLoader &assetsLoader, EntityManager &_eM):
@@ -173,8 +124,8 @@ void SpawnEnemy::_innerOperate(C::EntityStatus::Pool::Types &cstatus, C::Score::
     std::vector<Vector2> spawns = {{2020, 900}, {1305, -100}};
     Vector2 spawn = spawns[rand() % 2];
     enemy.setPosition({spawn.x, spawn.y});
-    enemy.setSize({50, 50});
-    enemy.setSprite({assetsLoader.get_asset(GOBLIN).id});
+    enemy.setSize({65, 65});
+    enemy.setSprite(spriteId);
     enemy.setHealth({20});
     enemy.setVelocity({0.0F, 0.0F});
 }
@@ -188,11 +139,11 @@ static Vector2 go_to_pos(Vector2 dest, Vector2 origin)
     return dir;
 }
 
-static const std::vector<Vector2> path1 = {{1738, 879}, {1506, 743}, {1375, 760},
-                                           {1225, 863}, {1045, 895}, {830, 782},
-                                           {810, 680},  {750, 411},  {-75, 409}};
-static const std::vector<Vector2> path2 = {{1229, 112}, {949, 158}, {886, 171},
-                                           {842, 210},  {742, 409}, {-75, 409}};
+static const std::vector<Vector2> path1 = {{1788, 929}, {1556, 793}, {1425, 810},
+                                           {1275, 913}, {1095, 945}, {880, 832},
+                                           {860, 730},  {800, 461},  {-25, 459}};
+static const std::vector<Vector2> path2 = {{1279, 162}, {999, 208}, {936, 221},
+                                           {892, 260},  {792, 459}, {-25, 459}};
 
 MoveEnemy::MoveEnemy():
     AMonoSystem(false)
@@ -235,8 +186,8 @@ void MoveEnemy::_innerOperate(
         }
     }
     Vector2 dir = go_to_pos(path[i], {x, y});
-    vX = dir.x;
-    vY = dir.y;
+    vX = dir.x * 100.0F;
+    vY = dir.y * 100.0F;
 }
 
 void shoot_projectile(
@@ -244,15 +195,15 @@ void shoot_projectile(
 )
 {
     auto projectile = _eM.createEntity<E::ProjectileEntity>();
-    projectile.setPosition({tower.pos.x + 50, tower.pos.y + 50});
-    projectile.setSize({70, 70});
+    projectile.setPosition({tower.pos.x, tower.pos.y});
+    projectile.setSize({80, 80});
     if (tower.type == TowerType::ARCHER) {
         projectile.setSprite({assetsLoader.get_asset(ARROW).id});
     } else if (tower.type == TowerType::WIZARD) {
         projectile.setSprite({assetsLoader.get_asset(FIREBALL).id});
     }
-    Vector2 vel = go_to_pos(dest, {tower.pos.x + 50, tower.pos.y + 50});
-    projectile.setVelocity({vel.x * 5, vel.y * 5});
+    Vector2 vel = go_to_pos(dest, {tower.pos.x, tower.pos.y});
+    projectile.setVelocity({vel.x * 500.0F, vel.y * 500.0F});
     projectile.setDest({dest});
 }
 
@@ -297,13 +248,13 @@ void DamageEnemy::_innerOperate(
 
         if (tower.type == TowerType::ARCHER) {
             if (tower.delay > 1) {
-                shoot_projectile(assetsLoader, _eM, tower, {x - 50, y});
+                shoot_projectile(assetsLoader, _eM, tower, {x, y});
                 health -= 5;
                 tower.delay = 0;
             }
         } else if (tower.type == TowerType::WIZARD) {
             if (tower.delay > 2.5) {
-                shoot_projectile(assetsLoader, _eM, tower, {x - 50, y});
+                shoot_projectile(assetsLoader, _eM, tower, {x, y});
                 health -= 15;
                 tower.delay = 0;
             }
@@ -355,6 +306,17 @@ void KillProjectile::_innerOperate(
     if (x_done && y_done) {
         status = C::EntityStatusEnum::ENT_NEEDS_DESTROY;
     }
+}
+
+DestroyEntitiesSystem::DestroyEntitiesSystem(EntityManager &entityManager):
+    AStatusMonoSystem(false, C::ENT_NEEDS_DESTROY),
+    entityManager(entityManager)
+{
+}
+
+void DestroyEntitiesSystem::_statusOperate(C::ChunkPos::Pool::Types &cchunkpos)
+{
+    entityManager.destroyEntity(cchunkpos);
 }
 
 } // namespace S

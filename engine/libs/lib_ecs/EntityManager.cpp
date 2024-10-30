@@ -87,7 +87,6 @@ void EntityManager::destroyEntities(std::ranges::input_range auto &&cPosRange)
     size_t count = std::ranges::distance(cPosRange);
     LOG_DEBUG(RED "Destroying " + std::to_string(count) + " entities" RESET);
 
-    _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosRange, C::ENT_NONE);
     _entityPtrPool.getFreePos().insert(
         _entityPtrPool.getFreePos().end(), std::ranges::begin(cPosRange),
         std::ranges::end(cPosRange)
@@ -105,6 +104,7 @@ void EntityManager::destroyEntities(std::ranges::input_range auto &&cPosRange)
         _entityPools[poolId]->resetEntityAtIndex(entCPos);
         _entityPools[poolId]->getFreePos().push_back(entCPos);
     }
+    _entityPtrPool.resetEntityAtIndexes(cPosRange);
 }
 
 void EntityManager::_destroyEntities(
@@ -113,20 +113,20 @@ void EntityManager::_destroyEntities(
 {
     size_t count = std::ranges::distance(cPosRange);
     LOG_DEBUG(RED "Destroying " + std::to_string(count) + " entities" RESET);
-
-    _entityPtrPool.getEntityStatusPool().setComponentAtIndexes(cPosRange, C::ENT_NONE);
     _entityPtrPool.getFreePos().insert(
         _entityPtrPool.getFreePos().end(), std::ranges::begin(cPosRange),
         std::ranges::end(cPosRange)
     );
 
-    Chunks::cPosArr_t deletedcPos(count);
+    Chunks::cPosArr_t deletedcPos = Chunks::cPosArr_t(count);
+    std::fill(deletedcPos.begin(), deletedcPos.end(), std::make_tuple(0, 0));
     _entityPtrPool.getChunkPosPool().getComponentsAtIndexes(cPosRange, deletedcPos);
 
-    entityPool->resetEntityAtIndexes(deletedcPos);
     entityPool->getFreePos().insert(
         entityPool->getFreePos().end(), deletedcPos.begin(), deletedcPos.end()
     );
+    _entityPtrPool.resetEntityAtIndexes(cPosRange);
+    entityPool->resetEntityAtIndexes(deletedcPos);
 }
 
 } // namespace ECS

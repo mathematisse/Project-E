@@ -11,6 +11,7 @@
 #include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Core/PureArchetypes.hpp"
 #include "lib_ecs/Entities/IArchetypePool.hpp"
+#include "lib_log/log.hpp"
 #include <vector>
 #include <ranges> // Include for C++20 ranges
 
@@ -20,7 +21,7 @@ namespace ECS {
 class EntityManager : public AEntityManager {
 public:
     ~EntityManager() override = default;
-    explicit EntityManager(float fixedUpdateTime);
+    explicit EntityManager(float fixedUpdateTime = 0);
 
     // templated get that can raise an exception (notice no need of pool id here)
     template<typename TArch>
@@ -35,8 +36,8 @@ public:
     typename TArch::Ref getEntity(const Chunks::chunkPos_t &cPos)
     {
         auto entityPtr = _entityPtrPool.getRawEntity(cPos);
-        auto *pool =
-            static_cast<typename TArch::Pool *>(_entityPools[entityPtr.getEntityPoolIdVal()]);
+        auto epool = _getEntityPool(TArch::getArchetypeName());
+        auto *pool = static_cast<typename TArch::Pool *>(std::get<0>(epool));
         return pool->getRawEntity(entityPtr.getChunkPosElem());
     }
 
@@ -78,8 +79,9 @@ public:
             LOG_BLUE "Creating " + std::to_string(count) + " entities of type " LOG_COLOR_RESET +
             std::string(TArch::getArchetypeName())
         );
+
         auto ePool = _getEntityPool(TArch::getArchetypeName());
-        return _createEntities<TArch>(ePool, count, status);
+        return _createEntities<TArch>(ePool, count, status) | std::views::take(count);
     }
 
     void deleteEverything()
@@ -104,7 +106,7 @@ protected:
     )
     {
         auto [_entityPool, poolId] = ePool;
-        auto entityPool = static_cast<typename TArch::Pool *>(_entityPool);
+        auto *entityPool = static_cast<typename TArch::Pool *>(_entityPool);
 
         auto &freePos = entityPool->getFreePos();
         auto &freePtrPos = _entityPtrPool.getFreePos();
@@ -131,13 +133,18 @@ protected:
             nextFreePtrPosRange, nextFreePosRange
         );
         _entityPtrPool.getEntityPoolIdPool().setComponentAtIndexes(nextFreePtrPosRange, poolId);
+        // copy nextFreePosRange
+        static Chunks::cPosArr_t tempCopy;
+        tempCopy.clear();
+        tempCopy.reserve(N);
+        std::copy(nextFreePosRange.begin(), nextFreePosRange.end(), std::back_inserter(tempCopy));
+
+        auto entities = tempCopy | std::views::transform([entityPool](auto pos) {
+                            return entityPool->getRawEntity(Chunks::chunkPos_t(pos));
+                        });
 
         freePtrPos.erase(freePtrPos.begin(), freePtrPos.begin() + N);
         freePos.erase(freePos.begin(), freePos.begin() + N);
-
-        auto entities = nextFreePosRange | std::views::transform([entityPool](auto pos) {
-                            return entityPool->getRawEntity(Chunks::chunkPos_t(pos));
-                        });
 
         return entities;
     }
@@ -148,7 +155,7 @@ protected:
     )
     {
         auto [_entityPool, poolId] = ePool;
-        auto entityPool = static_cast<typename TArch::Pool *>(_entityPool);
+        auto *entityPool = static_cast<typename TArch::Pool *>(_entityPool);
         auto &freePos = entityPool->getFreePos();
         auto &freePtrPos = _entityPtrPool.getFreePos();
 
@@ -210,12 +217,18 @@ protected:
         );
         _entityPtrPool.getEntityPoolIdPool().setComponentAtIndexes(nextFreePtrPosRange, poolId);
 
-        freePtrPos.erase(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
-        freePos.erase(freePos.begin(), freePos.begin() + static_cast<long>(count));
+        // copy nextFreePosRange
+        static Chunks::cPosArr_t tempCopy;
+        tempCopy.clear();
+        tempCopy.reserve(count);
+        std::copy(nextFreePosRange.begin(), nextFreePosRange.end(), std::back_inserter(tempCopy));
 
-        auto entities = nextFreePosRange | std::views::transform([entityPool](auto pos) {
+        auto entities = tempCopy | std::views::transform([entityPool](auto pos) {
                             return entityPool->getRawEntity(Chunks::chunkPos_t(pos));
                         });
+
+        freePtrPos.erase(freePtrPos.begin(), freePtrPos.begin() + static_cast<long>(count));
+        freePos.erase(freePos.begin(), freePos.begin() + static_cast<long>(count));
 
         return entities;
     }

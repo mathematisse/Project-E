@@ -68,9 +68,6 @@ public:
             }
         }
         if (i == sizeof...(Ts)) {
-            LOG_DEBUG(
-                "Added entity pool " + std::string(entityPool->getEntityName()) + " to query"
-            );
             _componentPoolsArrays.push_back(newComponentPoolsArray);
             return true;
         }

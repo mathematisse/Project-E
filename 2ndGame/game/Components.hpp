@@ -10,6 +10,8 @@
 #include <raylib.h>
 #include "lib_ecs/Core/ComponentMaker.hpp"
 
+#define TOWER_COUNT 9
+
 static const std::vector<std::string> tower_names {"None", "Bomb", "Archer", "Wizard"};
 
 static const std::vector<std::vector<size_t>> tower_range {

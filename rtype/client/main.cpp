@@ -90,14 +90,15 @@ void setup_decor(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
         background.setType({GameEntityType::BACKGROUND});
         background.setSize({3000, WINDOW_HEIGHT});
         background.setSprite({assetsLoader.get_asset(BACKGROUND_PATH).id});
-        background.setPosition({(float) i * 3000.0F, 0});
+        background.setPosition({(WINDOW_WIDTH / 2.0F) + ((float) i * 3000.0F), WINDOW_HEIGHT / 2.0F}
+        );
         i++;
     }
     i = 0;
     for (auto ground : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
         ground.setType({GameEntityType::WALL});
         ground.setSize({80, 100});
-        ground.setPosition({(float) i * 80.0F, WINDOW_HEIGHT - 100});
+        ground.setPosition({((float) i * 80.0F), WINDOW_HEIGHT});
         ground.setSprite({assetsLoader.get_asset(FLOOR).id});
         i++;
     }
@@ -105,7 +106,7 @@ void setup_decor(ECS::EntityManager &_eM, AssetsLoader &assetsLoader)
     for (auto ceiling : _eM.createEntities<ECS::E::DecorEntity, 250>()) {
         ceiling.setType({GameEntityType::WALL});
         ceiling.setSize({80, 100});
-        ceiling.setPosition({(float) i * 80.0F, 0});
+        ceiling.setPosition({((float) i * 80.0F), 0});
         ceiling.setSprite({assetsLoader.get_asset(CEILING).id});
         i++;
     }
@@ -218,13 +219,13 @@ int main(int ac, char ** /*av*/)
 
     // System nodes
     ECS::S::SystemTreeNode rTypeFixedNode(
-        "RtypeFixedNode",
-        {&moveBackgroundSystem, &moveEnnemySystem, &updateEnginePosition, &moveSystem}
+        "RtypeFixedNode", {&moveBackgroundSystem, &moveEnnemySystem, &moveSystem}
     );
     bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP);
     ECS::S::SystemTreeNode rTypeNode(
         "RtypeNode",
-        {&moveOtherPlayerSystem, &destroyEntitiesSystem, &getPlayerPositionSystem, &showInfoSystem}
+        {&moveOtherPlayerSystem, &destroyEntitiesSystem, &getPlayerPositionSystem, &showInfoSystem,
+         &updateEnginePosition} //, &debugSystem}
     );
     if (success) {
         LOG_INFO("Successfully registered RtypeFixedNode");
@@ -472,7 +473,6 @@ int main(int ac, char ** /*av*/)
             update_camera(camera, dt);
         }
         moveBackgroundSystem.cameraX = camera.target.x;
-        update_player_sprite(_eM, player, assetsLoader);
 
         playerPosition = get_player_position(_eM, player);
         moveEnnemySystem.playersPos = getPlayerPositionSystem.playersPos;
@@ -480,9 +480,11 @@ int main(int ac, char ** /*av*/)
         updateEnginePosition.playerPosition = playerPosition;
 
         playerAlive = player_is_alive(_eM, player);
+        if (playerAlive) {
+            update_player_sprite(_eM, player, assetsLoader);
+        }
         updateEnginePosition.playerAlive = playerAlive;
 
-        showInfoSystem.one_time = false;
         if (client.started && !change_music) {
             StopMusicStream(loading_music);
             PlayMusicStream(game_music);
@@ -497,9 +499,7 @@ int main(int ac, char ** /*av*/)
         {
             ClearBackground(RAYWHITE);
             if (client.started) {
-                if (_eM.addTime(dt)) {
-                    frame++;
-                }
+                frame += (int) _eM.addTime(dt);
                 EndMode2D();
             } else {
                 DrawTexture(loading_background, 0, 0, WHITE);

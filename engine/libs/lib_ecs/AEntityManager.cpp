@@ -21,7 +21,9 @@ namespace ECS {
 AEntityManager::AEntityManager(float fixedUpdateTime):
     _fixedUpdateTime(fixedUpdateTime)
 {
-    _fixedSystemTree.setDeltaTime(fixedUpdateTime);
+    if (fixedUpdateTime > 0) {
+        _fixedSystemTree.setDeltaTime(fixedUpdateTime);
+    }
 }
 
 bool AEntityManager::registerSystemGroup(
@@ -93,6 +95,14 @@ S::IQuery &AEntityManager::initializeQuery(S::IQuery &query)
 
 bool AEntityManager::addTime(float time)
 {
+    if (_fixedUpdateTime == 0) {
+        _timePassed += time;
+        _systemTree.setDeltaTime(time);
+        _fixedSystemTree.setDeltaTime(time);
+        _runSystems();
+        _runFixedSystems();
+        return true;
+    }
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
     _systemTree.setDeltaTime(time);

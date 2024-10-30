@@ -8,6 +8,7 @@
 #include "Components.hpp"
 #include "NetworkManager.hpp"
 #include "spatial2d/Components.hpp"
+#include "render/Components.hpp"
 #include "RTypePackets.hpp"
 #include "lib_ecs/Core/RawComponents.hpp"
 #include "lib_ecs/EntityManager.hpp"

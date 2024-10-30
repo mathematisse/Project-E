@@ -61,6 +61,8 @@ public:
      * @return ChunkType Type of the chunk.
      */
     [[nodiscard]] virtual ChunkType getType() const = 0;
+
+    virtual void resetAtIndex(size_t idx) = 0;
 };
 
 } // namespace ECS::Chunks
