@@ -39,12 +39,8 @@ void MainMenu::show_info_box(void)
     static const std::string message = "Failed to connect to server ";
 
     if (_showInfoBox) {
-        GuiWindowBox(
-            {WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 100, 600, 250}, "Info"
-        );
-        GuiLabel(
-            {WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20}, message.c_str()
-        );
+        GuiWindowBox({WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT / 2 - 100, 600, 250}, "Info");
+        GuiLabel({WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2 - 50, 600, 20}, message.c_str());
         GuiLabel({WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT / 2, 350, 20}, ip_text.c_str());
 
         if (GuiButton({WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 50, 100, 30}, "OK")) {
@@ -89,40 +85,27 @@ void MainMenu::show_settings(void)
     static int old_volume = 50;
 
     if (_showSettings) {
-        if (GuiWindowBox(
-                {WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings"
-            )) {
+        if (GuiWindowBox({WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings")) {
             _showSettings = false;
             return;
         }
         GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2, 350, 20}, "Auto Shoot:");
+        GuiCheckBox({WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2, 20, 20}, "", &settings.auto_shoot);
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20}, "High Saturation:");
         GuiCheckBox(
-            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2, 20, 20}, "",
-            &settings.auto_shoot
+            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "", &settings.color_blind
         );
-        GuiLabel(
-            {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
-            "High Saturation:"
-        );
-        GuiCheckBox(
-            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",
-            &settings.color_blind
-        );
-        GuiLabel(
-            {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:"
-        );
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:");
         GuiCheckBox(
             {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
             &settings.color_blind_simulation
         );
         GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 150, 350, 20}, "Volume:");
         GuiSlider(
-            {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150, 350, 20}, "0", "100",
-            &settings.volume, 0, 100
+            {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150, 350, 20}, "0", "100", &settings.volume, 0,
+            100
         );
-        if (GuiButton(
-                {WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 250, 100, 30}, "Back"
-            )) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 250, 100, 30}, "Back")) {
             _showSettings = false;
         }
 
@@ -173,15 +156,11 @@ bool MainMenu::open(void)
 
         get_ip_and_port();
 
-        if (GuiButton(
-                {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings"
-            )) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings")) {
             _showSettings = true;
         }
 
-        if (GuiButton(
-                {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit"
-            )) {
+        if (GuiButton({WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit")) {
             EndDrawing();
             break;
         }
