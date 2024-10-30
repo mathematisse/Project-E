@@ -23,10 +23,10 @@ using TowerEntityAspect = Aspect<
     std::tuple<C::ArchType, C::ArchLevel, C::ArchID>,
     std::tuple<StaticEntityAspect, SpriteEntityAspect>>;
 using ProjectileEntityAspect = Aspect<
-    std::tuple<C::ArchType, C::ArchLevel, C::ArchID, C::ArchDest>,
+    std::tuple<C::ArchType, C::ArchLevel, C::ArchDest>,
     std::tuple<DynamicEntityAspect, SpriteEntityAspect>>;
 using EnemyEntityAspect = Aspect<
-    std::tuple<C::ArchType, C::ArchLevel, C::ArchID, C::ArchDest, C::ArchHealth>,
+    std::tuple<C::ArchType, C::ArchLevel, C::ArchDest, C::ArchHealth>,
     std::tuple<DynamicEntityAspect, SpriteEntityAspect>>;
 
 } // namespace ECS::E

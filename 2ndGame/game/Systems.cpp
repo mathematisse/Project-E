@@ -91,7 +91,12 @@ void ChangeTowerSprite::_innerOperate(
     if (level == 0) {
         return;
     }
+    auto old_sprite = sprite;
     sprite = spriteIds[(level - 1) * 2 + (int) (type == TowerType::WIZARD)];
+    if (old_sprite != sprite) {
+        std::cout << "Changed sprite for level " << level << " and type " << (int) type
+                  << std::endl;
+    }
 }
 
 SpawnEnemy::SpawnEnemy(AssetsLoader &assetsLoader, EntityManager &_eM):

@@ -189,9 +189,9 @@ int main(int ac, char *av[])
         tower.setPosition({towers_positions[i].x, towers_positions[i].y - 50});
         tower.setSize({120, 120});
         tower.setSprite(assetsLoader.get_asset(EMPTY_TOWER).id);
-        tower.setID(i);
+        tower.setID(i + 1);
         tower_info towerInfo {};
-        towerInfo.id = i;
+        towerInfo.id = i + 1;
         towerInfo.level = 0;
         towerInfo.type = TowerType::NONE;
         towerInfo.pos = {towers_positions[i].x, towers_positions[i].y - 50};
@@ -201,7 +201,7 @@ int main(int ac, char *av[])
 
     _eM.createEntity<ECS::E::PlayerEntity>().setScore(0);
 
-    size_t money = 100;
+    size_t money = 500;
     int player_health = 10;
     size_t score = 0;
 
