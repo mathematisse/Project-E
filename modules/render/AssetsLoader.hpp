@@ -51,7 +51,7 @@ public:
 
     Texture2D &get_asset(std::vector<std::string> path_array);
 
-    Texture2D &get_asset_from_id(size_t id) { return assets[assets_id[id]]; }
+    inline Texture2D &get_asset_from_id(size_t id) { return assets[assets_id[id]]; }
 
     Texture2D &get_asset_with_string(std::string path);
 

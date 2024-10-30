@@ -1,5 +1,3 @@
-#pragma once
-
 #include "lib_log/log.hpp"
 #include "AssetsLoader.hpp"
 #include <map>
@@ -58,8 +56,6 @@ Texture2D &AssetsLoader::get_asset(std::vector<std::string> path_array)
     std::string path = get_real_path(path_array);
     return assets[path];
 }
-
-Texture2D &AssetsLoader::get_asset_from_id(size_t id) { return assets[assets_id[id]]; }
 
 Texture2D &AssetsLoader::get_asset_with_string(std::string path) { return assets[path]; }
 
