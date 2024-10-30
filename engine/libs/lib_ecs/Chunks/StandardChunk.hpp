@@ -31,7 +31,17 @@ public:
      */
     explicit StandardChunk(size_t elemCount):
         AChunk<T>(STDCHUNK, elemCount),
-        _elems(elemCount)
+        _elems(elemCount, T {0})
+    {
+    }
+
+    // Copy constructor disabled
+    StandardChunk(const StandardChunk &other) = delete;
+
+    // move operator ok
+    StandardChunk(StandardChunk &&other) noexcept:
+        AChunk<T>(STDCHUNK, other._elems.size()),
+        _elems(std::move(other._elems))
     {
     }
 
@@ -39,11 +49,6 @@ public:
      * @brief Default destructor.
      */
     ~StandardChunk() = default;
-
-    StandardChunk(const StandardChunk &other) = default;
-    StandardChunk(StandardChunk &&other) = default;
-    StandardChunk &operator=(const StandardChunk &other) = default;
-    StandardChunk &operator=(StandardChunk &&other) = default;
 
     /**
      * @brief Retrieves a pointer to the element at the specified index.
@@ -66,14 +71,16 @@ public:
      *
      * @return std::vector<T>* A pointer to the vector of elements.
      */
-    std::vector<T> *getElems() { return &_elems; }
+    std::vector<T> &getElems() { return _elems; }
 
     /**
      * @brief Retrieves a constant pointer to the vector of elements.
      *
      * @return const std::vector<T>* A constant pointer to the vector of elements.
      */
-    const std::vector<T> *getElems() const { return &_elems; }
+    const std::vector<T> &getElems() const { return _elems; }
+
+    void resetAtIndex(size_t idx) override { _elems[idx] = T {0}; }
 
 protected:
     std::vector<T> _elems; ///< The vector storing the elements.

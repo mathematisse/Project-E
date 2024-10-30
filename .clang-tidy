@@ -13,11 +13,23 @@ Checks: "*,
         -readability-avoid-const-params-in-decls,
         -cppcoreguidelines-non-private-member-variables-in-classes,
         -misc-non-private-member-variables-in-classes,
+        -hicpp-avoid-c-arrays,
+        -cppcoreguidelines-avoid-c-arrays,
+        -modernize-avoid-c-arrays,
+        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -hicpp-no-array-decay,
+        -unused-includes,
+        -bugprone-easily-swappable-parameters,
+        -cppcoreguidelines-special-member-functions,
+        -hicpp-special-member-functions,
+        -readability-identifier-length,
+        -misc-no-recursion,
         -cppcoreguidelines-macro-usage,
         -cppcoreguidelines-avoid-magic-numbers,
         -readability-magic-numbers,
         -cppcoreguidelines-avoid-non-const-global-variables,
         -cert-err58-cpp,
+        
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''

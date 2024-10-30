@@ -1,73 +1,50 @@
 
+#include "RTypePackets.hpp"
 #include "RTypeServer.hpp"
-#include "DecorSquare.hpp"
+#include "Archetypes.hpp"
 #include <cstdlib>
 #include <chrono>
 #include <vector>
 
 // ECS includes
-#include "Square.hpp"
 #include "Systems.hpp"
 #include "ServerSystems.hpp"
+#include "core/Core.hpp"
+#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
+#include "lib_log/log.hpp"
+#include "spatial2d/Spatial2D.hpp"
 
-char player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::cPosArr_t &chunks)
+bool player_is_alive(ECS::EntityManager &_eM, ECS::Chunks::chunkPos_t &player)
 {
-    auto player = chunks;
-    if (player.empty()) {
-        std::cout << "Player is dead" << std::endl;
-        return 0;
-    }
-    auto ref = _eM.getEntity(player[0]);
-    auto square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-    if (!square_player) {
-        std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-        return 0;
-    }
-    return *square_player->getHealth()->get<0>();
+    return _eM.getEntity<ECS::E::BaseEntity>(player).getHealthVal() > 0;
 }
 
-ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager)
+ECS::Chunks::chunkPos_t setup_player(ECS::EntityManager &_eM, NetworkManager &networkManager)
 {
-    auto player = _eM.createEntities("Square", 1, ECS::C::ENT_ALIVE);
+    auto player = _eM.createEntity<ECS::E::BaseEntity>();
 
-    for (const auto &entity : player) {
-        auto ref = _eM.getEntity(entity);
-
-        auto *square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-        if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-            return {};
-        }
-        square_player->getPosition()->set<0>(1920 / 4);
-        square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getVelocity()->set<2>(200.0F);
-        square_player->getType()->set<0>(SquareType::PLAYER);
-        square_player->getColor()->set<1>(255);
-        square_player->getColor()->set<3>(255);
-        square_player->getWeapon()->set<0>(WeaponType::BULLET);
-        square_player->getCanShoot()->set<0>(true);
-        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
-            square_player->getCanShoot()->set<1>(1.5F);
-        } else {
-            square_player->getCanShoot()->set<1>(0.3F);
-        }
-        square_player->getSize()->set<0>(80);
-        square_player->getSize()->set<1>(80);
-        square_player->getSize()->set<2>(90);
-        square_player->getSprite()->set<0>(0);
-        square_player->getHealth()->set<0>(4);
-        square_player->getNetworkID()->set<0>(networkManager.getnewNetID());
-    }
-    return player;
+    player.setPosition({1920.0F / 4, 1080.0F / 2});
+    player.setType({GameEntityType::PLAYER});
+    player.setColor({255, 0, 0, 255});
+    player.setWeapon({WeaponType::BULLET});
+    player.setCanShoot({true, player.getWeaponVal() == WeaponType::BIG_SHOT ? 1.5F : 0.3F, 0.0F});
+    player.setSize({80, 80});
+    player.setRotation({90});
+    player.setHealth({4});
+    player.setNetworkID({networkManager.getnewNetID()});
+    return player.getChunkPosVal();
 }
 
 int main(int ac, char **av)
 {
+    LOG_SET_LEVEL(DEBUG);
+    LOG_SET_STREAM(std::cerr);
+    LOG_SET_FILE("rtype_server.log", true);
+
     ECS::S::MovePlayersSystem movePlayersSystem;
-    ECS::EntityManager _eM;
+    ECS::EntityManager _eM(FIXED_TIMESTEP);
     NetworkManager networkManager;
     ECS::S::SendAllDataToNewClients sendAllDataToNewClients;
     net::RTypeServer server(
@@ -85,11 +62,16 @@ int main(int ac, char **av)
     server.host(port);
     server.start();
     std::cout << "Server started on port " << port << std::endl;
-    srand(time(NULL));
+    srand(time(nullptr));
 
-    float cameraX = 1920 / 2;
+    float cameraX = 1920.0F / 2;
 
-    ECS::S::ApplyVelocitySystem applyVelocitySystem;
+    // Engine modules
+    engine::module::Core mCore;
+    mCore.load(_eM);
+    engine::module::Spatial2D mSpatial2D;
+    mSpatial2D.load(_eM);
+
     ECS::S::SpawnEnnemySystem spawnEnnemySystem(_eM, networkManager, 0, server, 5);
     ECS::S::DestroyEntitiesSystem destroyEntitiesSystem(_eM, server);
     ECS::S::ShootSystem shootSystem(_eM, networkManager, 0, server);
@@ -97,30 +79,28 @@ int main(int ac, char **av)
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
     ECS::S::ChangePlayerWeaponSystem changePlayerWeaponSystem;
-    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
+    ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.enemyCount);
     ECS::S::GetPlayerPositionSystem getPlayerPositionSystem;
     ECS::S::SpawnPowerUpSystem spawnPowerUpSystem(_eM, networkManager, 0, server);
     ECS::S::CountPowerUpAliveSystem countPowerUpAliveSystem(spawnPowerUpSystem._powerUpCount);
 
     // Entity pools
-    ECS::E::SquarePool squarePool;
-    ECS::E::DecorSquarePool decorSquarePool;
+    ECS::E::BaseEntity::Pool gameEntityPool(RTYPE_ENTITY_POOL_SIZE);
+    _eM.registerEntityPool(&gameEntityPool);
 
-    ECS::S::SystemTreeNode demoFixedNode(
-        42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
+    ECS::S::SystemTreeNode rTypeFixedNode(
+        "RTypeFixedNode", {&spawnEnnemySystem, &countEnnemyAliveSystem},
         {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &spawnPowerUpSystem,
-         &countEnnemyAliveSystem, &applyVelocitySystem, &shootSystem, &colliderSystem,
-         &changePlayerWeaponSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
-         &sendAllDataToNewClients}
+         &countEnnemyAliveSystem, &shootSystem, &colliderSystem, &changePlayerWeaponSystem,
+         &destroyEntitiesSystem, &getPlayerPositionSystem, &sendAllDataToNewClients}
     );
+    bool success = _eM.registerFixedSystemNode(rTypeFixedNode, ROOT_SYS_GROUP);
 
-    _eM.registerFixedSystemNode(demoFixedNode, ECS::S::ROOTSYSGROUP, false, true);
-
-    _eM.registerEntityPool(&decorSquarePool);
-    _eM.registerEntityPool(&squarePool);
-
-    applyVelocitySystem.deltaTime = 0.02F;
-    shootSystem.deltaTime = 0.02F;
+    if (success) {
+        LOG_INFO("Successfully registered RTypeFixedNode");
+    } else {
+        LOG_ERROR("Failed to register RTypeFixedNode");
+    }
 
     auto curr_time = std::chrono::steady_clock::now();
 
@@ -137,8 +117,8 @@ int main(int ac, char **av)
         shootSystem.playersPos = getPlayerPositionSystem.playersPos;
         getPlayerPositionSystem.playersPos.clear();
 
-        countEnnemyAliveSystem.ennemyCount = 0;
-        if ((server.clientCount() > 0) || started) {
+        countEnnemyAliveSystem.enemyCount = 0;
+        if ((server.clientCount() > 1) || started) {
             cameraX += 80 * dt;
             moveBackgroundSystem.cameraX = cameraX;
             started = true;
@@ -146,10 +126,13 @@ int main(int ac, char **av)
                 frame++;
                 sendAllDataToNewClients.newClients.clear();
                 movePlayersSystem.playerStates.clear();
+                moveEnnemySystem.playersPos = getPlayerPositionSystem.playersPos;
+                shootSystem.playersPos = getPlayerPositionSystem.playersPos;
+                getPlayerPositionSystem.playersPos.clear();
                 server.send_tcp_all(
                     ECS::FRAME_ID, net::Packet::serializeStruct(ECS::FrameId {frame})
                 );
-                spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+                spawnEnnemySystem.enemyCount = countEnnemyAliveSystem.enemyCount;
                 spawnPowerUpSystem._powerUpCount = countPowerUpAliveSystem.powerUpCount;
             }
         }

@@ -7,13 +7,14 @@
 
 #pragma once
 
-#include "lib_ecs/Entities/IEntityPool.hpp"
+#include "lib_ecs/Entities/IArchetypePool.hpp"
 
 namespace ECS::S {
 
 class IQuery {
 public:
-    virtual bool tryAddEntityPool(E::IEntityPool *entityPool) = 0;
+    virtual ~IQuery() = default;
+    virtual bool tryAddEntityPool(E::IArchetypePool *entityPool) = 0;
 };
 
 } // namespace ECS::S

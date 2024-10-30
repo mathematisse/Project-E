@@ -7,29 +7,20 @@
 
 #pragma once
 
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include "lib_ecs/Entities/IEntityPool.hpp"
 #include "lib_ecs/Systems/ASystem.hpp"
 #include "lib_ecs/Systems/Query.hpp"
-#include <iostream>
-// # include <chrono>
 
 namespace ECS::S {
 template<typename... Ts>
-class AMonoSystem : public ASystem {
+class AMonoSystem : virtual public ASystem {
 public:
-    explicit AMonoSystem(bool isParallel):
+    explicit AMonoSystem(bool isParallel = false):
         ASystem(isParallel)
     {
     }
     ~AMonoSystem() override = default;
 
-    AMonoSystem(const AMonoSystem &other) = default;
-    AMonoSystem(AMonoSystem &&other) = default;
-    AMonoSystem &operator=(const AMonoSystem &other) = default;
-    AMonoSystem &operator=(AMonoSystem &&other) = default;
-
-    bool tryAddEntityPool(E::IEntityPool *entityPool) override
+    bool tryAddEntityPool(E::IArchetypePool *entityPool) override
     {
         return _query.tryAddEntityPool(entityPool);
     }
@@ -67,23 +58,18 @@ protected:
 };
 
 template<typename... Ts>
-class AStatusMonoSystem : public AMonoSystem<C::EntityStatusPool, Ts...> {
+class AStatusMonoSystem : public AMonoSystem<C::EntityStatus::Pool, Ts...> {
 public:
-    explicit AStatusMonoSystem(bool isParallel, C::EntityStatusEnum status):
-        AMonoSystem<C::EntityStatusPool, Ts...>(isParallel),
+    explicit AStatusMonoSystem(bool isParallel = false, C::EntityStatusEnum status = C::ENT_ALIVE):
+        AMonoSystem<C::EntityStatus::Pool, Ts...>(isParallel),
         _status(status)
     {
     }
     ~AStatusMonoSystem() override = default;
 
-    AStatusMonoSystem(const AStatusMonoSystem &other) = default;
-    AStatusMonoSystem(AStatusMonoSystem &&other) = default;
-    AStatusMonoSystem &operator=(const AStatusMonoSystem &other) = default;
-    AStatusMonoSystem &operator=(AStatusMonoSystem &&other) = default;
-
 protected:
     C::EntityStatusEnum _status;
-    void _innerOperate(C::EntityStatusPool::Types &cStatus, typename Ts::Types &...componentPools)
+    void _innerOperate(C::EntityStatus::Pool::Types &cStatus, typename Ts::Types &...componentPools)
         override
     {
         auto [status] = cStatus;

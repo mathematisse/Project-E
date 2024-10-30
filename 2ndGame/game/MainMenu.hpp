@@ -1,10 +1,7 @@
 #pragma once
 
 #include "raylib.h"
-#include <string>
-#include <vector>
-#include <iostream>
-#include "AssetsLoader.hpp"
+#include "render/AssetsLoader.hpp"
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080

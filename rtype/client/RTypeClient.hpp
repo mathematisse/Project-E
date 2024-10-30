@@ -20,7 +20,7 @@ public:
     void on_tcp_disconnect(client_id id) override {};
     void on_udp_connect(client_id id) override {};
     void on_packet(const Packet &packet, client_id server) override;
-    size_t ennemySpriteId = 0;
+    size_t enemySpriteId = 0;
     size_t bulletSpriteId = 0;
     size_t bigShotSpriteId = 0;
     size_t frigateSpriteId = 0;
