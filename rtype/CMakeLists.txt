@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Modules
+set(render_ENABLED ON)
+set(spatial2d_ENABLED ON)
+set(network_ENABLED ON)
+set(core_ENABLED ON)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/engine Engine)
 

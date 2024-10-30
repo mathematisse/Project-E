@@ -5,113 +5,87 @@
 ** Demo lib ecs
 */
 
-#include "DecorSquare.hpp"
-#include "lib_ecs/Components/PureComponentPools.hpp"
-#include "Square.hpp"
-#include "lib_ecs/EntityManager.hpp"
+#include "Components.hpp"
+#include "lib_ecs/Core/RawComponents.hpp"
+#include "spatial2d/Components.hpp"
 #include "lib_ecs/Systems/ADualSystem.hpp"
 #include "lib_ecs/Systems/AMonoSystem.hpp"
-#include "NetworkManager.hpp"
 #include "raylib.h"
 
 namespace ECS::S {
 
-class ApplyVelocitySystem : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool> {
-public:
-    explicit ApplyVelocitySystem();
-    ~ApplyVelocitySystem() override = default;
-
-    ApplyVelocitySystem(const ApplyVelocitySystem &other) = default;
-    ApplyVelocitySystem(ApplyVelocitySystem &&other) = default;
-    ApplyVelocitySystem &operator=(const ApplyVelocitySystem &other) = default;
-    ApplyVelocitySystem &operator=(ApplyVelocitySystem &&other) = default;
-
-    float deltaTime = 0.0f;
-
-protected:
-    void _statusOperate(
-        typename C::PositionPool::Types &cposition, typename C::VelocityPool::Types &cvelocity
-    ) override;
-};
-
 class MoveBackgroundSystem
-    : public S::AMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+    : public S::AMonoSystem<C::EntityStatus::Pool, C::Position::Pool, C::Type::Pool> {
 public:
     explicit MoveBackgroundSystem();
     ~MoveBackgroundSystem() override = default;
 
-    MoveBackgroundSystem(const MoveBackgroundSystem &other) = default;
-    MoveBackgroundSystem(MoveBackgroundSystem &&other) = default;
-    MoveBackgroundSystem &operator=(const MoveBackgroundSystem &other) = default;
-    MoveBackgroundSystem &operator=(MoveBackgroundSystem &&other) = default;
-
-    float cameraX;
+    float cameraX = 0;
 
 protected:
     void _innerOperate(
-        typename C::EntityStatusPool::Types &cstatus, typename C::PositionPool::Types &cposition,
-        typename C::TypePool::Types &ctype
+        typename C::EntityStatus::Pool::Types &cstatus,
+        typename C::Position::Pool::Types &cposition, typename C::Type::Pool::Types &ctype
     ) override;
 };
 
 class MoveEnnemySystem
-    : public S::AStatusMonoSystem<C::PositionPool, C::VelocityPool, C::TypePool> {
+    : public S::AMonoSystem<C::Position::Pool, C::Velocity::Pool, C::Type::Pool> {
 public:
     explicit MoveEnnemySystem();
     ~MoveEnnemySystem() override = default;
 
-    MoveEnnemySystem(const MoveEnnemySystem &other) = default;
-    MoveEnnemySystem(MoveEnnemySystem &&other) = default;
-    MoveEnnemySystem &operator=(const MoveEnnemySystem &other) = default;
-    MoveEnnemySystem &operator=(MoveEnnemySystem &&other) = default;
-
     std::vector<Vector2> playersPos;
 
 protected:
-    void _statusOperate(
-        C::PositionPool::Types &cposition, C::VelocityPool::Types &cvelocity,
-        C::TypePool::Types &ctype
+    void _innerOperate(
+        C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+        C::Type::Pool::Types &ctype
     ) override;
 };
 
-class ColliderSystem
-    : public S::ASelfDualSystem<std::tuple<
-          C::EntityStatusPool, C::PositionPool, C::SizePool, C::TypePool, C::HealthPool>> {
+class ColliderSystem : public S::ASelfDualSystem<std::tuple<
+                           C::EntityStatus::Pool, C::Position::Pool, C::Size::Pool, C::Type::Pool,
+                           C::Health::Pool>> {
 public:
     explicit ColliderSystem();
     ~ColliderSystem() override = default;
 
-    ColliderSystem(const ColliderSystem &other) = default;
-    ColliderSystem(ColliderSystem &&other) = default;
-    ColliderSystem &operator=(const ColliderSystem &other) = default;
-    ColliderSystem &operator=(ColliderSystem &&other) = default;
-
 protected:
     void _innerOperate(
-        C::EntityStatusPool::Types &cStatusA, C::PositionPool::Types &cpositionA,
-        C::SizePool::Types &csizeA, C::TypePool::Types &ctypeA, C::HealthPool::Types &chealthA,
-        C::EntityStatusPool::Types &cStatusB, C::PositionPool::Types &cpositionB,
-        C::SizePool::Types &csizeB, C::TypePool::Types &ctypeB, C::HealthPool::Types &chealthB
+        C::EntityStatus::Pool::Types &cStatusA, C::Position::Pool::Types &cpositionA,
+        C::Size::Pool::Types &csizeA, C::Type::Pool::Types &ctypeA,
+        C::Health::Pool::Types &chealthA, C::EntityStatus::Pool::Types &cStatusB,
+        C::Position::Pool::Types &cpositionB, C::Size::Pool::Types &csizeB,
+        C::Type::Pool::Types &ctypeB, C::Health::Pool::Types &chealthB
     ) override;
 };
 
 class GetPlayerPositionSystem
-    : public S::AStatusMonoSystem<C::EntityStatusPool, C::PositionPool, C::TypePool> {
+    : public S::AMonoSystem<C::EntityStatus::Pool, C::Position::Pool, C::Type::Pool> {
 public:
     explicit GetPlayerPositionSystem();
     ~GetPlayerPositionSystem() override = default;
 
-    GetPlayerPositionSystem(const GetPlayerPositionSystem &other) = default;
-    GetPlayerPositionSystem(GetPlayerPositionSystem &&other) = default;
-    GetPlayerPositionSystem &operator=(const GetPlayerPositionSystem &other) = default;
-    GetPlayerPositionSystem &operator=(GetPlayerPositionSystem &&other) = default;
-
     std::vector<Vector2> playersPos;
 
 protected:
-    void _statusOperate(
-        typename C::EntityStatusPool::Types &cEntityStatus,
-        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype
+    void _innerOperate(
+        typename C::EntityStatus::Pool::Types &cEntityStatus,
+        typename C::Position::Pool::Types &cposition, typename C::Type::Pool::Types &ctype
+    ) override;
+};
+
+class ChangePlayerWeaponSystem
+    : public S::AMonoSystem<C::Type::Pool, C::Health::Pool, C::Weapon::Pool> {
+public:
+    ChangePlayerWeaponSystem() = default;
+    ~ChangePlayerWeaponSystem() override = default;
+
+protected:
+    void _innerOperate(
+        typename C::Type::Pool::Types &ctype, typename C::Health::Pool::Types &cHealth,
+        typename C::Weapon::Pool::Types &cweapon
     ) override;
 };
 

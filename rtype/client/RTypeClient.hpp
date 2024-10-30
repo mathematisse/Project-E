@@ -14,10 +14,11 @@ public:
         std::vector<ECS::EntityDestroyed> &entitiesDestroyed, float &cameraX
     );
     void on_packet(const Packet &packet) override;
-    size_t ennemySpriteId = 0;
+    size_t enemySpriteId = 0;
     size_t bulletSpriteId = 0;
     size_t bigShotSpriteId = 0;
     size_t frigateSpriteId = 0;
+    size_t powerUpSpriteId = 0;
     ECS::Chunks::chunkPos_t playerPos;
 
     float &cameraX;

@@ -3,6 +3,7 @@ project(MultiProjectSetup)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_RTYPE "Build R-Type" ON)
 
@@ -30,8 +31,8 @@ endif()
 
 if(ENABLE_ASAN)
     message(STATUS "AddressSanitizer enabled")
-    add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address)
+    add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope)
+    add_link_options(-fsanitize=address -fsanitize-address-use-after-scope)
 endif()
 
 if(ENABLE_UBSAN)

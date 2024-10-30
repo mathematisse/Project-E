@@ -3,6 +3,6 @@ project(network)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(network STATIC network.cpp)
+add_library(network STATIC Systems.cpp)
 
 target_link_libraries(network lib_net)

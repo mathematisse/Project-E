@@ -30,9 +30,9 @@
       "name": "(gdb) Launch r-type_server",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/rtype/client/r-type_server",
+      "program": "${workspaceFolder}/build/rtype/server/r-type_server",
       "args": [
-        "someargumentexample"
+        "4242"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",

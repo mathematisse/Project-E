@@ -1,10 +1,9 @@
 #include "RTypeServer.hpp"
-#include "DecorSquare.hpp"
-#include "NetworkManager.hpp"
+#include "Archetypes.hpp"
 #include "RTypePackets.hpp"
-#include "Square.hpp"
 #include "lib_net/Packet.hpp"
-#include <iostream>
+#include "lib_log/log.hpp"
+#include <string>
 
 net::RTypeServer::RTypeServer(
     ECS::EntityManager &entityManager, NetworkManager &networkManager,
@@ -20,7 +19,7 @@ net::RTypeServer::RTypeServer(
 
 void net::RTypeServer::on_tcp_connect(client_id id)
 {
-    std::cout << "Client connected: " << id << std::endl;
+    LOG_INFO("Client connected: " + std::to_string(id));
     send_tcp(id, 255, {'h', 'e', 'l', 'l', 'o'});
     // get the generated number from the client
     try {
@@ -29,64 +28,47 @@ void net::RTypeServer::on_tcp_connect(client_id id)
             reinterpret_cast<std::uint8_t *>(&number),
             reinterpret_cast<std::uint8_t *>(&number) + sizeof(number)
         );
-        std::cout << "Sending generated number (" << number << ") to client " << id << std::endl;
+        LOG_DEBUG(
+            "Sending generated number (" + std::to_string(number) + ") to client " +
+            std::to_string(id)
+        );
         send_tcp(id, net::Packet::ASKUDP_NUMBER, number_interpreted_as_vector);
     } catch (const std::out_of_range &e) {
-        std::cerr << "Client not found: " << id << std::endl;
+        LOG_ERROR("Client not found: " + std::to_string(id));
     }
 }
 
 void net::RTypeServer::on_udp_connect(client_id id)
 {
-    std::cout << "UDP client connected: " << id << std::endl;
+    LOG_DEBUG("UDP client connected: " + std::to_string(id));
 
-    auto newP = _entityManager.createEntities("Square", 1, ECS::C::ENT_ALIVE);
-    for (const auto &entity : newP) {
-        auto ref = _entityManager.getEntity(entity);
+    auto player = _entityManager.createEntity<ECS::E::BaseEntity>();
 
-        auto *square_player = dynamic_cast<ECS::E::SquareRef *>(ref.get());
-        if (square_player == nullptr) {
-            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
-            return;
-        }
-        square_player->getPosition()->set<0>(1920 / 4);
-        square_player->getPosition()->set<1>(1080 / 2);
-        square_player->getVelocity()->set<2>(200.0F);
-        square_player->getType()->set<0>(SquareType::PLAYER);
-        unsigned char r = rand() % 255;
-        unsigned char g = rand() % 255;
-        unsigned char b = rand() % 255;
-        square_player->getColor()->set<0>(r);
-        square_player->getColor()->set<1>(g);
-        square_player->getColor()->set<2>(b);
-        square_player->getWeapon()->set<0>(WeaponType::BULLET);
-        square_player->getCanShoot()->set<0>(true);
-        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
-            square_player->getCanShoot()->set<1>(1.5F);
-        } else {
-            square_player->getCanShoot()->set<1>(0.3F);
-        }
-        square_player->getSize()->set<0>(80);
-        square_player->getSize()->set<1>(80);
-        square_player->getSize()->set<2>(90);
-        square_player->getSprite()->set<0>(0);
-        square_player->getHealth()->set<0>(4);
-        auto netId = networkManager.getnewNetID();
-        square_player->getNetworkID()->set<0>(netId);
+    player.setPosition({1920.0F / 4.0F, 1080.0F / 2.0F});
+    player.setType({GameEntityType::PLAYER});
+    unsigned char r = rand() % 255;
+    unsigned char g = rand() % 255;
+    unsigned char b = rand() % 255;
+    player.setColor({r, g, b, 255});
+    player.setWeapon({WeaponType::BULLET});
+    player.setCanShoot({true, (player.getWeaponVal() == WeaponType::BIG_SHOT) ? 1.5F : 0.3F, 0.0F});
+    player.setSize({80, 80});
+    player.setRotation({90});
+    player.setHealth({4});
 
-        client_netIds[id] = netId;
-
-        send_tcp(
-            id, ECS::PLAYER_CONNECTION_SUCCESS,
-            net::Packet::serializeStruct(ECS::PlayerConnectionSuccess {netId, r, g, b})
-        );
-    }
+    auto netId = networkManager.getnewNetID();
+    player.setNetworkID({netId});
+    client_netIds[id] = netId;
+    send_tcp(
+        id, ECS::PLAYER_CONNECTION_SUCCESS,
+        net::Packet::serializeStruct(ECS::PlayerConnectionSuccess {netId, r, g, b})
+    );
     newClientIds.push_back(id);
 }
 
 void net::RTypeServer::on_tcp_disconnect(client_id id)
 {
-    std::cout << "Client disconnected: " << id << std::endl;
+    LOG_INFO("Client disconnected: " + std::to_string(id));
 }
 
 void net::RTypeServer::on_packet(const Packet &packet, client_id id)
@@ -95,10 +77,10 @@ void net::RTypeServer::on_packet(const Packet &packet, client_id id)
     // std::cout << "Packet size: " << packet.header.size << std::endl;
     switch (packet.header.type) {
     case Packet::PONG:
-        std::cout << "Received PONG from client " << id << std::endl;
+        LOG_DEBUG("Received PONG from client " + std::to_string(id));
         pong_count++;
         if (pong_count < 10) {
-            std::cout << "Sending PING to client " << id << std::endl;
+            LOG_DEBUG("Sending PING to client " + std::to_string(id));
             send_udp(id, Packet::PING, {'P', 'I', 'N', 'G'});
         }
         break;
