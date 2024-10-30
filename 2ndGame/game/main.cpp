@@ -29,10 +29,13 @@ void open_tower_menu(
     short cost = 0;
 
     if (towerClickSystem.selectedTower.type != TowerType::NONE) {
-        GuiWindowBox(
-            (Rectangle) {pos.x, pos.y, 200, 200},
-            tower_names[(size_t) towerClickSystem.selectedTower.type].c_str()
-        );
+        if (GuiWindowBox(
+                (Rectangle) {pos.x, pos.y, 200, 200},
+                tower_names[(size_t) towerClickSystem.selectedTower.type].c_str()
+            )) {
+            towerClickSystem.open = false;
+            return;
+        }
         DrawCircleLines(
             towerClickSystem.pos.x, towerClickSystem.pos.y,
             tower_range[(size_t) towerClickSystem.selectedTower.type]
@@ -65,7 +68,10 @@ void open_tower_menu(
             GuiLabel((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Max level");
         }
     } else {
-        GuiWindowBox((Rectangle) {pos.x, pos.y, 300, 200}, "Tower");
+        if (GuiWindowBox((Rectangle) {pos.x, pos.y, 300, 200}, "Tower")) {
+            towerClickSystem.open = false;
+            return;
+        }
         GuiLabel((Rectangle) {pos.x + 20, pos.y + 55, 100, 20}, "50");
         if (GuiButton((Rectangle) {pos.x + 75, pos.y + 50, 150, 30}, "Archer")) {
             if (money >= 50) {

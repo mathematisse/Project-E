@@ -8,9 +8,12 @@ void MainMenu::show_settings(void)
     static int old_volume = 50;
 
     if (_showSettings) {
-        GuiWindowBox(
-            (Rectangle) {WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings"
-        );
+        if (GuiWindowBox(
+                (Rectangle) {WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings"
+            )) {
+            _showSettings = false;
+            return;
+        }
         GuiLabel(
             (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
             "High Saturation:"
