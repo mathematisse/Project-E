@@ -3,13 +3,17 @@
 #include "RTypePackets.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_net/Context.hpp"
-#include "lib_net/Server.hpp"
+// #include "lib_net/Server.hpp"
+#include "lib_net/super/BaseServer.hpp"
+#include "lib_net/super/Server.hpp"
 #include "NetworkManager.hpp"
+#include "lib_net/uuid/Uuid.hpp"
 
 namespace net {
 
-class RTypeServer : public Server {
+class RTypeServer : public net::Server {
 public:
+    using client_id = lnet::uuid::Uuid;
     explicit RTypeServer(
         ECS::EntityManager &entityManager, NetworkManager &networkManager,
         std::vector<std::tuple<ECS::PlayerVelocityInput, size_t>> &playerStates,

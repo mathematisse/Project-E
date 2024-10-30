@@ -3,10 +3,11 @@
 #include <map>
 
 #include "lib_net/net.hpp"
+#include "lib_net/uuid/Uuid.hpp"
 #include "Gateway.hpp"
 
 namespace net {
-using client_id = std::uint32_t;
+using client_id = lnet::uuid::Uuid;
 
 struct Context {
     fd_set readFds;

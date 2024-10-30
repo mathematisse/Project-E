@@ -16,21 +16,11 @@ net::RTypeClient::RTypeClient(
 {
 }
 
-void net::RTypeClient::on_packet(const Packet &packet)
+void net::RTypeClient::on_packet(const Packet &packet, client_id /*server*/)
 {
-    std::uint64_t transformed_number;
-    std::uint64_t number;
-
     switch (packet.header.type) {
-    case Packet::ASKUDP_NUMBER:
-        number = *reinterpret_cast<const std::uint64_t *>(packet.data.data());
-        LOG_DEBUG("Received generated number " + std::to_string(number) + " from server: ");
-        // send the number back to the server with the function transformNumberFunction applied
-        transformed_number = Gateway::transformNumberFunction(number);
-        send_udp(Packet::ASKUDP_RESPONSE, Packet::serializeStruct(transformed_number));
-        break;
     case Packet::PING:
-        send_udp(Packet::PONG, {});
+        send_udp_all(Packet::PONG, {});
         break;
     case ECS::PLAYER_STATE: // player state
     {

@@ -82,7 +82,7 @@ void SpawnEnnemySystem::_innerOperate(
 
         enemy.setNetworkID({_netId});
 
-        server.send_tcp(
+        server.send_tcp_all(
             RTypePacketType::NEW_ENNEMY,
             net::Packet::serializeStruct(NewEnnemy {_x, _y, _netId, rand})
         );
@@ -111,7 +111,7 @@ void DestroyEntitiesSystem::_statusOperate(
         return;
     }
     std::cout << RED_CLI << "Destroying entity with networkid: " << networkid << RESET << std::endl;
-    server.send_tcp(
+    server.send_tcp_all(
         RTypePacketType::ENTITY_DESTROYED, net::Packet::serializeStruct(EntityDestroyed {networkid})
     );
     entityManager.destroyEntity(cchunkpos);
@@ -202,7 +202,7 @@ void ShootSystem::_innerOperate(
 
     auto _netId = networkManager.getnewNetID();
     bullet.setNetworkID({_netId});
-    server.send_tcp(
+    server.send_tcp_all(
         RTypePacketType::BULLET_SHOT,
         net::Packet::serializeStruct(
             BulletShot {_x, y + 25, playerShot, _netId, weapon == WeaponType::BIG_SHOT}
@@ -266,7 +266,7 @@ void SendAllDataToNewClients::_statusOperate(
     //     }
     // } else
     if (type == GameEntityType::PLAYER) {
-        server->send_tcp(
+        server->send_tcp_all(
             RTypePacketType::PLAYER_STATE,
             net::Packet::serializeStruct(PlayerState {x, y, vX, vY, health, netId})
         );
@@ -279,7 +279,7 @@ MovePlayersSystem::MovePlayersSystem():
 }
 
 void MovePlayersSystem::_statusOperate(
-    C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity,
+    C::Position::Pool::Types & /*cposition*/, C::Velocity::Pool::Types &cvelocity,
     C::Type::Pool::Types &ctype, C::NetworkID::Pool::Types &cnetworkid,
     C::IsShooting::Pool::Types &cIsShooting
 )
@@ -288,7 +288,6 @@ void MovePlayersSystem::_statusOperate(
     if (type != GameEntityType::PLAYER) {
         return;
     }
-    auto [x, y] = cposition;
     auto [vX, vY] = cvelocity;
     auto [netId] = cnetworkid;
     auto [isShooting] = cIsShooting;
@@ -347,7 +346,7 @@ void SpawnPowerUpSystem::_innerOperate(
         auto _netId = networkManager.getnewNetID();
         powerUp.setNetworkID({_netId});
 
-        server.send_tcp(
+        server.send_tcp_all(
             RTypePacketType::NEW_POWERUP, net::Packet::serializeStruct(NewPowerUp {_x, _y, _netId})
         );
         powerupcount = 1;
