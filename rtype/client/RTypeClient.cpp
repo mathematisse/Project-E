@@ -1,8 +1,10 @@
 #include "RTypeClient.hpp"
+#include "DecorSquare.hpp"
 #include "Square.hpp"
 #include "lib_ecs/Components/PureComponentPools.hpp"
 #include "lib_net/Packet.hpp"
 #include "RTypePackets.hpp"
+#include <cstdlib>
 
 net::RTypeClient::RTypeClient(
     ECS::EntityManager &entityManager, std::vector<ECS::PlayerState> &playerStates,
@@ -43,6 +45,30 @@ void net::RTypeClient::on_packet(const Packet &packet, client_id /*server*/)
             std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
             return;
         }
+        if (newEnnemy.rand == 2) {
+            square_ennemy->getHealth()->set<0>(5);
+            square_ennemy->getWeapon()->set<0>(WeaponType::BIG_SHOT);
+            square_ennemy->getSize()->set<0>(180);
+            square_ennemy->getSize()->set<1>(120);
+            square_ennemy->getSprite()->set<0>(frigateSpriteId);
+            square_ennemy->getSprite()->set<1>(true);
+            square_ennemy->getSprite()->set<2>(120.0F);
+            square_ennemy->getSprite()->set<3>(180.0F);
+            square_ennemy->getSprite()->set<4>(6.0F);
+            square_ennemy->getSize()->set<2>(270);
+
+        } else {
+            square_ennemy->getHealth()->set<0>(2);
+            square_ennemy->getWeapon()->set<0>(WeaponType::BULLET);
+            square_ennemy->getSize()->set<0>(80);
+            square_ennemy->getSize()->set<1>(80);
+            square_ennemy->getSprite()->set<0>(ennemySpriteId);
+            square_ennemy->getSprite()->set<1>(false);
+            square_ennemy->getSprite()->set<2>(80.0F);
+            square_ennemy->getSprite()->set<3>(80.0F);
+            square_ennemy->getSprite()->set<4>(6.0F);
+            square_ennemy->getSize()->set<2>(90);
+        }
         square_ennemy->getVelocity()->set<0>(0.0F);
         square_ennemy->getVelocity()->set<1>(0.0F);
         square_ennemy->getVelocity()->set<2>(100.0F);
@@ -51,18 +77,17 @@ void net::RTypeClient::on_packet(const Packet &packet, client_id /*server*/)
         square_ennemy->getColor()->set<1>(0);
         square_ennemy->getColor()->set<2>(0);
         square_ennemy->getColor()->set<3>(255);
-        square_ennemy->getSize()->set<0>(80);
-        square_ennemy->getSize()->set<1>(80);
-        square_ennemy->getSize()->set<2>(90);
 
         float _x = newEnnemy.x;
         float _y = newEnnemy.y;
         square_ennemy->getPosition()->set<0>(_x);
         square_ennemy->getPosition()->set<1>(_y);
+        if (WeaponType::BIG_SHOT == *square_ennemy->getWeapon()->get<0>()) {
+            square_ennemy->getPosition()->set<0>(_x - 200);
+            square_ennemy->getPosition()->set<1>(_y - 100);
+        }
         square_ennemy->getCanShoot()->set<0>(true);
         square_ennemy->getCanShoot()->set<1>(1.5F);
-        square_ennemy->getSprite()->set<0>(ennemySpriteId);
-        square_ennemy->getHealth()->set<0>(2);
         square_ennemy->getNetworkID()->set<0>(newEnnemy.netId);
         break;
     }
@@ -85,6 +110,23 @@ void net::RTypeClient::on_packet(const Packet &packet, client_id /*server*/)
             square_bullet->getSize()->set<2>(-90);
             square_bullet->getType()->set<0>(SquareType::BULLET_ENNEMY);
         }
+        if (bulletShot.isBigShot) {
+            square_bullet->getSprite()->set<0>(bigShotSpriteId);
+            square_bullet->getSprite()->set<2>(70.0F);
+            square_bullet->getSprite()->set<3>(70.0F);
+            square_bullet->getSprite()->set<4>(10.0F);
+            square_bullet->getHealth()->set<0>(5);
+            square_bullet->getSize()->set<0>(70);
+            square_bullet->getSize()->set<1>(70);
+        } else {
+            square_bullet->getSprite()->set<0>(bulletSpriteId);
+            square_bullet->getSprite()->set<2>(30.0F);
+            square_bullet->getSprite()->set<3>(30.0F);
+            square_bullet->getSprite()->set<4>(4.0F);
+            square_bullet->getHealth()->set<0>(1);
+            square_bullet->getSize()->set<0>(30);
+            square_bullet->getSize()->set<1>(30);
+        }
         square_bullet->getPosition()->set<0>(bulletShot.x);
         square_bullet->getVelocity()->set<1>(0.0F);
         square_bullet->getVelocity()->set<2>(300.0F);
@@ -94,15 +136,8 @@ void net::RTypeClient::on_packet(const Packet &packet, client_id /*server*/)
         square_bullet->getColor()->set<3>(255);
         square_bullet->getPosition()->set<1>(bulletShot.y);
         square_bullet->getCanShoot()->set<0>(false);
-        square_bullet->getSize()->set<0>(30);
-        square_bullet->getSize()->set<1>(30);
-        square_bullet->getSprite()->set<0>(bulletSpriteId);
         square_bullet->getSprite()->set<1>(true);
-        square_bullet->getSprite()->set<2>(30.0F);
-        square_bullet->getSprite()->set<3>(30.0F);
-        square_bullet->getSprite()->set<4>(4.0F);
         square_bullet->getSprite()->set<5>(0);
-        square_bullet->getHealth()->set<0>(1);
         square_bullet->getTimer()->set<0>(0.0F);
         square_bullet->getTimer()->set<1>(8.0F);
         square_bullet->getNetworkID()->set<0>(bulletShot.netId);
@@ -138,6 +173,37 @@ void net::RTypeClient::on_packet(const Packet &packet, client_id /*server*/)
         auto frameId = *Packet::deserializeStruct<ECS::FrameId>(packet.data);
         cameraX = (80 * frameId.frame * 0.02F) + (1920 / 2);
         started = true;
+        break;
+    }
+    case ECS::NEW_POWERUP: {
+        auto newPowerUp = *Packet::deserializeStruct<ECS::NewPowerUp>(packet.data);
+        auto ent = _entityManager.createEntity("Square", ECS::C::ENT_ALIVE);
+        auto ref = _entityManager.getEntity(ent);
+        auto *square_powerUp = dynamic_cast<ECS::E::SquareRef *>(ref.get());
+        if (square_powerUp == nullptr) {
+            std::cerr << "Failed to cast IEntityRef to SquareRef" << std::endl;
+            return;
+        }
+        float _x = newPowerUp.x;
+        float _y = newPowerUp.y;
+        square_powerUp->getType()->set<0>(SquareType::POWERUP);
+        square_powerUp->getSize()->set<0>(80);
+        square_powerUp->getSize()->set<1>(80);
+        square_powerUp->getSize()->set<2>(90);
+        square_powerUp->getPosition()->set<0>(_x);
+        square_powerUp->getPosition()->set<1>(_y);
+        square_powerUp->getSprite()->set<0>(powerUpSpriteId);
+        square_powerUp->getSprite()->set<2>(80.0F);
+        square_powerUp->getSprite()->set<3>(80.0F);
+        square_powerUp->getHealth()->set<0>(1);
+        square_powerUp->getVelocity()->set<0>(0.0F);
+        square_powerUp->getVelocity()->set<1>(0.0F);
+        square_powerUp->getVelocity()->set<2>(0.0F);
+        square_powerUp->getCanShoot()->set<0>(false);
+        square_powerUp->getColor()->set<0>(255);
+        square_powerUp->getColor()->set<1>(255);
+        square_powerUp->getColor()->set<2>(0);
+        square_powerUp->getNetworkID()->set<0>(newPowerUp.netId);
         break;
     }
     default:

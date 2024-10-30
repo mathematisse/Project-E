@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(BUILD_RTYPE "Build R-Type" ON)
 
+option(BUILD_2NDGAME "Build 2ndGame" ON)
+
 enable_testing()
 
 if(UNIX)
@@ -38,7 +40,7 @@ if(ENABLE_UBSAN)
     add_link_options(-fsanitize=undefined)
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -D LOGGING")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
@@ -55,4 +57,8 @@ add_subdirectory(engine)
 
 if(BUILD_RTYPE)
     add_subdirectory(rtype)
+endif()
+
+if(BUILD_2NDGAME)
+    add_subdirectory(2ndGame)
 endif()

@@ -16,6 +16,7 @@
 #include "NetworkManager.hpp"
 #include "lib_net/Context.hpp"
 #include "raylib.h"
+#include <cstddef>
 #include <vector>
 
 namespace ECS::S {
@@ -69,8 +70,9 @@ protected:
     ) override;
 };
 
-class ShootSystem : public S::AStatusMonoSystem<
-                        C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool> {
+class ShootSystem
+    : public S::AStatusMonoSystem<
+          C::PositionPool, C::TypePool, C::CanShootPool, C::IsShootingPool, C::WeaponPool> {
 public:
     explicit ShootSystem(
         EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
@@ -94,7 +96,8 @@ protected:
     size_t _spriteId = 0;
     void _statusOperate(
         typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype,
-        typename C::CanShootPool::Types &canshoot, typename C::IsShootingPool::Types &cIsShooting
+        typename C::CanShootPool::Types &canshoot, typename C::IsShootingPool::Types &cIsShooting,
+        typename C::WeaponPool::Types &cweapon
     ) override;
 };
 
@@ -157,6 +160,50 @@ protected:
         typename C::TypePool::Types &ctype, typename C::NetworkIDPool::Types &cnetworkid,
         typename C::IsShootingPool::Types &cIsShooting
     ) override;
+};
+
+class SpawnPowerUpSystem : public S::AStatusMonoSystem<C::PositionPool, C::TypePool> {
+public:
+    explicit SpawnPowerUpSystem(
+        EntityManager &entityManager, NetworkManager &networkManager, size_t spriteId,
+        net::RTypeServer &server, size_t maxPowerUp = 1
+    );
+    ~SpawnPowerUpSystem() override = default;
+
+    SpawnPowerUpSystem(const SpawnPowerUpSystem &other) = default;
+    SpawnPowerUpSystem(SpawnPowerUpSystem &&other) = default;
+    SpawnPowerUpSystem &operator=(const SpawnPowerUpSystem &other) = default;
+    SpawnPowerUpSystem &operator=(SpawnPowerUpSystem &&other) = default;
+
+    EntityManager &entityManager;
+    NetworkManager &networkManager;
+    size_t _powerUpCount = 0;
+    net::RTypeServer &server;
+
+protected:
+    size_t _spriteId = 0;
+    void _statusOperate(
+        typename C::PositionPool::Types &cposition, typename C::TypePool::Types &ctype
+    ) override;
+
+private:
+    size_t maxPowerUp = 0;
+};
+
+class CountPowerUpAliveSystem : public S::AStatusMonoSystem<C::TypePool> {
+public:
+    explicit CountPowerUpAliveSystem(size_t &powerUpCount);
+    ~CountPowerUpAliveSystem() override = default;
+
+    CountPowerUpAliveSystem(const CountPowerUpAliveSystem &other) = default;
+    CountPowerUpAliveSystem(CountPowerUpAliveSystem &&other) = default;
+    CountPowerUpAliveSystem &operator=(const CountPowerUpAliveSystem &other) = default;
+    CountPowerUpAliveSystem &operator=(CountPowerUpAliveSystem &&other) = default;
+
+    size_t powerUpCount = 0;
+
+protected:
+    void _statusOperate(C::TypePool::Types &ctype) override;
 };
 
 } // namespace ECS::S

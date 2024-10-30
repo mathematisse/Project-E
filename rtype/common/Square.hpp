@@ -12,6 +12,11 @@
 #include "lib_ecs/Entities/AEntityPool.hpp"
 #include "DecorSquare.hpp"
 
+enum class WeaponType {
+    BULLET,
+    BIG_SHOT,
+};
+
 namespace ECS::C {
 DECLARE_COMPONENT(Velocity, float, float, float); // 3rd param is the speed
 DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned char);
@@ -19,6 +24,7 @@ DECLARE_COMPONENT(Color, unsigned char, unsigned char, unsigned char, unsigned c
 DECLARE_COMPONENT(CanShoot, char, float, float);
 DECLARE_COMPONENT(Health, size_t);
 DECLARE_COMPONENT(IsShooting, char);
+DECLARE_COMPONENT(Weapon, WeaponType);
 }
 
 namespace ECS::E {
@@ -31,7 +37,7 @@ public:
         C::EntityStatusRef *status, C::ChunkPosRef *cPos, C::PositionRef *position,
         C::VelocityRef *velocity, C::ColorRef *color, C::SizeRef *size, C::TypeRef *type,
         C::CanShootRef *canShoot, C::SpriteRef *sprite, C::HealthRef *health, C::TimerRef *time,
-        C::NetworkIDRef *networkID, C::IsShootingRef *isShooting
+        C::NetworkIDRef *networkID, C::IsShootingRef *isShooting, C::WeaponRef *weapon
     );
     ~SquareRef() override;
 
@@ -76,6 +82,9 @@ public:
     [[nodiscard]] C::IsShootingRef *getIsShooting() const;
     void setIsShooting(const C::IsShootingRef &isShooting);
 
+    [[nodiscard]] C::WeaponRef *getWeapon() const;
+    void setWeapon(const C::WeaponRef &weapon);
+
 protected:
     C::PositionRef *_position;
     C::VelocityRef *_velocity;
@@ -88,6 +97,7 @@ protected:
     C::TimerRef *_time;
     C::NetworkIDRef *_networkID;
     C::IsShootingRef *_isShooting;
+    C::WeaponRef *_weapon;
 };
 
 // ENTITY POOL
@@ -118,5 +128,6 @@ protected:
     C::TimerPool _timerPool;
     C::NetworkIDPool _networkIDPool;
     C::IsShootingPool _isShootingPool;
+    C::WeaponPool _weaponPool;
 };
 }

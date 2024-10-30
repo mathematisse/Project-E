@@ -47,8 +47,13 @@ ECS::Chunks::cPosArr_t setup_player(ECS::EntityManager &_eM, NetworkManager &net
         square_player->getType()->set<0>(SquareType::PLAYER);
         square_player->getColor()->set<1>(255);
         square_player->getColor()->set<3>(255);
+        square_player->getWeapon()->set<0>(WeaponType::BULLET);
         square_player->getCanShoot()->set<0>(true);
-        square_player->getCanShoot()->set<1>(0.3F);
+        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+            square_player->getCanShoot()->set<1>(1.5F);
+        } else {
+            square_player->getCanShoot()->set<1>(0.3F);
+        }
         square_player->getSize()->set<0>(80);
         square_player->getSize()->set<1>(80);
         square_player->getSize()->set<2>(90);
@@ -91,8 +96,11 @@ int main(int ac, char **av)
     ECS::S::MoveBackgroundSystem moveBackgroundSystem;
     ECS::S::MoveEnnemySystem moveEnnemySystem;
     ECS::S::ColliderSystem colliderSystem;
+    ECS::S::ChangePlayerWeaponSystem changePlayerWeaponSystem;
     ECS::S::CountEnnemyAliveSystem countEnnemyAliveSystem(spawnEnnemySystem.ennemyCount);
     ECS::S::GetPlayerPositionSystem getPlayerPositionSystem;
+    ECS::S::SpawnPowerUpSystem spawnPowerUpSystem(_eM, networkManager, 0, server);
+    ECS::S::CountPowerUpAliveSystem countPowerUpAliveSystem(spawnPowerUpSystem._powerUpCount);
 
     // Entity pools
     ECS::E::SquarePool squarePool;
@@ -100,8 +108,9 @@ int main(int ac, char **av)
 
     ECS::S::SystemTreeNode demoFixedNode(
         42, {&spawnEnnemySystem, &countEnnemyAliveSystem},
-        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &applyVelocitySystem,
-         &shootSystem, &colliderSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
+        {&moveBackgroundSystem, &moveEnnemySystem, &movePlayersSystem, &spawnPowerUpSystem,
+         &countEnnemyAliveSystem, &applyVelocitySystem, &shootSystem, &colliderSystem,
+         &changePlayerWeaponSystem, &destroyEntitiesSystem, &getPlayerPositionSystem,
          &sendAllDataToNewClients}
     );
 
@@ -141,6 +150,7 @@ int main(int ac, char **av)
                     ECS::FRAME_ID, net::Packet::serializeStruct(ECS::FrameId {frame})
                 );
                 spawnEnnemySystem.ennemyCount = countEnnemyAliveSystem.ennemyCount;
+                spawnPowerUpSystem._powerUpCount = countPowerUpAliveSystem.powerUpCount;
             }
         }
     }

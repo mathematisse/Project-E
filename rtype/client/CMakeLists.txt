@@ -23,11 +23,4 @@ execute_process(
 
 include_directories(${GIT_ROOT}/.submodules/raygui/src)
 
-target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network)
-
-if(UNIX)
-    target_link_libraries(r-type_client ncurses)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-enum-compare") #for raygui
-    endif()
-endif()
+target_link_libraries(r-type_client r-type_common render physics lib_ecs raylib network lib_log)

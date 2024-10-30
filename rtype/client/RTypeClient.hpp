@@ -5,6 +5,7 @@
 // #include "lib_net/Client.hpp"
 #include "lib_net/super/Server.hpp"
 #include "RTypePackets.hpp"
+#include <cstddef>
 #include "lib_net/uuid/Uuid.hpp"
 
 namespace net {
@@ -21,6 +22,9 @@ public:
     void on_packet(const Packet &packet, client_id server) override;
     size_t ennemySpriteId = 0;
     size_t bulletSpriteId = 0;
+    size_t bigShotSpriteId = 0;
+    size_t frigateSpriteId = 0;
+    size_t powerUpSpriteId = 0;
     ECS::Chunks::chunkPos_t playerPos;
 
     float &cameraX;

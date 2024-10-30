@@ -1,0 +1,40 @@
+name: Automated release
+
+# Runs when a pull request from dev is merged in main.
+# Creates a new release and publishes it to GitHub.
+# version name is the PR title.
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  merged_on_main:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y tree cmake build-essential libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev gh
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build release
+        run: | 
+          git submodule update --init --recursive
+          bash scripts/pack-release.sh ${{ github.event.pull_request.title }}
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.event.pull_request.title }}"            \
+                            --repo="${{ github.repository }}"                   \
+                            --title "${{ github.event.pull_request.title }}"    \
+                            --generate-notes                                    \
+                            release/*.tar.gz

@@ -46,8 +46,13 @@ void net::RTypeServer::on_udp_connect(client_id id)
         square_player->getColor()->set<0>(r);
         square_player->getColor()->set<1>(g);
         square_player->getColor()->set<2>(b);
+        square_player->getWeapon()->set<0>(WeaponType::BULLET);
         square_player->getCanShoot()->set<0>(true);
-        square_player->getCanShoot()->set<1>(0.3F);
+        if (*square_player->getWeapon()->get<0>() == WeaponType::BIG_SHOT) {
+            square_player->getCanShoot()->set<1>(1.5F);
+        } else {
+            square_player->getCanShoot()->set<1>(0.3F);
+        }
         square_player->getSize()->set<0>(80);
         square_player->getSize()->set<1>(80);
         square_player->getSize()->set<2>(90);

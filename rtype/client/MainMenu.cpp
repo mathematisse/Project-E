@@ -99,15 +99,14 @@ void MainMenu::show_settings(void)
         );
         GuiLabel(
             (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
-            "High Visibility:"
+            "High Saturation:"
         );
         GuiCheckBox(
             (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",
             &settings.color_blind
         );
         GuiLabel(
-            (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20},
-            "Color Blind Simulation:"
+            (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:"
         );
         GuiCheckBox(
             (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
