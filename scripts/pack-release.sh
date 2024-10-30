@@ -4,7 +4,7 @@ if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <version>"
     exit 1
 fi
-RELEASE_DIR=release/rtype-$1-x86_64-linux
+RELEASE_DIR=release/project-e-$1-linux
 
 ./scripts/check-version-name.sh $1 || exit 1
 
@@ -15,9 +15,12 @@ mkdir -p release
 mkdir -p $RELEASE_DIR
 
 # copy binaries & assets
-cp cmake-build-release/rtype/server/r-type_server $RELEASE_DIR/rtype-$1-server-x86_64-linux
-cp cmake-build-release/rtype/client/r-type_client $RELEASE_DIR/rtype-$1-client-x86_64-linux
-cp -r assets/ $RELEASE_DIR
+cp cmake-build-release/libs/lib_ecs/liblib_ecs.a $RELEASE_DIR/project-e-$1-linux
+cp cmake-build-release/libs/lib_net/liblib_net.a $RELEASE_DIR/project-e-$1-linux
+cp cmake-build-release/libs/lib_log/liblib_log.a $RELEASE_DIR/project-e-$1-linux
+rsync -av --include='*/' --include='*.hpp' --exclude='*' ./ $RELEASE_DIR/
+# dele all empty folders in the release folder
+find $RELEASE_DIR -type d -empty -delete
 
 # Create tarball
 tar -czf $RELEASE_DIR.tar.gz $RELEASE_DIR
