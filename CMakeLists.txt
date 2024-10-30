@@ -90,9 +90,9 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
 #enable the warnings back
 set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
 
-add_subdirectory(libs)
 
 include_directories(libs)
 include_directories(modules)
 
+add_subdirectory(libs)
 add_subdirectory(modules)
