@@ -1,65 +1,98 @@
 cmake_minimum_required(VERSION 3.15)
-project(MultiProjectSetup)
+project(Engine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BUILD_RTYPE "Build R-Type" ON)
+option(CORE_ENABLED "Enable core module" ON)
+option(RENDER_ENABLED "Enable render module" ON)
+option(SPATIAL2D_ENABLED "Enable spatial2D module" ON)
+option(NETWORK_ENABLED "Enable network module" ON)
 
-option(BUILD_2NDGAME "Build 2ndGame" ON)
+include(FetchContent)
 
-enable_testing()
+# set(BOOST_VERSION 1.86.0)
 
-if(UNIX)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-    endif()
-    if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-        option(ENABLE_ASAN "Enable AddressSanitizer" ON)
-        option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" ON)
-    else()
-        set(ENABLE_ASAN OFF)
-        set(ENABLE_UBSAN OFF)
-    endif()
-endif()
 
-if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "Build type not set, default to Debug")
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
-endif()
+# remove warnings temporarily to avoid warnings from raylib & boost
+set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+set(CMAKE_CXX_FLAGS "")
 
-if(ENABLE_ASAN)
-    message(STATUS "AddressSanitizer enabled")
-    add_compile_options(-fsanitize=address -fsanitize-address-use-after-scope)
-    add_link_options(-fsanitize=address -fsanitize-address-use-after-scope)
-endif()
-
-if(ENABLE_UBSAN)
-    message(STATUS "UndefinedBehaviorSanitizer enabled")
-    add_compile_options(-fsanitize=undefined)
-    add_link_options(-fsanitize=undefined)
-endif()
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -D LOGGING")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
-
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
-
-# add clang-tidy
-# find_program(CLANG_TIDY clang-tidy)
-# if(CLANG_TIDY)
-#     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY}")
+# set(BOOST_ENABLE_CMAKE ON)
+# find_package(Boost ${BOOST_VERSION} QUIET)
+# if (NOT Boost_FOUND)
+#     message(STATUS "Boost ${BOOST_VERSION} not found, fetching it")
+#     FetchContent_Declare(
+#         boost
+#         GIT_REPOSITORY https://github.com/boostorg/boost.git
+#         GIT_TAG boost-${BOOST_VERSION}
+#     )
+#     FetchContent_GetProperties(boost)
+#     if (NOT boost_POPULATED)
+#         set(FETCHCONTENT_QUIET NO) # Display more information during the fetch process
+#         FetchContent_MakeAvailable(boost)
+#     endif()
+#     include_directories(${CMAKE_SOURCE_DIR}/libs/boost)
+# else()
+#     message(STATUS "Using local Boost installation=${Boost_INCLUDE_DIRS}")
+#     include_directories(${Boost_INCLUDE_DIRS})
 # endif()
 
-include_directories(engine/libs)
-add_subdirectory(engine)
-
-if(BUILD_RTYPE)
-    add_subdirectory(rtype)
+# From Raylib's example CMakeLists.txt
+set(RAYLIB_VERSION 5.0)
+find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
+if (NOT raylib_FOUND) # If there's none, fetch and build raylib
+    include(FetchContent)
+    FetchContent_Declare(
+        raylib
+        DOWNLOAD_EXTRACT_TIMESTAMP OFF
+        URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+    )
+    FetchContent_GetProperties(raylib)
+    if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
+        set(FETCHCONTENT_QUIET NO)
+        FetchContent_MakeAvailable(raylib)
+        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
+        if (WAYLAND_ENABLED)
+            set(BUILD_WITH_WAYLAND ON CACHE BOOL "" FORCE)
+        endif()
+    endif()
 endif()
 
-if(BUILD_2NDGAME)
-    add_subdirectory(2ndGame)
+if (${PLATFORM} STREQUAL "Web")
+    # Tell Emscripten to build an example.html file.
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 endif()
+
+# Checks if OSX and links appropriate frameworks (Only required on MacOS)
+if (APPLE)
+    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
+    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
+    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
+endif()
+
+include_directories(${CMAKE_SOURCE_DIR}/libs/raylib)
+## End of raylib
+
+# ## Google Test
+# include(FetchContent)
+# FetchContent_Declare(
+#     googletest
+#     URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+# )
+# # For Windows: Prevent overriding the parent project's compiler/linker settings
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# FetchContent_MakeAvailable(googletest)
+
+# ## End of Google Test
+
+#enable the warnings back
+set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+
+add_subdirectory(libs)
+
+include_directories(libs)
+include_directories(modules)
+
+add_subdirectory(modules)
