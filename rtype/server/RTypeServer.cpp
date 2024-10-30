@@ -19,28 +19,12 @@ net::RTypeServer::RTypeServer(
 
 void net::RTypeServer::on_tcp_connect(client_id id)
 {
-    LOG_INFO("Client connected: " + std::to_string(id));
-    send_tcp(id, 255, {'h', 'e', 'l', 'l', 'o'});
-    // get the generated number from the client
-    try {
-        auto number = clients.at(id).generated_number;
-        auto number_interpreted_as_vector = std::vector<std::uint8_t>(
-            reinterpret_cast<std::uint8_t *>(&number),
-            reinterpret_cast<std::uint8_t *>(&number) + sizeof(number)
-        );
-        LOG_DEBUG(
-            "Sending generated number (" + std::to_string(number) + ") to client " +
-            std::to_string(id)
-        );
-        send_tcp(id, net::Packet::ASKUDP_NUMBER, number_interpreted_as_vector);
-    } catch (const std::out_of_range &e) {
-        LOG_ERROR("Client not found: " + std::to_string(id));
-    }
+    LOG_INFO("Client connected: " + id.to_str());
 }
 
 void net::RTypeServer::on_udp_connect(client_id id)
 {
-    LOG_DEBUG("UDP client connected: " + std::to_string(id));
+    LOG_DEBUG("UDP client connected: " + id.to_str());
 
     auto player = _entityManager.createEntity<ECS::E::BaseEntity>();
 
@@ -68,7 +52,7 @@ void net::RTypeServer::on_udp_connect(client_id id)
 
 void net::RTypeServer::on_tcp_disconnect(client_id id)
 {
-    LOG_INFO("Client disconnected: " + std::to_string(id));
+    LOG_INFO("Client disconnected: " + id.to_str());
 }
 
 void net::RTypeServer::on_packet(const Packet &packet, client_id id)
@@ -77,10 +61,10 @@ void net::RTypeServer::on_packet(const Packet &packet, client_id id)
     // std::cout << "Packet size: " << packet.header.size << std::endl;
     switch (packet.header.type) {
     case Packet::PONG:
-        LOG_DEBUG("Received PONG from client " + std::to_string(id));
+        LOG_DEBUG("Received PONG from client " + id.to_str());
         pong_count++;
         if (pong_count < 10) {
-            LOG_DEBUG("Sending PING to client " + std::to_string(id));
+            LOG_DEBUG("Sending PING to client " + id.to_str());
             send_udp(id, Packet::PING, {'P', 'I', 'N', 'G'});
         }
         break;

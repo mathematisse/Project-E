@@ -95,7 +95,6 @@ S::IQuery &AEntityManager::initializeQuery(S::IQuery &query)
 
 bool AEntityManager::addTime(float time)
 {
-    std::cout << "\n";
     if (_fixedUpdateTime == 0) {
         _timePassed += time;
         _systemTree.setDeltaTime(time);

@@ -346,7 +346,7 @@ void SpawnPowerUpSystem::_innerOperate(
         auto _netId = networkManager.getnewNetID();
         powerUp.setNetworkID({_netId});
 
-        server.send_tcp(
+        server.send_tcp_all(
             RTypePacketType::NEW_POWERUP, net::Packet::serializeStruct(NewPowerUp {_x, _y, _netId})
         );
         powerupcount = 1;
