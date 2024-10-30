@@ -13,9 +13,9 @@
     {                                                             \
         "assets", "Main ship weapons", "Aseprite", "big_shot.png" \
     }
-#define POWER_UP_PATH                                                           \
-    {                                                                           \
-        "assets", "Main Ship", "Main Ship - Weapons", "Aseprite", "big_gun.png" \
+#define POWER_UP_PATH                                                            \
+    {                                                                            \
+        "assets", "Main Ship", "Main Ship - Weapons", "Aseprite", "power_up.png" \
     }
 #define P1F                                                     \
     {                                                           \
