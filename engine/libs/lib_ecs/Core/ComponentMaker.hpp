@@ -13,10 +13,10 @@
 #include "lib_ecs/Core/ArchetypeWithRefsMaker.hpp" // IWYU pragma: keep
 #include "lib_ecs/Core/ArchetypeWithPoolsMaker.hpp" // IWYU pragma: keep
 
-#define DECLARE_COMPONENT(name, types...)        \
+#define DECLARE_COMPONENT(name, ...)        \
     namespace ECS {                              \
     namespace C {                                \
-    DECLARE_RAW_COMPONENT(name, types);          \
+    DECLARE_RAW_COMPONENT(name, __VA_ARGS__);          \
     }                                            \
     namespace E {                                \
     DECLARE_ARCHETYPE_VAL_WITH_COMPONENT(name);  \
@@ -26,6 +26,6 @@
     }                                            \
     namespace ECS {                              \
     namespace C {                                \
-    DECLARE_RAW_ARCH_COMPONENT(name, types);     \
+    DECLARE_RAW_ARCH_COMPONENT(name, __VA_ARGS__);     \
     }                                            \
     }

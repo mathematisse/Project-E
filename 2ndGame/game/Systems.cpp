@@ -9,8 +9,8 @@
 #include "Archetypes.hpp"
 #include "Components.hpp"
 #include "render/AssetsLoader.hpp"
-#include <cmath>
 #include <vector>
+#include <math.h>
 #include "AssetsPath.hpp"
 #include <raylib.h>
 
@@ -32,7 +32,7 @@ void DrawRotationProjectileSystem::_innerOperate(
     auto [vX, vY] = cvelocity;
     auto [rotation] = crotation;
 
-    rotation = (float) (std::atan2(vY, vX) * (180.0 / M_PI));
+    rotation = (float) (std::atan2(vY, vX) * (180.0 / PI));
 }
 
 TowerClickSystem::TowerClickSystem():

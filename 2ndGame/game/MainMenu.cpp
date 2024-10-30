@@ -9,33 +9,33 @@ void MainMenu::show_settings(void)
 
     if (_showSettings) {
         if (GuiWindowBox(
-                (Rectangle) {WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings"
+                {WINDOW_WIDTH / 2 - 400, WINDOW_HEIGHT / 2 - 100, 800, 500}, "Settings"
             )) {
             _showSettings = false;
             return;
         }
         GuiLabel(
-            (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
+            {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 50, 350, 20},
             "High Saturation:"
         );
         GuiCheckBox(
-            (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",
+            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 20, 20}, "",
             &settings.color_blind
         );
         GuiLabel(
-            (Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:"
+            {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 100, 350, 20}, "Color Blind:"
         );
         GuiCheckBox(
-            (Rectangle) {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
+            {WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 100, 20, 20}, "",
             &settings.color_blind_simulation
         );
-        GuiLabel((Rectangle) {WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 150, 350, 20}, "Volume:");
+        GuiLabel({WINDOW_WIDTH / 2 - 275, WINDOW_HEIGHT / 2 + 150, 350, 20}, "Volume:");
         GuiSlider(
-            (Rectangle) {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150, 350, 20}, "0", "100",
+            {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150, 350, 20}, "0", "100",
             &settings.volume, 0, 100
         );
         if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 250, 100, 30}, "Back"
+                {WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 250, 100, 30}, "Back"
             )) {
             _showSettings = false;
         }
@@ -85,19 +85,19 @@ bool MainMenu::open(void)
         }
 
         if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings"
+                {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 150, 300, 100}, "Settings"
             )) {
             _showSettings = true;
         }
 
         if (GuiButton(
-                (Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit"
+                {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 + 300, 300, 100}, "Quit"
             )) {
             EndDrawing();
             break;
         }
 
-        if (GuiButton((Rectangle) {WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2, 300, 100}, "Start") &&
+        if (GuiButton({WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2, 300, 100}, "Start") &&
             !_showSettings) {
             _started = true;
         }

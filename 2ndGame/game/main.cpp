@@ -30,7 +30,7 @@ void open_tower_menu(
 
     if (towerClickSystem.selectedTower.type != TowerType::NONE) {
         if (GuiWindowBox(
-                (Rectangle) {pos.x, pos.y, 200, 200},
+                {pos.x, pos.y, 200, 200},
                 tower_names[(size_t) towerClickSystem.selectedTower.type].c_str()
             )) {
             towerClickSystem.open = false;
@@ -42,9 +42,9 @@ void open_tower_menu(
                        [towerClickSystem.selectedTower.level - 1],
             WHITE
         );
-        GuiLabel((Rectangle) {pos.x + 10, pos.y + 40, 100, 20}, "Level:");
+        GuiLabel({pos.x + 10, pos.y + 40, 100, 20}, "Level:");
         GuiLabel(
-            (Rectangle) {pos.x + 100, pos.y + 40, 100, 20},
+            {pos.x + 100, pos.y + 40, 100, 20},
             std::to_string(towerClickSystem.selectedTower.level).c_str()
         );
         if (towerClickSystem.selectedTower.level < 3) {
@@ -53,27 +53,27 @@ void open_tower_menu(
             } else if (towerClickSystem.selectedTower.type == TowerType::WIZARD) {
                 cost = 80;
             }
-            GuiLabel((Rectangle) {pos.x + 10, pos.y + 65, 100, 20}, "Price:");
+            GuiLabel({pos.x + 10, pos.y + 65, 100, 20}, "Price:");
             GuiLabel(
-                (Rectangle) {pos.x + 100, pos.y + 65, 100, 20},
+                {pos.x + 100, pos.y + 65, 100, 20},
                 std::to_string((towerClickSystem.selectedTower.level * cost)).c_str()
             );
-            if (GuiButton((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
+            if (GuiButton({pos.x + 25, pos.y + 100, 150, 30}, "Upgrade")) {
                 if (money >= towerClickSystem.selectedTower.level * cost) {
                     money -= towerClickSystem.selectedTower.level * cost;
                     towerClickSystem.selectedTower.level++;
                 }
             }
         } else {
-            GuiLabel((Rectangle) {pos.x + 25, pos.y + 100, 150, 30}, "Max level");
+            GuiLabel({pos.x + 25, pos.y + 100, 150, 30}, "Max level");
         }
     } else {
-        if (GuiWindowBox((Rectangle) {pos.x, pos.y, 300, 200}, "Tower")) {
+        if (GuiWindowBox({pos.x, pos.y, 300, 200}, "Tower")) {
             towerClickSystem.open = false;
             return;
         }
-        GuiLabel((Rectangle) {pos.x + 20, pos.y + 55, 100, 20}, "50");
-        if (GuiButton((Rectangle) {pos.x + 75, pos.y + 50, 150, 30}, "Archer")) {
+        GuiLabel({pos.x + 20, pos.y + 55, 100, 20}, "50");
+        if (GuiButton({pos.x + 75, pos.y + 50, 150, 30}, "Archer")) {
             if (money >= 50) {
                 towerClickSystem.selectedTower.type = TowerType::ARCHER;
                 towerClickSystem.selectedTower.level = 1;
@@ -82,8 +82,8 @@ void open_tower_menu(
                 error_box = true;
             }
         }
-        GuiLabel((Rectangle) {pos.x + 20, pos.y + 105, 100, 20}, "80");
-        if (GuiButton((Rectangle) {pos.x + 75, pos.y + 100, 150, 30}, "Wizard")) {
+        GuiLabel({pos.x + 20, pos.y + 105, 100, 20}, "80");
+        if (GuiButton({pos.x + 75, pos.y + 100, 150, 30}, "Wizard")) {
             if (money >= 80) {
                 towerClickSystem.selectedTower.type = TowerType::WIZARD;
                 towerClickSystem.selectedTower.level = 1;
@@ -93,13 +93,13 @@ void open_tower_menu(
             }
         }
     }
-    if (GuiButton((Rectangle) {pos.x + 50, pos.y + 150, 100, 30}, "Quit")) {
+    if (GuiButton({pos.x + 50, pos.y + 150, 100, 30}, "Quit")) {
         towerClickSystem.open = false;
         error_box = false;
     }
     if (error_box) {
-        GuiWindowBox((Rectangle) {pos.x, pos.y - 150, 300, 100}, "Not enough money");
-        if (GuiButton((Rectangle) {pos.x + 50, pos.y - 120, 150, 50}, "OK")) {
+        GuiWindowBox({pos.x, pos.y - 150, 300, 100}, "Not enough money");
+        if (GuiButton({pos.x + 50, pos.y - 120, 150, 50}, "OK")) {
             error_box = false;
         }
     }

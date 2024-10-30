@@ -15,6 +15,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <array>
 
 template<typename First, typename... Rest>
 constexpr inline First getFirstArg(First first, Rest... /*unused*/)
