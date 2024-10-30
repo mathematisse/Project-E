@@ -207,7 +207,7 @@ int main(int ac, char *av[])
 
     _eM.createEntity<ECS::E::PlayerEntity>().setScore(0);
 
-    size_t money = 500;
+    size_t money = 100;
     int player_health = 10;
     size_t score = 0;
 
