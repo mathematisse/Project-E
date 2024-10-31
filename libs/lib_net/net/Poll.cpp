@@ -1,9 +1,7 @@
-#include "lib_net/net/Poll.hpp"
-
 #include <algorithm>
 #include <optional>
-#include <pstl/glue_algorithm_defs.h>
 
+#include "lib_net/net/Poll.hpp"
 #include "lib_net/net/_base.hpp"
 
 namespace lnet::net {
