@@ -23,7 +23,7 @@ std::vector<std::string> splitString(const std::string &str, const std::string &
 
     return result;
 }
-const std::string base_path = splitString(temp_path, "out\\")[0];
+const std::string base_path = splitString(temp_path, "out\\")[0] + "\\";
 #else // Linux / Unix
 const std::string separator = "/";
 const std::string base_path = "";
