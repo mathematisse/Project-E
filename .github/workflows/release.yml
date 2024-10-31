@@ -4,6 +4,9 @@ name: Automated release
 # Creates a new release and publishes it to GitHub.
 # version name is the PR title.
 
+permissions:
+  contents: write
+
 on:
   pull_request:
     types:

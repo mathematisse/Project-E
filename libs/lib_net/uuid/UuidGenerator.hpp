@@ -16,25 +16,25 @@ class UuidGenerator {
 public:
     UuidGenerator():
         generator(new G(std::random_device()())),
-        distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
+        distribution((std::numeric_limits<uint64_t>::min)(), (std::numeric_limits<uint64_t>::max)())
     {
     }
 
     explicit UuidGenerator(uint64_t seed):
         generator(new G(seed)),
-        distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
+        distribution((std::numeric_limits<uint64_t>::min)(), (std::numeric_limits<uint64_t>::max)())
     {
     }
 
     explicit UuidGenerator(G &gen):
         generator(gen),
-        distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
+        distribution((std::numeric_limits<uint64_t>::min)(), (std::numeric_limits<uint64_t>::max)())
     {
     }
 
     explicit UuidGenerator(std::shared_ptr<G> gen):
         generator(gen),
-        distribution(std::numeric_limits<uint64_t>::min(), std::numeric_limits<uint64_t>::max())
+        distribution((std::numeric_limits<uint64_t>::min)(), (std::numeric_limits<uint64_t>::max)())
     {
     }
 

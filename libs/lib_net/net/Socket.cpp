@@ -1,13 +1,18 @@
+#include <cstring>
 
-#include "_base.hpp"
+#include "lib_net/net/_base.hpp"
 #include "lib_net/io/Result.hpp"
 #include "lib_net/net/Socket.hpp"
 #include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/result/Result.hpp"
-#include <cstring>
-#include <sys/socket.h>
 
 namespace lnet::net {
+
+#ifdef __linux__
+constexpr int flag = MSG_NOSIGNAL;
+#else
+constexpr int flag = 0;
+#endif
 
 auto create_socket(int domain, int type) -> io::Result<int>
 {
@@ -68,9 +73,13 @@ auto address_from_sockaddr(const struct sockaddr_storage &address) -> SocketAddr
     } else {
         const auto *ipv6 = reinterpret_cast<const struct sockaddr_in6 *>(&address);
         std::array<uint16_t, 8> ipv6_segments {};
+        #ifdef _WIN32
+        std::memcpy(ipv6_segments.data(), ipv6->sin6_addr.u.Byte, sizeof(ipv6_segments));
+        #else
         std::memcpy(
             ipv6_segments.data(), ipv6->sin6_addr.s6_addr16, sizeof(ipv6->sin6_addr.s6_addr16)
         );
+        #endif
         Ipv6Addr ip(ipv6_segments);
         return {IpAddr(ip), ntohs(ipv6->sin6_port)};
     }
@@ -136,7 +145,7 @@ auto Socket::accept() const -> io::Result<std::pair<Socket, SocketAddr>>
 
 auto Socket::read(std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
 {
-    auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
+    auto nread = ::recv(sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), flag);
     if (nread == SOCKET_ERROR) {
         return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
@@ -149,7 +158,7 @@ auto Socket::recv_from(std::span<std::uint8_t> &buf
     struct sockaddr_storage address { };
     socklen_t address_len = sizeof(address);
     auto nread = ::recvfrom(
-        sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), MSG_NOSIGNAL,
+        sockfd, reinterpret_cast<char *>(buf.data()), buf.size(), flag,
         reinterpret_cast<struct sockaddr *>(&address), &address_len
     );
     if (nread == SOCKET_ERROR) {
@@ -164,7 +173,7 @@ auto Socket::recv_from(std::span<std::uint8_t> &buf
 auto Socket::write(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
 {
     auto nwritten =
-        ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), MSG_NOSIGNAL);
+        ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), flag);
     if (nwritten == SOCKET_ERROR) {
         return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
@@ -176,7 +185,7 @@ auto Socket::send_to(const std::span<std::uint8_t> &buf, const SocketAddr &addr)
 {
     auto [address, address_len] = initialize_address(addr);
     auto nwritten = ::sendto(
-        sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), MSG_NOSIGNAL,
+        sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), flag,
         reinterpret_cast<struct sockaddr *>(&address), address_len
     );
     if (nwritten == SOCKET_ERROR) {
@@ -187,7 +196,7 @@ auto Socket::send_to(const std::span<std::uint8_t> &buf, const SocketAddr &addr)
 
 auto Socket::shutdown() const -> io::Result<result::Void>
 {
-    if (::shutdown(sockfd, SHUT_RDWR) == SOCKET_ERROR) {
+    if (::shutdown(sockfd, 2) == SOCKET_ERROR) {
         return io::Result<result::Void>::Error(std::error_code(errno, std::system_category()));
     }
     return io::Result<result::Void>::Success({});
