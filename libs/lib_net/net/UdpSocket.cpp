@@ -1,6 +1,6 @@
 #include <cstring>
-#include <sys/socket.h>
 
+#include "lib_net/net/_base.hpp"
 #include "lib_net/net/UdpSocket.hpp"
 #include "lib_net/result/Result.hpp"
 

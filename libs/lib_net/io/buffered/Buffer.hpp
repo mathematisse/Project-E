@@ -47,7 +47,10 @@ public:
         _filled = 0;
     }
 
-    inline auto consume(std::size_t amt) -> void { _pos = std::min(_pos + amt, _filled); }
+    inline auto consume(std::size_t amt) -> void
+    {
+        _pos = (((_pos + amt) < (_filled)) ? (_pos + amt) : (_filled));
+    }
 
     template<typename V>
     inline auto consume_with(std::size_t amt, V &&visitor) -> bool
@@ -61,7 +64,10 @@ public:
         return true;
     }
 
-    inline auto unconsume(std::size_t amt) -> void { _pos = std::max(_pos - amt, 0UL); }
+    inline auto unconsume(std::size_t amt) -> void
+    {
+        _pos = (((_pos - amt) > (0ULL)) ? (_pos - amt) : (0ULL));
+    }
 
     template<typename R>
         requires io::Readable<R>

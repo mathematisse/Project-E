@@ -27,7 +27,7 @@ public:
         LOG_DEBUG("Creating entity pool " + std::string(Name));
         LOG_DEBUG("Chunk size: " + std::to_string(_chunkSize));
     }
-    explicit ArchetypePool(size_t chunkSize, const TComps ::Comp::Pool &...input):
+    explicit ArchetypePool(size_t chunkSize, const typename TComps ::Comp::Pool &...input):
         AArchetypePool(),
         BaseArchetypePool<TComps...>(input...),
         _chunkSize(chunkSize)

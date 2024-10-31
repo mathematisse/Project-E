@@ -39,7 +39,7 @@ private:
     size_t write_to_buf(const std::span<std::uint8_t> &buf)
     {
         size_t available = _buffer.capacity() - _buffer.size();
-        size_t amt_to_buffer = std::min(available, buf.size());
+        size_t amt_to_buffer = (std::min)(available, buf.size());
 
         _buffer.insert(_buffer.end(), buf.begin(), buf.begin() + amt_to_buffer);
 
