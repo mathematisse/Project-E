@@ -4,6 +4,31 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32 // Windows
+const std::string separator = "\\";
+const std::string temp_path = GetWorkingDirectory();
+std::vector<std::string> splitString(const std::string &str, const std::string &delimiter)
+{
+    std::vector<std::string> result;
+    size_t start = 0;
+    size_t end = str.find(delimiter);
+
+    while (end != std::string::npos) {
+        result.push_back(str.substr(start, end - start));
+        start = end + delimiter.length();
+        end = str.find(delimiter, start);
+    }
+
+    result.push_back(str.substr(start));
+
+    return result;
+}
+const std::string base_path = splitString(temp_path, "out\\")[0];
+#else // Linux / Unix
+const std::string separator = "/";
+const std::string base_path = "";
+#endif
+
 AssetsLoader::~AssetsLoader()
 {
     for (auto &asset : assets) {
