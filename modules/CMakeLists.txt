@@ -1,6 +1,6 @@
 function (add_module module)
     option(${module}_ENABLED "Enable ${module} module" OFF)
-    if(${module}_ENABLED AND NOT TARGET ${module})
+    if(NOT TARGET ${module})
         add_subdirectory(${module})
     endif()
 endfunction()
