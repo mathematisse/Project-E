@@ -1,10 +1,12 @@
-#include "log.hpp"
+#ifdef LOGGING
+
 #include <iostream>
 #include <utility>
+#include "log.hpp"
 
-namespace rlog {
+logging::Logger logging::global_logger;
 
-std::string logLevelToStr(Level level)
+std::string logging::levelToStr(Level level)
 {
     switch (level) {
     case Level::DEBUG:
@@ -22,7 +24,7 @@ std::string logLevelToStr(Level level)
     }
 }
 
-std::string logLevelToColor(Level level)
+std::string logging::levelToColor(Level level)
 {
     switch (level) {
     case Level::DEBUG:
@@ -39,89 +41,100 @@ std::string logLevelToColor(Level level)
         return LOG_COLOR_RESET;
     }
 }
-
-Logger::Logger():
-    log_level(Level::DEBUG),
+logging::Logger::Logger():
+    log_level(Level::INFO),
     prefix_creator(createDefaultPrefix),
     log_stream(getDefaultLogStream()),
     max_log_size(DEFAULT_MAX_LOG_SIZE)
 {
 }
 
-Logger::~Logger() { closeLogFile(); }
+logging::Logger::~Logger() { closeLogFile(); }
 
-void Logger::log(Level level, const std::string &message)
+std::string
+logging::Logger::formatMessage(Level level, const std::string &message, bool add_color) const
+{
+    std::string message_copy = message;
+    std::string prefix = add_color ? levelToColor(level) + prefix_creator(level) + LOG_COLOR_RESET
+                                   : prefix_creator(level);
+
+    message_copy.erase(message_copy.find_last_not_of(" \n\r\t") + 1);
+    std::size_t pos = 0;
+    while ((pos = message_copy.find('\n', pos)) != std::string::npos &&
+           pos < message_copy.size() - 2) {
+        message_copy.replace(pos, 1, "\n" + prefix);
+        pos += prefix.size() + 1;
+    }
+    return prefix + message_copy;
+}
+
+void logging::Logger::log(Level level, const std::string &message)
 {
     if (level < log_level) {
         return;
     }
-    std::string prefix = prefix_creator(level);
     if (log_stream != nullptr) {
-        *log_stream << logLevelToColor(level) << prefix << LOG_COLOR_RESET << message << std::endl;
+        *log_stream << formatMessage(level, message, true) << std::endl;
     }
     if (logFileIsOpen()) {
-        if (log_file.tellp() > max_log_size) {
+        if (static_cast<std::size_t>(log_file.tellp()) > max_log_size) {
             log_file.close();
             log_file.open(log_file_path, std::ios::out | std::ios::ate);
         }
-        log_file << prefix << message << std::endl;
+        log_file << formatMessage(level, message, false) << std::endl;
         log_file.flush();
     }
 }
 
-Level Logger::getLogLevel() const { return log_level; }
+logging::Level logging::Logger::getLogLevel() const { return log_level; }
 
-void Logger::setLogLevel(Level level) { log_level = level; }
+void logging::Logger::setLogLevel(logging::Level level) { log_level = level; }
 
-std::ostream *Logger::getLogStream() const { return log_stream; }
+std::ostream *logging::Logger::getLogStream() const { return log_stream; }
 
-void Logger::setLogStream(std::ostream *stream) { log_stream = stream; }
+void logging::Logger::setLogStream(std::ostream *stream) { log_stream = stream; }
 
-void Logger::resetLogStream() { log_stream = getDefaultLogStream(); }
+void logging::Logger::resetLogStream() { log_stream = getDefaultLogStream(); }
 
-std::ostream *Logger::getDefaultLogStream() { return &std::cout; }
+std::ostream *logging::Logger::getDefaultLogStream() { return &std::cout; }
 
-Logger::PrefixCreator Logger::getLogPrefix() const { return prefix_creator; }
+logging::Logger::PrefixCreator logging::Logger::getLogPrefix() const { return prefix_creator; }
 
-void Logger::setLogPrefix(Logger::PrefixCreator prefixCreator)
+void logging::Logger::setLogPrefix(logging::Logger::PrefixCreator prefixCreator)
 {
     prefix_creator = std::move(prefixCreator);
 }
 
-void Logger::resetLogPrefix() { prefix_creator = createDefaultPrefix; }
+void logging::Logger::resetLogPrefix() { prefix_creator = createDefaultPrefix; }
 
-std::string Logger::createDefaultPrefix(Level level) { return "[" + logLevelToStr(level) + "] "; }
-
-void Logger::openLogFile(const std::filesystem::path &filePath, bool clear_old)
+std::string logging::Logger::createDefaultPrefix(Level level)
 {
-    std::ios_base::openmode mode = std::ios::out | std::ios::ate;
+    return "[" + levelToStr(level) + "] ";
+}
 
-    if (clear_old) {
-        mode |= std::ios::trunc;
-    } else {
-        mode |= std::ios::app;
-    }
+void logging::Logger::openLogFile(const std::filesystem::path &filePath)
+{
     if (logFileIsOpen()) {
         if (log_file_path == filePath) {
             return;
         }
         closeLogFile();
     }
-    log_file.open(filePath, mode);
+    log_file.open(filePath, std::ios::out | std::ios::ate);
     log_file_path = filePath;
 }
 
-void Logger::closeLogFile()
+void logging::Logger::closeLogFile()
 {
     if (logFileIsOpen()) {
         log_file.close();
     }
 }
 
-bool Logger::logFileIsOpen() const { return log_file.is_open(); }
+bool logging::Logger::logFileIsOpen() const { return log_file.is_open(); }
 
-void Logger::setMaxLogSize(std::size_t size) { max_log_size = size; }
+void logging::Logger::setMaxLogSize(std::size_t size) { max_log_size = size; }
 
-std::size_t Logger::getMaxLogSize() const { return max_log_size; }
+std::size_t logging::Logger::getMaxLogSize() const { return max_log_size; }
 
-}
+#endif
