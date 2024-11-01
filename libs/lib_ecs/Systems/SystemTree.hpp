@@ -28,9 +28,10 @@ public:
     bool addSystemGroup(
         const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
     );
-    bool addSystem(ISystem *system, const std::string &group, bool atStart);
+    bool addSystem(ISystem *system, const std::string &group, bool atStart = false);
     bool addSystemTreeNode(
-        SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+        SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        bool addInside = true
     );
     void registerEntityPool(E::IArchetypePool *entityPool);
     void runNode(SystemTree &tree);

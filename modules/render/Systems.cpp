@@ -12,13 +12,15 @@
 namespace ECS::S {
 // SYSTEM
 
-DebugDrawSystem::DebugDrawSystem(Camera2D &camera):
+DebugDrawSystem::DebugDrawSystem(uint8_t layer, Camera2D &camera):
+    layer(layer),
     camera(camera),
     hasCamera(true)
 {
 }
 
-DebugDrawSystem::DebugDrawSystem():
+DebugDrawSystem::DebugDrawSystem(uint8_t layer):
+    layer(layer),
     camera(dummyCamera2D),
     hasCamera(false)
 {
@@ -37,14 +39,16 @@ void DebugDrawSystem::_statusOperate(
     DrawRectangle((int) x, (int) y, (int) sizeX, (int) sizeY, {r, g, b, a});
 }
 
-DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
+DrawSpriteSystem::DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera):
+    layer(layer),
     assetsLoader(assetsLoader),
     camera(camera),
     hasCamera(true)
 {
 }
 
-DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader):
+DrawSpriteSystem::DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader):
+    layer(layer),
     assetsLoader(assetsLoader),
     camera(dummyCamera2D),
     hasCamera(false)
@@ -73,15 +77,19 @@ void DrawSpriteSystem::_innerOperate(
     DrawTexturePro(texture, source, dest, origin, rotation, WHITE);
 }
 
-DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
+DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(
+    uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera
+):
+    layer(layer),
     assetsLoader(assetsLoader),
     camera(camera),
     hasCamera(true)
 {
 }
 
-DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader):
+DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader):
     AMonoSystem(false),
+    layer(layer),
     assetsLoader(assetsLoader),
     camera(dummyCamera2D),
     hasCamera(false)
