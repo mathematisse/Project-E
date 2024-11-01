@@ -14,7 +14,7 @@
 namespace ECS::E {
 
 template<typename... TComps>
-requires(C::ArchComponentConcept<TComps> && ...)
+// requires(C::ArchComponentConcept<TComps> && ...)
 class ArchetypeVal : public BaseArchetypeVal<TComps...>, public AArchetypeVal {
 public:
     ArchetypeVal():
