@@ -1,0 +1,687 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>R-Type</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overwiew</a></li><li class="chapter-item expanded "><a href="lexicon.html"><strong aria-hidden="true">2.</strong> Lexicon</a></li><li class="chapter-item expanded "><a href="engine/engine.html"><strong aria-hidden="true">3.</strong> Engine</a></li><li class="chapter-item expanded "><a href="engine/modules/modules.html"><strong aria-hidden="true">4.</strong> Modules</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="engine/modules/how_to_add_module.html"><strong aria-hidden="true">4.1.</strong> How to add a module</a></li><li class="chapter-item expanded "><a href="engine/modules/registry.html"><strong aria-hidden="true">4.2.</strong> Module registry</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="engine/modules/modules/spatial2d/spatial2d.html"><strong aria-hidden="true">4.2.1.</strong> Spatial 2D</a></li><li class="chapter-item expanded "><a href="engine/modules/modules/render/render.html"><strong aria-hidden="true">4.2.2.</strong> Render</a></li><li class="chapter-item expanded "><a href="engine/modules/modules/network/network.html"><strong aria-hidden="true">4.2.3.</strong> Network</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="ecs/ecs.html"><strong aria-hidden="true">5.</strong> ECS</a></li><li class="chapter-item expanded "><a href="other/build_system.html"><strong aria-hidden="true">6.</strong> Build System</a></li><li class="chapter-item expanded "><a href="other/comparative_study.html"><strong aria-hidden="true">7.</strong> Comparative Study</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">R-Type</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <div style="break-before: page; page-break-before: always;"></div><h1 id="lexicon"><a class="header" href="#lexicon">Lexicon</a></h1>
+<p>this page lists all relevant terminologies regarding the project.</p>
+<h2 id="ecs"><a class="header" href="#ecs">ECS</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody>
+<tr><td>ECS</td><td>Entity-Component-System, design pattern used to manage modular objects</td></tr>
+<tr><td>Entity</td><td>An object within the application. Can be a player, enemy, ui element etc...</td></tr>
+<tr><td>Component</td><td>Data that can be attached to an entity to give it specific properties.</td></tr>
+<tr><td>System</td><td>An operation that perform actions on an entity that has a specific set of components.</td></tr>
+<tr><td>Blob</td><td>A ressource that can be used by multiple entities (i.e. meshes for collision shapes)</td></tr>
+</tbody></table>
+</div>
+<h2 id="networking"><a class="header" href="#networking">Networking</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody>
+<tr><td>Networking</td><td>The process of transmitting data over the a network connection</td></tr>
+<tr><td>Protocol</td><td>A set of rules that define how data is transmitted</td></tr>
+<tr><td>TCP</td><td>Transmission Control Protocol, slower but reliable</td></tr>
+<tr><td>UDP</td><td>User Datagram Protocol, faster but unreliable</td></tr>
+<tr><td>Latency</td><td>The time it takes for a packet to travel to its destination</td></tr>
+</tbody></table>
+</div>
+<h2 id="game-engine"><a class="header" href="#game-engine">Game Engine</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody>
+<tr><td>Module</td><td>A collection of components, systems, blobs, and premade entities</td></tr>
+<tr><td>Scene</td><td>A collection of entities that are loaded into the game</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="game-engine-basics"><a class="header" href="#game-engine-basics">Game Engine Basics</a></h1>
+<p>This tutorial will cover the basics of the game engine.</p>
+<h2 id="game-loop"><a class="header" href="#game-loop">Game Loop</a></h2>
+<pre><code class="language-cpp">auto main() -&gt; int {
+    std::cout &lt;&lt; "Hello, World!" &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="modules"><a class="header" href="#modules">Modules</a></h1>
+<h3 id="overview"><a class="header" href="#overview">Overview</a></h3>
+<p>Modules are extensions of the ECS that implement features of the game engine.
+They provide a collection of defined Components and Systems related to commonly used concepts in game development to speed the process of making games.</p>
+<p>Using the build system, you may selectively enable modules to be built along-side your game.</p>
+<h3 id="sections"><a class="header" href="#sections">Sections</a></h3>
+<ul>
+<li><a href="engine/modules/how_to_add_module.html">How to add your own module</a></li>
+<li><a href="engine/modules/registry.html">See all modules</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-add-a-module-to-the-engine"><a class="header" href="#how-to-add-a-module-to-the-engine">How to add a module to the engine</a></h1>
+<h2 id="1-create-a-new-module"><a class="header" href="#1-create-a-new-module">1. Create a new module</a></h2>
+<p>Create a new directory in the <code>modules</code> directory. The name of the directory should be the name of the module.</p>
+<h2 id="2-create-a-cmakeliststxt-file"><a class="header" href="#2-create-a-cmakeliststxt-file">2. Create a <code>CMakeLists.txt</code> file</a></h2>
+<p>create a in <code>modules/&lt;module-name&gt;</code> directory. The content of the file should be similar to the following:</p>
+<pre><code class="language-cmake">cmake_minimum_required(VERSION 3.15)
+project(&lt;module-name&gt;) # Swap &lt;module-name&gt; with the name of your module
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_library(spatial2d STATIC Systems.cpp) # Change the source file to the source file of the module
+target_link_libraries(spatial2d lib_ecs) # link the needed libraries (ex: raylib, etc...)
+</code></pre>
+<p>Don't forget to change <code>&lt;module-name&gt;</code> to the name of the module and the source files.</p>
+<h2 id="3-make-the-module-available-in-the-engine"><a class="header" href="#3-make-the-module-available-in-the-engine">3. Make the module available in the engine</a></h2>
+<p>Edit the <code>CMakeLists.txt</code> file in <code>engine/modules/</code> directory. Add the following lines to the top of the file:</p>
+<pre><code class="language-cmake">add_module(&lt;module-name&gt;)
+</code></pre>
+<h2 id="4-notes"><a class="header" href="#4-notes">4. Notes</a></h2>
+<ul>
+<li>The module doesn't need to specify which other modules it depends on. This is the user's responsibility.</li>
+<li>The module should be documented using Doxygen comments.</li>
+<li>The module should have its own markdown file documenting it. The file should be listed to the <a href="engine/modules/registry.html">registry</a> using a similar format with a hyperlink to the file.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="module-registry"><a class="header" href="#module-registry">Module Registry</a></h1>
+<ul>
+<li><a href="engine/modules/engine/modules/modules/render/render.html"><strong>Render</strong></a>: Sprites drawing &amp; sprite sheet iteration for animated sprites.</li>
+<li><a href="engine/modules/engine/modules/modules/spatial2d/spatial2d.html"><strong>Spatial 2D</strong></a>: 2D spatial representation with basic movement logic.</li>
+<li><a href="engine/modules/engine/modules/modules/network/network.html"><strong>Network</strong></a>: TCP/UDP networking tools for Server/client netcode infrastructure.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="spatial-2d"><a class="header" href="#spatial-2d">Spatial 2D</a></h1>
+<p>The <code>Spatial2D</code> module provides a 2D spatial representation with basic movement logic. It is used to manage the position, rotation, and scale of 2D objects in the game world.</p>
+<h2 id="components"><a class="header" href="#components">Components</a></h2>
+<ul>
+<li><strong>Position2D</strong> (<em>x: float, y: float</em>)</li>
+<li><strong>Size2D</strong> (<em>width: float, height: float</em>)</li>
+<li><strong>Rotation</strong> (<em>angle: float</em>)</li>
+<li><strong>Velocity2D</strong> (<em>x: float, y: float</em>)</li>
+<li><strong>Acceleration2D</strong> (<em>x: float, y: float</em>)</li>
+</ul>
+<h2 id="systems"><a class="header" href="#systems">Systems</a></h2>
+<ul>
+<li><strong>ApplyVelocity</strong> (<em>Position2D, Velocity2D</em>)</li>
+<li><strong>ApplyAcceleration</strong> (<em>Velocity2D, Acceleration2D</em>)</li>
+</ul>
+<h2 id="aspects"><a class="header" href="#aspects">Aspects</a></h2>
+<ul>
+<li><strong>StaticEntity</strong> (<em>Position2D, Rotation</em>)</li>
+<li><strong>DynamicEntity</strong> (<em>+StaticEntity, Velocity2D, Acceleration2D</em>)</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="render"><a class="header" href="#render">Render</a></h1>
+<p>The <code>Render</code> module is responsible for drawing sprites and sprite sheets to the screen. It also provides tools for animating sprites.</p>
+<h2 id="components-1"><a class="header" href="#components-1">Components</a></h2>
+<ul>
+<li><strong>Sprite</strong> (<em>textureId: size_t</em>)</li>
+<li><strong>AnimatedSprite</strong> (<em>textureId: size_t, nbFrame: uint8_t, animationSpeed: float</em>)</li>
+</ul>
+<h2 id="systems-1"><a class="header" href="#systems-1">Systems</a></h2>
+<ul>
+<li><strong>DebugDrawSprite</strong> (<em>Position2D, Color, Size2D</em>)</li>
+<li><strong>DrawSprite</strong> (<em>Position2D, Size2D, Rotation, Sprite</em>)</li>
+<li><strong>DrawAnimatedSprite</strong> (<em>Position2D, Size2D, Rotation, AnimatedSprite</em>)</li>
+<li><strong>SpriteAnimation</strong> (<em>AnimatedSprite, Timer</em>)</li>
+</ul>
+<h2 id="aspects-1"><a class="header" href="#aspects-1">Aspects</a></h2>
+<ul>
+<li><strong>SpriteEntity</strong> (<em>Sprite, Size</em>)</li>
+<li><strong>AnimatedSpriteEntity</strong> (<em>AnimatedSprite, Timer, Size</em>)</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="network-module"><a class="header" href="#network-module">Network Module</a></h1>
+<p>The network module provides a set of functions to interact with the network interfaces of the device.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ecs-1"><a class="header" href="#ecs-1">ECS</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-the-build-system-works"><a class="header" href="#how-the-build-system-works">How the build system works</a></h1>
+<ul>
+<li><a href="other/build_system.html#introduction">Introduction</a></li>
+<li><a href="other/build_system.html#dependencies">Dependencies</a>
+<ul>
+<li><a href="other/build_system.html#on-linux">On linux:</a></li>
+<li><a href="other/build_system.html#on-windows">On Windows:</a></li>
+</ul>
+</li>
+<li><a href="other/build_system.html#how-to-build">How to build</a></li>
+<li><a href="other/build_system.html#how-to-run">How to run</a></li>
+<li><a href="other/build_system.html#how-to-test">How to test</a></li>
+</ul>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>todo...</p>
+<h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
+<p>The build system is based on <a href="https://cmake.org/">CMake</a>, a cross-platform build system generator. CMake is used to generate the build files for the project, which can be used to build the project on different platforms and with different compilers.</p>
+<h3 id="on-linux"><a class="header" href="#on-linux">On linux:</a></h3>
+<p>Ubuntu:</p>
+<pre><code class="language-bash">sudo apt install build-essential git
+sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+</code></pre>
+<p>Fedora:</p>
+<pre><code class="language-bash">sudo dnf groupinstall "Development Tools" "Development Libraries"
+sudo dnf install alsa-lib-devel mesa-libGL-devel libX11-devel libXrandr-devel libXi-devel libXcursor-devel libXinerama-devel libatomic
+</code></pre>
+<p>Arch Linux:</p>
+<pre><code class="language-bash">sudo pacman -S base-devel git
+sudo pacman -S alsa-lib mesa libx11 libxrandr libxi libxcursor libxinerama
+</code></pre>
+<h2 id="how-to-build-on-linux"><a class="header" href="#how-to-build-on-linux">How to build on Linux</a></h2>
+<p>Clone the repository and navigate to the project directory:</p>
+<pre><code class="language-bash">git clone https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.git
+cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
+</code></pre>
+<h3 id="using-cmake"><a class="header" href="#using-cmake">Using CMake:</a></h3>
+<h4 id="release-build"><a class="header" href="#release-build">Release build:</a></h4>
+<p>Configure the project:</p>
+<pre><code class="language-bash">cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release
+</code></pre>
+<p>Build the project:</p>
+<pre><code class="language-bash">cmake --build cmake-build-release --parallel --config Release
+</code></pre>
+<h4 id="debug-build"><a class="header" href="#debug-build">Debug build:</a></h4>
+<p>Configure the project:</p>
+<pre><code class="language-bash">cmake -B cmake-build-debug -S . -DCMAKE_BUILD_TYPE=Debug
+</code></pre>
+<p>Build the project:</p>
+<pre><code class="language-bash">cmake --build cmake-build-debug --parallel --config Debug
+</code></pre>
+<hr />
+<p><em>If you are using WSL2, you might have the following error:</em></p>
+<pre><code class="language-bash">c++ fatal error killed signal terminated program cc1plus
+</code></pre>
+<p>You can fix this by removing the <code>--parallel</code> flag from the build command. (you can enable it again after the first build)</p>
+<hr />
+<p>You can also use the provided scripts to build the project:</p>
+<pre><code class="language-bash">./scripts/build.sh
+</code></pre>
+<h2 id="how-to-build-on-windows"><a class="header" href="#how-to-build-on-windows">How to build on Windows</a></h2>
+<p>Open powershell
+Clone the repository and navigate to the project directory:</p>
+<pre><code class="language-powershell">git clone https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.git
+cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
+</code></pre>
+<h3 id="using-cmake-1"><a class="header" href="#using-cmake-1">Using CMake:</a></h3>
+<h4 id="release-build-1"><a class="header" href="#release-build-1">Release build:</a></h4>
+<p>Configure the project:</p>
+<pre><code class="language-bash">cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release
+</code></pre>
+<p>Build the project:</p>
+<pre><code class="language-bash">cmake --build cmake-build-release --config Release
+</code></pre>
+<h4 id="debug-build-1"><a class="header" href="#debug-build-1">Debug build:</a></h4>
+<p>Configure the project:</p>
+<pre><code class="language-bash">cmake -B cmake-build-debug -S . -DCMAKE_BUILD_TYPE=Debug
+</code></pre>
+<p>Build the project:</p>
+<pre><code class="language-bash">cmake --build cmake-build-debug --config Debug
+</code></pre>
+<hr />
+<p>You can also use the provided scripts to build the project:</p>
+<pre><code class="language-powershell">.\scripts\build.ps1
+</code></pre>
+<h2 id="how-to-run"><a class="header" href="#how-to-run">How to run</a></h2>
+<h4 id="on-linux-1"><a class="header" href="#on-linux-1">On linux:</a></h4>
+<p>The engine's libraries are located in the <code>cmake-build-release/engine</code> directory. And are directly linked to the binary. So you need to set the <code>LD_LIBRARY_PATH</code> environment variable to the <code>cmake-build-release/engine</code> directory.</p>
+<p>Your binary will be located in the <code>cmake-build-release</code> or <code>cmake-build-debug</code> directory depending on the build type you chose.
+The binary is standalone and can be run from anywhere.</p>
+<pre><code class="language-bash">./cmake-build-release/&lt;project&gt;/&lt;binary-name&gt;
+</code></pre>
+<h4 id="on-windows"><a class="header" href="#on-windows">On Windows:</a></h4>
+<p>TODO...</p>
+<h2 id="how-to-test"><a class="header" href="#how-to-test">How to test</a></h2>
+<p>To run the whole test suite you can use the <code>ctest</code> command. This will run all the tests in the <code>cmake-build-release</code> or <code>cmake-build-debug</code> directory depending on the build type you chose.</p>
+<pre><code class="language-bash">cd &lt;path-to-build-directory&gt;
+ctest
+</code></pre>
+<p>You can also run the tests individually. Or run the tests with the <code>-V</code> flag to get more information about the tests.</p>
+<pre><code class="language-bash">cd &lt;path-to-build-directory&gt;
+ctest -R &lt;test-name&gt;
+ctest -V
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparative-study---r-type"><a class="header" href="#comparative-study---r-type">Comparative Study - R-Type</a></h1>
+<p>This study evaluates the choices made for our game development project, focusing on the Entity-Component-System (ECS) architecture, programming language (C++), JSON-based database for storage, CMake for cross-platform compatibility, and GitHub for version control. We will also discuss the various algorithms, data structures, storage mechanisms, and security considerations, while proposing modern documentation solutions. The discussion will justify these decisions through comparative analysis, taking into account performance, scalability, and long-term maintainability.</p>
+<hr />
+<h2 id="1-programming-language-c"><a class="header" href="#1-programming-language-c">1. <strong>Programming Language: C++</strong></a></h2>
+<h3 id="relevance-and-justification"><a class="header" href="#relevance-and-justification">Relevance and Justification</a></h3>
+<p>C++ is chosen as the primary language for game development due to its efficiency, low-level memory management, and industry-wide usage in game engines. In comparison to other languages such as <strong>C#</strong> or <strong>Python</strong>, C++ provides better control over hardware resources, which is crucial for performance-intensive games.</p>
+<ul>
+<li>
+<p><strong>Pros</strong>:</p>
+<ul>
+<li>High performance and fine-grained control over memory (important in real-time rendering and ECS optimizations).</li>
+<li>Well-supported for <strong>multi-threading</strong> and <strong>parallelism</strong>, which is essential for the game loop and physics.</li>
+<li>Compatible with major gaming frameworks like <strong>Unreal Engine</strong> and <strong>Unity (via C++ for the backend)</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cons</strong>:</p>
+<ul>
+<li>Steeper learning curve compared to <strong>C#</strong> and <strong>Python</strong>.</li>
+<li>Manual memory management can lead to vulnerabilities (e.g., memory leaks, buffer overflows), but this is mitigated by robust design patterns.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Comparative Study</strong>:</p>
+<ul>
+<li><strong>C#</strong> (used in Unity): Easier to learn, but less control over low-level optimizations. Best for developers focusing on rapid prototyping or working with Unity.</li>
+<li><strong>Python</strong>: Great for scripting and prototyping due to simplicity and speed of development. However, its performance is not suitable for high-performance game engines.</li>
+</ul>
+<hr />
+<h2 id="2-ecs-entity-component-system-architecture"><a class="header" href="#2-ecs-entity-component-system-architecture">2. <strong>ECS (Entity-Component-System) Architecture</strong></a></h2>
+<h3 id="relevance-and-justification-1"><a class="header" href="#relevance-and-justification-1">Relevance and Justification</a></h3>
+<p>The <strong>ECS</strong> paradigm decouples game objects into three distinct components: <strong>Entities</strong>, <strong>Components</strong>, and <strong>Systems</strong>. This allows for modular, data-driven design and improves scalability in complex games.</p>
+<ul>
+<li><strong>Entities</strong> are unique identifiers or objects in the game world.</li>
+<li><strong>Components</strong> store data (e.g., position, velocity).</li>
+<li><strong>Systems</strong> operate on the components to update game state (e.g., physics, AI).</li>
+</ul>
+<p><strong>Pros</strong>:</p>
+<ul>
+<li><strong>Performance</strong>: ECS improves <strong>cache locality</strong> and data-oriented design, which enhances performance, especially in comparison to traditional <strong>object-oriented</strong> designs.</li>
+<li><strong>Scalability</strong>: It allows the game to scale better as new features are added without modifying existing entities.</li>
+</ul>
+<p><strong>Comparative Study</strong>:</p>
+<ul>
+<li><strong>Object-Oriented Design (OOD)</strong>: While OOD offers clear object relationships, it can lead to <strong>rigid inheritance hierarchies</strong> and poor performance due to <strong>cache misses</strong>.</li>
+<li><strong>Component-Based Design</strong>: While similar to ECS, the lack of strict separation between systems and entities can introduce <strong>tight coupling</strong>, reducing maintainability.</li>
+</ul>
+<hr />
+<h2 id="3-data-structures-and-algorithms"><a class="header" href="#3-data-structures-and-algorithms">3. <strong>Data Structures and Algorithms</strong></a></h2>
+<h3 id="relevance-and-justification-2"><a class="header" href="#relevance-and-justification-2">Relevance and Justification</a></h3>
+<p>Efficient data structures and algorithms are critical for managing game state, physics, AI, and rendering within the <strong>Entity-Component-System (ECS)</strong> architecture. In our implementation, key ECS features like <strong>EntityPool</strong>, <strong>Query</strong>, and custom-designed algorithms enable scalable and high-performance operations.</p>
+<h3 id="key-data-structures-in-ecs"><a class="header" href="#key-data-structures-in-ecs">Key Data Structures in ECS</a></h3>
+<ul>
+<li>
+<p><strong>EntityPool</strong>: The <strong>EntityPool</strong> stores all active entities in the game world. Entities are identified by unique IDs, and the pool manages the lifecycle of entities, including their creation, deletion, and reuse. Efficient entity management reduces memory overhead and avoids fragmentation, especially important in games with high entity churn.</p>
+</li>
+<li>
+<p><strong>Component Storage</strong>: Components (e.g., position, velocity, health) are stored in <strong>contiguous arrays</strong> or <strong>struct-of-arrays</strong> (SoA) to improve memory locality and cache efficiency. This structure ensures that components of the same type are stored together, reducing cache misses and improving performance, especially during system updates.</p>
+</li>
+<li>
+<p><strong>Query System</strong>: The <strong>Query</strong> system is designed to allow efficient filtering of entities based on the components they contain. Queries are optimized using bitmasks or sets, enabling systems (e.g., rendering, physics) to operate only on relevant entities. This minimizes overhead by eliminating the need to iterate over the entire entity pool.</p>
+</li>
+</ul>
+<h3 id="custom-designed-algorithms"><a class="header" href="#custom-designed-algorithms">Custom-Designed Algorithms</a></h3>
+<ul>
+<li>
+<p><strong>Efficient Component Lookup</strong>:</p>
+<ul>
+<li>We use <strong>hashmaps</strong> or <strong>unordered_maps</strong> for rapid component lookups (average <strong>O(1)</strong> complexity). When a system operates on specific components, this allows for direct access to the required components without iterating over irrelevant data.</li>
+<li>To further optimize, entities can be indexed by archetypes, ensuring that systems only process entities that have the necessary combination of components.</li>
+</ul>
+</li>
+<li>
+<p><strong>Event System</strong>:</p>
+<ul>
+<li>A custom <strong>event-driven system</strong> is implemented to handle inter-component and inter-system communication without creating tight coupling between systems. Events are queued and processed by relevant systems, allowing for decoupled interaction (e.g., damage events updating both health and UI systems).</li>
+</ul>
+</li>
+</ul>
+<h3 id="comparative-study"><a class="header" href="#comparative-study">Comparative Study</a></h3>
+<ul>
+<li>
+<p><strong>Traditional Game Loops</strong>: In a traditional game loop, all game objects and components are processed in a sequential or hierarchical manner. This approach can become inefficient in large games, where systems often iterate over irrelevant data or unused components, leading to performance bottlenecks. In contrast, the ECS architecture, along with optimized queries and entity pools, allows for more focused and scalable updates.</p>
+</li>
+<li>
+<p><strong>Physics Engines (e.g., Bullet, PhysX)</strong>: While using external physics engines can accelerate development, they may not be optimized for the specific requirements of an ECS. Custom physics algorithms, integrated with spatial partitioning, allow for better control over performance and flexibility in handling game-specific physics.</p>
+</li>
+</ul>
+<hr />
+<p>In summary, the combination of <strong>EntityPool</strong>, <strong>Query</strong> systems, and custom algorithms like <strong>spatial partitioning</strong> and <strong>component lookup</strong> enables high performance, scalability, and modularity within our ECS-based game engine.</p>
+<hr />
+<h2 id="4-storage-json-database"><a class="header" href="#4-storage-json-database">4. <strong>Storage: JSON Database</strong></a></h2>
+<h3 id="relevance-and-justification-3"><a class="header" href="#relevance-and-justification-3">Relevance and Justification</a></h3>
+<p>For storing game data (such as levels, player states, or settings), a <strong>JSON-based</strong> database is chosen for its simplicity and ease of integration with C++. JSON is human-readable and works well for <strong>game configuration</strong> or <strong>save states</strong>.</p>
+<ul>
+<li>
+<p><strong>Pros</strong>:</p>
+<ul>
+<li>Simple and lightweight format.</li>
+<li>Easy to read and modify manually (useful during development).</li>
+<li>Well-supported in C++ through libraries like <strong>nlohmann/json</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cons</strong>:</p>
+<ul>
+<li><strong>Not suited for large-scale, real-time transactions</strong> due to performance limitations in querying and update efficiency.</li>
+<li>Data validation is weak compared to <strong>SQL</strong> databases.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Comparative Study</strong>:</p>
+<ul>
+<li><strong>SQL Databases</strong>: While highly reliable and structured, they are overkill for storing simple game data and slower due to their relational nature.</li>
+<li><strong>NoSQL Databases (e.g., MongoDB)</strong>: Better for larger datasets or more complex querying. JSON-like structure is ideal for dynamic data but might add unnecessary overhead for simple games.</li>
+</ul>
+<hr />
+<h2 id="5-security-considerations"><a class="header" href="#5-security-considerations">5. <strong>Security Considerations</strong></a></h2>
+<p>Security is essential to ensure data integrity, prevent cheating, and protect user information.</p>
+<ul>
+<li>
+<p><strong>Memory Management</strong>: As C++ requires manual memory management, techniques like <strong>RAII</strong> (Resource Acquisition Is Initialization) and <strong>smart pointers</strong> (<strong>std::shared_ptr</strong>, <strong>std::unique_ptr</strong>) mitigate memory-related vulnerabilities such as <strong>buffer overflows</strong> and <strong>dangling pointers</strong>.</p>
+</li>
+<li>
+<p><strong>Encryption and Data Integrity</strong>:</p>
+<ul>
+<li><strong>Save Data</strong>: Encrypting sensitive data, such as user progress or settings, using <strong>AES</strong> (Advanced Encryption Standard) prevents tampering.</li>
+<li><strong>Networking</strong>: If multiplayer or online features are implemented, data integrity over networks should be protected using <strong>TLS</strong> (Transport Layer Security).</li>
+</ul>
+</li>
+</ul>
+<p><strong>Comparative Study</strong>:</p>
+<ul>
+<li><strong>Memory Management in C++ vs. C#</strong>: C# manages memory through garbage collection, making it less prone to memory leaks but more unpredictable in real-time applications.</li>
+<li><strong>JavaScript Object Signing and Encryption (JOSE)</strong>: While not directly applicable to C++, this standard is useful for client-server communication and could be relevant for a JSON-based database.</li>
+</ul>
+<hr />
+<h2 id="6-version-control-github"><a class="header" href="#6-version-control-github">6. <strong>Version Control: GitHub</strong></a></h2>
+<h3 id="relevance-and-justification-4"><a class="header" href="#relevance-and-justification-4">Relevance and Justification</a></h3>
+<p><strong>GitHub</strong> is selected for version control and collaboration, offering robust tools for <strong>code tracking</strong>, <strong>branch management</strong>, and <strong>continuous integration (CI)</strong>.</p>
+<ul>
+<li><strong>Pros</strong>:
+<ul>
+<li>Facilitates collaboration in a distributed team.</li>
+<li>Supports automated CI/CD pipelines, ensuring consistent quality through automated builds and tests.</li>
+<li>Rich issue-tracking and pull request features streamline project management.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Comparative Study</strong>:</p>
+<ul>
+<li><strong>GitLab</strong>: While similar, GitLab offers better CI/CD integration out-of-the-box but may have a steeper learning curve for smaller teams.</li>
+<li><strong>Bitbucket</strong>: Bitbucket is more enterprise-focused, with better integration with Jira, but is less popular in the open-source community.</li>
+</ul>
+<hr />
+<h2 id="7-build-system-cmake-for-cross-platform-development"><a class="header" href="#7-build-system-cmake-for-cross-platform-development">7. <strong>Build System: CMake for Cross-Platform Development</strong></a></h2>
+<h3 id="relevance-and-justification-5"><a class="header" href="#relevance-and-justification-5">Relevance and Justification</a></h3>
+<p><strong>CMake</strong> is chosen as the build system for its flexibility and cross-platform capabilities. CMake allows us to compile and build the game on both <strong>Linux</strong> and <strong>Windows</strong> without needing to change the build configuration for each platform.</p>
+<ul>
+<li>
+<p><strong>Pros</strong>:</p>
+<ul>
+<li><strong>Cross-platform compatibility</strong>: CMake enables us to develop on both Windows and Linux with a unified build process.</li>
+<li>Integrates with popular IDEs like <strong>Visual Studio</strong> (Windows) and <strong>CLion</strong> (Linux).</li>
+<li>Simplifies dependency management with clear CMake scripts.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cons</strong>:</p>
+<ul>
+<li>CMake scripts can become complex as the project grows, requiring careful management.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Comparative Study</strong>:</p>
+<ul>
+<li><strong>Make (Linux)</strong>: Standard for Linux, but does not support Windows natively without additional tools (e.g., Cygwin), making it unsuitable for cross-platform projects.</li>
+<li><strong>MSBuild (Windows)</strong>: Suitable for Windows, but lacks cross-platform support.</li>
+<li><strong>Premake</strong>: Similar to CMake, but with fewer features and community support, making CMake the more robust choice.</li>
+</ul>
+<hr />
+<h2 id="8-documentation-modern-solutions"><a class="header" href="#8-documentation-modern-solutions">8. <strong>Documentation: Modern Solutions</strong></a></h2>
+<h3 id="relevance-and-justification-6"><a class="header" href="#relevance-and-justification-6">Relevance and Justification</a></h3>
+<p>Clear, accessible documentation is essential for maintaining project quality and facilitating onboarding for new developers. Legacy formats like PDFs or Word documents are not suitable for modern, dynamic projects, as they are not easily searchable or navigable.</p>
+<p>For this project, we chose <strong>mdBook</strong>, which generates a static, interactive website from markdown files. It allows the documentation to be structured, easily navigated, and highly accessible, addressing the needs of both developers and contributors.</p>
+<ul>
+<li><strong>Pros</strong>:
+<ul>
+<li><strong>Markdown-based</strong>: Markdown is simple, lightweight, and familiar to most developers, making it easy to write and maintain.</li>
+<li><strong>Interactivity</strong>: mdBook generates a navigable site with a sidebar, search functionality, and interlinked pages, which improves user experience.</li>
+<li><strong>Integration with GitHub</strong>: Documentation can be seamlessly updated and tracked via version control, ensuring it stays current with the project’s progress.</li>
+</ul>
+</li>
+</ul>
+<h3 id="comparative-study-1"><a class="header" href="#comparative-study-1">Comparative Study</a></h3>
+<ul>
+<li><strong>GitBook</strong>: Offers a similar markdown-based documentation experience with cloud hosting options. However, mdBook is fully open-source and integrates more directly with local development workflows.</li>
+<li><strong>Sphinx (with reStructuredText)</strong>: Suitable for larger projects with more complex technical documentation. However, reStructuredText has a steeper learning curve compared to markdown, making mdBook the simpler, more efficient option for this project.</li>
+<li><strong>Doxygen</strong>: Well-suited for API documentation, but less appropriate for general-purpose documentation. mdBook offers better support for general project documentation beyond code references.</li>
+</ul>
+<hr />
+<p>By using <strong>mdBook</strong>, we ensure that our documentation remains dynamic, collaborative, and easy to maintain. It integrates well with our development environment and provides a modern, user-friendly experience for both developers and end-users.</p>
+<hr />
+<h2 id="9-graphics-library-raylib"><a class="header" href="#9-graphics-library-raylib">9. <strong>Graphics Library: Raylib</strong></a></h2>
+<h3 id="relevance-and-justification-7"><a class="header" href="#relevance-and-justification-7">Relevance and Justification</a></h3>
+<p>Choosing the right graphics library is essential for rendering game visuals efficiently and providing an intuitive development workflow. For this project, we chose <strong>Raylib</strong> over alternatives like <strong>SFML</strong> and <strong>SDL</strong> due to its simplicity, flexibility, and modern approach to game development, while still providing the necessary performance for real-time applications.</p>
+<h3 id="why-we-chose-raylib"><a class="header" href="#why-we-chose-raylib">Why We Chose Raylib</a></h3>
+<ul>
+<li>
+<p><strong>Simplicity and Ease of Use</strong>: Raylib is designed to be user-friendly and easy to learn, making it ideal for rapid prototyping and game development. Its simple API allows developers to quickly get up to speed and focus on game logic rather than struggling with the complexities of rendering pipelines.</p>
+</li>
+<li>
+<p><strong>Cross-Platform Support</strong>: Raylib provides seamless cross-platform development across Windows, Linux, and macOS, which aligns perfectly with our need for portability and compatibility in the game project.</p>
+</li>
+<li>
+<p><strong>Modern C-based Library</strong>: Raylib is written in C, making it highly efficient and lightweight. It is also easily integrable with our C++ ECS architecture. While Raylib is minimalistic, it provides powerful enough abstractions to handle essential game development tasks like rendering, input handling, and audio, without the bloat of more complex engines.</p>
+</li>
+<li>
+<p><strong>Support for 2D and 3D</strong>: While our game primarily uses 2D rendering, Raylib also offers strong support for 3D rendering, giving us flexibility to expand the game in the future. This versatility allows Raylib to scale with our project's needs.</p>
+</li>
+<li>
+<p><strong>Active Development and Community</strong>: Raylib benefits from an active community and continuous updates. Its growing popularity ensures a reliable support system and rich documentation, further easing the development process.</p>
+</li>
+</ul>
+<h3 id="comparative-study-2"><a class="header" href="#comparative-study-2">Comparative Study</a></h3>
+<ul>
+<li>
+<p><strong>SFML</strong> (Simple and Fast Multimedia Library):</p>
+<ul>
+<li><strong>Pros</strong>: SFML is a mature library that is also known for its simplicity and ease of use, especially in 2D game development. It offers good multimedia support (audio, networking, etc.).</li>
+<li><strong>Cons</strong>: While SFML is great for 2D, it lacks built-in support for 3D, making it less flexible for future scalability. Its C++-based API is more verbose compared to Raylib, which could slow down rapid prototyping.</li>
+</ul>
+</li>
+<li>
+<p><strong>SDL</strong> (Simple DirectMedia Layer):</p>
+<ul>
+<li><strong>Pros</strong>: SDL is highly portable and extremely low-level, making it suitable for both 2D and 3D applications. It also has a large community and extensive documentation.</li>
+<li><strong>Cons</strong>: SDL's API can be more cumbersome to use compared to Raylib's straightforward interface. Additionally, SDL is better suited for developers who want more control over low-level rendering, whereas Raylib provides simpler, higher-level abstractions that allow us to focus more on game logic and design.</li>
+</ul>
+</li>
+</ul>
+<h3 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h3>
+<p>We chose <strong>Raylib</strong> because it strikes the perfect balance between simplicity, performance, and flexibility. Its user-friendly API, combined with strong cross-platform support and the ability to handle both 2D and 3D graphics, makes it the best choice for our project, especially when compared to the more complex and lower-level alternatives like <strong>SDL</strong> or the less flexible <strong>SFML</strong>.</p>
+<hr />
+<h2 id="conclusion-1"><a class="header" href="#conclusion-1">Conclusion</a></h2>
+<p>The choice of C++ with ECS architecture, JSON-based storage, CMake for cross-platform development, and GitHub for version control ensures that the game will be highly performant, scalable, and maintainable. Algorithms and data structures are selected to optimize real-time operations, while security concerns are addressed with strong memory management and encryption techniques. Modern documentation tools ensure the project</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
