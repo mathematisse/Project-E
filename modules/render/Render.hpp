@@ -10,6 +10,19 @@
 #define RENDER_SYS_GROUP "RENDER"
 #define DEBUG_RENDER_SYS_GROUP "DEBUG_RENDER"
 
+
+template <uint8_t Layers, typename Class, std::size_t... Is, typename... Args>
+std::array<Class, Layers> makeSystemsHelper(std::index_sequence<Is...> /*unused*/, Args... args)
+{
+    return { (static_cast<void>(Is), Class(args...))... };
+}
+
+template <uint8_t Layers, typename Class, typename... Args>
+std::array<Class, Layers> makeSystems(Args... args)
+{
+    return makeSystemsHelper(std::make_index_sequence<Layers>{}, args...);
+}
+
 namespace engine::module {
 
 template<uint8_t Layers>
@@ -27,39 +40,14 @@ class Render : public IModule {
 
 public:
     Render(Camera2D &camera, AssetsLoader &assetsLoader):
-        debugDrawSystems(),
-        drawSpriteSystems(),
-        drawAnimatedSpriteSystems(),
+        debugDrawSystems(makeSystems<Layers, ECS::S::DebugDrawSystem>(camera)),
+        drawSpriteSystems(makeSystems<Layers, ECS::S::DrawSpriteSystem>(assetsLoader, camera)),
+        drawAnimatedSpriteSystems(makeSystems<Layers, ECS::S::DrawAnimatedSpriteSystem>(assetsLoader, camera)),
         spriteAnimationSystem(assetsLoader),
-
         rootRenderNode(RENDER_SYS_GROUP, {&spriteAnimationSystem})
     {
         renderNode = ECS::S::SystemTreeNode(RENDER_SYS_GROUP);
         debugRenderNode = ECS::S::SystemTreeNode(DEBUG_RENDER_SYS_GROUP);
-
-        std::apply(
-            [&camera](auto &...system) {
-                int index = 0;
-                ((system = ECS::S::DebugDrawSystem(index++, camera)), ...);
-            },
-            debugDrawSystems
-        );
-
-        std::apply(
-            [&assetsLoader, &camera](auto &...system) {
-                int index = 0;
-                ((system = ECS::S::DrawSpriteSystem(index++, assetsLoader, camera)), ...);
-            },
-            drawSpriteSystems
-        );
-
-        std::apply(
-            [&assetsLoader, &camera](auto &...system) {
-                int index = 0;
-                ((system = ECS::S::DrawAnimatedSpriteSystem(index++, assetsLoader, camera)), ...);
-            },
-            drawAnimatedSpriteSystems
-        );
 
         for (size_t i = 0; i < Layers; ++i) {
             renderNode.addSystem(&drawSpriteSystems[i], RENDER_SYS_GROUP);
