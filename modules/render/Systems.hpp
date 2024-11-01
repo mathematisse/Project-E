@@ -16,8 +16,8 @@ namespace ECS::S {
 
 static Camera2D dummyCamera2D = {};
 
-class DebugDrawSystem
-    : public S::AStatusMonoSystem<C::Position::Pool, C::Color::Pool, C::Size::Pool> {
+class DebugDrawSystem : public S::AStatusMonoSystem<
+                            C::Position::Pool, C::Color::Pool, C::Size::Pool, C::RLayer::Pool> {
 public:
     DebugDrawSystem(uint8_t layer, Camera2D &camera);
     explicit DebugDrawSystem(uint8_t layer);
@@ -30,12 +30,13 @@ public:
 protected:
     void _statusOperate(
         typename C::Position::Pool::Types &cposition, typename C::Color::Pool::Types &ccolor,
-        typename C::Size::Pool::Types &csize
+        typename C::Size::Pool::Types &csize, typename C::RLayer::Pool::Types &clayer
     ) override;
 };
 
 class DrawSpriteSystem
-    : public S::AMonoSystem<C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::Sprite::Pool> {
+    : public S::AMonoSystem<
+          C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::Sprite::Pool, C::RLayer::Pool> {
 public:
     DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera);
     DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader);
@@ -49,13 +50,14 @@ public:
 protected:
     void _innerOperate(
         typename C::Position::Pool::Types &cposition, typename C::Size::Pool::Types &csize,
-        typename C::Rotation::Pool::Types &crotation, typename C::Sprite::Pool::Types &csprite
+        typename C::Rotation::Pool::Types &crotation, typename C::Sprite::Pool::Types &csprite,
+        typename C::RLayer::Pool::Types &clayer
     ) override;
 };
 
-class DrawAnimatedSpriteSystem
-    : public S::AMonoSystem<
-          C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::AnimatedSprite::Pool> {
+class DrawAnimatedSpriteSystem : public S::AMonoSystem<
+                                     C::Position::Pool, C::Size::Pool, C::Rotation::Pool,
+                                     C::AnimatedSprite::Pool, C::RLayer::Pool> {
 public:
     DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera);
     DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader);
@@ -70,7 +72,7 @@ protected:
     void _innerOperate(
         typename C::Position::Pool::Types &cposition, typename C::Size::Pool::Types &csize,
         typename C::Rotation::Pool::Types &crotation,
-        typename C::AnimatedSprite::Pool::Types &csprite
+        typename C::AnimatedSprite::Pool::Types &csprite, typename C::RLayer::Pool::Types &clayer
     ) override;
 };
 

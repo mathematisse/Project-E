@@ -27,9 +27,14 @@ DebugDrawSystem::DebugDrawSystem(uint8_t layer):
 }
 
 void DebugDrawSystem::_statusOperate(
-    C::Position::Pool::Types &cposition, C::Color::Pool::Types &ccolor, C::Size::Pool::Types &csize
+    C::Position::Pool::Types &cposition, C::Color::Pool::Types &ccolor, C::Size::Pool::Types &csize,
+    C::RLayer::Pool::Types &clayer
 )
 {
+    auto [layer] = clayer;
+    if (layer != this->layer) {
+        return;
+    }
     auto [x, y] = cposition;
     auto [r, g, b, a] = ccolor;
     auto [sizeX, sizeY] = csize;
@@ -57,9 +62,14 @@ DrawSpriteSystem::DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader):
 
 void DrawSpriteSystem::_innerOperate(
     C::Position::Pool::Types &cposition, C::Size::Pool::Types &csize,
-    C::Rotation::Pool::Types &crotation, C::Sprite::Pool::Types &csprite
+    C::Rotation::Pool::Types &crotation, C::Sprite::Pool::Types &csprite,
+    C::RLayer::Pool::Types &clayer
 )
 {
+    auto [layer] = clayer;
+    if (layer != this->layer) {
+        return;
+    }
     auto [id] = csprite;
     if (id == 0) {
         return;
@@ -98,9 +108,14 @@ DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &
 
 void DrawAnimatedSpriteSystem::_innerOperate(
     C::Position::Pool::Types &cposition, C::Size::Pool::Types &csize,
-    C::Rotation::Pool::Types &crotation, C::AnimatedSprite::Pool::Types &csprite
+    C::Rotation::Pool::Types &crotation, C::AnimatedSprite::Pool::Types &csprite,
+    C::RLayer::Pool::Types &clayer
 )
 {
+    auto [layer] = clayer;
+    if (layer != this->layer) {
+        return;
+    }
     auto [id, nbr_frame, start_position, _] = csprite;
     if (id == 0) {
         return;
