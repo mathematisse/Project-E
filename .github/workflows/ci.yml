@@ -34,10 +34,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure
-        run: | 
-          git submodule update --init --recursive
-          cmake -G "MinGW Makefiles" -B build -S .
-
       - name: Build
-        run: cmake --build build --target ${{ env.TARGETS }}
+        run: '& $env:GITHUB_ACTION_PATH/scripts/build.ps1'
+        shell: pwsh
