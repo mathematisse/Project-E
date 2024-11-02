@@ -17,8 +17,9 @@
 namespace ECS::E {
 
 using AnimatedEntityAspect = Aspect<
-    std::tuple<C::ArchAnimatedSprite, C::ArchTimer, C::ArchSize>, std::tuple<StaticEntityAspect>>;
+    std::tuple<C::ArchAnimatedSprite, C::ArchTimer, C::ArchSize, C::ArchRLayer>,
+    std::tuple<StaticEntityAspect>>;
 using SpriteEntityAspect =
-    Aspect<std::tuple<C::ArchSprite, C::ArchSize>, std::tuple<StaticEntityAspect>>;
+    Aspect<std::tuple<C::ArchSprite, C::ArchSize, C::ArchRLayer>, std::tuple<StaticEntityAspect>>;
 
 } // namespace ECS::E

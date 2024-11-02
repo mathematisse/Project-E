@@ -12,22 +12,22 @@
 namespace ECS::S {
 // SYSTEM
 
-DebugDrawSystem::DebugDrawSystem(Camera2D &camera):
+DebugDrawSystem::DebugDrawSystem(uint8_t layer, Camera2D &camera, bool useCamera):
+    systemLayer(layer),
     camera(camera),
-    hasCamera(true)
-{
-}
-
-DebugDrawSystem::DebugDrawSystem():
-    camera(dummyCamera2D),
-    hasCamera(false)
+    hasCamera(useCamera)
 {
 }
 
 void DebugDrawSystem::_statusOperate(
-    C::Position::Pool::Types &cposition, C::Color::Pool::Types &ccolor, C::Size::Pool::Types &csize
+    C::Position::Pool::Types &cposition, C::Color::Pool::Types &ccolor, C::Size::Pool::Types &csize,
+    C::RLayer::Pool::Types &clayer
 )
 {
+    auto [layer] = clayer;
+    if (layer != this->systemLayer) {
+        return;
+    }
     auto [x, y] = cposition;
     auto [r, g, b, a] = ccolor;
     auto [sizeX, sizeY] = csize;
@@ -37,25 +37,26 @@ void DebugDrawSystem::_statusOperate(
     DrawRectangle((int) x, (int) y, (int) sizeX, (int) sizeY, {r, g, b, a});
 }
 
-DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
+DrawSpriteSystem::DrawSpriteSystem(
+    uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera, bool useCamera
+):
+    systemLayer(layer),
     assetsLoader(assetsLoader),
     camera(camera),
-    hasCamera(true)
-{
-}
-
-DrawSpriteSystem::DrawSpriteSystem(AssetsLoader &assetsLoader):
-    assetsLoader(assetsLoader),
-    camera(dummyCamera2D),
-    hasCamera(false)
+    hasCamera(useCamera)
 {
 }
 
 void DrawSpriteSystem::_innerOperate(
     C::Position::Pool::Types &cposition, C::Size::Pool::Types &csize,
-    C::Rotation::Pool::Types &crotation, C::Sprite::Pool::Types &csprite
+    C::Rotation::Pool::Types &crotation, C::Sprite::Pool::Types &csprite,
+    C::RLayer::Pool::Types &clayer
 )
 {
+    auto [layer] = clayer;
+    if (layer != this->systemLayer) {
+        return;
+    }
     auto [id] = csprite;
     if (id == 0) {
         return;
@@ -73,26 +74,26 @@ void DrawSpriteSystem::_innerOperate(
     DrawTexturePro(texture, source, dest, origin, rotation, WHITE);
 }
 
-DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader, Camera2D &camera):
+DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(
+    uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera, bool useCamera
+):
+    systemLayer(layer),
     assetsLoader(assetsLoader),
     camera(camera),
-    hasCamera(true)
-{
-}
-
-DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(AssetsLoader &assetsLoader):
-    AMonoSystem(false),
-    assetsLoader(assetsLoader),
-    camera(dummyCamera2D),
-    hasCamera(false)
+    hasCamera(useCamera)
 {
 }
 
 void DrawAnimatedSpriteSystem::_innerOperate(
     C::Position::Pool::Types &cposition, C::Size::Pool::Types &csize,
-    C::Rotation::Pool::Types &crotation, C::AnimatedSprite::Pool::Types &csprite
+    C::Rotation::Pool::Types &crotation, C::AnimatedSprite::Pool::Types &csprite,
+    C::RLayer::Pool::Types &clayer
 )
 {
+    auto [layer] = clayer;
+    if (layer != this->systemLayer) {
+        return;
+    }
     auto [id, nbr_frame, start_position, _] = csprite;
     if (id == 0) {
         return;

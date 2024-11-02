@@ -13,9 +13,13 @@ namespace lnet::net {
 /// instead.
 class Socket {
 public:
-    int sockfd;
+#ifdef _WIN32
+    using Type = std::uint64_t;
+#else
+    using Type = int;
+#endif
+    Type sockfd;
 
-public:
     static auto create(int domain, int type) -> io::Result<Socket>;
     static auto create(const SocketAddr &addr, int type) -> io::Result<Socket>;
     [[nodiscard]] auto connect(const SocketAddr &addr) const -> io::Result<result::Void>;
@@ -36,7 +40,7 @@ public:
     auto set_nonblocking(bool enable) -> io::Result<result::Void>;
 
 private:
-    explicit Socket(int sockfd):
+    explicit Socket(Type sockfd):
         sockfd(sockfd)
     {
     }

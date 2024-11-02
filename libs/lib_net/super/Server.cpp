@@ -7,6 +7,7 @@
 #include <span>
 #include <vector>
 
+#include "lib_log/log.hpp"
 #include "lib_net/Packet.hpp"
 #include "lib_net/net/SocketAddr.hpp"
 #include "lib_net/net/TcpStream.hpp"
@@ -32,27 +33,27 @@ auto Server::host(std::uint16_t port
     if (auto res = host_tcp(port); !res) {
         return res;
     }
-    std::cout << "TCP hosted on port " << port << std::endl;
+    LOG_DEBUG("TCP hosted on port " + std::to_string(port));
     return host_udp(port);
 }
 
 auto Server::connect_tcp(const std::string &ip, std::uint16_t port)
     -> lnet::result::Result<lnet::result::Void, lnet::utils::BaseServerError>
 {
-    std::cout << "Connecting TCP to " << ip << ":" << port << std::endl;
+    LOG_DEBUG("Connecting TCP to " + ip + ":" + std::to_string(port));
     return lnet::utils::BaseServer::connect_tcp(ip, port);
 }
 
 auto Server::connect_udp(const std::string &ip, std::uint16_t port)
     -> lnet::result::Result<lnet::result::Void, lnet::utils::BaseServerError>
 {
-    std::cout << "Connecting UDP to " << ip << ":" << port << std::endl;
+    LOG_DEBUG("Connecting UDP to " + ip + ":" + std::to_string(port));
     return lnet::utils::BaseServer::connect_udp(ip, port);
 }
 
 auto Server::start() -> decltype(start_context())
 {
-    std::cout << "Server started" << std::endl;
+    LOG_DEBUG("Server started");
     return start_context();
 }
 
@@ -60,7 +61,7 @@ void Server::send_tcp(
     lnet::uuid::Uuid client_uuid, Packet::MsgType type, const std::vector<std::uint8_t> &data
 )
 {
-    std::cout << "Sending TCP to client " << client_uuid << std::endl;
+    LOG_DEBUG("Sending TCP to client " + client_uuid.to_str());
     auto matchingClient = _clients.find(client_uuid);
     Packet packet = Packet::deserialize(type, data);
     if (matchingClient != _clients.end()) {
@@ -175,7 +176,7 @@ void Server::on_tcp_data(
                 if (auto udp_data =
                         Packet::deserializeStruct<UdpConnectionPacketInitialisation>(packet->data);
                     udp_data.has_value()) {
-                    std::cout << "UDP connection response received" << std::endl;
+                    LOG_DEBUG("UDP connection request received");
                     ask_udp_connection_response(
                         udp_data->client_uuid, transformNumberFunction(udp_data->generated_number)
                     );
@@ -218,7 +219,7 @@ void Server::ask_udp_connection_request(
         Packet::SystemTypes::ASKUDP_NUMBER,
         Packet::serializeStruct(UdpConnectionPacketInitialisation {client_uuid, number})
     );
-    std::cout << "Asking UDP connection to client " << client_uuid << std::endl;
+    LOG_DEBUG("Asking UDP connection to client " + client_uuid.to_str());
     lnet::utils::BaseServer::send_tcp(tcp_connection_id, packet.serialize());
 }
 

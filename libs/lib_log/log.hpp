@@ -1,18 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <ostream>
-#include <string>
-#include <filesystem>
-#include <functional>
-#include <fstream>
-
 #ifndef LOGGING
-#define LOGGING
-#endif
-
-#ifndef LOGGING
-
 #define LOG(level, message)
 #define LOG_DEBUG(message)
 #define LOG_INFO(message)
@@ -23,48 +11,44 @@
 #define LOG_SET_LEVEL(level)
 #define LOG_SET_STREAM(stream)
 #define LOG_SET_PREFIX(prefix_creator)
-
 #else
-
-#ifdef BASIC_LOGGING
-#define LOG(level, message)                                                           \
-    (std::cerr << logLevelToColor(level) << rlog::global_logger.getLogPrefix()(level) \
-               << LOG_COLOR_RESET << message << std::endl)
-#else
-#define LOG(level, message) (rlog::global_logger.log(level, message))
-#endif
-
-#define LOG_DEBUG(message) LOG(rlog::Level::DEBUG, message)
-#define LOG_INFO(message) LOG(rlog::Level::INFO, message)
-#define LOG_WARNING(message) LOG(rlog::Level::WARNING, message)
-#define LOG_ERROR(message) LOG(rlog::Level::ERROR, message)
-#define LOG_CRITICAL(message) LOG(rlog::Level::CRITICAL, message)
-#define LOG_SET_FILE(file_path, clear_old) (rlog::global_logger.openLogFile(file_path, clear_old))
-#define LOG_SET_LEVEL(level_name) (rlog::global_logger.setLogLevel(rlog::Level::level_name))
-#define LOG_SET_STREAM(stream) (rlog::global_logger.setLogStream(&(stream)))
-#define LOG_SET_PREFIX(prefix_creator) (rlog::global_logger.setLogPrefix(prefix_creator))
+#define LOG(level, message) (logging::global_logger.log(level, message))
+#define LOG_DEBUG(message) LOG(logging::Level::LDEBUG, message)
+#define LOG_INFO(message) LOG(logging::Level::LINFO, message)
+#define LOG_WARNING(message) LOG(logging::Level::LWARNING, message)
+#define LOG_ERROR(message) LOG(logging::Level::LERROR, message)
+#define LOG_CRITICAL(message) LOG(logging::Level::LCRITICAL, message)
+#define LOG_SET_FILE(file_path) (logging::global_logger.openLogFile(file_path))
+#define LOG_SET_LEVEL(level) (logging::global_logger.setLogLevel(logging::Level::level))
+#define LOG_SET_STREAM(stream) (logging::global_logger.setLogStream((stream)))
+#define LOG_SET_PREFIX(prefix_creator) (logging::global_logger.setLogPrefix(prefix_creator))
 
 #define LOG_PINK "\033[35m"
 #define LOG_GREEN "\033[32m"
 #define LOG_YELLOW "\033[33m"
 #define LOG_BLUE "\033[34m"
 #define LOG_RED "\033[31m"
+#define LOG_BOLD "\033[1m"
 #define LOG_COLOR_RESET "\033[0m"
 
-#define LOG_BOLD "\033[1m"
+#include <iostream>
+#include <ostream>
+#include <string>
+#include <filesystem>
+#include <functional>
+#include <fstream>
 
-namespace rlog {
-
+namespace logging {
 enum class Level {
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    CRITICAL
+    LDEBUG,
+    LINFO,
+    LWARNING,
+    LERROR,
+    LCRITICAL
 };
 
-std::string logLevelToStr(Level level);
-std::string logLevelToColor(Level level);
+std::string levelToStr(Level level);
+std::string levelToColor(Level level);
 
 class Logger {
 public:
@@ -78,6 +62,8 @@ public:
     Logger(Logger &&) = delete;
     Logger &operator=(Logger &&) = delete;
 
+    std::string
+    formatMessage(Level level, const std::string &message, bool add_color = false) const;
     void log(Level level, const std::string &message);
 
     [[nodiscard]] Level getLogLevel() const;
@@ -93,7 +79,7 @@ public:
     void resetLogPrefix();
     static std::string createDefaultPrefix(Level level);
 
-    void openLogFile(const std::filesystem::path &filePath, bool clear_old = false);
+    void openLogFile(const std::filesystem::path &filePath);
     void closeLogFile();
     [[nodiscard]] bool logFileIsOpen() const;
     void setMaxLogSize(std::size_t size);
@@ -108,8 +94,7 @@ private:
     std::size_t max_log_size;
 };
 
-static Logger global_logger;
-
+extern Logger global_logger;
 }
 
 #endif

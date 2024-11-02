@@ -155,6 +155,8 @@ void SystemTreeNode::runNode(SystemTree &tree)
 
 const std::string &SystemTreeNode::getGroup() const { return _group; }
 
+std::vector<SystemTreeNode> &SystemTreeNode::getChildren() { return _children; }
+
 SystemTree::SystemTree():
     _root(
         ROOT_SYS_GROUP, std::vector<ISystem *>(), std::vector<ISystem *>(),

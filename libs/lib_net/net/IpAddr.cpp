@@ -16,7 +16,7 @@ auto Ipv4Addr::parse_ascii(const std::string &str) -> result::Result<Ipv4Addr, A
     // we put 0 to get all the possible results
     hints.ai_socktype = 0;
     hints.ai_protocol = 0;
-    hints.ai_flags = 0;
+    hints.ai_flags = AI_PASSIVE;
 
     addrinfo *result = nullptr;
     if (::getaddrinfo(str.c_str(), nullptr, &hints, &result) != 0) {

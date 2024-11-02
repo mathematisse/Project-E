@@ -37,7 +37,6 @@ public:
 
     void run() override
     {
-        // auto now = std::chrono::high_resolution_clock::now();
         _query1.cross(
             _query2,
             [this](auto &...componentPools1, auto &...componentPools2) {
@@ -46,10 +45,6 @@ public:
             _isParallel
         );
 
-        // auto duration =
-        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()
-        // - now); std::cout << "DualSystem " << typeid(this).name() << " took " << duration.count()
-        // << " microseconds\n";
     }
 
 protected:
@@ -77,7 +72,6 @@ public:
 protected:
     void run() override
     {
-        // auto now = std::chrono::high_resolution_clock::now();
         this->_query1.selfCross(
             [this](auto &...componentPools1, auto &...componentPools2) {
                 _innerOperate(componentPools1..., componentPools2...);
@@ -85,10 +79,6 @@ protected:
             this->_isParallel
         );
 
-        // auto duration =
-        // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()
-        // - now); std::cout << "SelfDualSystem " << typeid(this).name() << " took " <<
-        // duration.count() << " microseconds\n";
     }
 
     virtual inline void _innerOperate(
