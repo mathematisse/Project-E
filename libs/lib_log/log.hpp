@@ -13,11 +13,11 @@
 #define LOG_SET_PREFIX(prefix_creator)
 #else
 #define LOG(level, message) (logging::global_logger.log(level, message))
-#define LOG_DEBUG(message) LOG(logging::Level::DEBUG, message)
-#define LOG_INFO(message) LOG(logging::Level::INFO, message)
-#define LOG_WARNING(message) LOG(logging::Level::WARNING, message)
-#define LOG_ERROR(message) LOG(logging::Level::ERROR, message)
-#define LOG_CRITICAL(message) LOG(logging::Level::CRITICAL, message)
+#define LOG_DEBUG(message) LOG(logging::Level::LDEBUG, message)
+#define LOG_INFO(message) LOG(logging::Level::LINFO, message)
+#define LOG_WARNING(message) LOG(logging::Level::LWARNING, message)
+#define LOG_ERROR(message) LOG(logging::Level::LERROR, message)
+#define LOG_CRITICAL(message) LOG(logging::Level::LCRITICAL, message)
 #define LOG_SET_FILE(file_path) (logging::global_logger.openLogFile(file_path))
 #define LOG_SET_LEVEL(level) (logging::global_logger.setLogLevel(logging::Level::level))
 #define LOG_SET_STREAM(stream) (logging::global_logger.setLogStream((stream)))
@@ -40,11 +40,11 @@
 
 namespace logging {
 enum class Level {
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    CRITICAL
+    LDEBUG,
+    LINFO,
+    LWARNING,
+    LERROR,
+    LCRITICAL
 };
 
 std::string levelToStr(Level level);

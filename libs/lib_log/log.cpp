@@ -9,15 +9,15 @@ logging::Logger logging::global_logger;
 std::string logging::levelToStr(Level level)
 {
     switch (level) {
-    case Level::DEBUG:
+    case Level::LDEBUG:
         return "DEBUG";
-    case Level::INFO:
+    case Level::LINFO:
         return "INFO";
-    case Level::WARNING:
+    case Level::LWARNING:
         return "WARNING";
-    case Level::ERROR:
+    case Level::LERROR:
         return "ERROR";
-    case Level::CRITICAL:
+    case Level::LCRITICAL:
         return "CRITICAL";
     default:
         return "UNKNOWN";
@@ -27,22 +27,22 @@ std::string logging::levelToStr(Level level)
 std::string logging::levelToColor(Level level)
 {
     switch (level) {
-    case Level::DEBUG:
+    case Level::LDEBUG:
         return LOG_PINK;
-    case Level::INFO:
+    case Level::LINFO:
         return LOG_GREEN;
-    case Level::WARNING:
+    case Level::LWARNING:
         return LOG_YELLOW;
-    case Level::ERROR:
+    case Level::LERROR:
         return LOG_RED;
-    case Level::CRITICAL:
+    case Level::LCRITICAL:
         return LOG_RED LOG_BOLD;
     default:
         return LOG_COLOR_RESET;
     }
 }
 logging::Logger::Logger():
-    log_level(Level::INFO),
+    log_level(Level::LINFO),
     prefix_creator(createDefaultPrefix),
     log_stream(getDefaultLogStream()),
     max_log_size(DEFAULT_MAX_LOG_SIZE)
