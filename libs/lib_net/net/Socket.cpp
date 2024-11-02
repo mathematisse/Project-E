@@ -49,16 +49,17 @@ auto initialize_address(const SocketAddr &addr) -> std::pair<struct sockaddr_sto
     struct sockaddr_storage address { };
     socklen_t address_len {};
     if (addr.is_ipv4()) {
-        auto *ipv4 = reinterpret_cast<struct sockaddr_in *>(&address);
+        auto *ipv4 = (struct sockaddr_in *) &address;
         ipv4->sin_family = AF_INET;
         ipv4->sin_port = htons(addr.port());
-        ipv4->sin_addr.s_addr = addr.ip().to_v4().to_uint32_t();
+        ipv4->sin_addr.s_addr = htonl(addr.ip().to_v4().to_uint32_t());
         address_len = sizeof(*ipv4);
     } else {
-        auto *ipv6 = reinterpret_cast<struct sockaddr_in6 *>(&address);
+        auto *ipv6 = (struct sockaddr_in6 *) &address;
         ipv6->sin6_family = AF_INET6;
         ipv6->sin6_port = htons(addr.port());
         std::memcpy(&ipv6->sin6_addr, addr.ip().to_v6().segments.data(), 16);
+        // TODO invert the byte order of the address
         address_len = sizeof(*ipv6);
     }
     return {address, address_len};

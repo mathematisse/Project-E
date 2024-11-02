@@ -10,8 +10,6 @@
 #include "lib_net/result/Result.hpp"
 #include "lib_net/net/SocketAddr.hpp"
 
-#pragma region WorkInProgress
-
 namespace lnet::net {
 
 class TcpStream final : public io::Write, public io::Read {
@@ -54,7 +52,7 @@ public:
     [[nodiscard]] inline auto close() const -> io::Result<result::Void> { return _sock.close(); }
 
     [[nodiscard]]
-    inline auto get_fd() const -> int
+    inline auto get_fd() const -> Socket::Type
     {
         return _sock.sockfd;
     }
