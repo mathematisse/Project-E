@@ -42,6 +42,8 @@ public:
     // std::function that takes a node and a systemtree that will be the start callback
     std::function<void(SystemTreeNode &, SystemTree &)> startCallback = nullptr;
 
+    std::vector<SystemTreeNode> &getChildren();
+
 private:
     std::string _group;
 

@@ -14,16 +14,13 @@
 
 namespace ECS::S {
 
-static Camera2D dummyCamera2D = {};
-
 class DebugDrawSystem : public S::AStatusMonoSystem<
                             C::Position::Pool, C::Color::Pool, C::Size::Pool, C::RLayer::Pool> {
 public:
-    DebugDrawSystem(uint8_t layer, Camera2D &camera);
-    explicit DebugDrawSystem(uint8_t layer);
+    DebugDrawSystem(uint8_t layer, Camera2D &camera, bool useCamera);
     ~DebugDrawSystem() override = default;
 
-    uint8_t layer;
+    uint8_t systemLayer;
     Camera2D &camera;
     bool hasCamera;
 
@@ -38,11 +35,10 @@ class DrawSpriteSystem
     : public S::AMonoSystem<
           C::Position::Pool, C::Size::Pool, C::Rotation::Pool, C::Sprite::Pool, C::RLayer::Pool> {
 public:
-    DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera);
-    DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader);
+    DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera, bool useCamera);
     ~DrawSpriteSystem() override = default;
 
-    uint8_t layer;
+    uint8_t systemLayer;
     AssetsLoader &assetsLoader;
     Camera2D &camera;
     bool hasCamera;
@@ -59,11 +55,12 @@ class DrawAnimatedSpriteSystem : public S::AMonoSystem<
                                      C::Position::Pool, C::Size::Pool, C::Rotation::Pool,
                                      C::AnimatedSprite::Pool, C::RLayer::Pool> {
 public:
-    DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera);
-    DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader);
+    DrawAnimatedSpriteSystem(
+        uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera, bool useCamera
+    );
     ~DrawAnimatedSpriteSystem() override = default;
 
-    uint8_t layer;
+    uint8_t systemLayer;
     AssetsLoader &assetsLoader;
     Camera2D &camera;
     bool hasCamera;

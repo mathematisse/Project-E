@@ -12,17 +12,10 @@
 namespace ECS::S {
 // SYSTEM
 
-DebugDrawSystem::DebugDrawSystem(uint8_t layer, Camera2D &camera):
-    layer(layer),
+DebugDrawSystem::DebugDrawSystem(uint8_t layer, Camera2D &camera, bool useCamera):
+    systemLayer(layer),
     camera(camera),
-    hasCamera(true)
-{
-}
-
-DebugDrawSystem::DebugDrawSystem(uint8_t layer):
-    layer(layer),
-    camera(dummyCamera2D),
-    hasCamera(false)
+    hasCamera(useCamera)
 {
 }
 
@@ -32,7 +25,7 @@ void DebugDrawSystem::_statusOperate(
 )
 {
     auto [layer] = clayer;
-    if (layer != this->layer) {
+    if (layer != this->systemLayer) {
         return;
     }
     auto [x, y] = cposition;
@@ -44,19 +37,13 @@ void DebugDrawSystem::_statusOperate(
     DrawRectangle((int) x, (int) y, (int) sizeX, (int) sizeY, {r, g, b, a});
 }
 
-DrawSpriteSystem::DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera):
-    layer(layer),
+DrawSpriteSystem::DrawSpriteSystem(
+    uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera, bool useCamera
+):
+    systemLayer(layer),
     assetsLoader(assetsLoader),
     camera(camera),
-    hasCamera(true)
-{
-}
-
-DrawSpriteSystem::DrawSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader):
-    layer(layer),
-    assetsLoader(assetsLoader),
-    camera(dummyCamera2D),
-    hasCamera(false)
+    hasCamera(useCamera)
 {
 }
 
@@ -67,7 +54,7 @@ void DrawSpriteSystem::_innerOperate(
 )
 {
     auto [layer] = clayer;
-    if (layer != this->layer) {
+    if (layer != this->systemLayer) {
         return;
     }
     auto [id] = csprite;
@@ -88,21 +75,12 @@ void DrawSpriteSystem::_innerOperate(
 }
 
 DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(
-    uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera
+    uint8_t layer, AssetsLoader &assetsLoader, Camera2D &camera, bool useCamera
 ):
-    layer(layer),
+    systemLayer(layer),
     assetsLoader(assetsLoader),
     camera(camera),
-    hasCamera(true)
-{
-}
-
-DrawAnimatedSpriteSystem::DrawAnimatedSpriteSystem(uint8_t layer, AssetsLoader &assetsLoader):
-    AMonoSystem(false),
-    layer(layer),
-    assetsLoader(assetsLoader),
-    camera(dummyCamera2D),
-    hasCamera(false)
+    hasCamera(useCamera)
 {
 }
 
@@ -113,7 +91,7 @@ void DrawAnimatedSpriteSystem::_innerOperate(
 )
 {
     auto [layer] = clayer;
-    if (layer != this->layer) {
+    if (layer != this->systemLayer) {
         return;
     }
     auto [id, nbr_frame, start_position, _] = csprite;
