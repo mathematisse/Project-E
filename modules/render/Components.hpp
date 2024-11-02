@@ -22,3 +22,8 @@ DECLARE_COMPONENT(
     float, // startPosition
     float // animationSpeed
 );
+
+DECLARE_COMPONENT(
+    RLayer,
+    uint8_t // layer
+);

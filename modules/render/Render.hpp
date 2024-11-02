@@ -4,77 +4,96 @@
 #include "Components.hpp" // IWYU pragma: keep
 #include "Systems.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
+#include "raylib.h"
+#include <cstddef>
 
+#define ROOT_RENDER_SYS_GROUP "ROOT_RENDER"
 #define RENDER_SYS_GROUP "RENDER"
 #define DEBUG_RENDER_SYS_GROUP "DEBUG_RENDER"
 
+template<uint8_t Layers, typename Class, typename... Args, std::size_t... Is>
+std::array<Class, Layers> makeSystemsHelper(std::index_sequence<Is...> /*unused*/, Args &...args)
+{
+    return {(static_cast<void>(Is), Class(Is, args...))...};
+}
+
+template<uint8_t Layers, typename Class, typename... Args>
+std::array<Class, Layers> makeSystems(Args &...args)
+{
+    return makeSystemsHelper<Layers, Class, Args...>(std::make_index_sequence<Layers> {}, args...);
+}
+
+namespace engine::module {
+template<uint8_t Layers>
+class Render;
+}
+
+template<uint8_t Layers>
+static void initRenderModule(engine::module::Render<Layers> &module)
+{
+    auto &rnode = module.rootRenderNode.getChildren()[0];
+    auto &dnode = module.rootRenderNode.getChildren()[1];
+    for (size_t i = 0; i < Layers; ++i) {
+        rnode.addSystem(&module.drawSpriteSystems[i], RENDER_SYS_GROUP);
+        rnode.addSystem(&module.drawAnimatedSpriteSystems[i], RENDER_SYS_GROUP);
+    }
+    std::apply(
+        [&dnode](auto &...system) {
+            ((dnode.addSystem(&system, DEBUG_RENDER_SYS_GROUP)), ...);
+        },
+        module.debugDrawSystems
+    );
+    dnode.shouldRun = false;
+    dnode.startCallback = [&module](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+        if (IsKeyPressed(KEY_F3)) {
+            module.debugRender = !module.debugRender;
+        }
+        node.shouldRun = module.debugRender;
+    };
+    rnode.startCallback = [&module](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+        node.shouldRun = !module.debugRender;
+    };
+}
+
 namespace engine::module {
 
+template<uint8_t Layers>
 class Render : public IModule {
-    ECS::S::DebugDrawSystem debugDrawSystem;
-    ECS::S::DrawSpriteSystem drawSpriteSystem;
-    ECS::S::DrawAnimatedSpriteSystem drawAnimatedSpriteSystem;
+public:
+    bool debugRender = false;
+
+    Camera2D camera;
+
+    std::array<ECS::S::DebugDrawSystem, Layers> debugDrawSystems;
+    std::array<ECS::S::DrawSpriteSystem, Layers> drawSpriteSystems;
+    std::array<ECS::S::DrawAnimatedSpriteSystem, Layers> drawAnimatedSpriteSystems;
     ECS::S::SpriteAnimationSystem spriteAnimationSystem;
 
     ECS::S::SystemTreeNode renderNode;
     ECS::S::SystemTreeNode debugRenderNode;
+    ECS::S::SystemTreeNode rootRenderNode;
 
-    bool _debug = false;
-
-public:
-    Render(Camera2D &camera, AssetsLoader &assetsLoader):
-        debugDrawSystem(camera),
-        drawSpriteSystem(assetsLoader, camera),
-        drawAnimatedSpriteSystem(assetsLoader, camera),
-        spriteAnimationSystem(assetsLoader),
-        renderNode(
-            RENDER_SYS_GROUP, {&drawSpriteSystem, &drawAnimatedSpriteSystem, &spriteAnimationSystem}
+    Render(AssetsLoader &assetsLoader, bool useCamera):
+        debugDrawSystems(makeSystems<Layers, ECS::S::DebugDrawSystem>(camera, useCamera)),
+        drawSpriteSystems(
+            makeSystems<Layers, ECS::S::DrawSpriteSystem>(assetsLoader, camera, useCamera)
         ),
-        debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
-    {
-        debugRenderNode.shouldRun = false;
-
-        debugRenderNode.startCallback =
-            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
-                if (IsKeyPressed(KEY_F3)) {
-                    this->_debug = !this->_debug;
-                }
-
-                node.shouldRun = this->_debug;
-            };
-        renderNode.startCallback =
-            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
-                node.shouldRun = !this->_debug;
-            };
-    }
-    explicit Render(AssetsLoader &assetsLoader):
-        drawSpriteSystem(assetsLoader),
-        drawAnimatedSpriteSystem(assetsLoader),
-        spriteAnimationSystem(assetsLoader),
-        renderNode(
-            RENDER_SYS_GROUP, {&drawSpriteSystem, &drawAnimatedSpriteSystem, &spriteAnimationSystem}
+        drawAnimatedSpriteSystems(
+            makeSystems<Layers, ECS::S::DrawAnimatedSpriteSystem>(assetsLoader, camera, useCamera)
         ),
-        debugRenderNode(DEBUG_RENDER_SYS_GROUP, {&debugDrawSystem})
+        spriteAnimationSystem(assetsLoader),
+        renderNode(RENDER_SYS_GROUP),
+        debugRenderNode(DEBUG_RENDER_SYS_GROUP),
+        rootRenderNode(
+            ROOT_RENDER_SYS_GROUP, {&spriteAnimationSystem}, {}, {renderNode, debugRenderNode}
+        )
     {
-        debugRenderNode.shouldRun = false;
-
-        debugRenderNode.startCallback =
-            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
-                if (IsKeyPressed(KEY_F3)) {
-                    this->_debug = !this->_debug;
-                }
-
-                node.shouldRun = this->_debug;
-            };
-        renderNode.startCallback =
-            [this](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
-                node.shouldRun = !this->_debug;
-            };
+        initRenderModule(*this);
     }
+
     void load(ECS::EntityManager &entityManager) override
     {
-        entityManager.registerSystemNode(renderNode, ROOT_SYS_GROUP);
-        entityManager.registerSystemNode(debugRenderNode, ROOT_SYS_GROUP);
+        entityManager.registerSystemNode(rootRenderNode, ROOT_SYS_GROUP);
     }
 };
 
