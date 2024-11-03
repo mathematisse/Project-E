@@ -46,6 +46,11 @@ public:
 
     std::vector<SystemTreeNode> &getChildren();
 
+    // copy constructor
+    SystemTreeNode(const SystemTreeNode &node);
+    // copy assignment operator
+    SystemTreeNode &operator=(const SystemTreeNode &node);
+
 private:
     NodeExecutionType _execType;
     std::string _group;

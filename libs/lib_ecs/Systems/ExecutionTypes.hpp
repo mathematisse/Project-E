@@ -7,7 +7,7 @@
 
 #pragma once
 
-#define MULTITHREADING true
+#define MULTITHREADING false
 
 namespace ECS::S {
 enum NodeExecutionType {

@@ -14,7 +14,6 @@
 #include "lib_ecs/Systems/ThreadPool.hpp"
 #include <functional>
 #include <string>
-#include <thread>
 #include <vector>
 #include <array>
 

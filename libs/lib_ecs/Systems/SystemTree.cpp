@@ -173,6 +173,25 @@ const std::string &SystemTreeNode::getGroup() const { return _group; }
 
 std::vector<SystemTreeNode> &SystemTreeNode::getChildren() { return _children; }
 
+SystemTreeNode::SystemTreeNode(const SystemTreeNode &node):
+    _execType(node._execType),
+    _group(node._group),
+    _startSystems(node._startSystems),
+    _children(node._children),
+    _endSystems(node._endSystems)
+{
+}
+
+SystemTreeNode &SystemTreeNode::operator=(const SystemTreeNode &node)
+{
+    _execType = node._execType;
+    _group = node._group;
+    _startSystems = node._startSystems;
+    _children = node._children;
+    _endSystems = node._endSystems;
+    return *this;
+}
+
 SystemTree::SystemTree(const std::string &rootGroup):
     _root(
         SERIAL_NODE_EXECUTION, rootGroup, std::vector<ISystem *>(), std::vector<ISystem *>(),

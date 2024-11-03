@@ -5,7 +5,9 @@
 ** Ecs pure base SystemTree
 */
 
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_log/log.hpp"
+#include <iostream>
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -42,6 +44,7 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::submit(const std::function<void()> &task)
 {
+    std::cout << "Submitting task" << std::endl;
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         tasks.emplace(task);
@@ -52,6 +55,7 @@ void ThreadPool::submit(const std::function<void()> &task)
 
 void ThreadPool::waitAll()
 {
+    std::cout << "Waiting for all tasks to complete" << std::endl;
     std::unique_lock<std::mutex> lock(completionMutex);
     completionCondition.wait(lock, [this]() {
         return tasksInProgress == 0;
@@ -92,4 +96,4 @@ void ThreadPool::worker()
 }
 
 // Global ThreadPool instance
-ThreadPool globalThreadPool(std::thread::hardware_concurrency());
+ThreadPool globalThreadPool(MULTITHREADING ? std::thread::hardware_concurrency() : 0);
