@@ -192,8 +192,6 @@ void Server::on_tcp_data(
             });
             packet = Packet::deserialize(buffer);
         }
-    } else {
-        std::cerr << "Client for packet not found" << std::endl;
     }
 }
 
