@@ -93,7 +93,7 @@ S::IQuery &AEntityManager::initializeQuery(S::IQuery &query)
     return query;
 }
 
-bool AEntityManager::addTime(double time)
+size_t AEntityManager::addTime(double time)
 {
     if (_fixedUpdateTime == 0) {
         _timePassed += time;
@@ -101,18 +101,22 @@ bool AEntityManager::addTime(double time)
         _fixedSystemTree.setDeltaTime(time);
         _runSystems();
         _runFixedSystems();
-        return true;
+        return 1;
     }
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
     _systemTree.setDeltaTime(time);
     _runSystems();
     if (_timeSinceLastFixedUpdate >= _fixedUpdateTime) {
-        _runFixedSystems();
-        _timeSinceLastFixedUpdate -= _fixedUpdateTime;
-        return true;
+        size_t count = 0;
+        while (_timeSinceLastFixedUpdate >= _fixedUpdateTime) {
+            _runFixedSystems();
+            _timeSinceLastFixedUpdate -= _fixedUpdateTime;
+            count++;
+        }
+        return count;
     }
-    return false;
+    return 0;
 }
 
 std::tuple<ECS::E::IArchetypePool *, C::entity_pool_id_t>

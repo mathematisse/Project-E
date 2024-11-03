@@ -45,7 +45,7 @@ public:
     S::IQuery &initializeQuery(S::IQuery &query) override;
     E::IArchetypePool *getEntityPool(const std::string &entityName) override;
 
-    bool addTime(double time) override;
+    size_t addTime(double time) override;
 
     S::SystemTree &getSystemTree() override { return _systemTree; };
     S::SystemTree &getFixedSystemTree() override { return _fixedSystemTree; };
