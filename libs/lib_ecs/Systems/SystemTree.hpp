@@ -11,7 +11,6 @@
 #include "lib_ecs/Systems/ASystemTree.hpp"
 #include <functional>
 
-#define ROOT_SYS_GROUP "ROOT"
 #define SYNC_SYS_GROUP "SYNC"
 
 namespace ECS::S {
@@ -54,7 +53,7 @@ private:
 
 class SystemTree : public ASystemTree {
 public:
-    SystemTree();
+    SystemTree(const std::string &rootGroup);
     ~SystemTree();
     bool addSystemGroup(
         const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside

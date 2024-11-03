@@ -157,10 +157,9 @@ const std::string &SystemTreeNode::getGroup() const { return _group; }
 
 std::vector<SystemTreeNode> &SystemTreeNode::getChildren() { return _children; }
 
-SystemTree::SystemTree():
+SystemTree::SystemTree(const std::string &rootGroup):
     _root(
-        ROOT_SYS_GROUP, std::vector<ISystem *>(), std::vector<ISystem *>(),
-        std::vector<SystemTreeNode>()
+        rootGroup, std::vector<ISystem *>(), std::vector<ISystem *>(), std::vector<SystemTreeNode>()
     )
 {
 }

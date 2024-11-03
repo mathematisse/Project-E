@@ -25,7 +25,7 @@ public:
     void load(ECS::EntityManager &entityManager) override
     {
         LOG_INFO("Loading Spatial2D module");
-        if (!entityManager.registerFixedSystemNode(spatial2DNode, ROOT_SYS_GROUP)) {
+        if (!entityManager.registerFixedSystemNode(spatial2DNode, FIXED_ROOT_SYS_GROUP)) {
             LOG_ERROR("Failed to register Spatial2D system node");
         }
     }

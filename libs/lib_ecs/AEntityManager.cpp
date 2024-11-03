@@ -6,19 +6,16 @@
 */
 
 #include "lib_ecs/AEntityManager.hpp"
-#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "lib_log/log.hpp"
 #include <string>
 #include <tuple>
 
-#define BLUE "\033[34m"
-#define RED "\033[31m"
-#define RESET "\033[0m"
-
 namespace ECS {
 
 AEntityManager::AEntityManager(float fixedUpdateTime):
+    _systemTree(ROOT_SYS_GROUP),
+    _fixedSystemTree(FIXED_ROOT_SYS_GROUP),
     _fixedUpdateTime(fixedUpdateTime)
 {
     if (fixedUpdateTime > 0) {
@@ -86,7 +83,7 @@ bool AEntityManager::registerEntityPool(E::IArchetypePool *entityPool)
 
 S::IQuery &AEntityManager::initializeQuery(S::IQuery &query)
 {
-    LOG_DEBUG(BLUE "Initializing Query" RESET);
+    LOG_DEBUG(LOG_BLUE "Initializing Query" LOG_COLOR_RESET);
     for (auto &entityPool : _entityPools) {
         query.tryAddEntityPool(entityPool);
     }

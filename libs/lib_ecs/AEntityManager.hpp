@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Entities/IArchetypePool.hpp"
 #include "lib_ecs/IEntityManager.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
@@ -15,6 +14,8 @@
 #include <vector>
 
 #define ENTITY_PTR_POOL_SIZE 64
+#define ROOT_SYS_GROUP "ROOT"
+#define FIXED_ROOT_SYS_GROUP "FIXED_ROOT"
 
 namespace ECS {
 class AEntityManager : public IEntityManager {
