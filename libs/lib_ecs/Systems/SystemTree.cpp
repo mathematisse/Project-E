@@ -103,7 +103,6 @@ void SystemTreeNode::registerEntityPool(E::IArchetypePool *entityPool)
 
 void SystemTreeNode::runNode(SystemTree &tree)
 {
-    std::cout << "Running node " << _group << std::endl;
     if (startCallback) {
         startCallback(*this, tree);
     }
