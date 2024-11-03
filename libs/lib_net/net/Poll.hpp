@@ -63,7 +63,7 @@ public:
         Socket::Type fd; /* file descriptor */
         short events; /* requested events */
         short revents; /* returned events */
-        
+
         bool operator==(const Fd &other) const { return fd == other.fd; }
     };
 

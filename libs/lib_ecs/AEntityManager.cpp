@@ -6,19 +6,16 @@
 */
 
 #include "lib_ecs/AEntityManager.hpp"
-#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "lib_log/log.hpp"
 #include <string>
 #include <tuple>
 
-#define BLUE "\033[34m"
-#define RED "\033[31m"
-#define RESET "\033[0m"
-
 namespace ECS {
 
 AEntityManager::AEntityManager(float fixedUpdateTime):
+    _systemTree(ROOT_SYS_GROUP),
+    _fixedSystemTree(FIXED_ROOT_SYS_GROUP),
     _fixedUpdateTime(fixedUpdateTime)
 {
     if (fixedUpdateTime > 0) {
@@ -86,14 +83,14 @@ bool AEntityManager::registerEntityPool(E::IArchetypePool *entityPool)
 
 S::IQuery &AEntityManager::initializeQuery(S::IQuery &query)
 {
-    LOG_DEBUG(BLUE "Initializing Query" RESET);
+    LOG_DEBUG(LOG_BLUE "Initializing Query" LOG_COLOR_RESET);
     for (auto &entityPool : _entityPools) {
         query.tryAddEntityPool(entityPool);
     }
     return query;
 }
 
-bool AEntityManager::addTime(float time)
+size_t AEntityManager::addTime(double time)
 {
     if (_fixedUpdateTime == 0) {
         _timePassed += time;
@@ -101,18 +98,22 @@ bool AEntityManager::addTime(float time)
         _fixedSystemTree.setDeltaTime(time);
         _runSystems();
         _runFixedSystems();
-        return true;
+        return 1;
     }
     _timePassed += time;
     _timeSinceLastFixedUpdate += time;
     _systemTree.setDeltaTime(time);
     _runSystems();
     if (_timeSinceLastFixedUpdate >= _fixedUpdateTime) {
-        _runFixedSystems();
-        _timeSinceLastFixedUpdate -= _fixedUpdateTime;
-        return true;
+        size_t count = 0;
+        while (_timeSinceLastFixedUpdate >= _fixedUpdateTime) {
+            _runFixedSystems();
+            _timeSinceLastFixedUpdate -= _fixedUpdateTime;
+            count++;
+        }
+        return count;
     }
-    return false;
+    return 0;
 }
 
 std::tuple<ECS::E::IArchetypePool *, C::entity_pool_id_t>

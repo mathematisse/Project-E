@@ -36,10 +36,7 @@ public:
         return _sock.local_addr();
     }
 
-    [[nodiscard]] inline auto get_fd() const -> Socket::Type
-    {
-        return _sock.sockfd;
-    }
+    [[nodiscard]] inline auto get_fd() const -> Socket::Type { return _sock.sockfd; }
 
     [[nodiscard]] inline auto close() const -> io::Result<result::Void> { return _sock.close(); }
 

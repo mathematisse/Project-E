@@ -10,7 +10,6 @@
 #include "lib_ecs/Components/IComponentPool.hpp"
 #include "lib_ecs/EntityManager.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
-#include "lib_log/log.hpp"
 #include <functional>
 #include <string>
 #include <thread>
@@ -58,7 +57,7 @@ public:
         size_t i = 0;
 
         for (auto &componentName : componentNames) {
-            for (auto &componentPool : componentPools) {
+            for (auto *componentPool : componentPools) {
                 if (componentPool->getComponentName() == componentName) {
                     if (i == sizeof...(Ts)) {
                         return false;
@@ -165,7 +164,11 @@ public:
             std::vector<std::thread> threads;
 
             pMap(
-                [f](Ts *...componentPools) {
+                [f, startCB, endCB](Ts *...componentPools) {
+                    if (startCB) {
+                        startCB(componentPools...);
+                    }
+
                     size_t chunkCount = getFirstArg(componentPools...)->chunkCount();
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply(
@@ -183,6 +186,10 @@ public:
                             componentPoolsTuple
                         );
                     }
+
+                    if (endCB) {
+                        endCB(componentPools...);
+                    }
                 },
                 true
             );
@@ -197,7 +204,11 @@ public:
         } else {
             // Default behavior: run pMap sequentially
             pMap(
-                [f](Ts *...componentPools) {
+                [f, startCB, endCB](Ts *...componentPools) {
+                    if (startCB) {
+                        startCB(componentPools...);
+                    }
+
                     size_t chunkCount = getFirstArg(componentPools...)->chunkCount();
                     for (size_t i = 0; i < chunkCount; i++) {
                         auto componentPoolsTuple = std::apply(
@@ -214,6 +225,10 @@ public:
                             },
                             componentPoolsTuple
                         );
+                    }
+
+                    if (endCB) {
+                        endCB(componentPools...);
                     }
                 },
                 false

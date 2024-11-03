@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "lib_ecs/Chunks/ChunkPos.hpp"
 #include "lib_ecs/Entities/IArchetypePool.hpp"
 #include "lib_ecs/IEntityManager.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
@@ -15,6 +14,8 @@
 #include <vector>
 
 #define ENTITY_PTR_POOL_SIZE 64
+#define ROOT_SYS_GROUP "ROOT"
+#define FIXED_ROOT_SYS_GROUP "FIXED_ROOT"
 
 namespace ECS {
 class AEntityManager : public IEntityManager {
@@ -45,7 +46,7 @@ public:
     S::IQuery &initializeQuery(S::IQuery &query) override;
     E::IArchetypePool *getEntityPool(const std::string &entityName) override;
 
-    bool addTime(float time) override;
+    size_t addTime(double time) override;
 
     S::SystemTree &getSystemTree() override { return _systemTree; };
     S::SystemTree &getFixedSystemTree() override { return _fixedSystemTree; };
@@ -57,10 +58,10 @@ protected:
     std::vector<E::IArchetypePool *> _entityPools;
     S::SystemTree _systemTree;
     S::SystemTree _fixedSystemTree; // run on fixed update
-    float _timePassed = 0;
-    float _timeNotAdded = 0;
-    float _timeSinceLastFixedUpdate = 0;
+    double _timePassed = 0;
+    double _timeNotAdded = 0;
+    double _timeSinceLastFixedUpdate = 0;
 
-    float _fixedUpdateTime = 0;
+    double _fixedUpdateTime = 0;
 };
 } // namespace ECS

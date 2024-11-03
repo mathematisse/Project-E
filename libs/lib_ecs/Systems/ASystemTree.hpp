@@ -11,10 +11,10 @@ namespace ECS::S {
 
 class ASystemTree {
 public:
-    [[nodiscard]] float getDeltaTime() const { return _deltaTime; }
-    void setDeltaTime(float newDeltaTime) { _deltaTime = newDeltaTime; }
+    [[nodiscard]] double getDeltaTime() const { return _deltaTime; }
+    void setDeltaTime(double newDeltaTime) { _deltaTime = newDeltaTime; }
 
 protected:
-    float _deltaTime = 0.0F;
+    double _deltaTime = 0.0F;
 };
 } // namespace ECS::S

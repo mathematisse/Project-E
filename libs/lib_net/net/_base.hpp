@@ -5,9 +5,9 @@
 
 #ifdef _WIN32
 /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
-//#ifndef _WIN32_WINNT
-//#define _WIN32_WINNT 0x0601 /* Windows XP. */
-//#endif
+// #ifndef _WIN32_WINNT
+// #define _WIN32_WINNT 0x0601 /* Windows XP. */
+// #endif
 #include <winsock2.h>
 #include <Winsock2.h>
 #include <Ws2tcpip.h>

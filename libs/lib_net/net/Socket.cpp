@@ -74,13 +74,13 @@ auto address_from_sockaddr(const struct sockaddr_storage &address) -> SocketAddr
     } else {
         const auto *ipv6 = reinterpret_cast<const struct sockaddr_in6 *>(&address);
         std::array<uint16_t, 8> ipv6_segments {};
-        #ifdef _WIN32
+#ifdef _WIN32
         std::memcpy(ipv6_segments.data(), ipv6->sin6_addr.u.Byte, sizeof(ipv6_segments));
-        #else
+#else
         std::memcpy(
             ipv6_segments.data(), ipv6->sin6_addr.s6_addr16, sizeof(ipv6->sin6_addr.s6_addr16)
         );
-        #endif
+#endif
         Ipv6Addr ip(ipv6_segments);
         return {IpAddr(ip), ntohs(ipv6->sin6_port)};
     }
@@ -173,8 +173,7 @@ auto Socket::recv_from(std::span<std::uint8_t> &buf
 
 auto Socket::write(const std::span<std::uint8_t> &buf) const -> io::Result<std::size_t>
 {
-    auto nwritten =
-        ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), flag);
+    auto nwritten = ::send(sockfd, reinterpret_cast<const char *>(buf.data()), buf.size(), flag);
     if (nwritten == SOCKET_ERROR) {
         return io::Result<std::size_t>::Error(std::error_code(errno, std::system_category()));
     }
