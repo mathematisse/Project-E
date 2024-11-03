@@ -28,6 +28,7 @@ public:
 
     void run() override
     {
+        _startAllMapCallBack();
         _query.map(
             [this](auto &...componentPools) {
                 _innerOperate(componentPools...);
@@ -46,6 +47,7 @@ public:
                 _endCPMapCallBack(componentPools...);
             }
         );
+        _endAllMapCallBack();
     }
 
 protected:
@@ -56,6 +58,8 @@ protected:
     virtual void _endCMapCallBack(typename Ts::VTypes &.../*unused*/) { }
     virtual void _startCPMapCallBack(Ts *.../*unused*/) { }
     virtual void _endCPMapCallBack(Ts *.../*unused*/) { }
+    virtual void _startAllMapCallBack() { }
+    virtual void _endAllMapCallBack() { }   
 };
 
 template<typename... Ts>
