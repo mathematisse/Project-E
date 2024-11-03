@@ -18,7 +18,7 @@ auto UdpSocket::bind(const SocketAddr &addr) -> io::Result<UdpSocket>
 
 auto UdpSocket::any(int domain) -> io::Result<UdpSocket>
 {
-    auto ip = domain == AF_INET ? IpAddr(Ipv4Addr({127, 0, 0, 1})) : IpAddr(Ipv6Addr({0, 0, 0, 0}));
+    auto ip = domain == AF_INET ? IpAddr(Ipv4Addr({0, 0, 0, 0})) : IpAddr(Ipv6Addr({0, 0, 0, 0}));
     auto addr = SocketAddr(ip, 0);
     auto sock = Socket::create(addr, SOCK_DGRAM);
     if (sock) {
