@@ -31,9 +31,6 @@ BaseServer::~BaseServer()
     stop_context();
     // close all existing connections
     for (auto &[id, connection] : tcp_connections) {
-        if (auto res = connection.stream.shutdown(); !res) {
-            LOG_DEBUG("Tcp shutdown error: " + res.error().message());
-        }
         if (auto res = connection.stream.close(); !res) {
             LOG_DEBUG("Tcp close error: " + res.error().message());
         }
@@ -49,9 +46,6 @@ BaseServer::~BaseServer()
         }
     }
     if (tcp_connection.has_value()) {
-        if (auto res = tcp_connection->stream.shutdown(); !res) {
-            LOG_DEBUG("Tcp connection shutdown error: " + res.error().message());
-        }
         if (auto res = tcp_connection->stream.close(); !res) {
             LOG_DEBUG("Tcp connection close error: " + res.error().message());
         }
@@ -72,7 +66,7 @@ auto BaseServer::host_tcp(std::uint16_t port) -> result::Result<result::Void, Ba
 
 auto BaseServer::host_udp(std::uint16_t port) -> result::Result<result::Void, BaseServerError>
 {
-    auto udp_result = net::UdpSocket::bind(net::SocketAddr(net::Ipv4Addr(0), port));
+    auto udp_result = net::UdpSocket::bind(net::SocketAddr(net::Ipv4Addr({127, 0, 0, 1}), port));
     if (!udp_result) {
         return result::Result<result::Void, BaseServerError>::Error(
             BaseServerError {BaseServerError::Kind::BindError}
@@ -143,8 +137,20 @@ auto BaseServer::connect_udp(const std::string &ip, std::uint16_t port)
         );
     }
     udp_socket = udp_result.value();
+    // get the address of the port of the socket that was just created
+    auto socket_addr = udp_socket->local_addr();
+    if (!socket_addr) {
+        std::cout << "Socket getaddr error" << std::endl;
+        return result::Result<result::Void, BaseServerError>::Error(
+            BaseServerError {BaseServerError::Kind::BindError}
+        );
+    }
+    auto address_s = socket_addr.value();
+    LOG_INFO("UDP socket bound to " + address_s.to_string());
+
     udp_connection_addr = net::SocketAddr(address, port);
     // _recv_udp_queue.push({*udp_connection_addr, std::vector<std::uint8_t> {}});
+    _udp_confirmed = true;
     return result::Result<result::Void, BaseServerError>::Success(result::Void {});
 }
 
@@ -183,11 +189,7 @@ void BaseServer::send_tcp(uuid::Uuid id, const std::vector<std::uint8_t> &data)
 
 void BaseServer::send_udp(const net::SocketAddr &addr, const std::vector<std::uint8_t> &data)
 {
-    std::vector<std::uint8_t> byte_data(data.size());
-    std::transform(data.begin(), data.end(), byte_data.begin(), [](std::uint8_t byte) {
-        return static_cast<std::uint8_t>(byte);
-    });
-    _send_udp_queue.push({addr, byte_data});
+    _send_udp_queue.push({addr, data});
 }
 
 void BaseServer::send_udp(const std::vector<std::uint8_t> &data)
@@ -232,6 +234,7 @@ void BaseServer::handle_events(std::chrono::milliseconds timeout)
     }
 
     while (!_recv_udp_queue.empty()) {
+        std::cout << "RECV UDP event" << std::endl;
         auto ret = _recv_udp_queue.wait_pop(timeout);
         if (ret) {
             auto [addr, data] = ret.value();
@@ -357,14 +360,17 @@ void BaseServer::handle_udp_read_event()
     }
     auto [size, addr] = res.value();
     if (size == 0) {
+        std::cout << "Empty UDP message" << std::endl;
         return;
     }
     if (!is_valid_udp_message(buffer)) {
+        std::cout << "Invalid UDP message" << std::endl;
         return;
     }
     std::pair<net::SocketAddr, std::vector<std::uint8_t>> event = {
         addr, std::vector<std::uint8_t>(buffer.begin(), buffer.begin() + (long) size)
     };
+    std::cout << "Received THE UDP message from: " << addr.to_string() << std::endl;
     _recv_udp_queue.push(event);
 }
 
@@ -373,7 +379,7 @@ void BaseServer::handle_udp_write_event()
     if (_send_udp_queue.empty()) {
         return;
     }
-    auto maybe_data = _send_udp_queue.wait_pop(std::chrono::milliseconds(100));
+    auto maybe_data = _send_udp_queue.wait_pop(std::chrono::milliseconds(1));
     if (maybe_data) {
         auto [addr, data] = maybe_data.value();
         if (udp_connection_addr.has_value()) {
@@ -381,7 +387,8 @@ void BaseServer::handle_udp_write_event()
         }
         auto res = udp_socket->send_to(data, addr);
         if (!res) {
-            LOG_DEBUG("Udp send error: " + res.error().message());
+            // LOG_DEBUG("Udp send error: " + res.error().message());
+            std::cout << "Udp send error: " << res.error().message() << std::endl;
         }
     }
 }
@@ -393,9 +400,6 @@ void BaseServer::disconnect_tcp_connection_single(net::Poll &poll)
         LOG_INFO("About to Disconnect client (" + (*tcp_connection_id).to_str() + ")");
         if (auto res = poll.remove(connection.stream); !res) {
             // LOG_DEBUG("Poll remove read error: " + res.error().message());
-        }
-        if (auto res = connection.stream.shutdown(); !res) {
-            // LOG_DEBUG("Tcp shutdown error: " + res.error().message());
         }
         if (auto res = connection.stream.close(); !res) {
             // LOG_DEBUG("Tcp close error: " + res.error().message());
@@ -418,9 +422,6 @@ void BaseServer::disconnect_tcp_connection(uuid::Uuid id, net::Poll &poll)
     LOG_INFO("About to Disconnect client (" + it->first.to_str() + ")");
     if (auto res = poll.remove(connection.stream); !res) {
         // LOG_DEBUG("Poll remove read error: " + res.error().message());
-    }
-    if (auto res = connection.stream.shutdown(); !res) {
-        // LOG_DEBUG("Tcp shutdown error: " + res.error().message());
     }
     if (auto res = connection.stream.close(); !res) {
         // LOG_DEBUG("Tcp close error: " + res.error().message());
@@ -484,8 +485,7 @@ void BaseServer::handle_tcp_connection_write(net::Poll &poll)
             }
         } else {
             if (auto res = poll.remove_write(connection.stream); !res) {
-                LOG_DEBUG("Poll remove TCP Connection write error: " + res.error().message()
-                         );
+                LOG_DEBUG("Poll remove TCP Connection write error: " + res.error().message());
             }
         }
     }
@@ -501,8 +501,9 @@ void BaseServer::handle_tcp_connections_write(net::Poll &poll)
             }
         } else {
             if (auto res = poll.remove_write(connection.stream); !res) {
-                LOG_DEBUG("Poll remove TCP ()" + id.to_str()
-                          + ") write error: " + res.error().message());
+                LOG_DEBUG(
+                    "Poll remove TCP ()" + id.to_str() + ") write error: " + res.error().message()
+                );
             }
         }
     }

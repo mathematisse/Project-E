@@ -100,7 +100,7 @@ public:
     // main thread append to the task queue to be processed by the context thread
     void ask_disconnect(uuid::Uuid id);
 
-    static constexpr auto DEFAULT_TIMEOUT = std::chrono::milliseconds(100);
+    static constexpr auto DEFAULT_TIMEOUT = std::chrono::milliseconds(5);
     // this function is semi-blocking and should be called in a loop
     void handle_events(std::chrono::milliseconds timeout = DEFAULT_TIMEOUT);
 
@@ -166,6 +166,10 @@ private:
     std::optional<uuid::Uuid> tcp_connection_id;
     std::optional<net::SocketAddr> udp_connection_addr;
 
+protected:
+    std::atomic_bool _udp_confirmed = false;
+
+private:
     // received connections
     std::unordered_map<uuid::Uuid, TcpConnection> tcp_connections;
 
