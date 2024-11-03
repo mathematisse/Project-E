@@ -5,8 +5,6 @@
 ** Ecs pure base SystemTree
 */
 
-#pragma once
-
 #include "lib_log/log.hpp"
 #include <vector>
 #include <thread>
