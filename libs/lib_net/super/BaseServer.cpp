@@ -66,7 +66,7 @@ auto BaseServer::host_tcp(std::uint16_t port) -> result::Result<result::Void, Ba
 
 auto BaseServer::host_udp(std::uint16_t port) -> result::Result<result::Void, BaseServerError>
 {
-    auto udp_result = net::UdpSocket::bind(net::SocketAddr(net::Ipv4Addr({127, 0, 0, 1}), port));
+    auto udp_result = net::UdpSocket::bind(net::SocketAddr(net::Ipv4Addr(0), port));
     if (!udp_result) {
         return result::Result<result::Void, BaseServerError>::Error(
             BaseServerError {BaseServerError::Kind::BindError}
