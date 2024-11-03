@@ -41,12 +41,6 @@ sudo pacman -S alsa-lib mesa libx11 libxrandr libxi libxcursor libxinerama
 
 ## How to build on Linux
 
-Clone the repository and navigate to the project directory:
-```bash
-git clone https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.git
-cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
-```
-
 ### Using CMake:
 
 #### Release build:
@@ -87,13 +81,6 @@ You can also use the provided scripts to build the project:
 ```
 
 ## How to build on Windows
-
-Open powershell
-Clone the repository and navigate to the project directory:
-```powershell
-git clone https://github.com/EpitechPromo2027/B-CPP-500-TLS-5-1-rtype-leo.wehrle.git
-cd B-CPP-500-TLS-5-1-rtype-leo.wehrle
-```
 
 ### Using CMake:
 
@@ -142,20 +129,12 @@ The binary is standalone and can be run from anywhere.
 
 #### On Windows:
 
-TODO...
+On Windows, the engine's libraries are located in the `build/engine` directory. And are directly linked to the binary. So you need to set the `PATH` environment variable to the `build/engine` directory.
 
+Your binary will be located in the `build`.
 
-## How to test
-
-To run the whole test suite you can use the `ctest` command. This will run all the tests in the `cmake-build-release` or `cmake-build-debug` directory depending on the build type you chose.
-```bash
-cd <path-to-build-directory>
-ctest
+The binary is standalone and can be run from anywhere. 
+```powershell
+.\build\<project>\<binary-name>.exe
 ```
-
-You can also run the tests individually. Or run the tests with the `-V` flag to get more information about the tests.
-```bash
-cd <path-to-build-directory>
-ctest -R <test-name>
-ctest -V
-```
+or double-click on the executable, found in the root of the project.
