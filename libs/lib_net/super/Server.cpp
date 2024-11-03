@@ -79,8 +79,6 @@ void Server::send_udp(
     Packet packet = Packet::deserialize(type, data);
     if (matchingClient != _clients.end()) {
         lnet::utils::BaseServer::send_udp(matchingClient->second.udp_addr, packet.serialize());
-    } else {
-        std::cout << "Client not found" << std::endl;
     }
 }
 
