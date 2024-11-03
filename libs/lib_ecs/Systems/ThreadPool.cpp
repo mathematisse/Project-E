@@ -21,7 +21,7 @@ ThreadPool::ThreadPool(size_t numThreads):
     stop(false),
     tasksInProgress(0)
 {
-    LOG_INFO("Creating ThreadPool with " + std::to_string(numThreads) + " threads");
+    std::cout << "Creating ThreadPool with " << numThreads << " threads" << std::endl;
     for (size_t i = 0; i < numThreads; ++i) {
         threads.emplace_back(&ThreadPool::worker, this);
     }
@@ -55,11 +55,15 @@ void ThreadPool::submit(const std::function<void()> &task)
 
 void ThreadPool::waitAll()
 {
-    std::cout << "Waiting for all tasks to complete" << std::endl;
-    std::unique_lock<std::mutex> lock(completionMutex);
-    completionCondition.wait(lock, [this]() {
-        return tasksInProgress == 0;
-    });
+    if (tasksInProgress == 0) {
+        return;
+    }
+    {
+        std::unique_lock<std::mutex> lock(completionMutex);
+        completionCondition.wait(lock, [this]() {
+            return tasksInProgress == 0;
+        });
+    }
 }
 
 void ThreadPool::worker()
@@ -95,5 +99,3 @@ void ThreadPool::worker()
     }
 }
 
-// Global ThreadPool instance
-ThreadPool globalThreadPool(MULTITHREADING ? std::thread::hardware_concurrency() : 0);

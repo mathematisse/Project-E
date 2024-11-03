@@ -23,16 +23,12 @@ public:
         NodeExecutionType execType, const std::string group,
         std::vector<ISystem *> startSystems = std::vector<ISystem *>(),
         std::vector<ISystem *> endSystems = std::vector<ISystem *>(),
-        std::vector<SystemTreeNode> children = std::vector<SystemTreeNode>()
+        std::vector<SystemTreeNode *> children = std::vector<SystemTreeNode *>()
     );
     ~SystemTreeNode() = default;
-    bool addSystemGroup(
-        NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-        bool addBefore, bool addInside
-    );
     bool addSystem(ISystem *system, const std::string &group, bool atStart = false);
     bool addSystemTreeNode(
-        SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        SystemTreeNode *node, const std::string &targetGroup, bool addBefore = false,
         bool addInside = true
     );
     void registerEntityPool(E::IArchetypePool *entityPool);
@@ -44,19 +40,14 @@ public:
     // std::function that takes a node and a systemtree that will be the start callback
     std::function<void(SystemTreeNode &, SystemTree &)> startCallback = nullptr;
 
-    std::vector<SystemTreeNode> &getChildren();
-
-    // copy constructor
-    SystemTreeNode(const SystemTreeNode &node);
-    // copy assignment operator
-    SystemTreeNode &operator=(const SystemTreeNode &node);
+    std::vector<SystemTreeNode *> &getChildren();
 
 private:
     NodeExecutionType _execType;
     std::string _group;
 
     std::vector<ISystem *> _startSystems;
-    std::vector<SystemTreeNode> _children;
+    std::vector<SystemTreeNode *> _children;
     std::vector<ISystem *> _endSystems;
 };
 
@@ -70,7 +61,7 @@ public:
     );
     bool addSystem(ISystem *system, const std::string &group, bool atStart);
     bool addSystemTreeNode(
-        SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+        SystemTreeNode *node, const std::string &targetGroup, bool addBefore, bool addInside
     );
     void registerEntityPool(E::IArchetypePool *entityPool);
     void runTree();

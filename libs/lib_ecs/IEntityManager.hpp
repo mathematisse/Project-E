@@ -18,22 +18,16 @@ namespace ECS {
 class IEntityManager {
 public:
     virtual ~IEntityManager() = default;
-    virtual bool registerSystemGroup(
-        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-        bool addBefore = false, bool addInside = true
-    ) = 0;
+
     virtual bool registerSystemNode(
-        S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        S::SystemTreeNode *node, const std::string &targetGroup, bool addBefore = false,
         bool addInside = true
     ) = 0;
     virtual bool
     registerSystem(S::ISystem &system, const std::string &group, bool atStart = false) = 0;
-    virtual bool registerFixedSystemGroup(
-        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-        bool addBefore = false, bool addInside = true
-    ) = 0;
+
     virtual bool registerFixedSystemNode(
-        S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        S::SystemTreeNode *node, const std::string &targetGroup, bool addBefore = false,
         bool addInside = true
     ) = 0;
     virtual bool

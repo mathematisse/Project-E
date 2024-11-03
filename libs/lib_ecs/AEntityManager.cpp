@@ -23,13 +23,6 @@ AEntityManager::AEntityManager(float fixedUpdateTime):
     }
 }
 
-bool AEntityManager::registerSystemGroup(
-    S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-    bool addBefore, bool addInside
-)
-{
-    return _systemTree.addSystemGroup(execType, targetGroup, newGroup, addBefore, addInside);
-}
 
 bool AEntityManager::registerSystem(S::ISystem &system, const std::string &group, bool atStart)
 {
@@ -40,22 +33,15 @@ bool AEntityManager::registerSystem(S::ISystem &system, const std::string &group
 }
 
 bool AEntityManager::registerSystemNode(
-    S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+    S::SystemTreeNode *node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     for (auto &entityPool : _entityPools) {
-        node.registerEntityPool(entityPool);
+        node->registerEntityPool(entityPool);
     }
     return _systemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }
 
-bool AEntityManager::registerFixedSystemGroup(
-    S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-    bool addBefore, bool addInside
-)
-{
-    return _fixedSystemTree.addSystemGroup(execType, targetGroup, newGroup, addBefore, addInside);
-}
 
 bool AEntityManager::registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart)
 {
@@ -66,11 +52,11 @@ bool AEntityManager::registerFixedSystem(S::ISystem &system, const std::string &
 }
 
 bool AEntityManager::registerFixedSystemNode(
-    S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore, bool addInside
+    S::SystemTreeNode *node, const std::string &targetGroup, bool addBefore, bool addInside
 )
 {
     for (auto &entityPool : _entityPools) {
-        node.registerEntityPool(entityPool);
+        node->registerEntityPool(entityPool);
     }
     return _fixedSystemTree.addSystemTreeNode(node, targetGroup, addBefore, addInside);
 }

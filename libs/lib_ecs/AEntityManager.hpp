@@ -22,22 +22,16 @@ class AEntityManager : public IEntityManager {
 public:
     explicit AEntityManager(float fixedUpdateTime = 0);
     ~AEntityManager() override = default;
-    bool registerSystemGroup(
-        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-        bool addBefore = false, bool addInside = true
-    ) override;
+
     bool registerSystemNode(
-        S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        S::SystemTreeNode *node, const std::string &targetGroup, bool addBefore = false,
         bool addInside = true
     ) override;
     bool
     registerSystem(S::ISystem &system, const std::string &group, bool atStart = false) override;
-    bool registerFixedSystemGroup(
-        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
-        bool addBefore = false, bool addInside = true
-    ) override;
+
     bool registerFixedSystemNode(
-        S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
+        S::SystemTreeNode *node, const std::string &targetGroup, bool addBefore = false,
         bool addInside = true
     ) override;
     bool registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart = false)

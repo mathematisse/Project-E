@@ -32,26 +32,26 @@ class Render;
 template<uint8_t Layers>
 static void initRenderModule(engine::module::Render<Layers> &module)
 {
-    auto &rnode = module.rootRenderNode.getChildren()[0];
-    auto &dnode = module.rootRenderNode.getChildren()[1];
+    auto *rnode = module.rootRenderNode.getChildren()[0];
+    auto *dnode = module.rootRenderNode.getChildren()[1];
     for (size_t i = 0; i < Layers; ++i) {
-        rnode.addSystem(&module.drawSpriteSystems[i], RENDER_SYS_GROUP);
-        rnode.addSystem(&module.drawAnimatedSpriteSystems[i], RENDER_SYS_GROUP);
+        rnode->addSystem(&module.drawSpriteSystems[i], RENDER_SYS_GROUP);
+        rnode->addSystem(&module.drawAnimatedSpriteSystems[i], RENDER_SYS_GROUP);
     }
     std::apply(
         [&dnode](auto &...system) {
-            ((dnode.addSystem(&system, DEBUG_RENDER_SYS_GROUP)), ...);
+            ((dnode->addSystem(&system, DEBUG_RENDER_SYS_GROUP)), ...);
         },
         module.debugDrawSystems
     );
-    dnode.shouldRun = false;
-    dnode.startCallback = [&module](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+    dnode->shouldRun = false;
+    dnode->startCallback = [&module](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
         if (IsKeyPressed(KEY_F3)) {
             module.debugRender = !module.debugRender;
         }
         node.shouldRun = module.debugRender;
     };
-    rnode.startCallback = [&module](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
+    rnode->startCallback = [&module](ECS::S::SystemTreeNode &node, ECS::S::SystemTree & /*tree*/) {
         node.shouldRun = !module.debugRender;
     };
 }
@@ -63,7 +63,7 @@ class Render : public IModule {
 public:
     bool debugRender = false;
 
-    Camera2D camera;
+    Camera2D camera{};
 
     std::array<ECS::S::DebugDrawSystem, Layers> debugDrawSystems;
     std::array<ECS::S::DrawSpriteSystem, Layers> drawSpriteSystems;
@@ -87,7 +87,7 @@ public:
         debugRenderNode(ECS::S::SERIAL_NODE_EXECUTION, DEBUG_RENDER_SYS_GROUP),
         rootRenderNode(
             ECS::S::SERIAL_NODE_EXECUTION, ROOT_RENDER_SYS_GROUP, {&spriteAnimationSystem}, {},
-            {renderNode, debugRenderNode}
+            {&renderNode, &debugRenderNode}
         )
     {
         initRenderModule(*this);
@@ -95,7 +95,7 @@ public:
 
     void load(ECS::EntityManager &entityManager) override
     {
-        entityManager.registerSystemNode(rootRenderNode, ROOT_SYS_GROUP);
+        entityManager.registerSystemNode(&rootRenderNode, ROOT_SYS_GROUP);
     }
 };
 

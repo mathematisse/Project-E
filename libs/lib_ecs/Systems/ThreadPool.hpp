@@ -41,3 +41,6 @@ private:
 
 // Global ThreadPool instance
 extern ThreadPool globalThreadPool;
+
+// Global ThreadPool instance
+#define THREADPOOL ThreadPool globalThreadPool(MULTITHREADING ? std::thread::hardware_concurrency() : 0);

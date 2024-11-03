@@ -29,7 +29,7 @@ public:
 
     void load(ECS::EntityManager &entityManager) override
     {
-        entityManager.registerSystemNode(networkNode, ROOT_SYS_GROUP);
+        entityManager.registerSystemNode(&networkNode, ROOT_SYS_GROUP);
     }
 };
 
