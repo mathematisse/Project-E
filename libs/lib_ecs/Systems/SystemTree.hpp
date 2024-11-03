@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/ISystem.hpp"
 #include "lib_ecs/Systems/ASystemTree.hpp"
 #include <functional>
@@ -18,14 +19,16 @@ class SystemTree;
 
 class SystemTreeNode {
 public:
-    explicit SystemTreeNode(
-        const std::string group, std::vector<ISystem *> startSystems = std::vector<ISystem *>(),
+    SystemTreeNode(
+        NodeExecutionType execType, const std::string group,
+        std::vector<ISystem *> startSystems = std::vector<ISystem *>(),
         std::vector<ISystem *> endSystems = std::vector<ISystem *>(),
         std::vector<SystemTreeNode> children = std::vector<SystemTreeNode>()
     );
     ~SystemTreeNode() = default;
     bool addSystemGroup(
-        const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+        NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+        bool addBefore, bool addInside
     );
     bool addSystem(ISystem *system, const std::string &group, bool atStart = false);
     bool addSystemTreeNode(
@@ -44,6 +47,7 @@ public:
     std::vector<SystemTreeNode> &getChildren();
 
 private:
+    NodeExecutionType _execType;
     std::string _group;
 
     std::vector<ISystem *> _startSystems;
@@ -53,10 +57,11 @@ private:
 
 class SystemTree : public ASystemTree {
 public:
-    SystemTree(const std::string &rootGroup);
+    explicit SystemTree(const std::string &rootGroup);
     ~SystemTree();
     bool addSystemGroup(
-        const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+        NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+        bool addBefore, bool addInside
     );
     bool addSystem(ISystem *system, const std::string &group, bool atStart);
     bool addSystemTreeNode(

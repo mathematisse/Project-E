@@ -3,6 +3,7 @@
 #include "IModule.hpp"
 #include "Components.hpp" // IWYU pragma: keep
 #include "Systems.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_log/log.hpp"
 
 #define SPATIAL2D_SYS_GROUP "SPATIAL2D"
@@ -18,7 +19,10 @@ class Spatial2D : public IModule {
 
 public:
     Spatial2D():
-        spatial2DNode(SPATIAL2D_SYS_GROUP, {&applyAccelerationSystem, &applyVelocitySystem})
+        spatial2DNode(
+            ECS::S::SERIAL_NODE_EXECUTION, SPATIAL2D_SYS_GROUP,
+            {&applyAccelerationSystem, &applyVelocitySystem}
+        )
     {
     }
 

@@ -3,6 +3,7 @@
 #include "IModule.hpp"
 #include "Components.hpp" // IWYU pragma: keep
 #include "Systems.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "raylib.h"
 #include <cstddef>
@@ -82,10 +83,11 @@ public:
             makeSystems<Layers, ECS::S::DrawAnimatedSpriteSystem>(assetsLoader, camera, useCamera)
         ),
         spriteAnimationSystem(assetsLoader),
-        renderNode(RENDER_SYS_GROUP),
-        debugRenderNode(DEBUG_RENDER_SYS_GROUP),
+        renderNode(ECS::S::SERIAL_NODE_EXECUTION, RENDER_SYS_GROUP),
+        debugRenderNode(ECS::S::SERIAL_NODE_EXECUTION, DEBUG_RENDER_SYS_GROUP),
         rootRenderNode(
-            ROOT_RENDER_SYS_GROUP, {&spriteAnimationSystem}, {}, {renderNode, debugRenderNode}
+            ECS::S::SERIAL_NODE_EXECUTION, ROOT_RENDER_SYS_GROUP, {&spriteAnimationSystem}, {},
+            {renderNode, debugRenderNode}
         )
     {
         initRenderModule(*this);

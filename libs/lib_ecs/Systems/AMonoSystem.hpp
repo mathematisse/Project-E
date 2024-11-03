@@ -8,14 +8,15 @@
 #pragma once
 
 #include "lib_ecs/Systems/ASystem.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 
 namespace ECS::S {
 template<typename... Ts>
 class AMonoSystem : virtual public ASystem {
 public:
-    explicit AMonoSystem(bool isParallel = false):
-        ASystem(isParallel)
+    explicit AMonoSystem(SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION):
+        ASystem(execType)
     {
     }
     ~AMonoSystem() override = default;
@@ -31,7 +32,7 @@ public:
             [this](auto &...componentPools) {
                 _innerOperate(componentPools...);
             },
-            _isParallel,
+            _execType,
             [this](auto &...componentPools) {
                 _startCMapCallBack(componentPools...);
             },
@@ -60,8 +61,11 @@ protected:
 template<typename... Ts>
 class AStatusMonoSystem : public AMonoSystem<C::EntityStatus::Pool, Ts...> {
 public:
-    explicit AStatusMonoSystem(bool isParallel = false, C::EntityStatusEnum status = C::ENT_ALIVE):
-        AMonoSystem<C::EntityStatus::Pool, Ts...>(isParallel),
+    explicit AStatusMonoSystem(
+        SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION,
+        C::EntityStatusEnum status = C::ENT_ALIVE
+    ):
+        AMonoSystem<C::EntityStatus::Pool, Ts...>(execType),
         _status(status)
     {
     }

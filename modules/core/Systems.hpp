@@ -8,6 +8,7 @@ namespace ECS::S {
 
 class IncrementTimerSystem : public S::AMonoSystem<C::Timer::Pool>, public S::ADeltaTimeSystem {
 public:
+    IncrementTimerSystem();
     ~IncrementTimerSystem() override = default;
 
 protected:

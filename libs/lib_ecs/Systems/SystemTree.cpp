@@ -6,6 +6,8 @@
 */
 
 #include "lib_ecs/Systems/SystemTree.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
+#include "lib_ecs/Systems/ThreadPool.cpp"
 #include "lib_log/log.hpp"
 #include <iterator>
 #include <utility>
@@ -13,9 +15,10 @@
 namespace ECS {
 namespace S {
 SystemTreeNode::SystemTreeNode(
-    std::string group, std::vector<ISystem *> startSystems, std::vector<ISystem *> endSystems,
-    std::vector<SystemTreeNode> children
+    NodeExecutionType execType, std::string group, std::vector<ISystem *> startSystems,
+    std::vector<ISystem *> endSystems, std::vector<SystemTreeNode> children
 ):
+    _execType(execType),
     _group(std::move(group)),
     _startSystems(std::move(startSystems)),
     _children(std::move(children)),
@@ -24,22 +27,23 @@ SystemTreeNode::SystemTreeNode(
 }
 
 bool SystemTreeNode::addSystemGroup(
-    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+    bool addBefore, bool addInside
 )
 {
     // First check if are in a match case (will add in children)
     if (targetGroup == _group && addInside) {
         if (addBefore) {
-            _children.emplace(_children.begin(), newGroup);
+            _children.emplace(_children.begin(), execType, newGroup);
         } else {
-            _children.emplace_back(newGroup);
+            _children.emplace_back(execType, newGroup);
         }
         return true;
     }
     // If not, check if we have to go deeper for insertion (could add in any sub-nodes)
     if (addInside) {
         for (auto &child : _children) {
-            if (child.addSystemGroup(targetGroup, newGroup, addBefore, addInside)) {
+            if (child.addSystemGroup(execType, targetGroup, newGroup, addBefore, addInside)) {
                 return true;
             }
         }
@@ -52,9 +56,9 @@ bool SystemTreeNode::addSystemGroup(
             continue;
         }
         if (addBefore) {
-            _children.insert(it, SystemTreeNode(newGroup));
+            _children.insert(it, SystemTreeNode(execType, newGroup));
         } else {
-            _children.insert(std::next(it), SystemTreeNode(newGroup));
+            _children.insert(std::next(it), SystemTreeNode(execType, newGroup));
         }
         return true;
     }
@@ -143,6 +147,12 @@ void SystemTreeNode::runNode(SystemTree &tree)
     for (auto &startSystem : _startSystems) {
         startSystem->getRunStepData(tree);
         startSystem->run();
+        if (_execType == SERIAL_NODE_EXECUTION) {
+            globalThreadPool.waitAll();
+        }
+    }
+    if (_execType == PARALLEL_NODE_EXECUTION) {
+        globalThreadPool.waitAll();
     }
     for (auto &child : _children) {
         child.runNode(tree);
@@ -150,6 +160,12 @@ void SystemTreeNode::runNode(SystemTree &tree)
     for (auto &endSystem : _endSystems) {
         endSystem->getRunStepData(tree);
         endSystem->run();
+        if (_execType == SERIAL_NODE_EXECUTION) {
+            globalThreadPool.waitAll();
+        }
+    }
+    if (_execType == PARALLEL_NODE_EXECUTION) {
+        globalThreadPool.waitAll();
     }
 }
 
@@ -159,7 +175,8 @@ std::vector<SystemTreeNode> &SystemTreeNode::getChildren() { return _children; }
 
 SystemTree::SystemTree(const std::string &rootGroup):
     _root(
-        rootGroup, std::vector<ISystem *>(), std::vector<ISystem *>(), std::vector<SystemTreeNode>()
+        SERIAL_NODE_EXECUTION, rootGroup, std::vector<ISystem *>(), std::vector<ISystem *>(),
+        std::vector<SystemTreeNode>()
     )
 {
 }
@@ -167,10 +184,11 @@ SystemTree::SystemTree(const std::string &rootGroup):
 SystemTree::~SystemTree() = default;
 
 bool SystemTree::addSystemGroup(
-    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+    bool addBefore, bool addInside
 )
 {
-    return _root.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
+    return _root.addSystemGroup(execType, targetGroup, newGroup, addBefore, addInside);
 }
 
 bool SystemTree::addSystem(ISystem *system, const std::string &group, bool atStart)

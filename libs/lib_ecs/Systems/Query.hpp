@@ -9,7 +9,9 @@
 
 #include "lib_ecs/Components/IComponentPool.hpp"
 #include "lib_ecs/EntityManager.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
+#include "lib_ecs/Systems/ThreadPool.hpp"
 #include <functional>
 #include <string>
 #include <thread>
@@ -90,43 +92,52 @@ public:
     template<typename... TOthers>
     using TCrossLambda = std::function<void(typename Ts::Types &..., typename TOthers::Types &...)>;
 
-    void map(EntityManager &eM, TMapLambda f, bool isParallel = false)
+    void
+    map(EntityManager &eM, TMapLambda f, SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION)
     {
         eM.initializeQuery(*this);
-        map(f, isParallel);
+        map(f, execType);
     }
 
-    void cMap(EntityManager &eM, TCMapLambda f, bool isParallel = false)
+    void
+    cMap(EntityManager &eM, TCMapLambda f, SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION)
     {
         eM.initializeQuery(*this);
-        cMap(f, isParallel);
+        cMap(f, execType);
     }
 
-    void pMap(EntityManager &eM, TPMapLambda f, bool isParallel = false)
+    void
+    pMap(EntityManager &eM, TPMapLambda f, SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION)
     {
         eM.initializeQuery(*this);
-        pMap(f, isParallel);
+        pMap(f, execType);
     }
 
-    void selfCross(EntityManager &eM, TCrossLambda<Ts...> f, bool isParallel = false)
+    void selfCross(
+        EntityManager &eM, TCrossLambda<Ts...> f,
+        SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION
+    )
     {
         eM.initializeQuery(*this);
-        cross<Ts...>(*this, f, true, isParallel);
+        cross<Ts...>(*this, f, true, execType);
     }
 
     template<typename... TOthers>
-    void cross(EntityManager &eM, TCrossLambda<TOthers...> f, bool isParallel = false)
+    void cross(
+        EntityManager &eM, TCrossLambda<TOthers...> f,
+        SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION
+    )
     {
         Query<TOthers...> otherQuery;
         eM.initializeQuery(*this);
         eM.initializeQuery(otherQuery);
-        cross(otherQuery, f, false, isParallel);
+        cross(otherQuery, f, false, execType);
     }
 
     void
-    map(TMapLambda f, bool isParallel = false, TCMapLambda startCB = nullptr,
-        TCMapLambda endCB = nullptr, TPMapLambda pMapStartCB = nullptr,
-        TPMapLambda pMapEndCB = nullptr)
+    map(TMapLambda f, SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION,
+        TCMapLambda startCB = nullptr, TCMapLambda endCB = nullptr,
+        TPMapLambda pMapStartCB = nullptr, TPMapLambda pMapEndCB = nullptr)
     {
         cMap(
             [f, startCB, endCB](typename Ts::VTypes &...componentVectors) {
@@ -150,18 +161,16 @@ public:
                     endCB(componentVectors...);
                 }
             },
-            isParallel, pMapStartCB, pMapEndCB
+            execType, pMapStartCB, pMapEndCB
         );
     }
 
     void cMap(
-        TCMapLambda f, bool isParallel = false, TPMapLambda startCB = nullptr,
-        TPMapLambda endCB = nullptr
+        TCMapLambda f, SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION,
+        TPMapLambda startCB = nullptr, TPMapLambda endCB = nullptr
     )
     {
-        if (isParallel) {
-            // Run the pMap function in parallel using multiple threads
-            std::vector<std::thread> threads;
+        if (MULTITHREADING && execType == PARALLEL_SYSTEM_EXECUTION) {
 
             pMap(
                 [f, startCB, endCB](Ts *...componentPools) {
@@ -191,15 +200,8 @@ public:
                         endCB(componentPools...);
                     }
                 },
-                true
+                PARALLEL_SYSTEM_EXECUTION
             );
-
-            // Wait for all threads to finish
-            for (auto &t : threads) {
-                if (t.joinable()) {
-                    t.join();
-                }
-            }
 
         } else {
             // Default behavior: run pMap sequentially
@@ -231,19 +233,16 @@ public:
                         endCB(componentPools...);
                     }
                 },
-                false
+                SERIAL_SYSTEM_EXECUTION
             );
         }
     }
 
-    void pMap(TPMapLambda f, bool isParallel = false)
+    void pMap(TPMapLambda f, SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION)
     {
-        if (isParallel) {
-            // Run the pMap function in parallel using multiple threads
-            std::vector<std::thread> threads;
-
+        if (MULTITHREADING && execType == PARALLEL_SYSTEM_EXECUTION) {
             for (auto &componentPools : _componentPoolsArrays) {
-                threads.emplace_back([&f, &componentPools]() {
+                globalThreadPool.submit([&f, &componentPools]() {
                     std::apply(
                         [&f](auto &...pools) {
                             f(static_cast<Ts *>(pools)...);
@@ -252,14 +251,6 @@ public:
                     );
                 });
             }
-
-            // Wait for all threads to finish
-            for (auto &t : threads) {
-                if (t.joinable()) {
-                    t.join();
-                }
-            }
-
         } else {
             // Default behavior: run pMap sequentially
             for (auto &componentPools : _componentPoolsArrays) {
@@ -276,15 +267,12 @@ public:
     template<typename... TOthers>
     void cross(
         Query<TOthers...> &otherQuery, TCrossLambda<TOthers...> f, bool selfCross = false,
-        bool isParallel = false
+        SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION
     )
     {
-        if (isParallel) {
-            // Run the cross function in parallel using multiple threads
-            std::vector<std::thread> threads;
-
+        if (MULTITHREADING && execType == PARALLEL_SYSTEM_EXECUTION) {
             for (auto &componentPools1 : _componentPoolsArrays) {
-                threads.emplace_back([&otherQuery, &f, &componentPools1, selfCross]() {
+                globalThreadPool.submit([&otherQuery, &f, &componentPools1, selfCross]() {
                     for (auto &componentPools2 : otherQuery.getComponentPoolsArrays()) {
                         size_t chunkCount1 = componentPools1[0]->chunkCount();
                         size_t chunkCount2 = componentPools2[0]->chunkCount();
@@ -297,13 +285,6 @@ public:
                         }
                     }
                 });
-            }
-
-            // Wait for all threads to finish
-            for (auto &t : threads) {
-                if (t.joinable()) {
-                    t.join();
-                }
             }
 
         } else {
@@ -324,9 +305,9 @@ public:
         }
     }
 
-    void selfCross(TCrossLambda<Ts...> f, bool isParallel)
+    void selfCross(TCrossLambda<Ts...> f, SystemExecutionType execType)
     {
-        cross<Ts...>(*this, f, true, isParallel);
+        cross<Ts...>(*this, f, true, execType);
     }
 
 protected:

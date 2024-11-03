@@ -6,6 +6,7 @@
 */
 
 #include "Systems.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "spatial2d/Components.hpp"
 #include <raylib.h>
 
@@ -114,7 +115,6 @@ void DrawAnimatedSpriteSystem::_innerOperate(
 }
 
 SpriteAnimationSystem::SpriteAnimationSystem(AssetsLoader &assetsLoader):
-    AMonoSystem(false),
     assetsLoader(assetsLoader)
 {
 }

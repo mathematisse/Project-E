@@ -11,9 +11,6 @@
 #include "lib_ecs/Entities/IArchetypePool.hpp"
 #include "lib_ecs/Systems/IQuery.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
-#include "lib_log/log.hpp"
-#include <ranges> // Include for C++20 ranges
-#include <vector>
 
 #define ENTITY_PTR_POOL_SIZE 64
 
@@ -22,8 +19,8 @@ class IEntityManager {
 public:
     virtual ~IEntityManager() = default;
     virtual bool registerSystemGroup(
-        const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
-        bool addInside = true
+        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+        bool addBefore = false, bool addInside = true
     ) = 0;
     virtual bool registerSystemNode(
         S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
@@ -32,8 +29,8 @@ public:
     virtual bool
     registerSystem(S::ISystem &system, const std::string &group, bool atStart = false) = 0;
     virtual bool registerFixedSystemGroup(
-        const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
-        bool addInside = true
+        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+        bool addBefore = false, bool addInside = true
     ) = 0;
     virtual bool registerFixedSystemNode(
         S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,

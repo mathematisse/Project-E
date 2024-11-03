@@ -10,6 +10,7 @@
 #include "IModule.hpp"
 #include "Components.hpp" // IWYU pragma: keep
 #include "Systems.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/SystemTree.hpp"
 
 #define NETWORK_SYS_GROUP "NETWORK"
@@ -22,7 +23,7 @@ class Network : public IModule {
 
 public:
     Network():
-        networkNode(NETWORK_SYS_GROUP, {})
+        networkNode(ECS::S::SERIAL_NODE_EXECUTION, NETWORK_SYS_GROUP, {})
     {
     }
 

@@ -9,6 +9,7 @@
 
 #include "lib_ecs/Entities/IArchetypePool.hpp"
 #include "lib_ecs/Systems/ASystem.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/Query.hpp"
 
 // #include <chrono>
@@ -22,8 +23,8 @@ template<typename... T1s, typename... T2s>
 class ADualSystem<std::tuple<T1s...>, std::tuple<T2s...>> : public ASystem {
 
 public:
-    explicit ADualSystem(bool isParallel):
-        ASystem(isParallel)
+    explicit ADualSystem(SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION):
+        ASystem(execType)
     {
     }
     ~ADualSystem() override = default;
@@ -42,7 +43,7 @@ public:
             [this](auto &...componentPools1, auto &...componentPools2) {
                 _innerOperate(componentPools1..., componentPools2...);
             },
-            _isParallel
+            _execType
         );
     }
 
@@ -62,8 +63,8 @@ template<typename... Ts>
 class ASelfDualSystem<std::tuple<Ts...>>
     : public ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>> {
 public:
-    explicit ASelfDualSystem(bool isParallel):
-        ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>>(isParallel)
+    explicit ASelfDualSystem(SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION):
+        ADualSystem<std::tuple<Ts...>, std::tuple<Ts...>>(execType)
     {
     }
     ~ASelfDualSystem() override = default;
@@ -75,7 +76,7 @@ protected:
             [this](auto &...componentPools1, auto &...componentPools2) {
                 _innerOperate(componentPools1..., componentPools2...);
             },
-            this->_isParallel
+            this->_execType
         );
     }
 

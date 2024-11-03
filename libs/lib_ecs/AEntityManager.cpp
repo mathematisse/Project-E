@@ -24,10 +24,11 @@ AEntityManager::AEntityManager(float fixedUpdateTime):
 }
 
 bool AEntityManager::registerSystemGroup(
-    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+    bool addBefore, bool addInside
 )
 {
-    return _systemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
+    return _systemTree.addSystemGroup(execType, targetGroup, newGroup, addBefore, addInside);
 }
 
 bool AEntityManager::registerSystem(S::ISystem &system, const std::string &group, bool atStart)
@@ -49,10 +50,11 @@ bool AEntityManager::registerSystemNode(
 }
 
 bool AEntityManager::registerFixedSystemGroup(
-    const std::string &targetGroup, const std::string &newGroup, bool addBefore, bool addInside
+    S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+    bool addBefore, bool addInside
 )
 {
-    return _fixedSystemTree.addSystemGroup(targetGroup, newGroup, addBefore, addInside);
+    return _fixedSystemTree.addSystemGroup(execType, targetGroup, newGroup, addBefore, addInside);
 }
 
 bool AEntityManager::registerFixedSystem(S::ISystem &system, const std::string &group, bool atStart)

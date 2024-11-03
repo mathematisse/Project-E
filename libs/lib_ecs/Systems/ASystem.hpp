@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 #include "lib_ecs/Systems/ISystem.hpp"
 #include "lib_ecs/Systems/ASystemTree.hpp"
 
@@ -14,23 +15,23 @@ namespace ECS::S {
 
 class ASystem : public ISystem {
 public:
-    explicit ASystem(bool isParallel = false):
-        _isParallel(isParallel)
+    explicit ASystem(SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION):
+        _execType(execType)
     {
     }
     ~ASystem() override = default;
-    [[nodiscard]] bool getIsParallel() const { return _isParallel; };
+    [[nodiscard]] SystemExecutionType getExecutionType() const { return _execType; };
     bool tryAddEntityPool(E::IArchetypePool *entityPool) override = 0;
     void getRunStepData(ASystemTree &sysTree) override {};
 
 protected:
-    bool _isParallel;
+    SystemExecutionType _execType;
 };
 
 class ADeltaTimeSystem : virtual public ASystem {
 public:
-    explicit ADeltaTimeSystem(bool isParallel = false):
-        ASystem(isParallel)
+    explicit ADeltaTimeSystem(SystemExecutionType execType = SERIAL_SYSTEM_EXECUTION):
+        ASystem(execType)
     {
     }
     ~ADeltaTimeSystem() override = default;

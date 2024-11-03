@@ -23,8 +23,8 @@ public:
     explicit AEntityManager(float fixedUpdateTime = 0);
     ~AEntityManager() override = default;
     bool registerSystemGroup(
-        const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
-        bool addInside = true
+        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+        bool addBefore = false, bool addInside = true
     ) override;
     bool registerSystemNode(
         S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,
@@ -33,8 +33,8 @@ public:
     bool
     registerSystem(S::ISystem &system, const std::string &group, bool atStart = false) override;
     bool registerFixedSystemGroup(
-        const std::string &targetGroup, const std::string &newGroup, bool addBefore = false,
-        bool addInside = true
+        S::NodeExecutionType execType, const std::string &targetGroup, const std::string &newGroup,
+        bool addBefore = false, bool addInside = true
     ) override;
     bool registerFixedSystemNode(
         S::SystemTreeNode &node, const std::string &targetGroup, bool addBefore = false,

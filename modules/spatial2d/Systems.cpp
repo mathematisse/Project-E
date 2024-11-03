@@ -1,6 +1,12 @@
 #include "Systems.hpp"
+#include "lib_ecs/Systems/ExecutionTypes.hpp"
 
 namespace ECS::S {
+
+ApplyVelocitySystem::ApplyVelocitySystem():
+    AMonoSystem(PARALLEL_SYSTEM_EXECUTION)
+{
+}
 
 void ApplyVelocitySystem::_innerOperate(
     C::Position::Pool::Types &cposition, C::Velocity::Pool::Types &cvelocity
@@ -13,6 +19,11 @@ void ApplyVelocitySystem::_innerOperate(
 }
 
 //////////////////////////////////////////////////////////////////////////////////
+
+ApplyAccelerationSystem::ApplyAccelerationSystem():
+    AMonoSystem(PARALLEL_SYSTEM_EXECUTION)
+{
+}
 
 void ApplyAccelerationSystem::_innerOperate(
     C::Velocity::Pool::Types &cvelocity, C::Acceleration::Pool::Types &cacceleration
