@@ -7,7 +7,7 @@
 
 #include "lib_ecs/Systems/SystemTree.hpp"
 #include "lib_ecs/Systems/ExecutionTypes.hpp"
-#include "lib_ecs/Systems/ThreadPool.cpp"
+#include "lib_ecs/Systems/ThreadPool.hpp"
 #include "lib_log/log.hpp"
 #include <iterator>
 #include <utility>
