@@ -1,5 +1,6 @@
 #include <cstring>
 
+#include "lib_net/net/IpAddr.hpp"
 #include "lib_net/net/_base.hpp"
 #include "lib_net/net/UdpSocket.hpp"
 #include "lib_net/result/Result.hpp"
@@ -17,7 +18,9 @@ auto UdpSocket::bind(const SocketAddr &addr) -> io::Result<UdpSocket>
 
 auto UdpSocket::any(int domain) -> io::Result<UdpSocket>
 {
-    auto sock = Socket::create(domain, SOCK_DGRAM);
+    auto ip = domain == AF_INET ? IpAddr(Ipv4Addr({0, 0, 0, 0})) : IpAddr(Ipv6Addr({0, 0, 0, 0}));
+    auto addr = SocketAddr(ip, 0);
+    auto sock = Socket::create(addr, SOCK_DGRAM);
     if (sock) {
         return io::Result<UdpSocket>::Success(UdpSocket(sock.value()));
     }
