@@ -93,7 +93,7 @@ S::IQuery &AEntityManager::initializeQuery(S::IQuery &query)
     return query;
 }
 
-bool AEntityManager::addTime(float time)
+bool AEntityManager::addTime(double time)
 {
     if (_fixedUpdateTime == 0) {
         _timePassed += time;

@@ -49,7 +49,7 @@ public:
     destroyEntities(std::span<Chunks::chunkPos_t> cPosArr, const std::string &entityName) = 0;
     virtual void destroyEntity(const Chunks::chunkPos_t &cPos) = 0;
 
-    virtual bool addTime(float time) = 0;
+    virtual bool addTime(double time) = 0;
 
     virtual S::SystemTree &getSystemTree() = 0;
     virtual S::SystemTree &getFixedSystemTree() = 0;

@@ -45,7 +45,7 @@ public:
     S::IQuery &initializeQuery(S::IQuery &query) override;
     E::IArchetypePool *getEntityPool(const std::string &entityName) override;
 
-    bool addTime(float time) override;
+    bool addTime(double time) override;
 
     S::SystemTree &getSystemTree() override { return _systemTree; };
     S::SystemTree &getFixedSystemTree() override { return _fixedSystemTree; };
@@ -57,10 +57,10 @@ protected:
     std::vector<E::IArchetypePool *> _entityPools;
     S::SystemTree _systemTree;
     S::SystemTree _fixedSystemTree; // run on fixed update
-    float _timePassed = 0;
-    float _timeNotAdded = 0;
-    float _timeSinceLastFixedUpdate = 0;
+    double _timePassed = 0;
+    double _timeNotAdded = 0;
+    double _timeSinceLastFixedUpdate = 0;
 
-    float _fixedUpdateTime = 0;
+    double _fixedUpdateTime = 0;
 };
 } // namespace ECS
