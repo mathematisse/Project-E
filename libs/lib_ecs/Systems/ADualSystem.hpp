@@ -44,7 +44,6 @@ public:
             },
             _isParallel
         );
-
     }
 
 protected:
@@ -78,7 +77,6 @@ protected:
             },
             this->_isParallel
         );
-
     }
 
     virtual inline void _innerOperate(

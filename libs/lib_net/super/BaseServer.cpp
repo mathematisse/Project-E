@@ -484,8 +484,7 @@ void BaseServer::handle_tcp_connection_write(net::Poll &poll)
             }
         } else {
             if (auto res = poll.remove_write(connection.stream); !res) {
-                LOG_DEBUG("Poll remove TCP Connection write error: " + res.error().message()
-                         );
+                LOG_DEBUG("Poll remove TCP Connection write error: " + res.error().message());
             }
         }
     }
@@ -501,8 +500,9 @@ void BaseServer::handle_tcp_connections_write(net::Poll &poll)
             }
         } else {
             if (auto res = poll.remove_write(connection.stream); !res) {
-                LOG_DEBUG("Poll remove TCP ()" + id.to_str()
-                          + ") write error: " + res.error().message());
+                LOG_DEBUG(
+                    "Poll remove TCP ()" + id.to_str() + ") write error: " + res.error().message()
+                );
             }
         }
     }

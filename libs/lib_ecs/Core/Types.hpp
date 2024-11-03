@@ -28,7 +28,6 @@ enum EntityStatusEnum : entity_status_t {
 };
 } // namespace ECS::C
 
-
 inline std::ostream &operator<<(std::ostream &os, ECS::C::EntityStatusEnum status)
 {
     switch (status) {
